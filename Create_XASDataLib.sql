@@ -145,17 +145,17 @@ create table spectra_ligand (
 --  name='internal-json' means data is stored as json data in spectra table
 -- 
 create table format (id integer primary key, name text, notes text);
-insert into formats (name, notes) values ('internal-json', 'Read dat_*** columns of spectra table as json');
+insert into  format (name, notes) values ('internal-json', 'Read dat_*** columns of spectra table as json');
 
 -- elements of the periodic table
 create table element (z integer primary key, symbol text not null unique, name text);
-insert into  element (z, symbol, name) values (1, 'H', 'hydrogen')
-insert into  element (z, symbol, name) values (2, 'He', 'helium')
+insert into  element (z, symbol, name) values (1, 'H', 'hydrogen');
+insert into  element (z, symbol, name) values (2, 'He', 'helium');
 
 create table edge (id integer primary key, name text not null unique,  level text);
-insert into  edge (name,  hole) values ('K', '1s');
-insert into  edge (name,  hole) values ('L3', '2p3/2');
-insert into  edge (name,  hole) values ('L2', '2p1/2');
-insert into  edge (name,  hole) values ('L1', '2s');
+insert into  edge (name,  level) values ('K', '1s');
+insert into  edge (name,  level) values ('L3', '2p3/2');
+insert into  edge (name,  level) values ('L2', '2p1/2');
+insert into  edge (name,  level) values ('L1', '2s');
 
 
