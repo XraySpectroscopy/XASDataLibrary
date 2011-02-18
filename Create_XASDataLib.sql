@@ -12,6 +12,7 @@ create table spectra (
   citation         integer,             -- > citation table
   temperature      text,  
   notes            text,  
+  attributes       text,  
   submission_date  text,
   reference_used   integer,
   npts             integer not null,
@@ -40,14 +41,16 @@ create table sample (
   name             text,
   formula          text,
   material_source  text,  
-  notes            text);
+  notes            text,
+  attributes       text);
 
 -- crystal information (example format = CIFS , PDB, atoms.inp)
 create table crystal (
   id       integer primary key , 
   format   text not null,
   data     text not null,
-  notes    text);
+  notes       text,
+  attributes  text);
 
 -- Persons: 
 --   EMAIL           email of person        
@@ -71,6 +74,7 @@ create table citation (
   pages        text,
   year         text,
   notes        text,
+  attributes   text,
   doi          text);
 
 -- Ratings:  for spectra or suite
@@ -87,7 +91,8 @@ create table suite (
   id        integer primary key , 
   person    integer not null,     -- > person table
   name      text not null,
-  notes     text);
+  notes     text,
+  attributes text);
 
 -- SUITE_SPECTRA: Join table for suite and spectra
 create table spectra_suite (
@@ -97,9 +102,11 @@ create table spectra_suite (
 
 
 -- facilities
-create table facility (id integer primary key, 
-                      name text not null unique, 
-                      notes text);
+create table facility (
+  id integer primary key, 
+  name text not null unique, 
+  notes         text,
+  attributes    text);
 
 -- beamline description 
 --    must have a facility
@@ -110,14 +117,17 @@ create table beamline (
   name          text, 
   xray_source   text, 
   monochromator integer,  -- > monochromator table (optional)
-  notes         text);
+  notes         text,
+  attributes    text);
 
 -- Monochromator descriptions
-create table monochomator (id integer primary key, 
-                           name text, 
-                           lattice_constant text, 
-                           steps_per_degree text, 
-                           notes text);
+create table monochomator (
+   id integer primary key, 
+   name text, 
+   lattice_constant text, 
+   steps_per_degree text, 
+   notes text,
+   attributes text);
 
 -- XAS collection modes ('transmission', 'fluorescence', ...)
 create table collection_mode (id  integer primary key, name text, notes text);
@@ -144,7 +154,12 @@ create table spectra_ligand (
 --
 --  name='internal-json' means data is stored as json data in spectra table
 -- 
-create table format (id integer primary key, name text, notes text);
+create table format (
+   id integer primary key, 
+   name text, 
+   notes text,
+   attributes text);
+
 insert into  format (name, notes) values ('internal-json', 'Read dat_*** columns of spectra table as json');
 
 -- elements of the periodic table
