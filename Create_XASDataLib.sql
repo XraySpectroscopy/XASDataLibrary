@@ -1,178 +1,316 @@
--- 
--- XAS Data Library Schema
---
-create table spectra (
-  id               integer primary key, 
-  person           integer not null,    -- > person table
-  edge             integer not null,    -- > edge table
-  element          integer not null,    -- > element table
-  sample           integer not null,    -- > sample table
-  beamline         integer not null,    -- > beamline table
-  monochromator    integer not null,    -- > monochromator table
-  format           integer not null,    -- > format table
-  citation         integer,             -- > citation table
-  temperature      text,  
-  notes            text,  
-  attributes       text,  
-  submission_date  text,
-  reference_used   integer,           --  boolean
-  reference_sample integer,           -- > sample table
-  npts             integer not null,
-  file_link        text,
-  dat_energy       text,
-  dat_i0           text,
-  dat_itrans       text,
-  dat_iemit        text,
-  dat_irefer       text,
-  dat_dtime_corr   text,
-  calc_mu_trans    text,
-  calc_mu_emit     text,
-  calc_mu_refer    text,
-  calc_energy_ev   text,
-  notes_energy     text,
-  notes_i0         text,
-  notes_itrans     text,
-  notes_iemit      text,
-  notes_irefer     text);
+CREATE TABLE spectra (
+   id INTEGER NOT NULL PRIMARY KEY,
+   name VARCHAR(256) NOT NULL, 
+   hashkey VARCHAR(256) NOT NULL,
+   notes VARCHAR, 
+   attributes VARCHAR, 
+   file_link VARCHAR, 
+   dat_energy VARCHAR, 
+   dat_i0 VARCHAR, 
+   dat_itrans VARCHAR, 
+   dat_iemit VARCHAR, 
+   dat_irefer VARCHAR, 
+   dat_dtime_corr VARCHAR, 
+   calc_mu_trans VARCHAR, 
+   calc_mu_emit VARCHAR, 
+   calc_mu_refer VARCHAR, 
+   calc_energy_ev VARCHAR, 
+   notes_energy VARCHAR, 
+   notes_i0 VARCHAR, 
+   notes_itrans VARCHAR, 
+   notes_iemit VARCHAR, 
+   notes_irefer VARCHAR, 
+   temperature VARCHAR, 
+   submission_date DATETIME, 
+   reference_used INTEGER, 
+   npts INTEGER, 
+   person INTEGER, 
+   edge INTEGER, 
+   element INTEGER, 
+   sample INTEGER, 
+   beamline INTEGER, 
+   monochromator INTEGER, 
+   format INTEGER, 
+   citation INTEGER, 
+   reference_sample INTEGER, 
+   FOREIGN KEY(reference_sample) REFERENCES sample (id), 
+   UNIQUE (hashkey), 
+   FOREIGN KEY(edge) REFERENCES edge (id), 
+   FOREIGN KEY(element) REFERENCES element (z), 
+   FOREIGN KEY(sample) REFERENCES sample (id), 
+   FOREIGN KEY(beamline) REFERENCES beamline (id), 
+   FOREIGN KEY(monochromator) REFERENCES monochromator (id), 
+   FOREIGN KEY(format) REFERENCES format (id), 
+   FOREIGN KEY(citation) REFERENCES citation (id), 
+   FOREIGN KEY(person) REFERENCES person (id));
 
--- sample information
-create table sample (
-  id               integer primary key, 
-  person           integer not null,    -- > person table
-  crystal          integer,             -- > crystal table
-  name             text,
-  formula          text,
-  material_source  text,  
-  notes            text,
-  attributes       text);
+CREATE TABLE sample (
+   id INTEGER PRIMARY KEY,
+   name VARCHAR(256) NOT NULL, 
+   notes VARCHAR, 
+   attributes VARCHAR, 
+   formula VARCHAR, 
+   material_source VARCHAR, 
+   person INTEGER, 
+   crystal INTEGER, 
+   FOREIGN KEY(person) REFERENCES person (id), 
+   FOREIGN KEY(crystal) REFERENCES crystal (id));
 
--- crystal information (example format = CIFS , PDB, atoms.inp)
-create table crystal (
-  id          integer primary key , 
-  format      text not null,
-  data        text not null,
-  notes       text,
-  attributes  text);
-
--- Persons: 
---   EMAIL           email of person        
---   FIRST_NAME      first name of person   
---   LAST_NAME       last name of person    
---   SHA_PASSWORD    sha1 sum of password   
-
-create table person (
-  id           integer primary key , 
-  email        text not null unique,
-  first_name   text not null,
-  last_name    text not null,
-  sha_password text not null);
-
-create table citation (
-  id           integer primary key , 
-  journal      text,
-  authors      text,
-  title        text,
-  volume       text,
-  pages        text,
-  year         text,
-  notes        text,
-  attributes   text,
-  doi          text);
-
--- Ratings:  for spectra or suite
-create table rating (
-  id         integer primary key , 
-  person     integer  not null,    -- > person table
-  spectra    integer,              -- > spectra table
-  suite      integer,              -- > suite table
-  score      integer,              -- > [1,2,3,4,5]
-  comments   text);
-
---  Suite:  collection of spectra
-create table suite (
-  id        integer primary key , 
-  person    integer not null,     -- > person table
-  name      text not null,
-  notes     text,
-  attributes text);
-
--- SUITE_SPECTRA: Join table for suite and spectra
-create table spectra_suite (
-  id       integer primary key , 
-  suite    integer  not null,     -- > suite table
-  spectra  integer  not null);    -- > spectra table
+CREATE TABLE crystal (
+   id INTEGER PRIMARY KEY,
+   name VARCHAR(256) NOT NULL, 
+   notes VARCHAR, 
+   attributes VARCHAR, 
+   format VARCHAR, 
+   data VARCHAR);
 
 
--- facilities
-create table facility (
-  id integer primary key, 
-  name text not null unique, 
-  notes         text,
-  attributes    text);
+CREATE TABLE person (
+   id INTEGER PRIMARY KEY, 
+   email VARCHAR(256) NOT NULL, 
+   notes VARCHAR, 
+   attributes VARCHAR, 
+   first_name VARCHAR NOT NULL, 
+   last_name VARCHAR NOT NULL, 
+   sha_password VARCHAR NOT NULL, 
+   UNIQUE (email));
 
--- beamline description 
---    must have a facility
---    a single, physical beamline can be represented many times for different configurations
-create table beamline (
-  id            integer primary key ,  
-  facility      integer  not null,    --> facility table
-  name          text, 
-  xray_source   text, 
-  monochromator integer,  -- > monochromator table (optional)
-  notes         text,
-  attributes    text);
+CREATE TABLE citation (
+   id INTEGER PRIMARY KEY,
+   notes VARCHAR, 
+   attributes VARCHAR, 
+   journal VARCHAR, 
+   authors VARCHAR, 
+   volume VARCHAR, 
+   title VARCHAR, 
+   pages VARCHAR, 
+   year VARCHAR, 
+   doi VARCHAR);
 
--- Monochromator descriptions
-create table monochomator (
-  id integer primary key, 
-  name             text, 
-  lattice_constant text,  -- lattice constand in Angstroms 
-  steps_per_degree text, 
-  notes            text,
-  attributes       text);
+CREATE TABLE beamline (
+   id INTEGER PRIMARY KEY, 
+   name VARCHAR(256) NOT NULL, 
+   notes VARCHAR, 
+   attributes VARCHAR, 
+   xray_source VARCHAR, 
+   monochromator INTEGER, 
+   facility INTEGER, 
+   FOREIGN KEY(facility) REFERENCES facility (id));
 
--- XAS collection modes ('transmission', 'fluorescence', ...)
-create table collection_mode (id  integer primary key, name text, notes text);
-insert into  collection_mode (name, notes) values ('transmission', 'transmission intensity through sample');
-insert into  collection_mode (name, notes) values ('fluorescence, total yield', 'total x-ray fluorescence intensity, as measured with ion chamber');
-insert into  collection_mode (name, notes) values ('fluorescence, energy analyzed', 'x-ray fluorescence measured with an energy dispersive (solid-state) detector.  These measurements will often need to be corrected for dead-time effects');
-insert into  collection_mode (name, notes) values ('electron emission', 'emitted electrons from sample');
-insert into  collection_mode (name, notes) values ('xeol', 'visible or uv light emission');
--- 
-create table spectra_modes (
-  id       integer primary key , 
-  mode     integer  not null,   -- > collection_mode 
-  spectra  integer  not null);  -- > spectra table
+CREATE TABLE facility (
+   id INTEGER PRIMARY KEY, 
+   name VARCHAR(256) NOT NULL, 
+   notes VARCHAR, 
+   attributes VARCHAR, 
+   UNIQUE (name));
 
-create table ligand (id integer primary key, name text, notes text);
+CREATE TABLE monochromator (
+   id INTEGER PRIMARY KEY, 
+   name VARCHAR(256) NOT NULL, 
+   notes VARCHAR, 
+   attributes VARCHAR, 
+   lattice_constant FLOAT, 
+   steps_per_degree FLOAT);
 
-create table spectra_ligand (
-  id       integer primary key, 
-  ligand   integer not null,     --> ligand table
-  spectra  integer not null);    --> spectra table
+CREATE TABLE mode (
+   id INTEGER PRIMARY KEY, 
+   name VARCHAR(256) NOT NULL, 
+   notes VARCHAR, 
+   attributes VARCHAR, 
+   UNIQUE (name));
+
+CREATE TABLE edge (
+   id INTEGER PRIMARY KEY, 
+   name VARCHAR(256) NOT NULL, 
+   level VARCHAR(32) NOT NULL, 
+   UNIQUE (name), 
+   UNIQUE (level));
+
+CREATE TABLE element (
+   z INTEGER PRIMARY KEY, 
+   name VARCHAR(256) NOT NULL, 
+   symbol VARCHAR(2) NOT NULL, 
+   UNIQUE (name), 
+   UNIQUE (symbol));
+
+CREATE TABLE format (
+   id INTEGER PRIMARY KEY, 
+   name VARCHAR(256) NOT NULL, 
+   notes VARCHAR, 
+   attributes VARCHAR, 
+   UNIQUE (name));
+
+CREATE TABLE ligand (
+   id INTEGER PRIMARY KEY, 
+   name VARCHAR(256) NOT NULL, 
+   notes VARCHAR, 
+   attributes VARCHAR);
+
+CREATE TABLE rating (
+   id INTEGER PRIMARY KEY, 
+   score INTEGER, 
+   comments VARCHAR, 
+   person INTEGER, 
+   spectra INTEGER, 
+   suite INTEGER, 
+   FOREIGN KEY(person) REFERENCES person (id), 
+   FOREIGN KEY(spectra) REFERENCES spectra (id), 
+   FOREIGN KEY(suite) REFERENCES suite (id));
+
+CREATE TABLE spectra_ligand (
+   id INTEGER PRIMARY KEY, 
+   ligand INTEGER, 
+   spectra INTEGER, 
+   FOREIGN KEY(ligand) REFERENCES ligand (id), 
+   FOREIGN KEY(spectra) REFERENCES spectra (id));
+
+CREATE TABLE spectra_mode (
+   id INTEGER PRIMARY KEY, 
+   mode INTEGER, 
+   spectra INTEGER, 
+   FOREIGN KEY(mode) REFERENCES mode (id), 
+   FOREIGN KEY(spectra) REFERENCES spectra (id));
+
+CREATE TABLE spectra_suite (
+   id INTEGER PRIMARY KEY,
+   suite INTEGER, 
+   spectra INTEGER, 
+   FOREIGN KEY(suite) REFERENCES suite (id), 
+   FOREIGN KEY(spectra) REFERENCES spectra (id));
+
+CREATE TABLE suite (
+   id INTEGER PRIMARY KEY, 
+   name VARCHAR(256) NOT NULL, 
+   notes VARCHAR, 
+   attributes VARCHAR, 
+   person INTEGER, 
+   UNIQUE (name), 
+   FOREIGN KEY(person) REFERENCES person (id));
 
 
--- spectra format: table of data formats
---
---  name='internal-json' means data is stored as json data in spectra table
--- 
-create table format (
-  id         integer primary key, 
-  name       text, 
-  notes      text,
-  attributes text);
+BEGIN TRANSACTION;
 
-insert into  format (name, notes) values ('internal-json', 'Read dat_*** columns of spectra table as json');
+INSERT INTO "element" VALUES(1,'hydrogen','H');
+INSERT INTO "element" VALUES(2,'helium','He');
+INSERT INTO "element" VALUES(3,'lithium','Li');
+INSERT INTO "element" VALUES(4,'beryllium','Be');
+INSERT INTO "element" VALUES(5,'boron','B');
+INSERT INTO "element" VALUES(6,'carbon','C');
+INSERT INTO "element" VALUES(7,'nitrogen','N');
+INSERT INTO "element" VALUES(8,'oxygen','O');
+INSERT INTO "element" VALUES(9,'fluorine','F');
+INSERT INTO "element" VALUES(10,'neon','Ne');
+INSERT INTO "element" VALUES(11,'sodium','Na');
+INSERT INTO "element" VALUES(12,'magnesium','Mg');
+INSERT INTO "element" VALUES(13,'aluminum','Al');
+INSERT INTO "element" VALUES(14,'silicon','Si');
+INSERT INTO "element" VALUES(15,'phosphorus','P');
+INSERT INTO "element" VALUES(16,'sulfur','S');
+INSERT INTO "element" VALUES(17,'chlorine','Cl');
+INSERT INTO "element" VALUES(18,'argon','Ar');
+INSERT INTO "element" VALUES(19,'potassium','K');
+INSERT INTO "element" VALUES(20,'calcium','Ca');
+INSERT INTO "element" VALUES(21,'scandium','Sc');
+INSERT INTO "element" VALUES(22,'titanium','Ti');
+INSERT INTO "element" VALUES(23,'vanadium','V');
+INSERT INTO "element" VALUES(24,'chromium','Cr');
+INSERT INTO "element" VALUES(25,'manganese','Mn');
+INSERT INTO "element" VALUES(26,'iron','Fe');
+INSERT INTO "element" VALUES(27,'cobalt','Co');
+INSERT INTO "element" VALUES(28,'nickel','Ni');
+INSERT INTO "element" VALUES(29,'copper','Cu');
+INSERT INTO "element" VALUES(30,'zinc','Zn');
+INSERT INTO "element" VALUES(31,'gallium','Ga');
+INSERT INTO "element" VALUES(32,'germanium','Ge');
+INSERT INTO "element" VALUES(33,'arsenic','As');
+INSERT INTO "element" VALUES(34,'selenium','Se');
+INSERT INTO "element" VALUES(35,'bromine','Br');
+INSERT INTO "element" VALUES(36,'krypton','Kr');
+INSERT INTO "element" VALUES(37,'rubidium','Rb');
+INSERT INTO "element" VALUES(38,'strontium','Sr');
+INSERT INTO "element" VALUES(39,'yttrium','Y');
+INSERT INTO "element" VALUES(40,'zirconium','Zr');
+INSERT INTO "element" VALUES(41,'niobium','Nb');
+INSERT INTO "element" VALUES(42,'molybdenum','Mo');
+INSERT INTO "element" VALUES(43,'technetium','Tc');
+INSERT INTO "element" VALUES(44,'ruthenium','Ru');
+INSERT INTO "element" VALUES(45,'rhodium','Rh');
+INSERT INTO "element" VALUES(46,'palladium','Pd');
+INSERT INTO "element" VALUES(47,'silver','Ag');
+INSERT INTO "element" VALUES(48,'cadmium','Cd');
+INSERT INTO "element" VALUES(49,'indium','In');
+INSERT INTO "element" VALUES(50,'tin','Sn');
+INSERT INTO "element" VALUES(51,'antimony','Sb');
+INSERT INTO "element" VALUES(52,'tellurium','Te');
+INSERT INTO "element" VALUES(53,'iodine','I');
+INSERT INTO "element" VALUES(54,'xenon','Xe');
+INSERT INTO "element" VALUES(55,'cesium','Cs');
+INSERT INTO "element" VALUES(56,'barium','Ba');
+INSERT INTO "element" VALUES(57,'lanthanum','La');
+INSERT INTO "element" VALUES(58,'cerium','Ce');
+INSERT INTO "element" VALUES(59,'praseodymium','Pr');
+INSERT INTO "element" VALUES(60,'neodymium','Nd');
+INSERT INTO "element" VALUES(61,'promethium','Pm');
+INSERT INTO "element" VALUES(62,'samarium','Sm');
+INSERT INTO "element" VALUES(63,'europium','Eu');
+INSERT INTO "element" VALUES(64,'gadolinium','Gd');
+INSERT INTO "element" VALUES(65,'terbium','Tb');
+INSERT INTO "element" VALUES(66,'dysprosium','Dy');
+INSERT INTO "element" VALUES(67,'holmium','Ho');
+INSERT INTO "element" VALUES(68,'erbium','Er');
+INSERT INTO "element" VALUES(69,'thulium','Tm');
+INSERT INTO "element" VALUES(70,'ytterbium','Yb');
+INSERT INTO "element" VALUES(71,'lutetium','Lu');
+INSERT INTO "element" VALUES(72,'hafnium','Hf');
+INSERT INTO "element" VALUES(73,'tantalum','Ta');
+INSERT INTO "element" VALUES(74,'tungsten','W');
+INSERT INTO "element" VALUES(75,'rhenium','Re');
+INSERT INTO "element" VALUES(76,'osmium','Os');
+INSERT INTO "element" VALUES(77,'iridium','Ir');
+INSERT INTO "element" VALUES(78,'platinum','Pt');
+INSERT INTO "element" VALUES(79,'gold','Au');
+INSERT INTO "element" VALUES(80,'mercury','Hg');
+INSERT INTO "element" VALUES(81,'thallium','Tl');
+INSERT INTO "element" VALUES(82,'lead','Pb');
+INSERT INTO "element" VALUES(83,'bismuth','Bi');
+INSERT INTO "element" VALUES(84,'polonium','Po');
+INSERT INTO "element" VALUES(85,'astatine','At');
+INSERT INTO "element" VALUES(86,'radon','Rn');
+INSERT INTO "element" VALUES(87,'francium','Fr');
+INSERT INTO "element" VALUES(88,'radium','Ra');
+INSERT INTO "element" VALUES(89,'actinium','Ac');
+INSERT INTO "element" VALUES(90,'thorium','Th');
+INSERT INTO "element" VALUES(91,'protactinium','Pa');
+INSERT INTO "element" VALUES(92,'uranium','U');
+INSERT INTO "element" VALUES(93,'neptunium','Np');
+INSERT INTO "element" VALUES(94,'plutonium','Pu');
+INSERT INTO "element" VALUES(95,'americium','Am');
+INSERT INTO "element" VALUES(96,'curium','Cm');
+INSERT INTO "element" VALUES(97,'berkelium','Bk');
+INSERT INTO "element" VALUES(98,'californium','Cf');
+INSERT INTO "element" VALUES(99,'einsteinium','Es');
+INSERT INTO "element" VALUES(100,'fermium','Fm');
+INSERT INTO "element" VALUES(101,'mendelevium','Md');
+INSERT INTO "element" VALUES(102,'nobelium','No');
+INSERT INTO "element" VALUES(103,'lawerencium','Lw');
+INSERT INTO "element" VALUES(104,'Rutherfordium','Rf');
+INSERT INTO "element" VALUES(105,'Dubnium','Ha');
+INSERT INTO "element" VALUES(106,'Seaborgium','Sg');
+INSERT INTO "element" VALUES(107,'Bohrium','Bh');
+INSERT INTO "element" VALUES(108,'Hassium','Hs');
+INSERT INTO "element" VALUES(109,'Meitnerium','Mt');
 
--- elements of the periodic table
-create table element (z integer primary key, symbol text not null unique, name text);
-insert into  element (z, symbol, name) values (1, 'H', 'hydrogen');
-insert into  element (z, symbol, name) values (2, 'He', 'helium');
+INSERT INTO "edge" VALUES(1,'K','1s');
+INSERT INTO "edge" VALUES(2,'L2','2p1/2');
+INSERT INTO "edge" VALUES(3,'L3','2p3/2');
+INSERT INTO "edge" VALUES(4,'L1','2s');
 
-create table edge (id integer primary key, name text not null unique,  level text);
-insert into  edge (name,  level) values ('K', '1s');
-insert into  edge (name,  level) values ('L3', '2p3/2');
-insert into  edge (name,  level) values ('L2', '2p1/2');
-insert into  edge (name,  level) values ('L1', '2s');
+INSERT INTO "mode" VALUES(1,'transmission','transmission intensity through sample',NULL);
+INSERT INTO "mode" VALUES(2,'fluorescence, total yield','total x-ray fluorescence intensity, no energy analysis',NULL);
+INSERT INTO "mode" VALUES(3,'fluorescence, energy analyzed','x-ray fluorescence measured with an energy dispersive (solid-state) detector.
+ Measurements may need to be corrected for dead-time effects',NULL);
+INSERT INTO "mode" VALUES(4,'electron emission','emitted electrons from sample',NULL);
+INSERT INTO "mode" VALUES(5,'xeol','visible or uv light emission',NULL);
 
-
+INSERT INTO "format" VALUES(1,'internal-json','Read dat_* columns of spectra table as json',NULL);
+COMMIT;
