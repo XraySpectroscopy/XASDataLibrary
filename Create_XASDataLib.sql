@@ -1,4 +1,5 @@
-
+-- 
+-- XAS Data Library Schema
 --
 create table spectra (
   id               integer primary key, 
@@ -14,7 +15,8 @@ create table spectra (
   notes            text,  
   attributes       text,  
   submission_date  text,
-  reference_used   integer,
+  reference_used   integer,           --  boolean
+  reference_sample integer,           -- > sample table
   npts             integer not null,
   file_link        text,
   dat_energy       text,
@@ -46,9 +48,9 @@ create table sample (
 
 -- crystal information (example format = CIFS , PDB, atoms.inp)
 create table crystal (
-  id       integer primary key , 
-  format   text not null,
-  data     text not null,
+  id          integer primary key , 
+  format      text not null,
+  data        text not null,
   notes       text,
   attributes  text);
 
@@ -83,7 +85,7 @@ create table rating (
   person     integer  not null,    -- > person table
   spectra    integer,              -- > spectra table
   suite      integer,              -- > suite table
-  score      integer,
+  score      integer,              -- > [1,2,3,4,5]
   comments   text);
 
 --  Suite:  collection of spectra
@@ -122,12 +124,12 @@ create table beamline (
 
 -- Monochromator descriptions
 create table monochomator (
-   id integer primary key, 
-   name text, 
-   lattice_constant text, 
-   steps_per_degree text, 
-   notes text,
-   attributes text);
+  id integer primary key, 
+  name             text, 
+  lattice_constant text,  -- lattice constand in Angstroms 
+  steps_per_degree text, 
+  notes            text,
+  attributes       text);
 
 -- XAS collection modes ('transmission', 'fluorescence', ...)
 create table collection_mode (id  integer primary key, name text, notes text);
@@ -155,10 +157,10 @@ create table spectra_ligand (
 --  name='internal-json' means data is stored as json data in spectra table
 -- 
 create table format (
-   id integer primary key, 
-   name text, 
-   notes text,
-   attributes text);
+  id         integer primary key, 
+  name       text, 
+  notes      text,
+  attributes text);
 
 insert into  format (name, notes) values ('internal-json', 'Read dat_*** columns of spectra table as json');
 
