@@ -14,6 +14,8 @@ def PointerCol(name, other=None, keyid='id', **kws):
     return Column(name, None, ForeignKey('%s.%s' % (other,keyid), **kws))
     
 def StrCol(name, size=None, **kws):
+    if size is None:
+        size = 65535
     return Column(name, String(size),**kws)
 
 def NamedTable(tablename, metadata, keyid='id', nameid='name',
