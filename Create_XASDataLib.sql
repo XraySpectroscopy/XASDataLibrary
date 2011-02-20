@@ -1,7 +1,6 @@
 CREATE TABLE spectra (
    id INTEGER NOT NULL PRIMARY KEY,
    name VARCHAR(256) NOT NULL, 
-   hashkey VARCHAR(256) NOT NULL,
    notes VARCHAR, 
    attributes VARCHAR, 
    file_link VARCHAR, 
@@ -34,7 +33,6 @@ CREATE TABLE spectra (
    citation INTEGER, 
    reference_sample INTEGER, 
    FOREIGN KEY(reference_sample) REFERENCES sample (id), 
-   UNIQUE (hashkey), 
    FOREIGN KEY(edge) REFERENCES edge (id), 
    FOREIGN KEY(element) REFERENCES element (z), 
    FOREIGN KEY(sample) REFERENCES sample (id), 
@@ -72,7 +70,6 @@ CREATE TABLE person (
    attributes VARCHAR, 
    first_name VARCHAR NOT NULL, 
    last_name VARCHAR NOT NULL, 
-   sha_password VARCHAR NOT NULL, 
    UNIQUE (email));
 
 CREATE TABLE citation (

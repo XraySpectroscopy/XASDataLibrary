@@ -118,9 +118,7 @@ def  make_newdb(dbname, server= 'sqlite'):
     
     person = NamedTable('person', metadata, nameid='email',
                         cols=[StrCol('first_name', nullable=False),
-                              StrCol('last_name', nullable=False),
-                              StrCol('sha_password', nullable=False)])
-    
+                              StrCol('last_name', nullable=False))
     
     citation = NamedTable('citation', metadata, 
                           cols=[StrCol('journal'),
@@ -137,8 +135,7 @@ def  make_newdb(dbname, server= 'sqlite'):
                               PointerCol('person'),
                               PointerCol('crystal')])
     
-    scols = [StrCol('file_link'),
-             StrCol('hashkey'), StrCol('dat_energy'),
+    scols = [StrCol('file_link'), StrCol('dat_energy'),
              StrCol('dat_i0'), StrCol('dat_itrans'),
              StrCol('dat_iemit'), StrCol('dat_irefer'),
              StrCol('dat_dtime_corr'), StrCol('calc_mu_trans'),
