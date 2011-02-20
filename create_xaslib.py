@@ -1,16 +1,17 @@
 #!/usr/bin/env python
 #
 #  This will create an empty XAS Data Library
+import sys
 import os
 
 from sqlalchemy.orm import sessionmaker, create_session
 from sqlalchemy import MetaData, create_engine, \
      Table, Column, Integer, Float, String, DateTime, ForeignKey
 
-def PointerCol(name, other=None, **kws):
+def PointerCol(name, other=None, keyid='id', **kws):
     if other is None:
         other = name
-    return Column(name, None, ForeignKey('%s.id' % other), **kws)
+    return Column(name, None, ForeignKey('%s.%s' % (other,keyid), **kws))
     
 def StrCol(name, size=None, **kws):
     return Column(name, String(size),**kws)
@@ -29,16 +30,17 @@ def NamedTable(tablename, metadata, keyid='id', nameid='name',
     return Table(tablename, metadata, *args)
     
 class InitialData:
-    formats = {"internal-json": "Read dat_* columns of spectra table as json"}
+    formats = [["internal-json", "Read dat_* columns of spectra table as json"]]
     
-    modes = {"transmission": "transmission intensity through sample",
-             "xeol": "visible or uv light emission",
-             "electron emission": "emitted electrons from sample",
-             "fluorescence, total yield": "total x-ray fluorescence intensity, no energy analysis",
-             "fluorescence, energy analyzed": '''x-ray fluorescence measured with an energy dispersive (solid-state) detector.
- Measurements will often need to be corrected for dead-time effects'''} 
+    modes = [["transmission", "transmission intensity through sample"],
+             ["fluorescence, total yield", "total x-ray fluorescence intensity, no energy analysis"],
+             ["fluorescence, energy analyzed", '''x-ray fluorescence measured with an energy dispersive (solid-state) detector.
+ Measurements will often need to be corrected for dead-time effects'''],
+             ["xeol", "visible or uv light emission"],
+             ["electron emission", "emitted electrons from sample"]]
+
     
-    edges = {"K": "1s", "L2": "2p1/2", "L3": "2p3/2", "L1": "2s"}
+    edges = [["K", "1s"], ["L2", "2p1/2"], ["L3", "2p3/2"], ["L1", "2s"]]
     
     elements = [[1, "H", "hydrogen"], [2, "He", "helium"], [3, "Li","lithium"],
             [4, "Be", "beryllium"], [5, "B", "boron"], [6, "C", "carbon"],
@@ -83,7 +85,7 @@ class InitialData:
 
 def  make_newdb(dbname, server= 'sqlite'):
     if os.path.exists(dbname):
-        print '%s exists'
+        print '%s exists' % dbname
         return
     
     engine  = create_engine('%s:///%s' % (server, dbname))
@@ -118,7 +120,7 @@ def  make_newdb(dbname, server= 'sqlite'):
     
     person = NamedTable('person', metadata, nameid='email',
                         cols=[StrCol('first_name', nullable=False),
-                              StrCol('last_name', nullable=False))
+                              StrCol('last_name', nullable=False)])
     
     citation = NamedTable('citation', metadata, 
                           cols=[StrCol('journal'),
@@ -148,7 +150,8 @@ def  make_newdb(dbname, server= 'sqlite'):
              Column('reference_used', Integer),
              Column('npts', Integer),
              PointerCol('person'), PointerCol('edge'),
-             PointerCol('element'), PointerCol('sample'),
+             PointerCol('element',keyid='z'),
+             PointerCol('sample'),
              PointerCol('beamline'), PointerCol('monochromator'),
              PointerCol('format'), PointerCol('citation'),
              PointerCol('reference_sample', 'sample')]
@@ -197,24 +200,23 @@ def  make_newdb(dbname, server= 'sqlite'):
         element.insert().execute(z=z, symbol=sym,
                                  name=name)
             
-    for name, level in InitialData.edges.items():
+    for name, level in InitialData.edges:
         edge.insert().execute(name=name, level=level)
 
-    for name, notes in InitialData.modes.items():
+    for name, notes in InitialData.modes:
         mode.insert().execute(name=name, notes=notes)
 
-    for name, notes in InitialData.formats.items():
+    for name, notes in InitialData.formats:
         format.insert().execute(name=name, notes=notes)
 
     session.commit()    
 
 
-
-    
-                
+               
 if __name__ == '__main__':
-    make_newdb('xasdat.sqlite')
+    dbname = 'xasdat.sqlite'
+    if len(sys.argv) > 1:
+        dbame  = sys.argv[1]
+    make_newdb(dbname)
 
-    print '''xasdat.sqlite created and initialized..
-    Check Foreign keys and Uniqueness settings!'''
-    
+    print '''%s  created and initialized.''' % dbname

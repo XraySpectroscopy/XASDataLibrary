@@ -1,192 +1,50 @@
-CREATE TABLE spectra (
-   id INTEGER NOT NULL PRIMARY KEY,
-   name VARCHAR(256) NOT NULL, 
-   notes VARCHAR, 
-   attributes VARCHAR, 
-   file_link VARCHAR, 
-   dat_energy VARCHAR, 
-   dat_i0 VARCHAR, 
-   dat_itrans VARCHAR, 
-   dat_iemit VARCHAR, 
-   dat_irefer VARCHAR, 
-   dat_dtime_corr VARCHAR, 
-   calc_mu_trans VARCHAR, 
-   calc_mu_emit VARCHAR, 
-   calc_mu_refer VARCHAR, 
-   calc_energy_ev VARCHAR, 
-   notes_energy VARCHAR, 
-   notes_i0 VARCHAR, 
-   notes_itrans VARCHAR, 
-   notes_iemit VARCHAR, 
-   notes_irefer VARCHAR, 
-   temperature VARCHAR, 
-   submission_date DATETIME, 
-   reference_used INTEGER, 
-   npts INTEGER, 
-   person INTEGER, 
-   edge INTEGER, 
-   element INTEGER, 
-   sample INTEGER, 
-   beamline INTEGER, 
-   monochromator INTEGER, 
-   format INTEGER, 
-   citation INTEGER, 
-   reference_sample INTEGER, 
-   FOREIGN KEY(reference_sample) REFERENCES sample (id), 
-   FOREIGN KEY(edge) REFERENCES edge (id), 
-   FOREIGN KEY(element) REFERENCES element (z), 
-   FOREIGN KEY(sample) REFERENCES sample (id), 
-   FOREIGN KEY(beamline) REFERENCES beamline (id), 
-   FOREIGN KEY(monochromator) REFERENCES monochromator (id), 
-   FOREIGN KEY(format) REFERENCES format (id), 
-   FOREIGN KEY(citation) REFERENCES citation (id), 
-   FOREIGN KEY(person) REFERENCES person (id));
-
-CREATE TABLE sample (
-   id INTEGER PRIMARY KEY,
-   name VARCHAR(256) NOT NULL, 
-   notes VARCHAR, 
-   attributes VARCHAR, 
-   formula VARCHAR, 
-   material_source VARCHAR, 
-   person INTEGER, 
-   crystal INTEGER, 
-   FOREIGN KEY(person) REFERENCES person (id), 
-   FOREIGN KEY(crystal) REFERENCES crystal (id));
-
-CREATE TABLE crystal (
-   id INTEGER PRIMARY KEY,
-   name VARCHAR(256) NOT NULL, 
-   notes VARCHAR, 
-   attributes VARCHAR, 
-   format VARCHAR, 
-   data VARCHAR);
-
-
-CREATE TABLE person (
-   id INTEGER PRIMARY KEY, 
-   email VARCHAR(256) NOT NULL, 
-   notes VARCHAR, 
-   attributes VARCHAR, 
-   first_name VARCHAR NOT NULL, 
-   last_name VARCHAR NOT NULL, 
-   UNIQUE (email));
-
-CREATE TABLE citation (
-   id INTEGER PRIMARY KEY,
-   notes VARCHAR, 
-   attributes VARCHAR, 
-   journal VARCHAR, 
-   authors VARCHAR, 
-   volume VARCHAR, 
-   title VARCHAR, 
-   pages VARCHAR, 
-   year VARCHAR, 
-   doi VARCHAR);
-
-CREATE TABLE beamline (
-   id INTEGER PRIMARY KEY, 
-   name VARCHAR(256) NOT NULL, 
-   notes VARCHAR, 
-   attributes VARCHAR, 
-   xray_source VARCHAR, 
-   monochromator INTEGER, 
-   facility INTEGER, 
-   FOREIGN KEY(facility) REFERENCES facility (id));
-
-CREATE TABLE facility (
-   id INTEGER PRIMARY KEY, 
-   name VARCHAR(256) NOT NULL, 
-   notes VARCHAR, 
-   attributes VARCHAR, 
-   UNIQUE (name));
-
-CREATE TABLE monochromator (
-   id INTEGER PRIMARY KEY, 
-   name VARCHAR(256) NOT NULL, 
-   notes VARCHAR, 
-   attributes VARCHAR, 
-   lattice_constant FLOAT, 
-   steps_per_degree FLOAT);
-
-CREATE TABLE mode (
-   id INTEGER PRIMARY KEY, 
-   name VARCHAR(256) NOT NULL, 
-   notes VARCHAR, 
-   attributes VARCHAR, 
-   UNIQUE (name));
-
-CREATE TABLE edge (
-   id INTEGER PRIMARY KEY, 
-   name VARCHAR(256) NOT NULL, 
-   level VARCHAR(32) NOT NULL, 
-   UNIQUE (name), 
-   UNIQUE (level));
-
-CREATE TABLE element (
-   z INTEGER PRIMARY KEY, 
-   name VARCHAR(256) NOT NULL, 
-   symbol VARCHAR(2) NOT NULL, 
-   UNIQUE (name), 
-   UNIQUE (symbol));
-
-CREATE TABLE format (
-   id INTEGER PRIMARY KEY, 
-   name VARCHAR(256) NOT NULL, 
-   notes VARCHAR, 
-   attributes VARCHAR, 
-   UNIQUE (name));
-
-CREATE TABLE ligand (
-   id INTEGER PRIMARY KEY, 
-   name VARCHAR(256) NOT NULL, 
-   notes VARCHAR, 
-   attributes VARCHAR);
-
-CREATE TABLE rating (
-   id INTEGER PRIMARY KEY, 
-   score INTEGER, 
-   comments VARCHAR, 
-   person INTEGER, 
-   spectra INTEGER, 
-   suite INTEGER, 
-   FOREIGN KEY(person) REFERENCES person (id), 
-   FOREIGN KEY(spectra) REFERENCES spectra (id), 
-   FOREIGN KEY(suite) REFERENCES suite (id));
-
-CREATE TABLE spectra_ligand (
-   id INTEGER PRIMARY KEY, 
-   ligand INTEGER, 
-   spectra INTEGER, 
-   FOREIGN KEY(ligand) REFERENCES ligand (id), 
-   FOREIGN KEY(spectra) REFERENCES spectra (id));
-
-CREATE TABLE spectra_mode (
-   id INTEGER PRIMARY KEY, 
-   mode INTEGER, 
-   spectra INTEGER, 
-   FOREIGN KEY(mode) REFERENCES mode (id), 
-   FOREIGN KEY(spectra) REFERENCES spectra (id));
-
-CREATE TABLE spectra_suite (
-   id INTEGER PRIMARY KEY,
-   suite INTEGER, 
-   spectra INTEGER, 
-   FOREIGN KEY(suite) REFERENCES suite (id), 
-   FOREIGN KEY(spectra) REFERENCES spectra (id));
-
-CREATE TABLE suite (
-   id INTEGER PRIMARY KEY, 
-   name VARCHAR(256) NOT NULL, 
-   notes VARCHAR, 
-   attributes VARCHAR, 
-   person INTEGER, 
-   UNIQUE (name), 
-   FOREIGN KEY(person) REFERENCES person (id));
-
-
 BEGIN TRANSACTION;
-
+CREATE TABLE ligand (
+	id INTEGER NOT NULL, 
+	name VARCHAR(256) NOT NULL, 
+	notes VARCHAR, 
+	attributes VARCHAR, 
+	PRIMARY KEY (id), 
+	UNIQUE (name)
+);
+CREATE TABLE edge (
+	id INTEGER NOT NULL, 
+	name VARCHAR(256) NOT NULL, 
+	level VARCHAR(32) NOT NULL, 
+	PRIMARY KEY (id), 
+	UNIQUE (name), 
+	UNIQUE (level)
+);
+INSERT INTO "edge" VALUES(1,'K','1s');
+INSERT INTO "edge" VALUES(2,'L2','2p1/2');
+INSERT INTO "edge" VALUES(3,'L3','2p3/2');
+INSERT INTO "edge" VALUES(4,'L1','2s');
+CREATE TABLE crystal (
+	id INTEGER NOT NULL, 
+	name VARCHAR(256) NOT NULL, 
+	notes VARCHAR, 
+	attributes VARCHAR, 
+	format VARCHAR, 
+	data VARCHAR, 
+	PRIMARY KEY (id), 
+	UNIQUE (name)
+);
+CREATE TABLE facility (
+	id INTEGER NOT NULL, 
+	name VARCHAR(256) NOT NULL, 
+	notes VARCHAR, 
+	attributes VARCHAR, 
+	PRIMARY KEY (id), 
+	UNIQUE (name)
+);
+CREATE TABLE element (
+	z INTEGER NOT NULL, 
+	name VARCHAR(256) NOT NULL, 
+	symbol VARCHAR(2) NOT NULL, 
+	PRIMARY KEY (z), 
+	UNIQUE (name), 
+	UNIQUE (symbol)
+);
 INSERT INTO "element" VALUES(1,'hydrogen','H');
 INSERT INTO "element" VALUES(2,'helium','He');
 INSERT INTO "element" VALUES(3,'lithium','Li');
@@ -296,18 +154,181 @@ INSERT INTO "element" VALUES(106,'Seaborgium','Sg');
 INSERT INTO "element" VALUES(107,'Bohrium','Bh');
 INSERT INTO "element" VALUES(108,'Hassium','Hs');
 INSERT INTO "element" VALUES(109,'Meitnerium','Mt');
-
-INSERT INTO "edge" VALUES(1,'K','1s');
-INSERT INTO "edge" VALUES(2,'L2','2p1/2');
-INSERT INTO "edge" VALUES(3,'L3','2p3/2');
-INSERT INTO "edge" VALUES(4,'L1','2s');
-
+CREATE TABLE citation (
+	id INTEGER NOT NULL, 
+	name VARCHAR(256) NOT NULL, 
+	notes VARCHAR, 
+	attributes VARCHAR, 
+	journal VARCHAR, 
+	authors VARCHAR, 
+	title VARCHAR, 
+	volume VARCHAR, 
+	pages VARCHAR, 
+	year VARCHAR, 
+	doi VARCHAR, 
+	PRIMARY KEY (id), 
+	UNIQUE (name)
+);
+CREATE TABLE monochromator (
+	id INTEGER NOT NULL, 
+	name VARCHAR(256) NOT NULL, 
+	notes VARCHAR, 
+	attributes VARCHAR, 
+	lattice_constant FLOAT, 
+	steps_per_degree FLOAT, 
+	PRIMARY KEY (id), 
+	UNIQUE (name)
+);
+CREATE TABLE mode (
+	id INTEGER NOT NULL, 
+	name VARCHAR(256) NOT NULL, 
+	notes VARCHAR, 
+	attributes VARCHAR, 
+	PRIMARY KEY (id), 
+	UNIQUE (name)
+);
 INSERT INTO "mode" VALUES(1,'transmission','transmission intensity through sample',NULL);
 INSERT INTO "mode" VALUES(2,'fluorescence, total yield','total x-ray fluorescence intensity, no energy analysis',NULL);
 INSERT INTO "mode" VALUES(3,'fluorescence, energy analyzed','x-ray fluorescence measured with an energy dispersive (solid-state) detector.
- Measurements may need to be corrected for dead-time effects',NULL);
-INSERT INTO "mode" VALUES(4,'electron emission','emitted electrons from sample',NULL);
-INSERT INTO "mode" VALUES(5,'xeol','visible or uv light emission',NULL);
-
+ Measurements will often need to be corrected for dead-time effects',NULL);
+INSERT INTO "mode" VALUES(4,'xeol','visible or uv light emission',NULL);
+INSERT INTO "mode" VALUES(5,'electron emission','emitted electrons from sample',NULL);
+CREATE TABLE person (
+	id INTEGER NOT NULL, 
+	email VARCHAR(256) NOT NULL, 
+	notes VARCHAR, 
+	attributes VARCHAR, 
+	first_name VARCHAR NOT NULL, 
+	last_name VARCHAR NOT NULL, 
+	PRIMARY KEY (id), 
+	UNIQUE (email)
+);
+CREATE TABLE format (
+	id INTEGER NOT NULL, 
+	name VARCHAR(256) NOT NULL, 
+	notes VARCHAR, 
+	attributes VARCHAR, 
+	PRIMARY KEY (id), 
+	UNIQUE (name)
+);
 INSERT INTO "format" VALUES(1,'internal-json','Read dat_* columns of spectra table as json',NULL);
+CREATE TABLE suite (
+	id INTEGER NOT NULL, 
+	name VARCHAR(256) NOT NULL, 
+	notes VARCHAR, 
+	attributes VARCHAR, 
+	person INTEGER, 
+	PRIMARY KEY (id), 
+	UNIQUE (name), 
+	FOREIGN KEY(person) REFERENCES person (id)
+);
+CREATE TABLE beamline (
+	id INTEGER NOT NULL, 
+	name VARCHAR(256) NOT NULL, 
+	notes VARCHAR, 
+	attributes VARCHAR, 
+	xray_source VARCHAR, 
+	monochromator INTEGER, 
+	facility INTEGER, 
+	PRIMARY KEY (id), 
+	UNIQUE (name), 
+	FOREIGN KEY(facility) REFERENCES facility (id), 
+	FOREIGN KEY(monochromator) REFERENCES monochromator (id)
+);
+CREATE TABLE sample (
+	id INTEGER NOT NULL, 
+	name VARCHAR(256) NOT NULL, 
+	notes VARCHAR, 
+	attributes VARCHAR, 
+	formula VARCHAR, 
+	material_source VARCHAR, 
+	person INTEGER, 
+	crystal INTEGER, 
+	PRIMARY KEY (id), 
+	UNIQUE (name), 
+	FOREIGN KEY(person) REFERENCES person (id), 
+	FOREIGN KEY(crystal) REFERENCES crystal (id)
+);
+CREATE TABLE spectra (
+	id INTEGER NOT NULL, 
+	name VARCHAR(256) NOT NULL, 
+	notes VARCHAR, 
+	attributes VARCHAR, 
+	file_link VARCHAR, 
+	dat_energy VARCHAR, 
+	dat_i0 VARCHAR, 
+	dat_itrans VARCHAR, 
+	dat_iemit VARCHAR, 
+	dat_irefer VARCHAR, 
+	dat_dtime_corr VARCHAR, 
+	calc_mu_trans VARCHAR, 
+	calc_mu_emit VARCHAR, 
+	calc_mu_refer VARCHAR, 
+	calc_energy_ev VARCHAR, 
+	notes_energy VARCHAR, 
+	notes_i0 VARCHAR, 
+	notes_itrans VARCHAR, 
+	notes_iemit VARCHAR, 
+	notes_irefer VARCHAR, 
+	temperature VARCHAR, 
+	submission_date DATETIME, 
+	reference_used INTEGER, 
+	npts INTEGER, 
+	person INTEGER, 
+	edge INTEGER, 
+	element INTEGER, 
+	sample INTEGER, 
+	beamline INTEGER, 
+	monochromator INTEGER, 
+	format INTEGER, 
+	citation INTEGER, 
+	reference_sample INTEGER, 
+	PRIMARY KEY (id), 
+	UNIQUE (name), 
+	FOREIGN KEY(edge) REFERENCES edge (id), 
+	FOREIGN KEY(element) REFERENCES element (z), 
+	FOREIGN KEY(sample) REFERENCES sample (id), 
+	FOREIGN KEY(beamline) REFERENCES beamline (id), 
+	FOREIGN KEY(monochromator) REFERENCES monochromator (id), 
+	FOREIGN KEY(format) REFERENCES format (id), 
+	FOREIGN KEY(citation) REFERENCES citation (id), 
+	FOREIGN KEY(reference_sample) REFERENCES sample (id), 
+	FOREIGN KEY(person) REFERENCES person (id)
+);
+CREATE TABLE spectra_suite (
+	id INTEGER NOT NULL, 
+	suite INTEGER, 
+	spectra INTEGER, 
+	PRIMARY KEY (id), 
+	FOREIGN KEY(suite) REFERENCES suite (id), 
+	FOREIGN KEY(spectra) REFERENCES spectra (id)
+);
+CREATE TABLE rating (
+	id INTEGER NOT NULL, 
+	score INTEGER, 
+	comments VARCHAR, 
+	person INTEGER, 
+	spectra INTEGER, 
+	suite INTEGER, 
+	PRIMARY KEY (id), 
+	FOREIGN KEY(person) REFERENCES person (id), 
+	FOREIGN KEY(spectra) REFERENCES spectra (id), 
+	FOREIGN KEY(suite) REFERENCES suite (id)
+);
+CREATE TABLE spectra_mode (
+	id INTEGER NOT NULL, 
+	mode INTEGER, 
+	spectra INTEGER, 
+	PRIMARY KEY (id), 
+	FOREIGN KEY(mode) REFERENCES mode (id), 
+	FOREIGN KEY(spectra) REFERENCES spectra (id)
+);
+CREATE TABLE spectra_ligand (
+	id INTEGER NOT NULL, 
+	ligand INTEGER, 
+	spectra INTEGER, 
+	PRIMARY KEY (id), 
+	FOREIGN KEY(ligand) REFERENCES ligand (id), 
+	FOREIGN KEY(spectra) REFERENCES spectra (id)
+);
 COMMIT;
