@@ -6,23 +6,25 @@ import os
 
 from sqlalchemy.orm import sessionmaker, create_session
 from sqlalchemy import MetaData, create_engine, \
-     Table, Column, Integer, Float, String, DateTime, ForeignKey
+     Table, Column, Integer, Float, String, Text, DateTime, ForeignKey
 
 def PointerCol(name, other=None, keyid='id', **kws):
     if other is None:
         other = name
-    return Column(name, None, ForeignKey('%s.%s' % (other,keyid), **kws))
+    return Column("%s_%s" % (name, keyid), None,
+                  ForeignKey('%s.%s' % (other, keyid), **kws))
     
 def StrCol(name, size=None, **kws):
     if size is None:
-        size = 65535
-    return Column(name, String(size),**kws)
+        return Column(name, Text, **kws)
+    else:
+        return Column(name, String(size), **kws)
 
 def NamedTable(tablename, metadata, keyid='id', nameid='name',
                name=True,notes=True, attributes=True, cols=None):
     args  = [Column(keyid, Integer, primary_key=True)]
     if name:
-        args.append(StrCol(nameid, size=256, nullable=False, unique=True))
+        args.append(StrCol(nameid, nullable=False, unique=True))
     if notes:
         args.append(StrCol('notes'))
     if attributes:
@@ -32,7 +34,13 @@ def NamedTable(tablename, metadata, keyid='id', nameid='name',
     return Table(tablename, metadata, *args)
     
 class InitialData:
-    formats = [["internal-json", "Read dat_* columns of spectra table as json"]]
+    formats = [["internal-json", "Read data_* values of spectra table as json"],
+               ["external-ixas", "Read data from extenal IXAS format"] ]
+
+    e_units = [["eV", "electronVolts"],
+               ["keV", "kiloelectronVolts"],
+               ["degrees","angle in degrees for Bragg Monochromator.  Need mono lattic_constant to convert to eV"],
+               ["steps",  "angular steps for Bragg Monochromator. Need mono lattice_constand and steps_per_degree to convert to eV"]]
     
     modes = [["transmission", "transmission intensity through sample"],
              ["fluorescence, total yield", "total x-ray fluorescence intensity, no energy analysis"],
@@ -85,10 +93,10 @@ class InitialData:
 
                 
 
-def  make_newdb(dbname, server= 'sqlite'):
-    if os.path.exists(dbname):
-        print '%s exists' % dbname
-        return
+def  make_newdb(dbname, server= 'sqlite', overwrite=False):
+    if os.path.exists(dbname) and not overwrite:
+        print '%s exists and will not be overwritten' % dbname
+        return False
     
     engine  = create_engine('%s:///%s' % (server, dbname))
     metadata =  MetaData(engine)
@@ -108,21 +116,23 @@ def  make_newdb(dbname, server= 'sqlite'):
     edge = NamedTable('edge', metadata,
                       notes=False, attributes=False,
                       cols=[StrCol('level', size=32,
-                                   unique=True,
-                                   nullable=False)])
-    
+                                   unique=True, nullable=False)])
+
+    energy_units = NamedTable('energy_units', metadata, nameid='units')
+
     mono = NamedTable('monochromator', metadata,
                       cols=[Column('lattice_constant', Float(precision=8)),
-                            Column('steps_per_degree', Float(precision=8))])
+                            Column('steps_per_degree', Float(precision=8)),
+                            PointerCol('energy_units')])
     
-    
-    crystal = NamedTable('crystal', metadata,
+    crystal_structure = NamedTable('crystal_structure', metadata,
                          cols=[StrCol('format'), 
                                StrCol('data')])
     
     person = NamedTable('person', metadata, nameid='email',
-                        cols=[StrCol('first_name', nullable=False),
-                              StrCol('last_name', nullable=False)])
+                        cols=[StrCol('firstname', nullable=False),
+                              StrCol('lastname', nullable=False),
+                              StrCol('affiliation')])
     
     citation = NamedTable('citation', metadata, 
                           cols=[StrCol('journal'),
@@ -137,26 +147,36 @@ def  make_newdb(dbname, server= 'sqlite'):
                         cols=[StrCol('formula'),
                               StrCol('material_source'),
                               PointerCol('person'),
-                              PointerCol('crystal')])
+                              PointerCol('crystal_structure')])
     
-    scols = [StrCol('file_link'), StrCol('dat_energy'),
-             StrCol('dat_i0'), StrCol('dat_itrans'),
-             StrCol('dat_iemit'), StrCol('dat_irefer'),
-             StrCol('dat_dtime_corr'), StrCol('calc_mu_trans'),
-             StrCol('calc_mu_emit'), StrCol('calc_mu_refer'),
-             StrCol('calc_energy_ev'), StrCol('notes_energy'),
-             StrCol('notes_i0'), StrCol('notes_itrans'),
-             StrCol('notes_iemit'), StrCol('notes_irefer'),
+    scols = [StrCol('file_link'),
+             StrCol('data_energy'),
+             StrCol('data_i0', server_default='[1.0]'),
+             StrCol('data_itrans', server_default='[1.0]'),
+             StrCol('data_iemit', server_default='[1.0]'),
+             StrCol('data_irefer', server_default='[1.0]'),
+             StrCol('data_dtime_corr', server_default='[1.0]'),
+             StrCol('calc_mu_trans', server_default='-log(itrans/i0)'),
+             StrCol('calc_mu_emit',  server_default='(iemit*dtime_corr/i0)'),
+             StrCol('calc_mu_refer', server_default='-log(irefer/itrans)'),
+             StrCol('notes_i0'),
+             StrCol('notes_itrans'),
+             StrCol('notes_iemit'),
+             StrCol('notes_irefer'),
              StrCol('temperature'),
              Column('submission_date', DateTime),
-             Column('reference_used', Integer),
-             Column('npts', Integer),
-             PointerCol('person'), PointerCol('edge'),
+             Column('collection_date', DateTime),
+             Column('reference_used', Integer), # , server_default=0),
+             PointerCol('energy_units'),
+             PointerCol('monochromator'),
+             PointerCol('person'),
+             PointerCol('edge'),
              PointerCol('element',keyid='z'),
              PointerCol('sample'),
-             PointerCol('beamline'), PointerCol('monochromator'),
-             PointerCol('format'), PointerCol('citation'),
-             PointerCol('reference_sample', 'sample')]
+             PointerCol('beamline'),
+             PointerCol('format'),
+             PointerCol('citation'),
+             PointerCol('reference', 'sample')]
     
     spectra = NamedTable('spectra', metadata,
                          cols=scols)
@@ -169,16 +189,22 @@ def  make_newdb(dbname, server= 'sqlite'):
     beamline = NamedTable('beamline', metadata, 
                           cols=[StrCol('xray_source'),
                                 PointerCol('monochromator'),
-                                PointerCol('facility')])
+                                PointerCol('facility'),
+                                ])
     
     
-    rating = Table('rating', metadata,
-                   Column('id', Integer, primary_key=True), 
-                   Column('score', Integer),
-                   StrCol('comments'),
-                   PointerCol('person') ,
-                   PointerCol('spectra'),
-                   PointerCol('suite'))
+    spectra_rating = Table('spectra_rating', metadata,
+                           Column('id', Integer, primary_key=True), 
+                           Column('score', Integer),
+                           StrCol('comments'),
+                           PointerCol('person') ,
+                           PointerCol('spectra'))
+
+    suite_rating = Table('suite_rating', metadata,
+                           Column('id', Integer, primary_key=True), 
+                           Column('score', Integer),
+                           StrCol('comments'),
+                           PointerCol('spectra'))
     
     spectra_suite = Table('spectra_suite', metadata,
                           Column('id', Integer, primary_key=True), 
@@ -199,9 +225,11 @@ def  make_newdb(dbname, server= 'sqlite'):
     session = sessionmaker(bind=engine)()
 
     for z, sym, name  in InitialData.elements:
-        element.insert().execute(z=z, symbol=sym,
-                                 name=name)
-            
+        element.insert().execute(z=z, symbol=sym,  name=name)
+
+    for units, notes  in InitialData.e_units:
+        energy_units.insert().execute(units=units, notes=notes)
+ 
     for name, level in InitialData.edges:
         edge.insert().execute(name=name, level=level)
 
@@ -212,13 +240,12 @@ def  make_newdb(dbname, server= 'sqlite'):
         format.insert().execute(name=name, notes=notes)
 
     session.commit()    
-
+    return True
 
                
 if __name__ == '__main__':
     dbname = 'xasdat.sqlite'
     if len(sys.argv) > 1:
         dbame  = sys.argv[1]
-    make_newdb(dbname)
-
-    print '''%s  created and initialized.''' % dbname
+    if make_newdb(dbname, overwrite=True):
+        print '''%s  created and initialized.''' % dbname
