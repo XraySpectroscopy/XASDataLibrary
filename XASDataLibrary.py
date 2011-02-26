@@ -7,10 +7,12 @@ Main Class:  XASDataLibrary
 
 """
 import os
-from sqlalchemy import MetaData, create_engine
-from sqlalchemy.orm import sessionmaker,  mapper, relationship, backref
+import sys
 import json
 
+from sqlalchemy import MetaData, create_engine
+from sqlalchemy.orm import sessionmaker,  mapper, relationship, backref
+from sqlalchemy.exc import IntegrityError
 class _BaseTable(object):
     "generic class to encapsulate SQLAlchemy table"
     def __repr__(self):
@@ -109,11 +111,10 @@ class Spectra(_BaseTable):
 
 
 class XASDataLibrary(object):
-    def __init__(self, dbname='xaslib.sqlite'):
+    def __init__(self, dbname='xasdat.sqlite'):
 
         if not os.path.exists(dbname):
             raise IOError("Database '%s' not found!" % dbname)
-        
         
         self.dbname = dbname
         self.engine  = create_engine('sqlite:///%s' % self.dbname)
@@ -216,19 +217,26 @@ class XASDataLibrary(object):
                 if not isinstance(val, (str, unicode)):
                     val = json.dumps(val)
             setattr(me, key, val)
-        self.session.add(me)
-        self.session.commit()
+        try:
+            self.session.add(me)
+            self.session.commit()
+        except IntegrityError, msg:
+            self.session.rollback()
+            print msg
+            raise Warning('Could not add data to table %s' % table)
+
         return self.query(table).filter(getattr(table, arg0)==val0).one()
 
-    def add_facility(self, name, notes=None, attributes='', **kws):
+    def add_facility(self, name, notes='', attributes='', **kws):
         """add facilty by name, return Facility instance"""
         kws['notes'] = notes
         kws['attributes'] = attributes
         return self.__addRow(Facility, ('name',), (name,), **kws)
 
-    def add_beamline(self, name, facility=None, notes=None,
-                     xray_source=None, monochromator=None,
-                     attributes=None, **kws):
+    def add_beamline(self, name, facility=None,
+                     monochromator=None,
+                     xray_source=None,  notes='',                     
+                     attributes='', **kws):
         """add beamline by name, with facility:
                facility= Facility instance or id
                monochromator= Monochromator or id
@@ -241,13 +249,13 @@ class XASDataLibrary(object):
         kws['notes'] = notes
         kws['attributes'] = attributes
         kws['xray_source'] = xray_source
-        kw['facility'] = facility            
-        kw['monochromator'] = monochromator
+        kw['facility_id'] = facility            
+        kw['monochromator_id'] = monochromator
 
         return self.__addRow(Beamline, ('name',), (name,), **kws)
 
     def add_person(self, firstname, lastname, email,
-                   affiliation=None, attributes=None, **kws):
+                   affiliation='', attributes='', **kws):
         """add person: arguments are
         firstname, lastname, email  with
         affiliation and attributes optional
@@ -257,7 +265,7 @@ class XASDataLibrary(object):
         return self.__addRow(Person, ('email','firstname','lastname'),
                              (email, firstname, lastname), **kws)
 
-    def add_ligand(self, name, notes=None, attributes=None, **kws):
+    def add_ligand(self, name, notes='', attributes='', **kws):
         """add ligand: name required
         notes and attributes optional
         returns Ligand instance"""
@@ -265,7 +273,38 @@ class XASDataLibrary(object):
         kws['attributes'] = attributes
 
         return self.__addRow(Ligand, ('name',), (name,), **kws)        
-         
+
+    def add_mode(self, name, notes='', attributes='', **kws):
+        """add collection mode: name required
+        notes and attributes optional
+        returns Mode instance"""
+        kws['notes'] = notes
+        kws['attributes'] = attributes
+
+        return self.__addRow(Mode, ('name',), (name,), **kws)        
+
+    def add_format(self, name, notes='', attributes='', **kws):
+        """add data format: name required
+        notes and attributes optional
+        returns Format instance"""
+        kws['notes'] = notes
+        kws['attributes'] = attributes
+
+        return self.__addRow(Format, ('name',), (name,), **kws)        
+
+    def add_crystal_structure(self, name, notes='',
+                              attributes='', format=None,
+                              data=None, **kws):
+        """add data format: name required
+        notes and attributes optional
+        returns Format instance"""
+        kws['notes'] = notes
+        kws['attributes'] = attributes
+        kws['format'] = format
+        kws['data'] = data
+
+        return self.__addRow(CrystalStructure, ('name',), (name,), **kws)        
+
     def add_energy_units(self, units, notes=None, attributes=None, **kws):
         """add Energy Units: units required
         notes and attributes optional
@@ -274,6 +313,50 @@ class XASDataLibrary(object):
         kws['attributes'] = attributes
 
         return self.__addRow(EnergyUnits, ('units',), (units,), **kws)        
+
+
+    def add_monochromator(self, name, notes='', attributes='',
+                          steps_per_degree=None, energy_units=None,
+                          lattice_constant=None, **kws):
+        """add monochromator: name required
+        notes and attributes optional
+        returns Monochromator instance"""
+        if isinstance(energy_units, EnergyUnits):
+            energy_units = energy_units.id
+        elif isinstance(energy_units, (str, unicode)):
+            try:
+                query = self.query(EnergyUnits).filter(
+                    EnergyUnits.units==energy_units)
+                energy_units = query.one().id
+            except:
+                raise Warning('Unknown energy units: %s' % energy_units)
+
+        kws['notes'] = notes
+        kws['attributes'] = attributes
+        kws['energy_units_id'] = energy_units
+        kws['lattice_constant'] = lattice_constant
+        kws['steps_per_degreee'] = steps_per_degree
+
+        return self.__addRow(Monochromator, ('name',), (name,), **kws)        
+
+    def add_citation(self, name, notes='', attributes='',
+                     journal='',  authors='',  title='', 
+                     volume='', pages='',  year='', 
+                     doi='',  **kws):
+        """add literature citation: name required
+        notes and attributes optional
+        returns Citation instance"""
+        kws['notes'] = notes
+        kws['attributes'] = attributes
+	kws['journal'] = journal
+	kws['authors'] = authors
+	kws['title'] = title
+	kws['volume'] = volume
+	kws['pages'] = pages
+	kws['year'] = year
+	kws['doi'] = doi
+        return self.__addRow(Citation, ('name',), (name,), **kws)        
+
 
 if __name__ == '__main__':    
     xaslib =  XASDataLibrary('xasdat.sqlite')
