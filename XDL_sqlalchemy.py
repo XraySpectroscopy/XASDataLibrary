@@ -114,7 +114,8 @@ class XASDataLibrary(object):
         self.session = sessionmaker(bind=self.engine)()
 
         mapper(Mode,     self.tables.mode, 
-               properties={'spectra': relationship(Spectra, backref='mode', secondary=self.tables.spectra_mode)}
+               properties={'spectra': relationship(Spectra, backref='mode',
+                                                   secondary=self.tables.spectra_mode)}
         )
 
         mapper(Edge,     self.tables.edge,
@@ -138,8 +139,10 @@ class XASDataLibrary(object):
                )
                
         mapper(Ligand,   self.tables.ligand,
-               properties={'spectra': relationship(Spectra, backref='ligand', secondary=self.tables.spectra_ligand)}
+               properties={'spectra': relationship(Spectra, backref='ligand',
+                                                   secondary=self.tables.spectra_ligand)}
                )               
+
         mapper(CrystalStructure,   self.tables.crystal_structure,
                properties={'samples': relationship(Sample, backref='structure'),
                            }
@@ -163,14 +166,14 @@ class XASDataLibrary(object):
                            'spectra': relationship(Spectra, backref='person')})
                
 
-        # mapper(Spectra_Rating,   self.tables.spectra_rating,
-        #       properties = {'person': relationship(Rating, backref='person_ref', secondary=self.tables.spectra_rating),
-        #                   }
-        #        )
+        mapper(Spectra_Rating,   self.tables.spectra_rating)
+
+        mapper(Suite_Rating,   self.tables.suite_rating)
 
 
         mapper(Suite,   self.tables.suite,
-               properties={'spectra': relationship(Spectra, backref='suite', secondary=self.tables.spectra_suite)}
+               properties={'spectra': relationship(Spectra, backref='suite',
+                                                   secondary=self.tables.spectra_suite)}
                )
         
         mapper(Sample,  self.tables.sample)
