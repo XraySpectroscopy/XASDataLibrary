@@ -13,6 +13,8 @@ import json
 from sqlalchemy import MetaData, create_engine
 from sqlalchemy.orm import sessionmaker,  mapper, relationship, backref
 from sqlalchemy.exc import IntegrityError
+from sqlalchemy.orm.exc import  NoResultFound
+
 class _BaseTable(object):
     "generic class to encapsulate SQLAlchemy table"
     def __repr__(self):
@@ -241,16 +243,15 @@ class XASDataLibrary(object):
                facility= Facility instance or id
                monochromator= Monochromator or id
                returns Beamline instance"""
-        if isinstance(facility, Facility):
-            facility = facility.id
-        if isinstance(monochromator, Monochromator):
-            monochromator = monochromator.id
+
+        fac_id  = self._get_foreign_keyid(Facility, facility)
+        mono_id = self._get_foreign_keyid(Monochromator, monochromator)
 
         kws['notes'] = notes
         kws['attributes'] = attributes
         kws['xray_source'] = xray_source
-        kw['facility_id'] = facility            
-        kw['monochromator_id'] = monochromator
+        kw['facility_id'] = fac_id
+        kw['monochromator_id'] = mono_id
 
         return self.__addRow(Beamline, ('name',), (name,), **kws)
 
@@ -315,22 +316,40 @@ class XASDataLibrary(object):
         return self.__addRow(EnergyUnits, ('units',), (units,), **kws)        
 
 
+    def _get_foreign_keyid(self, table, value, name='name',
+                           keyid='id', default=0):
+        """generalized lookup for foreign key
+        can provide one of:
+            table instance
+            'name' attribute (or set which attribute with 'name' arg)
+            a valid id
+            """
+        if isinstance(value, table):
+            return getattr(table, keyid)
+        else:
+            if isinstance(value, (str, unicode)):
+                filter = getattr(table, name)
+            elif isinstance(value, int):
+                filter = getattr(table, keyid)
+            else:
+                return default
+            try:
+                query = self.query(table).filter(
+                    filter==value)
+                return getattr(query.one(), keyid)
+            except (IntegrityError, NoResultFound):
+                return default
+
+        return default
+    
     def add_monochromator(self, name, notes='', attributes='',
                           steps_per_degree=None, energy_units=None,
                           lattice_constant=None, **kws):
         """add monochromator: name required
         notes and attributes optional
         returns Monochromator instance"""
-        if isinstance(energy_units, EnergyUnits):
-            energy_units = energy_units.id
-        elif isinstance(energy_units, (str, unicode)):
-            try:
-                query = self.query(EnergyUnits).filter(
-                    EnergyUnits.units==energy_units)
-                energy_units = query.one().id
-            except:
-                raise Warning('Unknown energy units: %s' % energy_units)
-
+        energy_units = self._get_foreign_keyid(EnergyUnits, energy_units,
+                                               name='units')
         kws['notes'] = notes
         kws['attributes'] = attributes
         kws['energy_units_id'] = energy_units
