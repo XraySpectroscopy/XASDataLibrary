@@ -16,6 +16,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm.exc import  NoResultFound
 
 def json_encode(val):
+    "simple wrapper around json.dumps"
     if val is None or isinstance(val, (str, unicode)):
         return val
     return  json.dumps(val)
@@ -49,12 +50,14 @@ class Monochromator(_BaseTable):
     pass
 
 class EnergyUnits(_BaseTable):
+    "Energy Units table"
     def __repr__(self):
         name = self.__class__.__name__
         fields = ['%s' % getattr(self, 'units', '')]
         return "<%s(%s)>" % (name, ', '.join(fields))
 
 class Edge(_BaseTable):
+    "edge table"
     def __repr__(self):
         name = self.__class__.__name__
         fields = ['%s' % getattr(self, 'name', 'X')]
@@ -62,6 +65,7 @@ class Edge(_BaseTable):
         return "<%s(%s)>" % (name, ', '.join(fields))
 
 class Element(_BaseTable):
+    "element table"
     def __repr__(self):
         name = self.__class__.__name__
         fields = ['%s' % getattr(self, 'symbol', 'NU'),
@@ -72,21 +76,24 @@ class Element(_BaseTable):
 
 
 class Ligand(_BaseTable):
+    "ligand table"
     pass
 
 class CrystalStructure(_BaseTable):
+    "crystal structure table"
     pass
 
 class Citation(_BaseTable):
+    "literature citation table"
     pass
 
-class Monchomator(_BaseTable):
-    pass
 
 class Format(_BaseTable):
+    "data format table"
     pass
 
 class Person(_BaseTable):
+    "person table"
     def __repr__(self):
         name = self.__class__.__name__
         fields = ['%s %s' % (getattr(self, 'firstname', ''),
@@ -95,6 +102,7 @@ class Person(_BaseTable):
         return "<%s(%s)>" % (name, ', '.join(fields))
 
 class Spectra_Rating(_BaseTable):
+    "spectra rating"
     def __repr__(self):
         name = self.__class__.__name__
         fields = ['%i' % (int(getattr(self, 'score', 0)))]
@@ -104,6 +112,7 @@ class Spectra_Rating(_BaseTable):
         return "<%s(%s)>" % (name, ', '.join(fields))
 
 class Suite_Rating(_BaseTable):
+    "suite rating table"
     def __repr__(self):
         name = self.__class__.__name__
         fields = ['%i' % (int(getattr(self, 'score', 0)))]
@@ -113,16 +122,20 @@ class Suite_Rating(_BaseTable):
         return "<%s(%s)>" % (name, ', '.join(fields))
 
 class Suite(_BaseTable):
+    "suite table"    
     pass
 
 class Sample(_BaseTable):
+    "sample table"
     pass
 
 class Spectra(_BaseTable):
+    "spectra table"
     pass
 
 
 class XASDataLibrary(object):
+    "full interface to XAS Spectral Library"
     def __init__(self, dbname='xasdat.sqlite'):
 
         if not os.path.exists(dbname):
@@ -240,8 +253,7 @@ class XASDataLibrary(object):
 
         return self.query(table).filter(getattr(table, arg0)==val0).one()
 
-    def _get_foreign_keyid(self, table, value, name='name',
-                           keyid='id', default=0):
+    def _get_foreign_keyid(self, table, value, name='name', keyid='id'):
         """generalized lookup for foreign key
         can provide one of:
             table instance
@@ -252,17 +264,17 @@ class XASDataLibrary(object):
             return getattr(table, keyid)
         else:
             if isinstance(value, (str, unicode)):
-                filter = getattr(table, name)
+                xfilter = getattr(table, name)
             elif isinstance(value, int):
-                filter = getattr(table, keyid)
+                xfilter = getattr(table, keyid)
             else:
-                return default
+                return 0
             try:
                 query = self.query(table).filter(
-                    filter==value)
+                    xfilter==value)
                 return getattr(query.one(), keyid)
             except (IntegrityError, NoResultFound):
-                return default
+                return 0
 
         return default
     
@@ -304,12 +316,12 @@ class XASDataLibrary(object):
         kws['format'] = format
         kws['data'] = data
 
-        return self.__addRow(CrystalStructure, ('name',), (name,), **kws)        
+        return self.__addRow(CrystalStructure, ('name',), (name,), **kws)
 
     def add_edge(self, name, level):
         """add edge: name and level required
         returns Edge instance"""
-        return self.__addRow(Ligand, ('name','level'), (name,level))
+        return self.__addRow(Ligand, ('name', 'level'), (name, level))
 
 
     def add_facility(self, name, notes='', attributes='', **kws):
@@ -330,8 +342,8 @@ class XASDataLibrary(object):
         kws['notes'] = notes
         kws['attributes'] = attributes
         kws['xray_source'] = xray_source
-        kw['facility_id'] = self._get_foreign_keyid(Facility, facility)
-        kw['monochromator_id'] = self._get_foreign_keyid(Monochromator,
+        kws['facility_id'] = self._get_foreign_keyid(Facility, facility)
+        kws['monochromator_id'] = self._get_foreign_keyid(Monochromator,
                                                          monochromator)
 
         return self.__addRow(Beamline, ('name',), (name,), **kws)
@@ -361,16 +373,16 @@ class XASDataLibrary(object):
         returns Citation instance"""
         kws['notes'] = notes
         kws['attributes'] = attributes
-	kws['journal'] = journal
-	kws['authors'] = authors
-	kws['title'] = title
-	kws['volume'] = volume
-	kws['pages'] = pages
-	kws['year'] = year
-	kws['doi'] = doi
+        kws['journal'] = journal
+        kws['authors'] = authors
+        kws['title'] = title
+        kws['volume'] = volume
+        kws['pages'] = pages
+        kws['year'] = year
+        kws['doi'] = doi
         return self.__addRow(Citation, ('name',), (name,), **kws)        
 
-    def add_info(self, key, value, **kw):
+    def add_info(self, key, value):
         """add Info key value pair -- returns Info instance"""
         return self.__addRow(Info, ('key', 'value'), (key, value))
 
@@ -391,7 +403,7 @@ class XASDataLibrary(object):
         returns Person instance"""
         kws['affiliation'] = affiliation
         kws['attributes'] = attributes
-        return self.__addRow(Person, ('email','firstname','lastname'),
+        return self.__addRow(Person, ('email', 'firstname', 'lastname'),
                              (email, firstname, lastname), **kws)
 
     def add_sample(self, name, notes='', attributes='',
@@ -404,9 +416,9 @@ class XASDataLibrary(object):
         kws['attributes'] = attributes
         kws['formula'] = formula
         kws['material_source'] = material_source
-        kw['person_id'] = self._get_foreign_keyid(Person, person)
-        kw['crystal_structure_id'] = self._get_foreign_keyid(CrystalStructure,
-                                                             crystal_structure)
+        kws['person_id'] = self._get_foreign_keyid(Person, person)
+        kws['crystal_structure_id'] = self._get_foreign_keyid(CrystalStructure,
+                                                              crystal_structure)
         return self.__addRow(Sample, ('name',), (name,), **kws)        
 
 
@@ -416,7 +428,7 @@ class XASDataLibrary(object):
         returns Suite instance"""
         kws['notes'] = notes
         kws['attributes'] = attributes
-        kw['person_id'] = self._get_foreign_keyid(Person, person)
+        kws['person_id'] = self._get_foreign_keyid(Person, person)
 
         return self.__addRow(Suite, ('name',), (name,), **kws)        
 
@@ -430,43 +442,42 @@ class XASDataLibrary(object):
                     collection_date='', reference_used='',
                     energy_units=None, monochromator=None, person=None,
                     edge=None, element=None, sample=None, beamline=None,
-                    format=None, citation=None, reference=None, **kws):
+                    data_format=None, citation=None, reference=None, **kws):
 
         """add spectra: name required
         returns Spectra instance"""
         kws['notes'] = notes
         kws['attributes'] = attributes
 
-	kw['file_link'] = file_link
-	kw['data_energy'] = data_energy
-	kw['data_i0'] = data_i0
-	kw['data_itrans'] = data_itrans
-	kw['data_iemit'] = data_iemit
-	kw['data_irefer'] = data_irefer
-	kw['data_dtime_corr'] = data_dtime_corr
-	kw['calc_mu_trans'] = calc_mu_trans
-	kw['calc_mu_emit'] = calc_mu_emit
-	kw['calc_mu_refer'] = calc_mu_refer
-	kw['notes_i0'] = notes_i0
-	kw['notes_itrans'] = notes_itrans
-	kw['notes_iemit'] = notes_iemit
-	kw['notes_irefer'] = notes_irefer
-	kw['temperature'] = temperature
-	kw['submission_date'] = submission_date
-	kw['collection_date'] = collection_date
-	kw['reference_used'] = reference_used
-        
-        kw['beamline_id'] = self._get_foreign_keyid(Beamline, beamline)
-        kw['monochromator_id'] = self._get_foreign_keyid(Monochromator,
+        kws['file_link'] = file_link
+        kws['data_energy'] = data_energy
+        kws['data_i0'] = data_i0
+        kws['data_itrans'] = data_itrans
+        kws['data_iemit'] = data_iemit
+        kws['data_irefer'] = data_irefer
+        kws['data_dtime_corr'] = data_dtime_corr
+        kws['calc_mu_trans'] = calc_mu_trans
+        kws['calc_mu_emit'] = calc_mu_emit
+        kws['calc_mu_refer'] = calc_mu_refer
+        kws['notes_i0'] = notes_i0
+        kws['notes_itrans'] = notes_itrans
+        kws['notes_iemit'] = notes_iemit
+        kws['notes_irefer'] = notes_irefer
+        kws['temperature'] = temperature
+        kws['submission_date'] = submission_date
+        kws['collection_date'] = collection_date
+        kws['reference_used'] = reference_used
+        kws['beamline_id'] = self._get_foreign_keyid(Beamline, beamline)
+        kws['monochromator_id'] = self._get_foreign_keyid(Monochromator,
                                                          monochromator)
-        kw['person_id'] = self._get_foreign_keyid(Person, person)
-        kw['edge_id'] = self._get_foreign_keyid(Edge, edge)
-        kw['element_z'] = self._get_foreign_keyid(Element, element)
-        kw['sample_id'] = self._get_foreign_keyid(Sample, sample)
-        kw['format_id'] = self._get_foreign_keyid(Format, format)
-        kw['citation_id'] = self._get_foreign_keyid(Citation, citation)
-        kw['reference_id'] = self._get_foreign_keyid(Sample, reference)
-        kw['energy_units_id'] = self._get_foreign_keyid(EnergyUnits,
+        kws['person_id'] = self._get_foreign_keyid(Person, person)
+        kws['edge_id'] = self._get_foreign_keyid(Edge, edge)
+        kws['element_z'] = self._get_foreign_keyid(Element, element)
+        kws['sample_id'] = self._get_foreign_keyid(Sample, sample)
+        kws['format_id'] = self._get_foreign_keyid(Format, data_format)
+        kws['citation_id'] = self._get_foreign_keyid(Citation, citation)
+        kws['reference_id'] = self._get_foreign_keyid(Sample, reference)
+        kws['energy_units_id'] = self._get_foreign_keyid(EnergyUnits,
                                                         energy_units)
 
         return self.__addRow(Spectra, ('name',), (name,), **kws)        
