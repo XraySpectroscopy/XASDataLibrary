@@ -32,15 +32,18 @@ def NamedTable(tablename, metadata, keyid='id', nameid='name',
     if cols is not None:
         args.extend(cols)
     return Table(tablename, metadata, *args)
-    
+
 class InitialData:
+    info    = [["version", "1.0.0"],
+               ["creation-date", "2012-Feb-28"]]
+
     formats = [["internal-json", "Read data_* values of spectra table as json"],
-               ["external-ixas", "Read data from extenal IXAS format"] ]
+               ["external-xdi",  "Read data from extenal XDI formatted file"]]
 
     e_units = [["eV", "electronVolts"],
                ["keV", "kiloelectronVolts"],
-               ["degrees","angle in degrees for Bragg Monochromator.  Need mono lattic_constant to convert to eV"],
-               ["steps",  "angular steps for Bragg Monochromator. Need mono lattice_constand and steps_per_degree to convert to eV"]]
+               ["degrees","angle in degrees for Bragg Monochromator.  Need mono dspacing to convert to eV"],
+               ["steps",  "angular steps for Bragg Monochromator. Need mono dspacing and steps_per_degree to convert to eV"]]
     
     modes = [["transmission", "transmission intensity through sample"],
              ["fluorescence, total yield", "total x-ray fluorescence intensity, no energy analysis"],
@@ -50,7 +53,7 @@ class InitialData:
              ["electron emission", "emitted electrons from sample"]]
 
     
-    edges = [["K", "1s"], ["L2", "2p1/2"], ["L3", "2p3/2"], ["L1", "2s"]]
+    edges = [["K", "1s"], ["L3", "2p3/2"], ["L2", "2p1/2"], ["L1", "2s"]]
     
     elements = [[1, "H", "hydrogen"], [2, "He", "helium"], [3, "Li","lithium"],
             [4, "Be", "beryllium"], [5, "B", "boron"], [6, "C", "carbon"],
@@ -221,6 +224,10 @@ def  make_newdb(dbname, server= 'sqlite', overwrite=False):
                            PointerCol('ligand'),
                            PointerCol('spectra'))                                    
 
+    info = Table('info', metadata,
+                 Column('key', Text, primary_key=True, unique=True), 
+                 StrCol('value'))
+
     metadata.create_all()
     session = sessionmaker(bind=engine)()
 
@@ -238,6 +245,9 @@ def  make_newdb(dbname, server= 'sqlite', overwrite=False):
 
     for name, notes in InitialData.formats:
         format.insert().execute(name=name, notes=notes)
+
+    for key, value in InitialData.info:
+        info.insert().execute(key=key, value=value)
 
     session.commit()    
     return True

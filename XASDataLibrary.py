@@ -15,12 +15,22 @@ from sqlalchemy.orm import sessionmaker,  mapper, relationship, backref
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm.exc import  NoResultFound
 
+def json_encode(val):
+    if val is None or isinstance(val, (str, unicode)):
+        return val
+    return  json.dumps(val)
+
 class _BaseTable(object):
     "generic class to encapsulate SQLAlchemy table"
     def __repr__(self):
         name = self.__class__.__name__
         fields = ['%s' % getattr(self, 'name', 'UNNAMED')]
         return "<%s(%s)>" % (name, ', '.join(fields))
+
+
+class Info(_BaseTable):
+    "general information table (versions, etc)"
+    pass
 
 class Mode(_BaseTable):
     "collection mode table"
@@ -127,6 +137,8 @@ class XASDataLibrary(object):
 
         self.session = sessionmaker(bind=self.engine)()
 
+        mapper(Info,     tables['info'])
+
         mapper(Mode,     tables['mode'], 
                properties={'spectra':
                            relationship(Spectra, backref='mode',
@@ -216,8 +228,7 @@ class XASDataLibrary(object):
             setattr(me, name, val)
         for key, val in kws.items():
             if key == 'attributes':
-                if not isinstance(val, (str, unicode)):
-                    val = json.dumps(val)
+                val = json_encode(val)
             setattr(me, key, val)
         try:
             self.session.add(me)
@@ -229,51 +240,40 @@ class XASDataLibrary(object):
 
         return self.query(table).filter(getattr(table, arg0)==val0).one()
 
-    def add_facility(self, name, notes='', attributes='', **kws):
-        """add facilty by name, return Facility instance"""
-        kws['notes'] = notes
-        kws['attributes'] = attributes
-        return self.__addRow(Facility, ('name',), (name,), **kws)
+    def _get_foreign_keyid(self, table, value, name='name',
+                           keyid='id', default=0):
+        """generalized lookup for foreign key
+        can provide one of:
+            table instance
+            'name' attribute (or set which attribute with 'name' arg)
+            a valid id
+            """
+        if isinstance(value, table):
+            return getattr(table, keyid)
+        else:
+            if isinstance(value, (str, unicode)):
+                filter = getattr(table, name)
+            elif isinstance(value, int):
+                filter = getattr(table, keyid)
+            else:
+                return default
+            try:
+                query = self.query(table).filter(
+                    filter==value)
+                return getattr(query.one(), keyid)
+            except (IntegrityError, NoResultFound):
+                return default
 
-    def add_beamline(self, name, facility=None,
-                     monochromator=None,
-                     xray_source=None,  notes='',                     
-                     attributes='', **kws):
-        """add beamline by name, with facility:
-               facility= Facility instance or id
-               monochromator= Monochromator or id
-               returns Beamline instance"""
-
-        fac_id  = self._get_foreign_keyid(Facility, facility)
-        mono_id = self._get_foreign_keyid(Monochromator, monochromator)
-
-        kws['notes'] = notes
-        kws['attributes'] = attributes
-        kws['xray_source'] = xray_source
-        kw['facility_id'] = fac_id
-        kw['monochromator_id'] = mono_id
-
-        return self.__addRow(Beamline, ('name',), (name,), **kws)
-
-    def add_person(self, firstname, lastname, email,
-                   affiliation='', attributes='', **kws):
-        """add person: arguments are
-        firstname, lastname, email  with
-        affiliation and attributes optional
-        returns Person instance"""
-        kws['affiliation'] = affiliation
-        kws['attributes'] = attributes
-        return self.__addRow(Person, ('email','firstname','lastname'),
-                             (email, firstname, lastname), **kws)
-
-    def add_ligand(self, name, notes='', attributes='', **kws):
-        """add ligand: name required
+        return default
+    
+    def add_energy_units(self, units, notes=None, attributes=None, **kws):
+        """add Energy Units: units required
         notes and attributes optional
-        returns Ligand instance"""
+        returns EnergyUnits instance"""
         kws['notes'] = notes
         kws['attributes'] = attributes
 
-        return self.__addRow(Ligand, ('name',), (name,), **kws)        
+        return self.__addRow(EnergyUnits, ('units',), (units,), **kws)        
 
     def add_mode(self, name, notes='', attributes='', **kws):
         """add collection mode: name required
@@ -306,55 +306,49 @@ class XASDataLibrary(object):
 
         return self.__addRow(CrystalStructure, ('name',), (name,), **kws)        
 
-    def add_energy_units(self, units, notes=None, attributes=None, **kws):
-        """add Energy Units: units required
-        notes and attributes optional
-        returns EnergyUnits instance"""
+    def add_edge(self, name, level):
+        """add edge: name and level required
+        returns Edge instance"""
+        return self.__addRow(Ligand, ('name','level'), (name,level))
+
+
+    def add_facility(self, name, notes='', attributes='', **kws):
+        """add facilty by name, return Facility instance"""
         kws['notes'] = notes
         kws['attributes'] = attributes
+        return self.__addRow(Facility, ('name',), (name,), **kws)
 
-        return self.__addRow(EnergyUnits, ('units',), (units,), **kws)        
+    def add_beamline(self, name, facility=None,
+                     monochromator=None,
+                     xray_source=None,  notes='',                     
+                     attributes='', **kws):
+        """add beamline by name, with facility:
+               facility= Facility instance or id
+               monochromator= Monochromator or id
+               returns Beamline instance"""
 
+        kws['notes'] = notes
+        kws['attributes'] = attributes
+        kws['xray_source'] = xray_source
+        kw['facility_id'] = self._get_foreign_keyid(Facility, facility)
+        kw['monochromator_id'] = self._get_foreign_keyid(Monochromator,
+                                                         monochromator)
 
-    def _get_foreign_keyid(self, table, value, name='name',
-                           keyid='id', default=0):
-        """generalized lookup for foreign key
-        can provide one of:
-            table instance
-            'name' attribute (or set which attribute with 'name' arg)
-            a valid id
-            """
-        if isinstance(value, table):
-            return getattr(table, keyid)
-        else:
-            if isinstance(value, (str, unicode)):
-                filter = getattr(table, name)
-            elif isinstance(value, int):
-                filter = getattr(table, keyid)
-            else:
-                return default
-            try:
-                query = self.query(table).filter(
-                    filter==value)
-                return getattr(query.one(), keyid)
-            except (IntegrityError, NoResultFound):
-                return default
+        return self.__addRow(Beamline, ('name',), (name,), **kws)
 
-        return default
-    
     def add_monochromator(self, name, notes='', attributes='',
                           steps_per_degree=None, energy_units=None,
-                          lattice_constant=None, **kws):
+                          dspacing=None, pixel_to_energy=None, **kws):
         """add monochromator: name required
         notes and attributes optional
         returns Monochromator instance"""
-        energy_units = self._get_foreign_keyid(EnergyUnits, energy_units,
-                                               name='units')
         kws['notes'] = notes
         kws['attributes'] = attributes
-        kws['energy_units_id'] = energy_units
-        kws['lattice_constant'] = lattice_constant
+        kws['dspacing'] = dspacing
         kws['steps_per_degreee'] = steps_per_degree
+        kws['energy_units_id'] =  self._get_foreign_keyid(EnergyUnits,
+                                                          energy_units,
+                                                          name='units')
 
         return self.__addRow(Monochromator, ('name',), (name,), **kws)        
 
@@ -375,6 +369,107 @@ class XASDataLibrary(object):
 	kws['year'] = year
 	kws['doi'] = doi
         return self.__addRow(Citation, ('name',), (name,), **kws)        
+
+    def add_info(self, key, value, **kw):
+        """add Info key value pair -- returns Info instance"""
+        return self.__addRow(Info, ('key', 'value'), (key, value))
+
+    def add_ligand(self, name, notes='', attributes='', **kws):
+        """add ligand: name required
+        notes and attributes optional
+        returns Ligand instance"""
+        kws['notes'] = notes
+        kws['attributes'] = attributes
+
+        return self.__addRow(Ligand, ('name',), (name,), **kws)        
+
+    def add_person(self, firstname, lastname, email,
+                   affiliation='', attributes='', **kws):
+        """add person: arguments are
+        firstname, lastname, email  with
+        affiliation and attributes optional
+        returns Person instance"""
+        kws['affiliation'] = affiliation
+        kws['attributes'] = attributes
+        return self.__addRow(Person, ('email','firstname','lastname'),
+                             (email, firstname, lastname), **kws)
+
+    def add_sample(self, name, notes='', attributes='',
+                   formula=None, material_source=None,
+                   person=None, crystal_structure=None, **kws):
+        """add sample: name required
+        returns Sample instance"""
+
+        kws['notes'] = notes
+        kws['attributes'] = attributes
+        kws['formula'] = formula
+        kws['material_source'] = material_source
+        kw['person_id'] = self._get_foreign_keyid(Person, person)
+        kw['crystal_structure_id'] = self._get_foreign_keyid(CrystalStructure,
+                                                             crystal_structure)
+        return self.__addRow(Sample, ('name',), (name,), **kws)        
+
+
+    def add_suite(self, name, notes='', attributes='',
+                  person=None, **kws):
+        """add suite: name required
+        returns Suite instance"""
+        kws['notes'] = notes
+        kws['attributes'] = attributes
+        kw['person_id'] = self._get_foreign_keyid(Person, person)
+
+        return self.__addRow(Suite, ('name',), (name,), **kws)        
+
+    
+    def add_spectra(self, name, notes='', attributes='', file_link='',
+                    data_energy='', data_i0='', data_itrans='',
+                    data_iemit='', data_irefer='', data_dtime_corr='',
+                    calc_mu_trans='', calc_mu_emit='', calc_mu_refer='',
+                    notes_i0='', notes_itrans='', notes_iemit='',
+                    notes_irefer='', temperature='', submission_date='',
+                    collection_date='', reference_used='',
+                    energy_units=None, monochromator=None, person=None,
+                    edge=None, element=None, sample=None, beamline=None,
+                    format=None, citation=None, reference=None, **kws):
+
+        """add spectra: name required
+        returns Spectra instance"""
+        kws['notes'] = notes
+        kws['attributes'] = attributes
+
+	kw['file_link'] = file_link
+	kw['data_energy'] = data_energy
+	kw['data_i0'] = data_i0
+	kw['data_itrans'] = data_itrans
+	kw['data_iemit'] = data_iemit
+	kw['data_irefer'] = data_irefer
+	kw['data_dtime_corr'] = data_dtime_corr
+	kw['calc_mu_trans'] = calc_mu_trans
+	kw['calc_mu_emit'] = calc_mu_emit
+	kw['calc_mu_refer'] = calc_mu_refer
+	kw['notes_i0'] = notes_i0
+	kw['notes_itrans'] = notes_itrans
+	kw['notes_iemit'] = notes_iemit
+	kw['notes_irefer'] = notes_irefer
+	kw['temperature'] = temperature
+	kw['submission_date'] = submission_date
+	kw['collection_date'] = collection_date
+	kw['reference_used'] = reference_used
+        
+        kw['beamline_id'] = self._get_foreign_keyid(Beamline, beamline)
+        kw['monochromator_id'] = self._get_foreign_keyid(Monochromator,
+                                                         monochromator)
+        kw['person_id'] = self._get_foreign_keyid(Person, person)
+        kw['edge_id'] = self._get_foreign_keyid(Edge, edge)
+        kw['element_z'] = self._get_foreign_keyid(Element, element)
+        kw['sample_id'] = self._get_foreign_keyid(Sample, sample)
+        kw['format_id'] = self._get_foreign_keyid(Format, format)
+        kw['citation_id'] = self._get_foreign_keyid(Citation, citation)
+        kw['reference_id'] = self._get_foreign_keyid(Sample, reference)
+        kw['energy_units_id'] = self._get_foreign_keyid(EnergyUnits,
+                                                        energy_units)
+
+        return self.__addRow(Spectra, ('name',), (name,), **kws)        
 
 
 if __name__ == '__main__':    
