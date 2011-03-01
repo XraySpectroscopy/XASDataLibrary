@@ -3,6 +3,7 @@
 #  This will create an empty XAS Data Library
 import sys
 import os
+import shutil
 
 from sqlalchemy.orm import sessionmaker, create_session
 from sqlalchemy import MetaData, create_engine, \
@@ -96,9 +97,9 @@ class InitialData:
 
                 
 
-def  make_newdb(dbname, server= 'sqlite', overwrite=False):
-    if os.path.exists(dbname) and not overwrite:
-        print '%s exists and will not be overwritten' % dbname
+def  make_newdb(dbname, server= 'sqlite'):
+    if os.path.exists(dbname):
+        print '%s exists -- will not be overwritten' % dbname
         return False
     
     engine  = create_engine('%s:///%s' % (server, dbname))
@@ -253,10 +254,29 @@ def  make_newdb(dbname, server= 'sqlite', overwrite=False):
     session.commit()    
     return True
 
-               
+
+def dumpsql(dbname, fname='xdl_init.sql'):
+    """ dump SQL statements for an sqlite db"""
+    os.system('echo .dump | sqlite3 %s > %s' % (dbname, fname))
+    
+def backup_versions(fname, max=10):
+    """keep backups of a file -- up to 'max', in order"""
+    if os.path.exists(fname):
+        for i in range(max-1, 0, -1):
+            fb0 = "%s.%i" % (fname, i)
+            fb1 = "%s.%i" % (fname, i+1)
+            if os.path.exists(fb0):
+                print ' %s -> %s ' % (fb0, fb1)
+                shutil.move(fb0, fb1)
+        print ' %s -> %s.1 ' % (fname, fname)                
+        shutil.move(fname, "%s.1" % fname)        
+
+    
 if __name__ == '__main__':
-    dbname = 'xasdat.sqlite'
-    if len(sys.argv) > 1:
-        dbame  = sys.argv[1]
-    if make_newdb(dbname, overwrite=True):
+    dbname = 'example.xdl'
+    if os.path.exists(dbname):
+        backup_versions(dbname)
+        
+    if make_newdb(dbname):
         print '''%s  created and initialized.''' % dbname
+        dumpsql(dbname)

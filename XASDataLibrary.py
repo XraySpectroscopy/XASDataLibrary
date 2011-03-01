@@ -146,7 +146,7 @@ class Spectra(_BaseTable):
 
 class XASDataLibrary(object):
     "full interface to XAS Spectral Library"
-    def __init__(self, dbname='xasdat.sqlite'):
+    def __init__(self, dbname='example.xdl'):
 
         if not os.path.exists(dbname):
             raise IOError("Database '%s' not found!" % dbname)
@@ -531,7 +531,7 @@ Optional:
         return self.__addRow(Spectra, ('name',), (name,), **kws)        
 
 if __name__ == '__main__':    
-    xaslib =  XASDataLibrary('xasdat.sqlite')
+    xaslib =  XASDataLibrary('example.xdl')
 
     print xaslib.tables.keys()
     for f in xaslib.query(Info):
