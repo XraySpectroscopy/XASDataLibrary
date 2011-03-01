@@ -21,6 +21,11 @@ def json_encode(val):
         return val
     return  json.dumps(val)
 
+def valid_score(score, smin=0, smax=5):
+    """ensure that the input score is an integr
+    in the range [smin, smax]  (inclusive)"""
+    return max(smin, min(smax, int(score)))
+    
 class _BaseTable(object):
     "generic class to encapsulate SQLAlchemy table"
     def __repr__(self):
@@ -31,7 +36,12 @@ class _BaseTable(object):
 
 class Info(_BaseTable):
     "general information table (versions, etc)"
-    pass
+    def __repr__(self):
+        name = self.__class__.__name__
+        fields = ['%s=%s' % (getattr(self, 'key', '?'),
+                               getattr(self, 'value', '?'))]
+        return "<%s(%s)>" % (name, ', '.join(fields))
+
 
 class Mode(_BaseTable):
     "collection mode table"
@@ -253,11 +263,14 @@ class XASDataLibrary(object):
 
         return self.query(table).filter(getattr(table, arg0)==val0).one()
 
-    def _get_foreign_keyid(self, table, value, name='name', keyid='id'):
+    def _get_foreign_keyid(self, table, value, name='name',
+                           keyid='id', default=None):
         """generalized lookup for foreign key
-        can provide one of:
-            table instance
-            'name' attribute (or set which attribute with 'name' arg)
+arguments
+    table: a valid table class, as mapped by mapper.
+    value: can be one of the following
+         table instance:  keyid is returned
+         string:          'name' attribute (or set which attribute with 'name' arg)
             a valid id
             """
         if isinstance(value, table):
@@ -268,13 +281,13 @@ class XASDataLibrary(object):
             elif isinstance(value, int):
                 xfilter = getattr(table, keyid)
             else:
-                return 0
+                return default
             try:
                 query = self.query(table).filter(
                     xfilter==value)
                 return getattr(query.one(), keyid)
             except (IntegrityError, NoResultFound):
-                return 0
+                return default
 
         return default
     
@@ -321,7 +334,7 @@ class XASDataLibrary(object):
     def add_edge(self, name, level):
         """add edge: name and level required
         returns Edge instance"""
-        return self.__addRow(Ligand, ('name', 'level'), (name, level))
+        return self.__addRow(Edge, ('name', 'level'), (name, level))
 
 
     def add_facility(self, name, notes='', attributes='', **kws):
@@ -428,10 +441,42 @@ class XASDataLibrary(object):
         returns Suite instance"""
         kws['notes'] = notes
         kws['attributes'] = attributes
-        kws['person_id'] = self._get_foreign_keyid(Person, person)
+        kws['person_id'] = self._get_foreign_keyid(Person, person,
+                                                   name='email')
 
         return self.__addRow(Suite, ('name',), (name,), **kws)        
 
+    def add_suite_rating(self, person, suite, score, comments=None):
+        """add a score to a suite:  The following are required:
+   person: instance of Person table, a valid email, or Person id
+   suite:  instance of Suite table, a valid suite name, or Suite id
+   score:  an integer value 0 to 5.
+Optional:
+   comments text of comments"""
+
+        kws['person_id'] = self._get_foreign_keyid(Person, person,
+                                                   name='email')
+        kws['suite_id'] = self._get_foreign_keyid(Suite, suite)
+        if comments is not None:
+            kws['comments'] = comments
+        score = valid_score(score)
+        self.__addRow(Suite_Rating, ('score',), (score,), **kws)
+
+    def add_spectra_rating(self, person, spectra, score, comments=None):
+        """add a score to a suite:  The following are required:
+   person: instance of Person table, a valid email, or Person id
+   spectra: instance of Spectra table, a valid spectra name, or spectra id
+   score:  an integer value 0 to 5.
+Optional:
+   comments text of comments"""
+
+        kws['person_id'] = self._get_foreign_keyid(Person, person,
+                                                   name='email')
+        kws['spectra_id'] = self._get_foreign_keyid(Spectra, specctra)
+        if comments is not None:
+            kws['comments'] = comments
+        score = valid_score(score)
+        self.__addRow(Spectra_Rating, ('score',), (score,), **kws)
     
     def add_spectra(self, name, notes='', attributes='', file_link='',
                     data_energy='', data_i0='', data_itrans='',
@@ -470,27 +515,32 @@ class XASDataLibrary(object):
         kws['beamline_id'] = self._get_foreign_keyid(Beamline, beamline)
         kws['monochromator_id'] = self._get_foreign_keyid(Monochromator,
                                                          monochromator)
-        kws['person_id'] = self._get_foreign_keyid(Person, person)
+        kws['person_id'] = self._get_foreign_keyid(Person, person,
+                                                   name='email')
         kws['edge_id'] = self._get_foreign_keyid(Edge, edge)
-        kws['element_z'] = self._get_foreign_keyid(Element, element)
+        kws['element_z'] = self._get_foreign_keyid(Element, element,
+                                                   keyid='z', name='symbol')
         kws['sample_id'] = self._get_foreign_keyid(Sample, sample)
         kws['format_id'] = self._get_foreign_keyid(Format, data_format)
         kws['citation_id'] = self._get_foreign_keyid(Citation, citation)
         kws['reference_id'] = self._get_foreign_keyid(Sample, reference)
         kws['energy_units_id'] = self._get_foreign_keyid(EnergyUnits,
-                                                        energy_units)
+                                                         energy_units,
+                                                         name='units')
 
         return self.__addRow(Spectra, ('name',), (name,), **kws)        
-
 
 if __name__ == '__main__':    
     xaslib =  XASDataLibrary('xasdat.sqlite')
 
     print xaslib.tables.keys()
-    print 'Edges:'
+    for f in xaslib.query(Info):
+        print ' -- ', f, f.key, f.value
+
+    print 'Edges:' 
     for f in xaslib.query(Edge):
         print ' -- ', f, f.level
-    
+   
     print 'Facilities:'
     for f in xaslib.query(Facility):
         print  ' -- ', f, f.notes, f.beamlines

@@ -207,7 +207,8 @@ def  make_newdb(dbname, server= 'sqlite', overwrite=False):
                            Column('id', Integer, primary_key=True), 
                            Column('score', Integer),
                            StrCol('comments'),
-                           PointerCol('spectra'))
+                           PointerCol('person') ,                         
+                           PointerCol('suite'))
     
     spectra_suite = Table('spectra_suite', metadata,
                           Column('id', Integer, primary_key=True), 
