@@ -9,11 +9,17 @@ Main Class:  XASDataLibrary
 import os
 import sys
 import json
+import logging
+from datetime import datetime
 
 from sqlalchemy import MetaData, create_engine
 from sqlalchemy.orm import sessionmaker,  mapper, relationship, backref
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm.exc import  NoResultFound
+
+logging.basicConfig()
+handler = logging.FileHandler('XASDataLib.log')
+logging.getLogger('sqlalchemy.engine').addHandler(handler)
 
 def json_encode(val):
     "simple wrapper around json.dumps"
@@ -152,15 +158,13 @@ class XASDataLibrary(object):
             raise IOError("Database '%s' not found!" % dbname)
         
         self.dbname = dbname
-        self.engine  = create_engine('sqlite:///%s' % self.dbname)
+        self.engine  = create_engine('sqlite:///%s' % self.dbname, echo=False)
         self.metadata =  MetaData(self.engine)
         
         self.metadata.reflect()
         tables = self.tables = self.metadata.tables
 
         self.session = sessionmaker(bind=self.engine)()
-
-        mapper(Info,     tables['info'])
 
         mapper(Mode,     tables['mode'], 
                properties={'spectra':
@@ -220,19 +224,18 @@ class XASDataLibrary(object):
                            'spectra':
                            relationship(Spectra, backref='energy_units')})
 
-        mapper(Spectra_Rating,   tables['spectra_rating'])
-
-        mapper(Suite_Rating,   tables['suite_rating'])
-
         mapper(Suite,   tables['suite'],
                properties={'spectra':
                            relationship(Spectra, backref='suite',
                                         secondary=tables['spectra_suite'])})
 
         mapper(Sample,  tables['sample'])
-
         mapper(Spectra, tables['spectra'])        
-
+        mapper(Spectra_Rating,   tables['spectra_rating'])
+        mapper(Suite_Rating,   tables['suite_rating'])
+        mapper(Info,     tables['info'])
+        
+        self.update_mod_time =  None
         
     def commit(self):
         "commit session state"
@@ -241,6 +244,23 @@ class XASDataLibrary(object):
     def query(self, *args, **kws):
         "generic query"
         return self.session.query(*args, **kws)
+
+    def set_info(self, key, value):
+        """set key / value in the info table"""
+        table = self.tables['info']
+        vals  = self.query(table).filter(Info.key==key).all()
+        if len(vals) < 1:
+            # none found -- insert
+            table.insert().execute(key=key, value=value)
+        else:
+            table.update(whereclause="key='%s'" % key).execute(value=value)
+            
+    def set_mod_time(self):
+        """set modify_date in info table"""
+        if self.update_mod_time is None:
+            self.update_mod_time = self.tables['info'].update(
+                whereclause="key='modify_date'")
+        self.update_mod_time.execute(value=datetime.isoformat(datetime.now()))
 
     def __addRow(self, table, argnames, argvals, **kws):
         """add generic row"""
@@ -255,6 +275,7 @@ class XASDataLibrary(object):
             setattr(me, key, val)
         try:
             self.session.add(me)
+            self.set_mod_time()
             self.session.commit()
         except IntegrityError, msg:
             self.session.rollback()
@@ -262,6 +283,7 @@ class XASDataLibrary(object):
             raise Warning('Could not add data to table %s' % table)
 
         return self.query(table).filter(getattr(table, arg0)==val0).one()
+
 
     def _get_foreign_keyid(self, table, value, name='name',
                            keyid='id', default=None):
@@ -535,12 +557,16 @@ if __name__ == '__main__':
 
     print xaslib.tables.keys()
     for f in xaslib.query(Info):
-        print ' -- ', f, f.key, f.value
+        print ' -- ', f
 
     print 'Edges:' 
     for f in xaslib.query(Edge):
         print ' -- ', f, f.level
    
+    print 'EnergyUnits:'
+    for f in xaslib.query(EnergyUnits):
+        print ' -- ', f, f.notes
+
     print 'Facilities:'
     for f in xaslib.query(Facility):
         print  ' -- ', f, f.notes, f.beamlines
@@ -548,6 +574,7 @@ if __name__ == '__main__':
     print 'Beamlines:'
     for f in xaslib.query(Beamline):
         print ' -- ', f,  f.notes, f.facility
-    print 'EnergyUnits:'
-    for f in xaslib.query(EnergyUnits):
-        print ' -- ', f, f.notes
+
+    print 'People:'
+    for f in xaslib.query(Person):
+        print ' -- ', f

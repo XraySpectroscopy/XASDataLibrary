@@ -4,7 +4,7 @@
 import sys
 import os
 import shutil
-from datetime import datetime as dtime
+from datetime import datetime
 
 from sqlalchemy.orm import sessionmaker, create_session
 from sqlalchemy import MetaData, create_engine, \
@@ -37,7 +37,8 @@ def NamedTable(tablename, metadata, keyid='id', nameid='name',
 
 class InitialData:
     info    = [["version", "1.0.0"],
-               ["creation-date", dtime.isoformat(dtime.now())] ]
+               ["create_date", '<now>'], 
+               ["modify_date", '<now>']]
 
     formats = [["internal-json", "Read data_* values of spectra table as json"],
                ["external-xdi",  "Read data from extenal XDI formatted file"]]
@@ -249,7 +250,10 @@ def  make_newdb(dbname, server= 'sqlite'):
     for name, notes in InitialData.formats:
         format.insert().execute(name=name, notes=notes)
 
+    now = datetime.isoformat(datetime.now())
     for key, value in InitialData.info:
+        if value == '<now>':
+            value = now
         info.insert().execute(key=key, value=value)
 
     session.commit()    
