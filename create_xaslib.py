@@ -4,6 +4,7 @@
 import sys
 import os
 import shutil
+from datetime import datetime as dtime
 
 from sqlalchemy.orm import sessionmaker, create_session
 from sqlalchemy import MetaData, create_engine, \
@@ -36,7 +37,7 @@ def NamedTable(tablename, metadata, keyid='id', nameid='name',
 
 class InitialData:
     info    = [["version", "1.0.0"],
-               ["creation-date", "2012-Feb-28"]]
+               ["creation-date", dtime.isoformat(dtime.now())] ]
 
     formats = [["internal-json", "Read data_* values of spectra table as json"],
                ["external-xdi",  "Read data from extenal XDI formatted file"]]
