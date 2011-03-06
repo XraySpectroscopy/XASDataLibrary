@@ -4,8 +4,8 @@ import sys
 import lib
 
 #
-no_sqlachemy=""
-"*******************************************************
+no_sqlachemy="""
+*******************************************************
 *** WARNING - WARNING - WARNING - WARNING - WARNING ***
 
        Install or Upgrade SQLAlchemy!
@@ -21,8 +21,8 @@ try:
 try:
     import sqlalchemy
     vers_info = sqlalchemy.__version__.split('.')
-    assert int(vers_info[1]) => 6
-    assert int(vers_info[2]) => 5
+    assert int(vers_info[1]) >= 6
+    assert int(vers_info[2]) >= 5
 except:
     print no_sqlalchemy
     sys.exit()
