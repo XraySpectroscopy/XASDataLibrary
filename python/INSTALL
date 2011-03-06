@@ -1,0 +1,15 @@
+Installation instructions for xasdb Python module
+=================================================
+
+To install the xasdb module from source, use 
+
+   python setup.py build
+   python setup.py install
+
+This assumes that Python 2.6 or higher and  
+SQLAlchemy 0.6.5 or higher have been installed. 
+
+Matt Newville <newville@cars.uchicago.edu>
+Last Update:  2011-March-06
+
+

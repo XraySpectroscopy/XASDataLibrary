@@ -1,0 +1,25 @@
+Metadata-Version: 1.1
+Name: xasdb
+Version: 0.1
+Author: Matthew Newville
+Author-email: newville at cars uchicago edu
+Home-page: http://xafs.org/XasDataLibrary
+Download-url: https://github.com/newville/xasdatalib
+Summary: x-ray absorption spectra database
+License: Public Domain
+Description: A Python interface to the XAS DAta Library
+Platform: Linux, Windows, Mac OS X
+Requires: python(>=2.5)
+Provides: xasdb
+Classifier: Development Status :: 4 - Beta
+Classifier: Intended Audience :: Education
+Classifier: Intended Audience :: Science/Research
+Classifier: License :: Public Domain
+Classifier: Operating System :: MacOS :: MacOS X
+Classifier: Operating System :: Microsoft :: Windows
+Classifier: Operating System :: POSIX :: Linux
+Classifier: Operating System :: POSIX :: SunOS/Solaris
+Classifier: Programming Language :: Python 
+Classifier: Topic :: Scientific/Engineering
+Classifier: Topic :: Scientific/Engineering :: Physics
+
