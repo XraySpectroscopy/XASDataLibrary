@@ -1,22 +1,27 @@
 The XAS Data Library is designed to hold X-ray Absorption Spectra (EXAFS
 and XANES) using an SQLite database, with array data encoded using JSON.
 The principle goal for the library is as a proposed standard for storing
-and exchanging XAS data. The implementation here is intended for initial
-reference and comments. 
+and exchanging XAS data, with implementation here intended as initial
+reference and request for comments. 
 
 The idea is provide a format and set of tools for managing Libraries of
 XAFS Data, and to be able to share these libraries between different
 researchers and different analysis programs.  As the the base format of the
 library will be created with SQLite, the SQL syntax and any third party
 software that can use SQL and SQLite will be able to explore the data in
-the format.  In addition, reference implementations of programmatically
-interecting with the library will be provided.  
+the format.  Data in the library will be importable from and exportable to
+the ASCII XAFS Data Interchange Format, which is being developed in
+parallel with this effort.  Reference implementations of programmatically
+interecting with the library from a few languages will be provided.  
 
-Ideally, a stand-alone GUI Data Browser and an on-line Library will be
-built upon such a format.
+The intention is for a stand-alone GUI Data Browser to be included in this
+distribution, and for an on-line Library to be built upon this library format.
 
 See http://xafs.org/XasDataLibrary for additional information.
 
 
---Matt Newville  18-Feb-2011
+Last modified:  2011-March-05, Matt Newville <newville@cars.uchicago.edu>
+
+
+
 
