@@ -6,6 +6,7 @@ requires SQLAlchemy 0.6 or higher
 Main Class:  XASDataLibrary
 
 """
+
 import os
 import sys
 import json
@@ -17,9 +18,33 @@ from sqlalchemy.orm import sessionmaker,  mapper, relationship, backref
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm.exc import  NoResultFound
 
-logging.basicConfig()
-handler = logging.FileHandler('XASDataLib.log')
-logging.getLogger('sqlalchemy.engine').addHandler(handler)
+def isXASDataLibrary(dbname):
+    """test if a file is a valid XAS Data Library file:
+       must be a sqlite db file, with tables named
+          'info', 'spectra', 'sample', and 'energy_units'
+       and the 'info' table must have an entry named 'version'
+    """
+    
+    try:
+        engine  = create_engine('sqlite:///%s' % dbname)
+        metadata =  MetaData(self.engine)
+        metadata.reflect()
+    except:
+        return False
+    if ('info' in metadata.tables and
+        'spectra' in metadata.tables and
+        'sample' in metadata.tables and
+        'element' in metadata.tables and        
+        'energy_units' in metadata.tables and):
+
+        elements = m.tables['elements'].select().execute().fetchall()
+        if len(elements) > 90:
+            info = m.tables['info'].select().execute().fetchall()
+            for key, val in info:
+                if key == 'version':
+                    return True
+    return False
+            
 
 def json_encode(val):
     "simple wrapper around json.dumps"
@@ -152,13 +177,19 @@ class Spectra(_BaseTable):
 
 class XASDataLibrary(object):
     "full interface to XAS Spectral Library"
-    def __init__(self, dbname='example.xdl'):
+    def __init__(self, dbname='example.xdl', logfile=None):
 
         if not os.path.exists(dbname):
             raise IOError("Database '%s' not found!" % dbname)
         
         self.dbname = dbname
         self.engine  = create_engine('sqlite:///%s' % self.dbname, echo=False)
+
+        self.logfile = self.dbname
+        if self.logfile.endswith('.xdl'):
+            self.logfile = self.logfile[:-4]
+        self.logfile = "%s.log" % self.logfile
+        
         self.metadata =  MetaData(self.engine)
         
         self.metadata.reflect()
@@ -236,6 +267,10 @@ class XASDataLibrary(object):
         mapper(Info,     tables['info'])
         
         self.update_mod_time =  None
+
+        logging.basicConfig()
+        logging.getLogger('sqlalchemy.engine'
+                          ).addHandler(logging.FileHandler(self.logfile))
         
     def commit(self):
         "commit session state"

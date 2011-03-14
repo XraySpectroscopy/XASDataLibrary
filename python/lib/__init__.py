@@ -24,3 +24,23 @@ __version__ = '0.1.0'
 import time
 import sys
 from . import xasdb
+
+Info = xasdb.Info
+Mode = xasdb.Mode
+Facility = xasdb.Facility
+Beamline = xasdb.Beamline
+Monochromator = xasdb.Monochromator
+EnergyUnits = xasdb.EnergyUnits
+Edge = xasdb.Edge
+Element = xasdb.Element
+Ligand = xasdb.Ligand
+CrystalStructure = xasdb.CrystalStructure
+Citation = xasdb.Citation
+Format = xasdb.Format
+Person = xasdb.Person
+Spectra_Rating = xasdb.Spectra_Rating
+Suite_Rating = xasdb.Suite_Rating
+Suite = xasdb.Suite
+Sample = xasdb.Sample
+Spectra = xasdb.Spectra
+XASDataLibrary = xasdb.XASDataLibrary
