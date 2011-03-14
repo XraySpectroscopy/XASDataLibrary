@@ -13,38 +13,41 @@ import json
 import logging
 from datetime import datetime
 
+import xasdb_creator
+
 from sqlalchemy import MetaData, create_engine
 from sqlalchemy.orm import sessionmaker,  mapper, relationship, backref
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm.exc import  NoResultFound
 
+
 def isXASDataLibrary(dbname):
     """test if a file is a valid XAS Data Library file:
        must be a sqlite db file, with tables named
-          'info', 'spectra', 'sample', and 'energy_units'
-       and the 'info' table must have an entry named 'version'
+          'info', 'spectra', 'sample', 'element' and 'energy_units'
+       the 'element' table must have more than 90 rows and the
+       'info' table must have an entries named 'version' and 'create_date'
     """
-    
+
     try:
         engine  = create_engine('sqlite:///%s' % dbname)
-        metadata =  MetaData(self.engine)
+        metadata =  MetaData(engine)
         metadata.reflect()
     except:
         return False
+
     if ('info' in metadata.tables and
         'spectra' in metadata.tables and
         'sample' in metadata.tables and
         'element' in metadata.tables and        
-        'energy_units' in metadata.tables and):
+        'energy_units' in metadata.tables):
 
-        elements = m.tables['elements'].select().execute().fetchall()
+        elements = metadata.tables['element'].select().execute().fetchall()
         if len(elements) > 90:
-            info = m.tables['info'].select().execute().fetchall()
-            for key, val in info:
-                if key == 'version':
-                    return True
+            info = metadata.tables['info'].select().execute().fetchall()
+            keys =[x for x, y in info]
+            return ('version' in keys and 'create_date' in keys)
     return False
-            
 
 def json_encode(val):
     "simple wrapper around json.dumps"
@@ -177,14 +180,29 @@ class Spectra(_BaseTable):
 
 class XASDataLibrary(object):
     "full interface to XAS Spectral Library"
-    def __init__(self, dbname='example.xdl', logfile=None):
+    def __init__(self, dbname=None, logfile=None):
+        self.engine = None
+        self.session = None
+        self.metadata = None
+        self.logfile = logfile
+        if dbname is not None:
+            self.connect(dbname)
+            
+    def create_new(self, dbname):
+        "create a new, empty database"
 
+        
+
+    def connect(self, dbname):
+        "connect to an existing database"
         if not os.path.exists(dbname):
             raise IOError("Database '%s' not found!" % dbname)
-        
-        self.dbname = dbname
-        self.engine  = create_engine('sqlite:///%s' % self.dbname, echo=False)
 
+        if not isXASDataLibrary(dbname):
+            raise ValueError("'%s' is not an XAS Data Library file!" % dbname)
+
+        self.dbname = dbname
+        self.engine = create_engine('sqlite:///%s' % self.dbname)
         self.logfile = self.dbname
         if self.logfile.endswith('.xdl'):
             self.logfile = self.logfile[:-4]

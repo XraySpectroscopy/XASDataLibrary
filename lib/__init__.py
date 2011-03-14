@@ -25,6 +25,8 @@ import time
 import sys
 from . import xasdb
 
+isXASDataLibrary = xasdb.isXASDataLibrary
+
 Info = xasdb.Info
 Mode = xasdb.Mode
 Facility = xasdb.Facility
