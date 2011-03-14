@@ -11,15 +11,15 @@ import os
 import sys
 import json
 import logging
+import numpy
 from datetime import datetime
 
-from xasdb_creator import make_newdb, backup_versions
+from .creator import make_newdb, backup_versions
 
 from sqlalchemy import MetaData, create_engine
 from sqlalchemy.orm import sessionmaker,  mapper, relationship, backref
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm.exc import  NoResultFound
-
 
 def isXASDataLibrary(dbname):
     """test if a file is a valid XAS Data Library file:
@@ -45,7 +45,7 @@ def isXASDataLibrary(dbname):
         elements = metadata.tables['element'].select().execute().fetchall()
         if len(elements) > 90:
             info = metadata.tables['info'].select().execute().fetchall()
-            keys =[x for x, y in info]
+            keys = [row.key for row in info]
             return ('version' in keys and 'create_date' in keys)
     return False
 
@@ -297,6 +297,12 @@ class XASDataLibrary(object):
         "commit session state"
         return self.session.commit()
         
+    def close(self):
+        "close session"
+        self.session.commit()
+        self.session.flush()
+        self.session.close()
+
     def query(self, *args, **kws):
         "generic query"
         return self.session.query(*args, **kws)
@@ -555,7 +561,11 @@ Optional:
             kws['comments'] = comments
         score = valid_score(score)
         self.__addRow(Spectra_Rating, ('score',), (score,), **kws)
-    
+
+    def import_XDIspectra(self, fname):
+        """import a spectra from XDI ASCII Format"""
+        print 'Hello!'
+        
     def add_spectra(self, name, notes='', attributes='', file_link='',
                     data_energy='', data_i0='', data_itrans='',
                     data_iemit='', data_irefer='', data_dtime_corr='',
@@ -573,12 +583,17 @@ Optional:
         kws['attributes'] = attributes
 
         kws['file_link'] = file_link
-        kws['data_energy'] = data_energy
-        kws['data_i0'] = data_i0
-        kws['data_itrans'] = data_itrans
-        kws['data_iemit'] = data_iemit
-        kws['data_irefer'] = data_irefer
-        kws['data_dtime_corr'] = data_dtime_corr
+
+        for attr, val in (('data_energy', data_energy),
+                          ('data_i0', data_i0),
+                          ('data_itrans', data_itrans),
+                          ('data_iemit', data_iemit),
+                          ('data_irefer', data_irefer),
+                          ('data_dtime_corr', data_dtime_corr)):
+            if isinstance(val, numpy.ndarray):
+                val = list(val.flatten())
+            kws[attr] = json_encode(val)
+
         kws['calc_mu_trans'] = calc_mu_trans
         kws['calc_mu_emit'] = calc_mu_emit
         kws['calc_mu_refer'] = calc_mu_refer
@@ -608,30 +623,3 @@ Optional:
 
         return self.__addRow(Spectra, ('name',), (name,), **kws)        
 
-if __name__ == '__main__':    
-    xaslib =  XASDataLibrary()
-    xasib.connect(os.path.join('..', 'data', 'example.xdl'))
-
-    print xaslib.tables.keys()
-    for f in xaslib.query(Info):
-        print ' -- ', f
-
-    print 'Edges:' 
-    for f in xaslib.query(Edge):
-        print ' -- ', f, f.level
-   
-    print 'EnergyUnits:'
-    for f in xaslib.query(EnergyUnits):
-        print ' -- ', f, f.notes
-
-    print 'Facilities:'
-    for f in xaslib.query(Facility):
-        print  ' -- ', f, f.notes, f.beamlines
-
-    print 'Beamlines:'
-    for f in xaslib.query(Beamline):
-        print ' -- ', f,  f.notes, f.facility
-
-    print 'People:'
-    for f in xaslib.query(Person):
-        print ' -- ', f

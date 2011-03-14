@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 """
- This will create an empty XAS Data Library
+   provides make_newdb() function to create an empty XAS Data Library
 """
 import sys
 import os
@@ -104,7 +104,6 @@ def  make_newdb(dbname, server= 'sqlite'):
     metadata =  MetaData(engine)
 
     format  = NamedTable('format', metadata)
-    
     ligand  = NamedTable('ligand', metadata)
     mode    = NamedTable('mode', metadata)
     facility = NamedTable('facility', metadata)

@@ -57,7 +57,6 @@ def put(wid, val):
         val = ''
     return wid.SetValue(val)
 
-
 def add_btn(panel, label, action=None):
     "add simple button with bound action"
     thisb = wx.Button(panel, label=label)
@@ -73,3 +72,36 @@ def popup(parent, message, title, style=None):
     ret = dlg.ShowModal()
     dlg.Destroy()
     return ret    
+
+def add_menu(parent, menu, label, help, action=None):
+    "add a menu item with action"
+    id = wx.NewId()
+    menu.Append(id, label, help)
+    if action is not None:
+        parent.Bind(wx.EVT_MENU, action, id=id)
+
+    
+def FileOpen(parent, message, wildcard=None):
+    "File Open dialog"
+    out = None
+    dlg = wx.FileDialog(parent, message=message,
+                        wildcard=wildcard,
+                        style=wx.OPEN|wx.CHANGE_DIR)
+    if dlg.ShowModal() == wx.ID_OK:
+        out = dlg.GetPath()
+    dlg.Destroy()
+    return out
+
+
+def FileSave(parent, message, wildcard=None):
+    "File Save dialog"
+    out = None
+    dlg = wx.FileDialog(parent, message=message,
+                        wildcard=wildcard,
+                        style=wx.SAVE|wx.CHANGE_DIR)
+    if dlg.ShowModal() == wx.ID_OK:
+        out = dlg.GetPath()
+    dlg.Destroy()
+    return out
+
+                       

@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-"""Simple dump of data from example database
+"""Simple dump of data from example database.
 """
 import os
 import xasdb
