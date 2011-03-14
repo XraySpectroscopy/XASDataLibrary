@@ -13,7 +13,7 @@ import json
 import logging
 from datetime import datetime
 
-import xasdb_creator
+from xasdb_creator import make_newdb, backup_versions
 
 from sqlalchemy import MetaData, create_engine
 from sqlalchemy.orm import sessionmaker,  mapper, relationship, backref
@@ -188,10 +188,13 @@ class XASDataLibrary(object):
         if dbname is not None:
             self.connect(dbname)
             
-    def create_new(self, dbname):
+    def create_newdb(self, dbname, connect=False):
         "create a new, empty database"
-
-        
+        if os.path.exists(dbname):
+            backup_versions(dbname)
+        make_newdb(dbname)
+        if connect:
+            self.connect(dbname)
 
     def connect(self, dbname):
         "connect to an existing database"
@@ -606,7 +609,8 @@ Optional:
         return self.__addRow(Spectra, ('name',), (name,), **kws)        
 
 if __name__ == '__main__':    
-    xaslib =  XASDataLibrary('example.xdl')
+    xaslib =  XASDataLibrary()
+    xasib.connect(os.path.join('..', 'data', 'example.xdl'))
 
     print xaslib.tables.keys()
     for f in xaslib.query(Info):

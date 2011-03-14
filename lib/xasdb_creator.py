@@ -1,6 +1,7 @@
 #!/usr/bin/env python
-#
-#  This will create an empty XAS Data Library
+"""
+ This will create an empty XAS Data Library
+"""
 import sys
 import os
 import shutil
@@ -97,13 +98,8 @@ class InitialData:
                 [109, "Mt", "Meitnerium"]
                 ]
 
-                
 
 def  make_newdb(dbname, server= 'sqlite'):
-    if os.path.exists(dbname):
-        print '%s exists -- will not be overwritten' % dbname
-        return False
-    
     engine  = create_engine('%s:///%s' % (server, dbname))
     metadata =  MetaData(engine)
 
@@ -257,7 +253,6 @@ def  make_newdb(dbname, server= 'sqlite'):
         info.insert().execute(key=key, value=value)
 
     session.commit()    
-    return True
 
 
 def dumpsql(dbname, fname='xdl_init.sql'):
@@ -282,6 +277,6 @@ if __name__ == '__main__':
     if os.path.exists(dbname):
         backup_versions(dbname)
         
-    if make_newdb(dbname):
-        print '''%s  created and initialized.''' % dbname
-        dumpsql(dbname)
+    make_newdb(dbname)
+    print '''%s  created and initialized.''' % dbname
+    dumpsql(dbname)
