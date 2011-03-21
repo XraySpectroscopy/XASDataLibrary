@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 """GUI App for CARS Phonebook
 """
+import os
 import wx
 import time
 import copy
@@ -8,30 +9,46 @@ import cStringIO
 import warnings
 warnings.simplefilter('ignore')
 
-import xasdb
-from xasdb import XASDataLibrary, isXASDataLibrary
-from xasdb.wx import OrderedDict, pack, add_btn, add_menu, popup, \
+import lib as xasdb
+from lib import XASDataLibrary, isXASDataLibrary
+from lib.wx import OrderedDict, pack, add_btn, add_menu, popup, \
      FileOpen, FileSave
+
+import xdi
+
 
 class MainFrame(wx.Frame):
     """This is the main XAS DataBrowser Frame."""
-    def __init__(self, title='XAS Data Library', dbfile=None):
+    title = 'XAS Data Library'
+    filters = ('Suites of Spectra', 'Element',
+               'Beamline', 'Facility', 'People')
+
+    def __init__(self, dbfile=None):
         
-        wx.Frame.__init__(self, None, -1, title, size=(500, 700))
+        wx.Frame.__init__(self, parent=None, title=self.title,
+                          size=(200, -1))
         self.xasdb = None
+        self.current_filter = self.filters[0]
         self.create_frame()
-        #if dbfile is None:
-        #    self.ReadXDLFile()
-            
-    def ReadXDLFile(self, evt=None):
+        self.SetTitle("%s: %s" % (self.title, 'No Library Open'))
+        self.ReadXDLFile(dbfile)
+        
+    def ReadXDLFile(self, dbname=None):            
+        if dbname is not None and isXASDataLibrary(dbname):
+            self.xasdb = XASDataLibrary(dbname)
+            self.SetTitle("%s :%s " % (self.title,
+                                       os.path.abspath(dbname)))
+            for s in self.xasdb.query(xasdb.Spectra):
+                print 'Spectra: ', s
+
+    def onReadXDLFile(self, evt=None):
         "open an XDL file"
         wildcard = "XAS Data Libraries (*.xdl)|*.xdl|"  \
            "All files (*.*)|*.*"
         dbname = FileOpen(self, "Open XAS Data Library",
                           wildcard=wildcard)
-        if dbname is not None and isXASDataLibrary(dbname):
-            self.xasdb = XASDataLibrary(dbname)
-            
+        self.ReadXDLFile(dbname)
+
     def OpenNewXDLFile(self, evt=None):
         "create new XDL file"
         wildcard = "XAS Data Libraries (*.xdl)|*.xdl|"  \
@@ -46,6 +63,9 @@ class MainFrame(wx.Frame):
             if len(list(self.xasdb.query(xasdb.Person))) == 0:
                 print 'No People yet defined!!'
 
+    def onNewThing(self, evt=None):
+        print 'this thing is not yet implemented!'
+        
     def ImportSpectra(self, evt=None):
         "import spectra from ASCII Column file"
         wildcard = "XAS Data Interchange (*.xdi)|*.xdi|"  \
@@ -98,8 +118,8 @@ class MainFrame(wx.Frame):
         fmenu = wx.Menu()
         add_menu(self, fmenu, "Open Library",
                       "Open Existing XAS Data Library",
-                      action = self.ReadXDLFile)
-        
+                      action = self.onReadXDLFile)
+
         add_menu(self, fmenu, "New Library",
                       "Create New XAS Data Library",
                       action=self.OpenNewXDLFile)
@@ -116,52 +136,152 @@ class MainFrame(wx.Frame):
                       action=self.onClose)
 
         omenu = wx.Menu()
-        #omenu.Append(4910, "Show All", "Show All People", 
-#                      wx.ITEM_RADIO)
-#         omenu.Append(4911, "Show Active Only",
-#                      "Show Active People Only", wx.ITEM_RADIO)
-#         omenu.Append(4912, "Show Inactive Only",
-#                      "Show Inactive People Only",  wx.ITEM_RADIO)
-#         self.Bind(wx.EVT_MENU, self.onChooseActive, id=4910)        
-#         self.Bind(wx.EVT_MENU, self.onChooseActive, id=4911)        
-#         self.Bind(wx.EVT_MENU, self.onChooseActive, id=4912)
-#         
-#         omenu.AppendSeparator()
-#         omenu.Append(4913, "Manage Affiliations",
-#                      "Change and Add Affliations",  wx.ITEM_NORMAL)
-#         self.Bind(wx.EVT_MENU, self.onAffiliation, id=4913)        
-        
+        add_menu(self, omenu, "View/Add Suites of Spectra",
+                 "Manage Suites of Spectra",
+                 action=self.onNewThing)
+        add_menu(self, omenu, "View/Add Samples",
+                 "Manage Samples",
+                 action=self.onNewThing)        
+        add_menu(self, omenu, "View/Add People",
+                 "Manage People Adding to Library",
+                 action=self.onNewThing)
+        add_menu(self, omenu, "View/Add Beamlines",
+                 "Manage Beamline, Facilities, Monochromators",
+                 action=self.onNewThing)        
+
         # and put the menu on the menubar
         menuBar.Append(fmenu, "&File")
-        # menuBar.Append(tmenu, "&Tables")
-        menuBar.Append(omenu, "&Options")
+        menuBar.Append(omenu, "&Tables")
         self.SetMenuBar(menuBar)
-        self.CreateStatusBar(2, wx.CAPTION|wx.THICK_FRAME)
+        self.CreateStatusBar(1, wx.CAPTION|wx.THICK_FRAME)
         
-        # Now create the Panel to put the other controls on.
-        splitter  = wx.SplitterWindow(self, style=wx.SP_LIVE_UPDATE)
-        splitter.SetMinimumPaneSize(165)
+        # Now create the Main Panel to put the other controls on.
+        #  SelectFilter | CurrentFilter | SpectraList
+        #  ------------------------------------------
+        #    Spectra details
+        #  ------------------------------------------
+        topsection = wx.Panel(self)
+        self.filterchoice = wx.Choice(topsection, size=(-1,-1),
+                                     choices = self.filters)
+        self.filterchoice.SetStringSelection(self.current_filter)
+        self.filterchoice.Bind(wx.EVT_CHOICE, self.onFilterChoice)
 
-        self.itemlist  = wx.ListBox(splitter) 
-        self.itemlist.SetBackgroundColour(wx.Colour(255, 255, 255))
-        self.itemlist.Bind(wx.EVT_LISTBOX, self.ShowPerson)
+        sizer = wx.BoxSizer(wx.HORIZONTAL)
+        sizer.Add(wx.StaticText(topsection,
+                                label='Filter Spectra by:'),
+                  0, wx.ALIGN_LEFT|wx.ALIGN_CENTER|wx.ALL, 1)
+        sizer.Add(self.filterchoice, 0, wx.ALIGN_LEFT|wx.ALL, 1)
+
+        pack(topsection, sizer)
         
-        self.rightpanel = wx.Panel(splitter)
+        splitter1  = wx.SplitterWindow(self, style=wx.SP_LIVE_UPDATE)
+        splitter1.SetMinimumPaneSize(200)
 
-        # self.set_person_list()
-        # self.build_mainpage()
-        splitter.SplitVertically(self.itemlist, self.rightpanel, 1)
+        self.top_panel     = wx.Panel(splitter1)  # top
+        self.spectra_panel = wx.Panel(splitter1)  # bottom
 
+        splitter2 = wx.SplitterWindow(self.top_panel, style=wx.SP_LIVE_UPDATE)
+        splitter2.SetMinimumPaneSize(200)
+        
+        # left hand side -- filter
+        self.left_panel   = wx.Panel(splitter2)
+        self.selection_list  = wx.ListBox(self.left_panel)
+        self.selection_label = wx.StaticText(self.left_panel,
+                                             label=self.current_filter)
         sizer = wx.BoxSizer(wx.VERTICAL)
-        sizer.Add(splitter, 1, wx.GROW|wx.ALL, 5)
-        pack(self, sizer)
         
-    def build_mainpage(self):
-        "build right hand panel"
-        panel = self.rightpanel
-        sizer =  wx.GridBagSizer(5, 5)
-        self.toplabel    = wx.StaticText(panel, label='')
+        sizer.Add(self.selection_label, 0, wx.ALIGN_LEFT|wx.ALL, 1)
+        sizer.Add(self.selection_list, 1, wx.ALIGN_LEFT|wx.GROW|wx.ALL, 1)
 
+        pack(self.left_panel, sizer)
+
+        # right hand side -- filtered spectra
+        self.right_panel   = wx.Panel(splitter2)
+        self.spectra_list  = wx.ListBox(self.right_panel)
+        self.spectra_label = wx.StaticText(self.right_panel,
+                                             label='Spectra')
+        sizer = wx.BoxSizer(wx.VERTICAL)
+        sizer.Add(self.spectra_label, 0, wx.ALIGN_LEFT|wx.ALL, 1)
+        sizer.Add(self.spectra_list, 1, wx.ALIGN_LEFT|wx.GROW|wx.ALL, 1)
+
+        pack(self.right_panel, sizer)
+
+        self.selection_list.SetBackgroundColour(wx.Colour(255, 240, 250))
+        self.spectra_list.SetBackgroundColour(wx.Colour(250, 250, 240))
+
+        self.selection_list.Clear()
+        for name in ('Suite1', 'Suite2'):
+            self.selection_list.Append(name)
+
+        self.spectra_list.Clear()
+        for name in ('S1', 'S2'):
+            self.spectra_list.Append(name)
+
+        self.selection_list.Bind(wx.EVT_LISTBOX, self.onSelectionSelect)
+        self.spectra_list.Bind(wx.EVT_LISTBOX, self.onSpectraSelect)
+        
+        splitter2.SplitVertically(self.left_panel, self.right_panel, 0)
+
+        sizer2 = wx.BoxSizer(wx.HORIZONTAL)
+        sizer2.Add(splitter2, 1, wx.GROW|wx.ALL, 5)
+        pack(self.top_panel, sizer2)
+
+        self.build_spectra_panel()
+        splitter1.SplitHorizontally(self.top_panel, self.spectra_panel, 1)
+        
+        sizer = wx.BoxSizer(wx.VERTICAL)
+        sizer.Add(topsection, 0, wx.ALL, 5)
+        sizer.Add(splitter1, 1, wx.GROW|wx.ALL, 5)
+        pack(self, sizer)
+
+    def onFilterChoice(self, evt=None, choice=None):
+        if evt is not None:
+            choice = evt.GetString()
+        if choice is None:
+            return
+
+        self.selection_label.SetLabel(choice)
+        if choice == 'People':
+            sel_list = ["%s %s" % (e.firstname, e.lastname) for e in self.xasdb.query(xasdb.Person)]
+        else:
+            if choice == 'Element':
+                thisclass = xasdb.Element
+            elif choice == 'Beamline':
+                thisclass = xasdb.Beamline
+            elif choice == 'Facility':
+                thisclass = xasdb.Facility
+            elif choice == 'Suites of Spectra':
+                thisclass = xasdb.Suite
+            sel_list = [e.name for e in self.xasdb.query(thisclass)]
+        self.current_filter = choice
+        self.selection_list.Clear()
+        for name in sel_list:
+            self.selection_list.Append(name)
+        
+    def onSelectionSelect(self, evt=None):
+        print 'onSelection Select %s=%s'  % (self.current_filter, evt.GetString())
+        
+
+    def onSpectraSelect(self, evt=None):
+        print 'onSpectra Select ' , evt
+        
+    def build_spectra_panel(self):
+        "build lower panel"
+        panel = self.spectra_panel
+        sizer =  wx.BoxSizer(wx.HORIZONTAL) # wx.GridBagSizer(5, 5)
+        toplabel    = wx.StaticText(panel, label='Spectra Panel')
+        sizer.Add(toplabel, 1, wx.GROW, 5)
+        pack(panel, sizer)
+
+    def build_filter_panel(self):
+        "build lower panel"
+        panel = self.filter
+        sizer =  wx.BoxSizer(wx.HORIZONTAL) # wx.GridBagSizer(5, 5)
+        toplabel    = wx.StaticText(panel, label='Spectra Panel')
+        sizer.Add(toplabel, 1, wx.GROW, 5)
+        pack(panel, sizer)
+
+    def x(self):
         self.status = wx.Choice(self.rightpanel, -1, (180, 60),
                                 choices=self.status_choices)
         self.affil = wx.Choice(panel, -1, (300, -1),
@@ -383,6 +503,10 @@ class MainFrame(wx.Frame):
 
         
 if __name__ == '__main__':
+    import sys
+    dbfile = None
+    if len(sys.argv) > 1:
+        dbfile = sys.argv[1]
     app = wx.PySimpleApp()        
-    MainFrame("XAS Data Library").Show()
+    MainFrame(dbfile=dbfile).Show()
     app.MainLoop()

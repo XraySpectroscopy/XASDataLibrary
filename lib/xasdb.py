@@ -16,6 +16,8 @@ from datetime import datetime
 
 from .creator import make_newdb, backup_versions
 
+from xdi  import XDIFile
+
 from sqlalchemy import MetaData, create_engine
 from sqlalchemy.orm import sessionmaker,  mapper, relationship, backref
 from sqlalchemy.exc import IntegrityError
@@ -60,6 +62,27 @@ def valid_score(score, smin=0, smax=5):
     in the range [smin, smax]  (inclusive)"""
     return max(smin, min(smax, int(score)))
     
+
+def isotime2datetime(isotime):
+    sdate, stime = isotime.replace('T', ' ').split(' ')
+    syear, smon, sday = [int(x) for x in sdate.split('-')]
+    sfrac = '0'
+    if '.' in stime:
+        stime, sfrac = stime.split('.')
+    shour, smin, ssec  = [int(x) for x in stime.split(':')]
+    susec = int(1e6*float('.%s' % sfrac))
+
+    return datetime(syear, smon, sday, shour, smin, ssec, susec)
+
+class XASDBException(Exception):
+    """XAS DB Access Exception: General Errors"""
+    def __init__(self, msg):
+        Exception.__init__(self)
+        self.msg = msg
+    def __str__(self):
+        return self.msg
+
+
 class _BaseTable(object):
     "generic class to encapsulate SQLAlchemy table"
     def __repr__(self):
@@ -569,16 +592,27 @@ Optional:
     def add_spectra(self, name, notes='', attributes='', file_link='',
                     data_energy='', data_i0='', data_itrans='',
                     data_iemit='', data_irefer='', data_dtime_corr='',
-                    calc_mu_trans='', calc_mu_emit='', calc_mu_refer='',
+                    calc_mu_trans=None, calc_mu_emit=None, calc_mu_refer=None,
                     notes_i0='', notes_itrans='', notes_iemit='',
-                    notes_irefer='', temperature='', submission_date='',
-                    collection_date='', reference_used='',
+                    notes_irefer='', temperature='', submission_date=None,
+                    collection_date=None, reference_used='',
                     energy_units=None, monochromator=None, person=None,
                     edge=None, element=None, sample=None, beamline=None,
                     data_format=None, citation=None, reference=None, **kws):
 
         """add spectra: name required
         returns Spectra instance"""
+
+        spectra_names = self.query('name'
+                                   ).from_statement('select name from spectra').all()
+ 
+        if len(spectra_names) > 1:
+            if any([entry[0] == name for entry in spectra_names]):
+                raise XASDBException("A spectra named '%s' already exists" % name)
+                
+        # eif  name in spectra_names:
+        # return
+    
         kws['notes'] = notes
         kws['attributes'] = attributes
 
@@ -594,6 +628,19 @@ Optional:
                 val = list(val.flatten())
             kws[attr] = json_encode(val)
 
+        if submission_date is None:
+            submission_date = datetime.now()
+        for attr, val in (('submission_date', submission_date),
+                          ('collection_date', collection_date)):
+            if isinstance(val, (str, unicode)):
+                try:
+                    val = isotime2datetime(val)
+                except ValueError:
+                    val = None
+            if val is None:
+                val = datetime(1,1,1)
+            kws[attr] = val
+            
         kws['calc_mu_trans'] = calc_mu_trans
         kws['calc_mu_emit'] = calc_mu_emit
         kws['calc_mu_refer'] = calc_mu_refer
@@ -602,8 +649,7 @@ Optional:
         kws['notes_iemit'] = notes_iemit
         kws['notes_irefer'] = notes_irefer
         kws['temperature'] = temperature
-        kws['submission_date'] = submission_date
-        kws['collection_date'] = collection_date
+
         kws['reference_used'] = reference_used
         kws['beamline_id'] = self._get_foreign_keyid(Beamline, beamline)
         kws['monochromator_id'] = self._get_foreign_keyid(Monochromator,
@@ -620,6 +666,7 @@ Optional:
         kws['energy_units_id'] = self._get_foreign_keyid(EnergyUnits,
                                                          energy_units,
                                                          name='units')
-
-        return self.__addRow(Spectra, ('name',), (name,), **kws)        
-
+        try:
+            return self.__addRow(Spectra, ('name',), (name,), **kws)        
+        except:
+            return None
