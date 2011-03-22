@@ -398,6 +398,31 @@ arguments
 
         return default
     
+    def get_elements(self, show_all=True):
+        """return list of elements,
+        with_spectra:  return only elements with spectra in database
+        """
+        if show_all:
+            out = []
+            for f in self.query(Element):
+                out.append(f.name)            
+            print 'get elems ', len(out)
+            return out
+        else:
+            print 'limit!!'
+            return [f.name for f in self.query(Element)]
+
+    def get_edges(self, show_all=True):
+        """return list of edges,
+        with_spectra:  return only edges with spectra in database
+        """
+        if show_all:
+            return [f.name for f in self.query(Edge)]            
+        else:
+            print 'limit!'
+            return [f.name for f in self.query(Edge)]
+
+
     def add_energy_units(self, units, notes=None, attributes=None, **kws):
         """add Energy Units: units required
         notes and attributes optional

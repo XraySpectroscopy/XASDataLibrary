@@ -75,7 +75,7 @@ class MainFrame(wx.Frame):
         fname = FileOpen(self, "Import Spectra",
                           wildcard=wildcard)
         if fname is not None:
-            FileImporter(fname)
+            FileImporter(fname, db=self.xasdb)
 
     def ExportSpectra(self, evt=None):
         "export spectra to  XDI ASCII file"
@@ -268,59 +268,6 @@ class MainFrame(wx.Frame):
     def onSpectraSelect(self, evt=None):
         print 'onSpectra Select ' , evt.GetString()
         
-    def build_spectra_panel(self):
-        "build lower panel"
-
-        labstyle = wx.ALIGN_LEFT#|wx.ALIGN_CENTER_VERTICAL|wx.ALL|wx.GROW
-        panel = self.bot_panel
-        self.xabel  = wx.StaticText(panel, label='Spectra:')
-        #self.element   = wx.StaticText(toprow, label='Element:')
-        #self.edge      = wx.StaticText(toprow, label='Edge: ')
-
-        tsizer =  wx.BoxSizer(wx.HORIZONTAL) 
-        tsizer.Add(self.xabel, 1, labstyle, 3)
-        # tsizer.Add(self.element,  0, labstyle, 3)
-        #tsizer.Add(self.edge,     0, labstyle, 3)
-        
-        pack(panel, tsizer)
-
-#         nb = self.notebook = wx.Notebook(panel)
-#  
-#         self.data_panel  = wx.Panel(nb)
-#         nb.AddPage(self.data_panel, 'Data')
-# 
-#         self.sample_panel  = wx.Panel(nb)
-#         nb.AddPage(self.sample_panel, 'Sample')
-# 
-#         self.beamline_panel  = wx.Panel(nb)
-#         nb.AddPage(self.beamline_panel, 'Beamline/Mono')
-# 
-#         self.info_panel  = wx.Panel(nb)
-#         nb.AddPage(self.info_panel, 'Info')
-#        
-        sizer =  wx.BoxSizer(wx.VERTICAL) 
-        sizer.Add(tsizer, 0, wx.ALIGN_LEFT|wx.ALIGN_TOP, 5)
-        #sizer.Add(nb, 1, wx.ALIGN_LEFT|wx.ALIGN_TOP|wx.GROW, 5)
-        pack(panel, sizer)
-    
-#         
-#         self.spectra_label  = wx.StaticText(panel, label='Spectra:')
-#         nb = self.notebook = wx.Notebook(panel)
-# 
-#         self.sample_panel  = wx.Panel(nb)
-#         nb.AddPage(self.sample_panel, 'Sample')
-# 
-#         self.info_panel  = wx.Panel(nb)
-#         nb.AddPage(self.info_panel, 'Info')
-# 
-#         
-#         sizer =  wx.BoxSizer(wx.VERTICAL) 
-#         sizer.Add(self.spectra_label, 0, wx.ALIGN_LEFT|wx.ALIGN_TOP, 5)
-#         sizer.Add(self.notebook, 1, wx.ALIGN_LEFT|wx.ALIGN_TOP|wx.GROW, 5)
-#         pack(panel, sizer)
-# 
-#         self.sample_panel  = wx.Panel(panel)
-#         # nb.AddPage(self.sample_panel, 'Sample')
     def onClose(self, evt=None):
         "quit application"
         ret = popup(self, "Really Quit?", "Exit XAS Data Library?",

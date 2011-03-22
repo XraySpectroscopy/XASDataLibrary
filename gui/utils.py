@@ -80,6 +80,24 @@ def add_menu(parent, menu, label, help, action=None):
     if action is not None:
         parent.Bind(wx.EVT_MENU, action, id=id)
 
+class ElementChoice(wx.Choice):
+    def __init__(self, parent, wid=-1, db=None, show_all=True,
+                 size=(130,-1)):
+        print 'Element Choice ', self, parent, db, show_all
+        wx.Choice.__init__(self, parent, wid, size=size)
+        if db is not None:
+            choices = db.get_elements(show_all=show_all)
+            self.Clear()
+            self.SetItems(choices)
+
+class EdgeChoice(wx.Choice):
+    def __init__(self, parent, db=None, show_all=True,
+                 size=(60,-1)):
+        wx.Choice.__init__(self, parent, -1, size=size)
+        if db is not None:
+            choices = db.get_edges(show_all=show_all)
+            self.Clear()
+            self.SetItems(choices)
     
 def FileOpen(parent, message, wildcard=None):
     "File Open dialog"
