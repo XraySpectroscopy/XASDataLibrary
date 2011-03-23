@@ -1,9 +1,8 @@
 import os
 import wx
 import xdi
-from lib.wx import OrderedDict, pack, add_btn, add_menu, popup, \
-     FileOpen, FileSave
 
+from utils import pack, add_btn, add_menu, popup, FileOpen, FileSave
 from utils import ElementChoice, EdgeChoice
 
 class FileImporter(wx.Frame):

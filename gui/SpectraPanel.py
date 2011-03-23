@@ -1,6 +1,5 @@
 import wx
-from lib.wx import OrderedDict, pack, add_btn, add_menu, popup, \
-     FileOpen, FileSave
+from utils import pack, add_btn, add_menu, popup, FileOpen, FileSave
 
 class SpectraPanel(wx.Panel):
     "build spectra panel"

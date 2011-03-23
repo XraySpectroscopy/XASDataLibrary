@@ -9,10 +9,11 @@ import cStringIO
 import warnings
 warnings.simplefilter('ignore')
 
-import lib as xasdb
-from lib import XASDataLibrary, isXASDataLibrary
-from lib.wx import OrderedDict, pack, add_btn, add_menu, popup, \
-     FileOpen, FileSave
+import xasdb
+from xasdb import XASDataLibrary, isXASDataLibrary
+from ordereddict import OrderedDict
+
+from utils import pack, add_btn, add_menu, popup, FileOpen, FileSave
 
 import xdi
 
