@@ -3,6 +3,8 @@
 # Column_i0: 2
 # Column_itrans: 3
 # Column_mutrans: 4
+# Edge: K
+# Element: Cu
 # Abscissa: $1
 # Beamline: APS 13ID
 # Collimation: none
@@ -15,12 +17,10 @@
 # Start_Time: 2001-06-26T22:27:31
 # Gse_Detector_I0: 10cm / N2
 # Gse_Detector_I1: 10cm / N2
-# Gse_Edge: K
-# Gse_Element: Cu
 # Gse_Sample_Crystalstructure: Cu
 # Gse_Sample_Prep: Cu metal foil
 # Gse_Sample_Temperature: Room Temperature
-# Original_Labels: energy xmu i0
+# Pylib_Original_Labels: energy xmu i0
 # ///
 # Cu foil Room Temperature
 #----
