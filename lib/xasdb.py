@@ -16,7 +16,6 @@ from datetime import datetime
 
 from .creator import make_newdb, backup_versions
 
-from xdi  import XDIFile
 
 from sqlalchemy import MetaData, create_engine
 from sqlalchemy.orm import sessionmaker,  mapper, relationship, backref

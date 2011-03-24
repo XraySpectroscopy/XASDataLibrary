@@ -26,6 +26,7 @@ import sys
 from . import xasdb
 from . import xdiformat
 
+XDIFile = xdiformat.XDIFile
 
 isXASDataLibrary = xasdb.isXASDataLibrary
 

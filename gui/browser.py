@@ -10,12 +10,10 @@ import warnings
 warnings.simplefilter('ignore')
 
 import xasdb
-from xasdb import XASDataLibrary, isXASDataLibrary
+from xasdb import XASDataLibrary, isXASDataLibrary, XDIFile
 from ordereddict import OrderedDict
 
 from utils import pack, add_btn, add_menu, popup, FileOpen, FileSave
-
-import xdi
 
 from SpectraPanel import SpectraPanel
 from FileImporter import FileImporter
@@ -28,7 +26,11 @@ class MainFrame(wx.Frame):
 
     def __init__(self, dbfile=None):
         wx.Frame.__init__(self, parent=None, title=self.title,
-                          size=(200, -1))
+                          size=(250, 500))
+
+        self.font = self.GetFont()
+        self.SetFont(self.font)
+        
         self.xasdb = None
 
         self.current_filter = self.filters[0]
@@ -172,8 +174,8 @@ class MainFrame(wx.Frame):
         sizer = wx.BoxSizer(wx.HORIZONTAL)
         sizer.Add(wx.StaticText(topsection,
                                 label='Filter Spectra by:'),
-                  0, wx.ALIGN_LEFT|wx.ALIGN_CENTER|wx.ALL, 1)
-        sizer.Add(self.filterchoice, 0, wx.ALIGN_LEFT|wx.ALL, 1)
+                  0, wx.ALIGN_LEFT|wx.ALIGN_CENTER_VERTICAL|wx.GROW|wx.ALL, 4)
+        sizer.Add(self.filterchoice, 0, wx.ALIGN_LEFT|wx.GROW|wx.ALL, 0)
 
         pack(topsection, sizer)
         
@@ -233,8 +235,8 @@ class MainFrame(wx.Frame):
         splitter1.SplitHorizontally(self.top_panel, self.bot_panel, 1)
        
         sizer = wx.BoxSizer(wx.VERTICAL)
-        sizer.Add(topsection, 0, wx.ALL, 5)
-        sizer.Add(splitter1, 1, wx.GROW|wx.ALL, 5)
+        sizer.Add(topsection, 0, wx.ALL|wx.GROW, 1)
+        sizer.Add(splitter1, 1, wx.GROW|wx.ALL, 1)
         pack(self, sizer)
 
 
@@ -274,7 +276,8 @@ class MainFrame(wx.Frame):
         ret = popup(self, "Really Quit?", "Exit XAS Data Library?",
                     style=wx.YES_NO|wx.ICON_QUESTION)
         if ret == wx.ID_YES:
-            self.xasdb.close()
+            if self.xasdb is not None:
+                self.xasdb.close()
             self.Destroy()
 
     def onSave(self, evt):
