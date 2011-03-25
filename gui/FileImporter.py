@@ -8,7 +8,7 @@ from xasdb import XDIFile
 from utils import pack, add_btn, add_menu, popup, FileOpen, FileSave, FloatCtrl
 
 from choices import ElementChoice, EdgeChoice, ColumnChoice, TypeChoice, \
-     PersonChoice, BeamlineChoice, DateTimeCtrl
+     PersonChoice, BeamlineChoice, MonochromatorChoice, DateTimeCtrl
 
 titlestyle  = wx.ALIGN_CENTER|wx.ALIGN_CENTER_VERTICAL|wx.ALL|wx.GROW
 labstyle    = wx.ALIGN_LEFT|wx.ALIGN_CENTER_VERTICAL|wx.ALL
@@ -23,6 +23,21 @@ def Title(parent, text, colour=(50, 50, 180)):
     title.SetForegroundColour(colour)
     return title
 
+class HyperText(wx.StaticText):
+    def  __init__(self, parent, label, action=None, colour=(50, 50, 180)):
+        self.action = action
+        wx.StaticText.__init__(self, parent, -1, label=label)
+        font  = self.GetFont().Larger().Bold()
+        font.SetUnderlined(True)
+        self.SetFont(font)
+        self.SetForegroundColour(colour)
+        self.Bind(wx.EVT_LEFT_UP, self.onSelect)
+
+    def onSelect(self, evt=None):
+        if self.action is not None:
+            self.action(evt=evt)
+        evt.Skip()
+        
 class FileImporter(wx.Frame):
     title = 'ASCII File Importer'
     energy_choices = ('energy (eV)', 'energy (keV)',
@@ -30,7 +45,7 @@ class FileImporter(wx.Frame):
 
     def __init__(self, fname=None, db=None):
         wx.Frame.__init__(self, parent=None,
-                          title=self.title, size=(500, 500))
+                          title=self.title, size=(675, 650))
         self.fname = fname
         self.db    = db
         menuBar = wx.MenuBar()
@@ -43,7 +58,7 @@ class FileImporter(wx.Frame):
         self.CreateStatusBar(1, wx.CAPTION|wx.THICK_FRAME)
 
         splitter  = wx.SplitterWindow(self, style=wx.SP_LIVE_UPDATE)
-        splitter.SetMinimumPaneSize(150)
+        splitter.SetMinimumPaneSize(175)
         
         self.top_panel = wx.Panel(splitter) # top
         self.bot_panel = wx.Panel(splitter) # bottom
@@ -103,46 +118,87 @@ class FileImporter(wx.Frame):
         panel = self.beamline_panel  = wx.Panel(self.nb)
         self.nb.AddPage(panel, 'Beamline')
 
-        sizer = wx.GridBagSizer(10, 5)
+        sizer = wx.GridBagSizer(10, 6)
 
         def stext(label):
             return wx.StaticText(panel, label=label)
 
         self.person = PersonChoice(panel, db=self.db, show_all=True)
         self.beamline = BeamlineChoice(panel, db=self.db, show_all=True)
+        self.monochromator = MonochromatorChoice(panel, db=self.db, show_all=True)
 
+        self.add_person   = HyperText(panel, 'Person:',   action=self.onAddPerson)
+        self.add_beamline = HyperText(panel, 'Beamline:', action=self.onAddBeamline)
+        self.add_mono     = HyperText(panel, 'Monochromator:', action=self.onAddMono)
 
-        self.add_person   = add_btn(panel, "Add Person",  action=self.onAddPerson)
-        self.add_beamline = add_btn(panel, "Add Beamline",  action=self.onAddBeamline)
-        
         self.collection_datetime = DateTimeCtrl(panel, name="collection_time")
         self.submission_datetime = DateTimeCtrl(panel, name="collection_time", use_now=True)
 
         sizer.Add(Title(panel, 'Beamline Information:'),  (0, 0), (1, 3), titlestyle, 1)
 
         irow = 1
-        sizer.Add(stext('Person:'), (irow, 0), (1, 1), labstyle, 1)
-        sizer.Add(self.person,      (irow, 1), (1, 1), namestyle, 1)
-        sizer.Add(self.add_person,  (irow, 2), (1, 1), btnstyle, 1)
+
+        sizer.Add(self.add_person,  (irow, 0), (1, 1), labstyle, 1)
+        sizer.Add(self.person,       (irow, 1), (1, 1), namestyle, 1)
+
 
         irow += 1
         sizer.Add(stext('Collection Date:'), (irow, 0), (1, 1), labstyle, 1)
         sizer.Add(self.collection_datetime,  (irow, 1), (1, 1), namestyle, 1)
 
-
         irow += 1
         sizer.Add(stext('Submission Date:'), (irow, 0), (1, 1), labstyle, 1)
         sizer.Add(self.submission_datetime,  (irow, 1), (1, 1), namestyle, 1)
 
-        irow += 1
-        sizer.Add(wx.StaticLine(panel, size=(150, 1), style=wx.LI_HORIZONTAL),
-                  (irow, 0), (1, 5), wx.ALIGN_CENTER|wx.GROW|wx.ALL, 0)
 
         irow += 1
-        sizer.Add(stext('Beamline:'),        (irow, 0), (1, 1), labstyle, 1)
-        sizer.Add(self.beamline,             (irow, 1), (1, 1), namestyle, 1)
-        sizer.Add(self.add_beamline,         (irow, 2), (1, 1), btnstyle, 1)        
+        sizer.Add(self.add_beamline,          (irow, 0), (1, 1), labstyle, 1)
+        sizer.Add(self.beamline,              (irow, 1), (1, 1), namestyle, 1)
 
+        irow += 1
+        sizer.Add(self.add_mono,               (irow, 0), (1, 1), labstyle, 1)
+        sizer.Add(self.monochromator,          (irow, 1), (1, 1), namestyle, 1)
+
+
+        ## RHS of Beamline Panel
+        sizer.Add(wx.StaticLine(panel, size=(1, 160), style=wx.LI_VERTICAL),
+                  (1, 2), (6, 1), wx.ALIGN_CENTER|wx.GROW|wx.ALL, 0)
+
+        irow = 1
+        self.ring_current = FloatCtrl(panel, precision=2, value=0, min=0, max=1e6)
+        self.ring_energy  = FloatCtrl(panel, precision=3, value=0, min=0, max=1e3)        
+        self.collimation  = wx.TextCtrl(panel, value='', size=(180, -1))
+        self.focussing    = wx.TextCtrl(panel, value='', size=(180, -1))
+        self.xray_source  = wx.TextCtrl(panel, value='', size=(180, -1))
+        self.harmonic_rej = wx.TextCtrl(panel, value='', size=(180, -1))
+
+        sizer.Add(stext('Ring Current:'), (irow, 4), (1, 1), labstyle, 1)
+        sizer.Add(self.ring_current,      (irow, 5), (1, 1), namestyle, 1)
+        sizer.Add(stext('mA'),            (irow, 6), (1, 1), labstyle, 1)
+
+        irow += 1
+        sizer.Add(stext('Ring Energy:'),  (irow, 4), (1, 1), labstyle, 1)
+        sizer.Add(self.ring_energy,       (irow, 5), (1, 1), namestyle, 1)
+        sizer.Add(stext('GeV'),           (irow, 6), (1, 1), labstyle, 1)
+
+        irow += 1
+        sizer.Add(stext('X-ray Source:'),  (irow, 4), (1, 1), labstyle, 1)
+        sizer.Add(self.xray_source,        (irow, 5), (1, 2), namestyle, 1)
+        irow += 1
+        sizer.Add(stext('focussing:'),    (irow, 4), (1, 1), labstyle, 1)
+        sizer.Add(self.focussing,         (irow, 5), (1, 2), namestyle, 1)
+
+        irow += 1
+        sizer.Add(stext('collimation:'),   (irow, 4), (1, 1), labstyle, 1)
+        sizer.Add(self.collimation,        (irow, 5), (1, 2), namestyle, 1)
+
+        irow += 1
+        sizer.Add(stext('harmonic rejection:'), (irow, 4), (1, 1), labstyle, 1)
+        sizer.Add(self.harmonic_rej,            (irow, 5), (1, 2), namestyle, 1)
+
+        
+
+        
         pack(panel, sizer)
         
     def buildCitationPanel(self):
@@ -256,6 +312,9 @@ class FileImporter(wx.Frame):
 
     def onAddBeamline(self, evt=None):
         print 'Add beamline ', dir(evt)
+
+    def onAddMono(self, evt=None):
+        print 'Add monochromator ', dir(evt)
 
     def onSampleXTAL(self, evt=None):
         print 'Add Sample XTAL ', evt
