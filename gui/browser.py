@@ -3,6 +3,8 @@
 """
 import os
 import wx
+import wx.lib.mixins.inspection
+
 import time
 import copy
 import cStringIO
@@ -350,12 +352,24 @@ class MainFrame(wx.Frame):
         self.SetStatusText("Saved data for %s" % self.current_name)
             
 
+class TestApp(wx.App, wx.lib.mixins.inspection.InspectionMixin):
+    def __init__(self, dbfile=None, **kws):
+        self.dbfile = dbfile
+        wx.App.__init__(self)
+        
+    def OnInit(self):
+        self.Init() 
+        frame = MainFrame(dbfile=dbfile)
+        frame.Show()
+        self.SetTopWindow(frame)
+        return True
         
 if __name__ == '__main__':
     import sys
     dbfile = None
     if len(sys.argv) > 1:
         dbfile = sys.argv[1]
-    app = wx.PySimpleApp()        
-    MainFrame(dbfile=dbfile).Show()
-    app.MainLoop()
+    #app = wx.PySimpleApp()        
+    #MainFrame(dbfile=dbfile).Show()
+    #app.MainLoop()
+    TestApp(dbfile=dbfile).MainLoop()
