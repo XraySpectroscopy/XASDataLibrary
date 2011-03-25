@@ -404,12 +404,10 @@ arguments
         if show_all:
             out = []
             for f in self.query(Element):
-                out.append(f.name)            
-            print 'get elems ', len(out)
+                out.append((f.name, f.symbol, f.z))
             return out
         else:
-            print 'limit!!'
-            return [f.name for f in self.query(Element)]
+            return [(f.name, f.symbol, f.z) for f in self.query(Element)]
 
     def get_edges(self, show_all=True):
         """return list of edges,

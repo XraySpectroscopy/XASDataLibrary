@@ -86,23 +86,55 @@ class ColumnChoice(wx.Choice):
         if columns is None:
             columns = ['1', '2', '3']
         self.Clear()
-        print 'Choice columns  : ' , columns
         self.SetItems(columns)
-
+        self.choices = columns
+        
+    def SetChoices(self, choices):
+        self.Clear()
+        self.SetItems(choices)
+        self.choices = choices
+        
+    def Select(self, choice):
+        if isinstance(choice, int):
+            choice = '%i' % choice
+        if choice in self.choices:
+            self.SetSelection(self.choices.index(choice))
+        
 class TypeChoice(wx.Choice):
     def __init__(self, parent, choices, wid=-1, size=(130,-1)):
         wx.Choice.__init__(self, parent, wid, size=size)
         self.Clear()
         self.SetItems(choices)
+        self.choices = choices
+
+    def Select(self, choice):
+        if isinstance(choice, int):
+            choice = '%i' % choice
+        if choice in self.choices:
+            self.SetSelection(self.choices.index(choice))
 
 class ElementChoice(wx.Choice):
     def __init__(self, parent, wid=-1, db=None, show_all=True,
                  size=(130,-1)):
         wx.Choice.__init__(self, parent, wid, size=size)
         if db is not None:
-            choices = db.get_elements(show_all=show_all)
+            elements = db.get_elements(show_all=show_all)
+            self.names   = [elem[0].lower() for elem in elements]
+            self.symbols = [elem[1].lower() for elem in elements]
+            self.atnums  = [elem[2] for elem in elements]
             self.Clear()
-            self.SetItems(choices)
+            self.SetItems(self.names)
+
+    def Select(self, choice):
+        if isinstance(choice, int):
+            choice = '%i' % choice
+        choice = choice.lower()
+        if choice in self.names:
+            self.SetSelection(self.names.index(choice))
+        elif choice in self.symbols:
+            self.SetSelection(self.symbols.index(choice))
+        elif choice in self.atnums:
+            self.SetSelection(self.atnums.index(choice))
 
 
 class EdgeChoice(wx.Choice):
@@ -113,6 +145,10 @@ class EdgeChoice(wx.Choice):
             choices = db.get_edges(show_all=show_all)
             self.Clear()
             self.SetItems(choices)
+            self.choices = choices
+    def Select(self, choice):
+        if choice in self.choices:
+            self.SetSelection(self.choices.index(choice))
     
 def FileOpen(parent, message, wildcard=None):
     "File Open dialog"
@@ -202,6 +238,14 @@ class FloatCtrl(wx.TextCtrl):
         self.Bind(wx.EVT_SIZE, self.onResize)
         self.__GetMark()
 
+    def DisableEntry(self):
+        self.SetBackgroundColour((220,220,220))
+        self.Disable()
+
+    def EnableEntry(self):
+        self.Enable()
+        self.SetBackgroundColour(self.bgcol_valid)
+        
     def SetAction(self, action, action_kw={}):
         self.__action = Closure()  
         if hasattr(action,'__call__'):
