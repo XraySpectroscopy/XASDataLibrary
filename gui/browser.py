@@ -100,8 +100,7 @@ class MainFrame(wx.Frame):
         self.people = OrderedDict()
         self.people["<Add New Person>"] = None
         for row in self.xasdb.query(xasdb.Person):
-            name = "%s %s" % (row.firstname, row.lastname)
-            self.people[name] = row.id
+            self.people[row.name] = row.id
 
     def get_suites(self):
         "make self.suites  name: id "
@@ -250,7 +249,7 @@ class MainFrame(wx.Frame):
 
         self.selection_label.SetLabel(choice)
         if choice == 'People':
-            sel_list = ["%s %s" % (e.firstname, e.lastname) for e in self.xasdb.query(xasdb.Person)]
+            sel_list = [e.name for e in self.xasdb.query(xasdb.Person)]
         else:
             if choice == 'Element':
                 thisclass = xasdb.Element
@@ -281,76 +280,6 @@ class MainFrame(wx.Frame):
             if self.xasdb is not None:
                 self.xasdb.close()
             self.Destroy()
-
-    def onSave(self, evt):
-        "save data on form to database"
-        fname, lname, email = (get(self.first_name),
-                               get(self.last_name),
-                               get(self.email))
-
-        if self.current_id is None:
-            if fname == '' or lname == '' or email == '':
-                popup(self, """New entry must have
-    email, first name, and last name""",
-                           'Incomplete Address entry')
-                return
-            # check if email is alresdy in use
-            q_email = "select * from person where email='%s'" % get(self.email)
-            row = self.query(q_email)
-            try:
-                if row[0]['id'] is not None:
-                    popup(self, "Email '%s' is already in use!" % email,
-                          'Invalid Address entry')
-                    return
-            except:
-                pass
-            
-            q = """insert into person(first_name,middle_name,last_name,email)
-            values('%s','%s','%s','%s')"""
-            self.query(q % (fname, get(self.middle_name), lname, email))
-            time.sleep(0.25)
-            self.set_person_list(make_list=True)
-
-            row = self.query(q_email)
-            self.current_id = row[0]['id']
-            self.current_name = "%s %s" % (row[0]['first_name'],
-                                          row[0]['last_name'])
-
-            
-        base_q = "update person set %%s where last_name='%s' and first_name='%s'" % (lname, fname)
-        for attr in (self.simple_attr + self.multiline_attr):
-            # print base_q % ("%s='%s'" %(attr, get(getattr(self, attr))))
-            self.query(base_q % ("%s='%s'" %(attr, get(getattr(self, attr)))))
-
-        affil_name = self.affil.GetStringSelection()
-        affil_index = 0
-        for a_idx, a_name in self.affil_dict.items():
-            if a_name == affil_name:
-                affil_index = a_idx
-            
-        self.query(base_q % ("status='%s'" %
-                             (self.status.GetStringSelection())))
-        self.query(base_q % ("affiliation=%i" % affil_index))
-        img_encoded = base64.b64encode(self.raw_image)
-        if len(img_encoded) > MAX_IMAGE_SIZE:
-            popup(self, "Image is too large.\n Use one smaller than 2 Mb",
-                  "Image too big to save")
-            return
-        self.query(base_q % ("picture='%s'" % img_encoded))
-        self.query(base_q % ("new_picture=1"))
-
-        if self.current_id is None:
-            row = self.query(q_email)
-            self.current_id = row[0]['id']
-            
-        self.query("delete from person_sector where user_id='%i'" %
-                   (self.current_id))
-        q = "insert into person_sector(user_id, sector_id) values(%i, %i)"
-        for k, cb in self.sector_cb.items():
-            if cb.GetValue():
-                self.query(q % (self.current_id, k))
-        self.SetStatusText("Saved data for %s" % self.current_name)
-            
 
 class TestApp(wx.App, wx.lib.mixins.inspection.InspectionMixin):
     def __init__(self, dbfile=None, **kws):

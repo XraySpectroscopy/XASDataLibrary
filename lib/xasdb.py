@@ -162,9 +162,8 @@ class Person(_BaseTable):
     "person table"
     def __repr__(self):
         name = self.__class__.__name__
-        fields = ['%s %s' % (getattr(self, 'firstname', ''),
-                             getattr(self, 'lastname', '')),
-                  '%s' % getattr(self, 'email', 'NO EMAIL')]
+        fields = [getattr(self, 'name', ''),
+                  getattr(self, 'email', 'NO EMAIL')]
         return "<%s(%s)>" % (name, ', '.join(fields))
 
 class Spectra_Rating(_BaseTable):
@@ -537,16 +536,16 @@ arguments
 
         return self.__addRow(Ligand, ('name',), (name,), **kws)        
 
-    def add_person(self, firstname, lastname, email,
+    def add_person(self, name, email,
                    affiliation='', attributes='', **kws):
         """add person: arguments are
-        firstname, lastname, email  with
+        name, email  with
         affiliation and attributes optional
         returns Person instance"""
         kws['affiliation'] = affiliation
         kws['attributes'] = attributes
-        return self.__addRow(Person, ('email', 'firstname', 'lastname'),
-                             (email, firstname, lastname), **kws)
+        return self.__addRow(Person, ('email', 'name'),
+                             (email, name), **kws)
 
     def add_sample(self, name, notes='', attributes='',
                    formula=None, material_source=None,

@@ -29,6 +29,7 @@ from . import xdiformat
 XDIFile = xdiformat.XDIFile
 
 isXASDataLibrary = xasdb.isXASDataLibrary
+isotime2datetime = xasdb.isotime2datetime
 
 Info = xasdb.Info
 Mode = xasdb.Mode

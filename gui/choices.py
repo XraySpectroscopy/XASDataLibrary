@@ -40,10 +40,9 @@ class PersonChoice(_dbChoice):
     def __init__(self, parent, db=None, show_all=True,  size=(190,-1)):
         self.names = []
         if db is not None:
-            self.names = ["%s %s" % (row.firstname, row.lastname) for \
-                          row in db.query(Person)]
+            self.names = [row.name for row in db.query(Person)]
 
-        _dbChoice.__init__(self, parent, choices=self.names, size=size)
+        _dbChoice.__init__(self, parent, choices=self.names, db=db, size=size)
         if len(self.names)  > 0:
             self.SetSelection(0)
             
@@ -55,17 +54,39 @@ class BeamlineChoice(_dbChoice):
     def __init__(self, parent, db=None, show_all=True,  size=(190,-1)):
         self.names = []
         if db is not None:
-            self.names = ["%s:  %s" % (row.facility.name, row.name) for \
+            self.names = ["%s: %s" % (row.facility.name, row.name) for \
                           row in db.query(Beamline)]
             self.names.sort()
             
-        _dbChoice.__init__(self, parent, choices=self.names, size=size)
+        _dbChoice.__init__(self, parent, choices=self.names, db=db, size=size)
         if len(self.names)  > 0:
             self.SetSelection(0)
             
     def Select(self, choice):
         if choice in self.names:
             self.SetSelection(self.names.index(choice))
+        elif isinstance(choice, int) and choice>=0 and choice<len(self.names):
+            self.SetSelection(choice)
+        elif self.db is not None: # look for matches
+            choice = choice.lower()
+            fnames, bnames = [], []
+            for row in self.db.query(Beamline):
+                fnames.append(row.facility.name)
+                bnames.append(row.name)
+
+            _fac, _bl = None, None
+            for name in fnames:
+                if name.lower() in choice:
+                    _fac = name
+                    break
+            for name in bnames:
+                if name.lower() in choice:
+                    _bl = name
+                    break                
+            newchoice = "%s: %s" % (_fac, _bl)
+            if newchoice in self.names:
+                self.SetSelection(self.names.index(newchoice))
+
 
 class MonochromatorChoice(_dbChoice):
     def __init__(self, parent, db=None, show_all=True,  size=(190,-1)):
@@ -81,16 +102,35 @@ class MonochromatorChoice(_dbChoice):
     def Select(self, choice):
         if choice in self.names:
             self.SetSelection(self.names.index(choice))
-
+            return choice
+        elif isinstance(choice, int) and choice>=0 and choice<len(self.names):
+            self.SetSelection(choice)
+            return self.names[choice]
+        else:  # look for matches
+            choice = choice.lower()
+            for delim in '()[]{}<> ':
+                choice = choice.replace(delim, '')
+            choice = choice.replace('-', ',').split(',')[0]                
+            for index, name in enumerate(self.names):
+                nam = name.lower()
+                for delim in '()[]{}<> ':
+                    nam = nam.replace(delim, '')
+                nam = nam.replace('-', ',').split(',')[0]
+                if choice == nam:
+                    self.SetSelection(index)
+                    return name
+        return None
 class ElementChoice(_dbChoice):
     def __init__(self, parent, db=None, show_all=True,  size=(130,-1)):
-        self.names, self.symbols, self.atnums = [], [], []
+        self.choices, self.names, self.symbols, self.atnums = [], [], [], []
         if db is not None:
             elements = db.get_elements(show_all=show_all)
+            self.choices = ["%s: %s" % (elem[1], elem[0]) for elem in elements]
+            self.names   = [elem[0].lower() for elem in elements]
             self.names   = [elem[0].lower() for elem in elements]
             self.symbols = [elem[1].lower() for elem in elements]
             self.atnums  = [elem[2] for elem in elements]
-        _dbChoice.__init__(self, parent, choices=self.names, size=size)
+        _dbChoice.__init__(self, parent, choices=self.choices, size=size)
 
     def Select(self, choice):
         if isinstance(choice, int):
@@ -131,14 +171,12 @@ def DateTimeCtrl(parent, name='datetimectrl', use_now=False):
     sizer.Fit(panel)
     if use_now:
         timectrl.SetValue(wx.DateTime_Now())
-    return panel
+    return panel, datectrl, timectrl
 
 def DateCtrl(parent, use_now=False):
-    def onDateChange(evt=None):
-        print "onDateChange ", evt.GetDate()
     style = wx.DP_DROPDOWN|wx.DP_SHOWCENTURY|wx.DP_ALLOWNONE
     datectrl = wx.DatePickerCtrl(parent, size=(120,-1), style=style)
-    datectrl.Bind(wx.EVT_DATE_CHANGED, onDateChange)
+    # datectrl.Bind(wx.EVT_DATE_CHANGED, onDateChange)
     return datectrl
 
 

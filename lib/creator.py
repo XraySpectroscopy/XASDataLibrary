@@ -41,6 +41,10 @@ class InitialData:
                ["create_date", '<now>'], 
                ["modify_date", '<now>']]
 
+    monos = [['Si(111), generic', 'nominal lattice constant, 8000 steps/degree', 3.135560, 8000, 1],
+             ['Si(220), generic', 'nominal lattice constant, 8000 steps/degree', 1.920156, 8000, 1],
+             ['Si(311), generic', 'nominal lattice constant, 8000 steps/degree', 1.637514, 8000, 1]]
+
     formats = [["internal-json", "Read data_* values of spectra table as json"],
                ["external-xdi",  "Read data from extenal XDI formatted file"]]
 
@@ -55,9 +59,30 @@ class InitialData:
  Measurements will often need to be corrected for dead-time effects'''],
              ["xeol", "visible or uv light emission"],
              ["electron emission", "emitted electrons from sample"]]
-
     
-    edges = [["K", "1s"], ["L3", "2p3/2"], ["L2", "2p1/2"], ["L1", "2s"]]
+    facilities = [['APS',  'Advanced Photon Source, ANL, Argonne, IL, USA'],
+                  ['ALS',  'Advanced Light Source, LBNL, Berkeley, CA, USA'],                  
+                  ['NSLS', 'National Synchrotron Light Source, BNL, Upton, IL, USA'],
+                  ['SSRL', 'Stanford Synchrotron Radiation Laboratory, SLAC, Palo Alto, CA, USA'],
+                  ['ESRF', 'European Synchrotron Radiation Facility, Grenoble, France'],
+                  ['DLS',  'Diamond Light Source, Didcot, Oxfordshire, Great Britian'],
+                  ['SOLEIL',  'Synchrotron SOLEIL, GIF-sur-YVETTE, France'],
+                  ['SPring-8', 'SPring=8 Synchrotron,  Hyogo, Japan'],
+                  ['Photon Factory', 'Photon Factory, KEK, Tsukuba, Japan'],
+                  ['DESY', 'DESY Synchrotron, Hamburg, Germany']]
+
+    beamlines = [['13ID',  'GSECARS 13-ID',   'APS Undulator A',     1],
+                 ['13BM',  'GSECARS 13-BM',   'APS bending magnet',  1],
+                 ['10ID',  'MR-CAT  10-ID',   'APS Undulator A',     1],
+                 ['10BM',  'MR-CAT  10-BM',   'APS Bending Magnet',  1],
+                 ['20ID',  'PNC/XOR 20-ID',   'APS Undulator A',     1],
+                 ['20BM',  'PNC/XOR 20-BM',   'APS Bending Magnet',  1],
+                 ['X11A',  'NSLS X11-A',      'NSLS bending magnet', 3],
+                 ['4-3',   'SSRL, 4-3',       'SSRL',                4],
+                 ['4-1',   'SSRL, 4-1',       'SSRL',                4]]
+   
+    edges = [["K", "1s"], ["L3", "2p3/2"],
+             ["L2", "2p1/2"], ["L1", "2s"], ["M4,5", "3d3/2,5/2"]]
     
     elements = [[1, "H", "hydrogen"], [2, "He", "helium"], [3, "Li","lithium"],
             [4, "Be", "beryllium"], [5, "B", "boron"], [6, "C", "carbon"],
@@ -122,7 +147,7 @@ def  make_newdb(dbname, server= 'sqlite'):
     energy_units = NamedTable('energy_units', metadata, nameid='units')
 
     mono = NamedTable('monochromator', metadata,
-                      cols=[Column('lattice_constant', Float(precision=8)),
+                      cols=[Column('dspacing', Float(precision=8)),
                             Column('steps_per_degree', Float(precision=8)),
                             PointerCol('energy_units')])
     
@@ -131,8 +156,7 @@ def  make_newdb(dbname, server= 'sqlite'):
                                StrCol('data')])
     
     person = NamedTable('person', metadata, nameid='email',
-                        cols=[StrCol('firstname', nullable=False),
-                              StrCol('lastname', nullable=False),
+                        cols=[StrCol('name', nullable=False),
                               StrCol('affiliation')])
     
     citation = NamedTable('citation', metadata, 
@@ -242,8 +266,22 @@ def  make_newdb(dbname, server= 'sqlite'):
     for name, notes in InitialData.modes:
         mode.insert().execute(name=name, notes=notes)
 
+    for name, notes, dspacing, steps, units_id in InitialData.monos:
+        mono.insert().execute(name=name, notes=notes,
+                              dspacing=dspacing,
+                              steps_per_degree=steps,
+                              energy_units_id=units_id)
+
     for name, notes in InitialData.formats:
         format.insert().execute(name=name, notes=notes)
+
+    for name, notes in InitialData.facilities:
+        facility.insert().execute(name=name, notes=notes)
+
+    for name, notes, xray_source, fac_id in InitialData.beamlines:
+        beamline.insert().execute(name=name, notes=notes,
+                                  xray_source=xray_source,
+                                  facility_id=fac_id)
 
     now = datetime.isoformat(datetime.now())
     for key, value in InitialData.info:
