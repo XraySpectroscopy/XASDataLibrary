@@ -118,9 +118,9 @@ class InitialData:
                 [94, "Pu", "plutonium"], [95, "Am", "americium"], [96, "Cm", "curium"],
                 [97, "Bk", "berkelium"], [98, "Cf", "californium"], [99, "Es", "einsteinium"],
                 [100, "Fm", "fermium"], [101, "Md", "mendelevium"], [102, "No", "nobelium"],
-                [103, "Lw", "lawerencium"], [104, "Rf", "Rutherfordium"], [105, 'Ha', "Dubnium"],
-                [106, "Sg", "Seaborgium"], [107, "Bh", "Bohrium"], [108, "Hs", "Hassium"], 
-                [109, "Mt", "Meitnerium"]
+                [103, "Lw", "lawerencium"], [104, "Rf", "rutherfordium"], [105, 'Ha', "dubnium"],
+                [106, "Sg", "seaborgium"], [107, "Bh", "bohrium"], [108, "Hs", "hassium"], 
+                [109, "Mt", "meitnerium"]
                 ]
 
 
