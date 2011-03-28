@@ -351,14 +351,14 @@ class XDIFile(object):
         """assign data arrays for i0, itrans, ifluor, irefer"""
         cols = self.columns
         if cols['energy'] is None:            
-            expr = validate_mathexpr(self.abscissa).groups()
+            expr = validate_mathexpr(self.attrs['abscissa']).groups()
             cols['energy'] = int(expr[2].replace('$', ''))
 
             
         # is there transmission data?
         if cols['mutrans'] is None and cols['itrans'] is None and \
-           self.mu_transmission is not None:
-            trans =  validate_mathexpr(self.mu_transmission).groups()
+           self.attrs['mu_transmission'] is not None:
+            trans =  validate_mathexpr(self.attrs['mu_transmission']).groups()
             if trans is not None and trans[1] == 'ln' and trans[3] == '/':
                 if trans[0] == '-':
                     cols['i0']  = int(trans[4].replace('$', ''))
