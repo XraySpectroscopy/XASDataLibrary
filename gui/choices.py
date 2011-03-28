@@ -2,11 +2,12 @@
 import wx
 import wx.lib.masked as masked
 
-from xasdb import Person, Beamline, Monochromator, Element, Edge
+import xasdb
+import table_managers
 
 class _dbChoice(wx.Choice):
     "basic xasdb-derived choice"
-    def __init__(self, parent, choices=None, db=None, size=(120,-1)):
+    def __init__(self, parent, choices=None, db=None, size=(125,-1)):
         wx.Choice.__init__(self, parent, -1, size=size)
         if choices is None:
             choices = []
@@ -14,7 +15,9 @@ class _dbChoice(wx.Choice):
         self.db  = db
         self.Clear()
         self.SetItems(choices)
-
+        if len(self.choices)  > 0:
+            self.SetSelection(0)
+        
     def SetChoices(self, choices):
         self.Clear()
         self.SetItems(choices)
@@ -25,52 +28,93 @@ class _dbChoice(wx.Choice):
             choice = '%i' % choice
         if choice in self.choices:
             self.SetSelection(self.choices.index(choice))
+
+class HyperText(wx.StaticText):
+    def  __init__(self, parent, label, action=None, colour=(50, 50, 180)):
+        self.action = action
+        wx.StaticText.__init__(self, parent, -1, label=label)
+        font  = self.GetFont() # .Bold()
+        font.SetUnderlined(True)
+        self.SetFont(font)
+        self.SetForegroundColour(colour)
+        self.Bind(wx.EVT_LEFT_UP, self.onSelect)
+
+    def onSelect(self, evt=None):
+        if self.action is not None:
+            self.action(evt=evt, label=self.GetLabel())
+        evt.Skip()
+
+class HyperChoice(object):
+    """combined HyperText label and Choice, connected """
+    def __init__(self, parent, choiceclass, label=None, db=None,
+                 show_all=True):
+        self.label  = label
+        self.link   = HyperText(parent, label, action=self.onClick)
+        self.choice = choiceclass(parent, db=db, show_all=show_all)
+
+    def onClick(self, evt=None, label=None):
+        if label is None:
+            label = self.label
+        table = self.label.replace(':', '')
+        print 'onClick for table= ', table, hasattr(table_managers, table)
+        print self.choice
     
 class ColumnChoice(_dbChoice):
-    def __init__(self, parent, columns=None, size=(80,-1)):
+    def __init__(self, parent, columns=None, size=(75,-1)):
         if columns is None:
             columns = ['1', '2', '3']
         _dbChoice.__init__(self, parent, choices=columns, size=size)
         
 class TypeChoice(_dbChoice):
-    def __init__(self, parent, choices=None, size=(130,-1)):
+    def __init__(self, parent, choices=None, size=(150,-1)):
         _dbChoice.__init__(self, parent, choices=choices, size=size)
 
 class PersonChoice(_dbChoice):
     def __init__(self, parent, db=None, show_all=True,  size=(190,-1)):
-        self.names = []
+        choices = []
         if db is not None:
-            self.names = [row.name for row in db.query(Person)]
+            choices = [row.name for row in db.query(xasdb.Person)]
+        _dbChoice.__init__(self, parent, choices=choices,
+                           db=db, size=size)
 
-        _dbChoice.__init__(self, parent, choices=self.names, db=db, size=size)
-        if len(self.names)  > 0:
-            self.SetSelection(0)
-            
-    def Select(self, choice):
-        if choice in self.names:
-            self.SetSelection(self.names.index(choice))
+class SampleChoice(_dbChoice):
+    def __init__(self, parent, db=None, show_all=True,  size=(190,-1)):
+        choices = []
+        if db is not None:
+            choices = [row.name for row in db.query(xasdb.Sample)]
+        _dbChoice.__init__(self, parent, choices=choices,
+                           db=db, size=size)
+
+class CitationChoice(_dbChoice):
+    def __init__(self, parent, db=None, show_all=True,  size=(190,-1)):
+        choices = []
+        if db is not None:
+            choices = [row.name for row in db.query(xasdb.Citation)]
+        _dbChoice.__init__(self, parent, choices=choices,
+                           db=db, size=size)
 
 class BeamlineChoice(_dbChoice):
     def __init__(self, parent, db=None, show_all=True,  size=(190,-1)):
-        self.names = []
+        choices = []
         if db is not None:
-            self.names = ["%s: %s" % (row.facility.name, row.name) for \
-                          row in db.query(Beamline)]
-            self.names.sort()
-            
-        _dbChoice.__init__(self, parent, choices=self.names, db=db, size=size)
-        if len(self.names)  > 0:
-            self.SetSelection(0)
+            choices = ["%s: %s" % (row.facility.name, row.name) for \
+                       row in db.query(xasdb.Beamline)]
+            choices.sort()
+        _dbChoice.__init__(self, parent, choices=choices,
+                           db=db, size=size)
             
     def Select(self, choice):
-        if choice in self.names:
-            self.SetSelection(self.names.index(choice))
-        elif isinstance(choice, int) and choice>=0 and choice<len(self.names):
+        if choice is None:
+            return
+        if choice in self.choices:
+            self.SetSelection(self.choices.index(choice))
+        elif isinstance(choice, int) and choice>=0 and \
+             choice<len(self.choices):
             self.SetSelection(choice)
         elif self.db is not None: # look for matches
             choice = choice.lower()
             fnames, bnames = [], []
-            for row in self.db.query(Beamline):
+            for row in self.db.query(xasdb.Beamline):
                 fnames.append(row.facility.name)
                 bnames.append(row.name)
 
@@ -84,34 +128,32 @@ class BeamlineChoice(_dbChoice):
                     _bl = name
                     break                
             newchoice = "%s: %s" % (_fac, _bl)
-            if newchoice in self.names:
-                self.SetSelection(self.names.index(newchoice))
-
+            if newchoice in self.choices:
+                self.SetSelection(self.choices.index(newchoice))
 
 class MonochromatorChoice(_dbChoice):
-    def __init__(self, parent, db=None, show_all=True,  size=(190,-1)):
-        self.names = []
+    def __init__(self, parent, db=None, show_all=True,  size=(150,-1)):
+        choices = []
         if db is not None:
-            self.names = ["%s" % (row.name) for row in db.query(Monochromator)]
-            self.names.sort()
-            
-        _dbChoice.__init__(self, parent, choices=self.names, size=size)
-        if len(self.names)  > 0:
-            self.SetSelection(0)
+            choices = ["%s" % (row.name) for row in db.query(xasdb.Monochromator)]
+            choices.sort()
+        _dbChoice.__init__(self, parent, choices=choices, size=size)
             
     def Select(self, choice):
-        if choice in self.names:
-            self.SetSelection(self.names.index(choice))
+        if choice is None:
+            return
+        if choice in self.choices:
+            self.SetSelection(self.choices.index(choice))
             return choice
-        elif isinstance(choice, int) and choice>=0 and choice<len(self.names):
+        elif isinstance(choice, int) and choice>=0 and choice<len(self.choices):
             self.SetSelection(choice)
-            return self.names[choice]
+            return self.choices[choice]
         else:  # look for matches
             choice = choice.lower()
             for delim in '()[]{}<> ':
                 choice = choice.replace(delim, '')
             choice = choice.replace('-', ',').split(',')[0]                
-            for index, name in enumerate(self.names):
+            for index, name in enumerate(self.choices):
                 nam = name.lower()
                 for delim in '()[]{}<> ':
                     nam = nam.replace(delim, '')
@@ -120,19 +162,22 @@ class MonochromatorChoice(_dbChoice):
                     self.SetSelection(index)
                     return name
         return None
+
 class ElementChoice(_dbChoice):
-    def __init__(self, parent, db=None, show_all=True,  size=(130,-1)):
-        self.choices, self.names, self.symbols, self.atnums = [], [], [], []
+    def __init__(self, parent, db=None, show_all=True,  size=(150,-1)):
+        choices, self.names, self.symbols, self.atnums = [], [], [], []
         if db is not None:
             elements = db.get_elements(show_all=show_all)
-            self.choices = ["%s: %s" % (elem[1], elem[0]) for elem in elements]
+            choices = ["%s: %s" % (elem[1], elem[0]) for elem in elements]
             self.names   = [elem[0].lower() for elem in elements]
             self.names   = [elem[0].lower() for elem in elements]
             self.symbols = [elem[1].lower() for elem in elements]
             self.atnums  = [elem[2] for elem in elements]
-        _dbChoice.__init__(self, parent, choices=self.choices, size=size)
+        _dbChoice.__init__(self, parent, choices=choices, size=size)
 
     def Select(self, choice):
+        if choice is None:
+            return
         if isinstance(choice, int):
             choice = '%i' % choice
         choice = choice.lower()
@@ -144,7 +189,7 @@ class ElementChoice(_dbChoice):
             self.SetSelection(self.atnums.index(choice))
 
 class EdgeChoice(_dbChoice):
-    def __init__(self, parent, db=None, show_all=True,  size=(60,-1)):
+    def __init__(self, parent, db=None, show_all=True,  size=(75,-1)):
         choices = []
         if db is not None:
             choices = db.get_edges(show_all=show_all)

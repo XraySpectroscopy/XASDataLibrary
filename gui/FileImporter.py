@@ -9,7 +9,8 @@ from xasdb import XDIFile, isotime2datetime
 from utils import pack, add_btn, add_menu, popup, FileOpen, FileSave, FloatCtrl
 
 from choices import ElementChoice, EdgeChoice, ColumnChoice, TypeChoice, \
-     PersonChoice, BeamlineChoice, MonochromatorChoice, DateTimeCtrl
+     PersonChoice, BeamlineChoice, MonochromatorChoice, DateTimeCtrl, \
+     CitationChoice, SampleChoice, HyperChoice
 
 titlestyle  = wx.ALIGN_CENTER|wx.ALIGN_CENTER_VERTICAL|wx.ALL|wx.GROW
 labstyle    = wx.ALIGN_LEFT|wx.ALIGN_CENTER_VERTICAL|wx.ALL
@@ -27,20 +28,6 @@ def Title(parent, text, colour=(50, 50, 180)):
     title.SetForegroundColour(colour)
     return title
 
-class HyperText(wx.StaticText):
-    def  __init__(self, parent, label, action=None, colour=(50, 50, 180)):
-        self.action = action
-        wx.StaticText.__init__(self, parent, -1, label=label)
-        font  = self.GetFont() # .Bold()
-        font.SetUnderlined(True)
-        self.SetFont(font)
-        self.SetForegroundColour(colour)
-        self.Bind(wx.EVT_LEFT_UP, self.onSelect)
-
-    def onSelect(self, evt=None):
-        if self.action is not None:
-            self.action(evt=evt, label=self.GetLabel())
-        evt.Skip()
         
 class FileImporter(wx.Frame):
     title = 'ASCII File Importer'
@@ -128,13 +115,14 @@ class FileImporter(wx.Frame):
         def stext(label):
             return wx.StaticText(panel, label=label)
 
-        self.person = PersonChoice(panel, db=self.db, show_all=True)
-        self.beamline = BeamlineChoice(panel, db=self.db, show_all=True)
-        self.monochromator = MonochromatorChoice(panel, db=self.db, show_all=True)
+        _person   = HyperChoice(panel, PersonChoice, label='Person:', db=self.db)
+        self.person = _person.choice
 
-        self.add_person   = HyperText(panel, 'Person:',   action=self.onAddPerson)
-        self.add_beamline = HyperText(panel, 'Beamline:', action=self.onAddBeamline)
-        self.add_mono     = HyperText(panel, 'Monochromator:', action=self.onAddMono)
+        _beamline = HyperChoice(panel, BeamlineChoice, label='Beamline:', db=self.db)
+        self.beamline = _beamline.choice
+
+        _mono = HyperChoice(panel, MonochromatorChoice, label='Monochromator:', db=self.db)
+        self.monochromator = _mono.choice
 
         self.collection_datetime = DateTimeCtrl(panel, name="collection_time")
         self.submission_datetime = DateTimeCtrl(panel, name="collection_time", use_now=True)
@@ -143,8 +131,8 @@ class FileImporter(wx.Frame):
 
         irow = 1
 
-        sizer.Add(self.add_person,  (irow, 0), (1, 1), labstyle, 1)
-        sizer.Add(self.person,       (irow, 1), (1, 1), namestyle, 1)
+        sizer.Add(_person.link,     (irow, 0), (1, 1), labstyle, 1)
+        sizer.Add(self.person,      (irow, 1), (1, 1), namestyle, 1)
 
 
         irow += 1
@@ -157,11 +145,11 @@ class FileImporter(wx.Frame):
 
 
         irow += 1
-        sizer.Add(self.add_beamline,          (irow, 0), (1, 1), labstyle, 1)
-        sizer.Add(self.beamline,              (irow, 1), (1, 1), namestyle, 1)
+        sizer.Add(_beamline.link,          (irow, 0), (1, 1), labstyle, 1)
+        sizer.Add(self.beamline,           (irow, 1), (1, 1), namestyle, 1)
 
         irow += 1
-        sizer.Add(self.add_mono,               (irow, 0), (1, 1), labstyle, 1)
+        sizer.Add(_mono.link,                  (irow, 0), (1, 1), labstyle, 1)
         sizer.Add(self.monochromator,          (irow, 1), (1, 1), namestyle, 1)
 
 
@@ -190,15 +178,15 @@ class FileImporter(wx.Frame):
         sizer.Add(stext('X-ray Source:'),  (irow, 4), (1, 1), labstyle, 1)
         sizer.Add(self.xray_source,        (irow, 5), (1, 2), namestyle, 1)
         irow += 1
-        sizer.Add(stext('focusing:'),     (irow, 4), (1, 1), labstyle, 1)
+        sizer.Add(stext('Focusing:'),     (irow, 4), (1, 1), labstyle, 1)
         sizer.Add(self.focusing,          (irow, 5), (1, 2), namestyle, 1)
 
         irow += 1
-        sizer.Add(stext('collimation:'),   (irow, 4), (1, 1), labstyle, 1)
+        sizer.Add(stext('Collimation:'),   (irow, 4), (1, 1), labstyle, 1)
         sizer.Add(self.collimation,        (irow, 5), (1, 2), namestyle, 1)
 
         irow += 1
-        sizer.Add(stext('harmonic rejection:'), (irow, 4), (1, 1), labstyle, 1)
+        sizer.Add(stext('Harmonic\nRejection:'), (irow, 4), (1, 1), labstyle, 1)
         sizer.Add(self.harmonic_rej,            (irow, 5), (1, 2), namestyle, 1)
 
         
@@ -214,17 +202,21 @@ class FileImporter(wx.Frame):
         def stext(label):
             return wx.StaticText(panel, label=label)
 
-        self.cite_authors = wx.TextCtrl(panel, value='', size=(250, 80),
+        self.cite_authors = wx.TextCtrl(panel, value='', size=(225, 85),
                                        style=wx.TE_MULTILINE)
-        self.cite_journal = wx.TextCtrl(panel, value='', size=(250, -1))
-        self.cite_title   = wx.TextCtrl(panel, value='', size=(250, -1))
+        self.cite_journal = wx.TextCtrl(panel, value='', size=(225, -1))
+        self.cite_title   = wx.TextCtrl(panel, value='', size=(225, -1))
         self.cite_volume  = wx.TextCtrl(panel, value='', size=(120, -1))
         self.cite_pages   = wx.TextCtrl(panel, value='', size=(120, -1))
         self.cite_year    = wx.TextCtrl(panel, value='', size=(120, -1))
-        self.cite_doi     = wx.TextCtrl(panel, value='', size=(250, -1))
+        self.cite_doi     = wx.TextCtrl(panel, value='', size=(225, -1))
 
-        sizer.Add(Title(panel, 'Literature Citation:'),
-                  (0, 0), (1, 3), titlestyle, 1)
+        _cite = HyperChoice(panel, CitationChoice,
+                              label='Citation:', db=self.db)
+        self.citation = _cite.choice
+        
+        sizer.Add(_cite.link,     (0, 0), (1, 1), labstyle, 1)
+        sizer.Add(self.citation,  (0, 1), (1, 1), choicestyle, 1)
         
         irow = 1
         sizer.Add(stext('Journal:'),  (irow, 0), (1, 1), labstyle, 1)
@@ -296,7 +288,8 @@ class FileImporter(wx.Frame):
                                       style=wx.TE_MULTILINE)
 
         irow = 1
-        sizer.Add(Title(panel, 'Data Collection Notes:'),   (0, 0), (1, 1),
+        sizer.Add(Title(panel, 'User Notes from\nData Collection:'),
+                  (0, 0), (1, 1),
                   titlestyle,  1)
 
         sizer.Add(self.user_notes,  (0, 1), (1, 3), namestyle, 1)
@@ -304,10 +297,17 @@ class FileImporter(wx.Frame):
         sizer.Add(wx.StaticLine(panel, size=(150, 1), style=wx.LI_HORIZONTAL),
                   (1, 0), (1, 5), wx.ALIGN_CENTER|wx.GROW|wx.ALL, 0)
 
-        sizer.Add(Title(panel, 'Sample Information:'),  (2, 0), (1, 1),
-                  titlestyle, 1)
+        _sample = HyperChoice(panel, SampleChoice, label='Sample:', db=self.db)
+        self.sample = _sample.choice
 
-        sizer.Add(self.sample_xtal,   (2, 1), (1, 3), rlabstyle, 1)
+        _refsample = HyperChoice(panel, SampleChoice, label='Reference Sample:',
+                               db=self.db)
+        self.refsample = _refsample.choice
+        
+        sizer.Add(_sample.link,  (2, 0), (1, 1), labstyle, 1)
+        sizer.Add(self.sample,   (2, 1), (1, 1), namestyle, 1)
+
+        sizer.Add(self.sample_xtal,   (2, 2), (1, 2), rlabstyle, 1)
 
         irow = 3
         sizer.Add(stext('Chemical Formula:'),  (irow, 0), (1, 1), labstyle, 1)
@@ -324,9 +324,8 @@ class FileImporter(wx.Frame):
                   (irow, 0), (1, 5), wx.ALIGN_CENTER|wx.GROW|wx.ALL, 0)
 
         irow += 1        
-        sizer.Add(Title(panel, 'Reference Sample:'),
-                  (irow, 0), (1, 3), titlestyle, 1)
-
+        sizer.Add(_refsample.link,  (irow, 0), (1, 1), labstyle, 1)
+        sizer.Add(self.refsample,   (irow, 1), (1, 1), namestyle, 1)
 
         irow += 1
         sizer.Add(stext('Chemical Formula:'),  (irow, 0), (1, 1), labstyle, 1)
@@ -387,6 +386,9 @@ class FileImporter(wx.Frame):
         self.type_ir.SetSelection(0)
         self.type_if.SetSelection(0)
         
+        _mono = HyperChoice(panel, MonochromatorChoice, label='Monochromator:', db=self.db)
+        self.mono_choice   = _mono.choice
+        
         self.mono_dspacing = FloatCtrl(panel, precision=6, 
                                        value=0, min=0, max=100.0)
         self.mono_steps    = FloatCtrl(panel, precision=2,
@@ -400,7 +402,7 @@ class FileImporter(wx.Frame):
         
         sizer.Add(stext('Element:'), (1, 0), (1, 1), labstyle,    1)
         sizer.Add(self.elem,         (1, 1), (1, 1), choicestyle, 1)        
-        sizer.Add(stext('Edge:'),    (1, 2), (1, 1), labstyle,    1)
+        sizer.Add(stext('Edge:'),    (1, 2), (1, 1), rlabstyle,    1)
         sizer.Add(self.edge,         (1, 3), (1, 1), choicestyle, 1)
 
         sizer.Add(wx.StaticLine(panel, size=(350, 2), style=wx.LI_HORIZONTAL),
@@ -437,12 +439,19 @@ class FileImporter(wx.Frame):
         sizer.Add(self.column_ir,        (irow, 2), (1, 1), choicestyle, 1)
 
         irow = 4
-        sizer.Add(stext('Mono d spacing (Ang):'), (irow, 3), (1, 1), labstyle, 1)
-        sizer.Add(self.mono_dspacing ,      (irow, 4), (1, 2), labstyle, 1)
-        
+        sizer.Add(_mono.link,           (irow, 3), (1, 1), labstyle, 1)
+        sizer.Add(self.mono_choice,     (irow, 4), (1, 2), choicestyle, 1)
 
-        sizer.Add(stext('Mono Steps / Degree:'), (irow+1, 3), (1, 1), labstyle, 1)
-        sizer.Add(self.mono_steps ,        (irow+1, 4), (1, 2), labstyle, 1)     
+        irow += 1
+        sizer.Add(stext(' d spacing ='), (irow, 3), (1, 1), rlabstyle, 1)
+        sizer.Add(self.mono_dspacing ,   (irow, 4), (1, 1), namestyle, 1)
+        sizer.Add(stext('Angtroms'),     (irow, 5), (1, 1), labstyle, 1)
+
+        irow += 1
+        sizer.Add(stext(' resolution ='), (irow, 3), (1, 1), rlabstyle, 1)
+        sizer.Add(self.mono_steps ,       (irow, 4), (1, 1), namestyle, 1)     
+        sizer.Add(stext('steps/degree'),  (irow, 5), (1, 1), labstyle, 1)
+
         self.mono_dspacing.DisableEntry()
         self.mono_steps.DisableEntry()
         
