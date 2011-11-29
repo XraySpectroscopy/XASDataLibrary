@@ -40,7 +40,7 @@ def isXASDataLibrary(dbname):
     if ('info' in metadata.tables and
         'spectra' in metadata.tables and
         'sample' in metadata.tables and
-        'element' in metadata.tables and        
+        'element' in metadata.tables and
         'energy_units' in metadata.tables):
 
         elements = metadata.tables['element'].select().execute().fetchall()
@@ -60,7 +60,7 @@ def valid_score(score, smin=0, smax=5):
     """ensure that the input score is an integr
     in the range [smin, smax]  (inclusive)"""
     return max(smin, min(smax, int(score)))
-    
+
 
 def isotime2datetime(isotime):
     sdate, stime = isotime.replace('T', ' ').split(' ')
@@ -108,7 +108,7 @@ class Facility(_BaseTable):
     pass
 
 class Beamline(_BaseTable):
-    "beamline table"    
+    "beamline table"
     pass
 
 class Monochromator(_BaseTable):
@@ -173,7 +173,7 @@ class Spectra_Rating(_BaseTable):
         fields = ['%i' % (int(getattr(self, 'score', 0)))]
         if getattr(self, 'spectra', None) is not None:
             fields.append('Spectra %i' % getattr(self, 'spectra', 0))
-            
+
         return "<%s(%s)>" % (name, ', '.join(fields))
 
 class Suite_Rating(_BaseTable):
@@ -183,11 +183,11 @@ class Suite_Rating(_BaseTable):
         fields = ['%i' % (int(getattr(self, 'score', 0)))]
         if getattr(self, 'suite', None) is not None:
             fields.append('Suite %i' % getattr(self, 'suite', 0))
-            
+
         return "<%s(%s)>" % (name, ', '.join(fields))
 
 class Suite(_BaseTable):
-    "suite table"    
+    "suite table"
     pass
 
 class Sample(_BaseTable):
@@ -202,13 +202,14 @@ class Spectra(_BaseTable):
 class XASDataLibrary(object):
     "full interface to XAS Spectral Library"
     def __init__(self, dbname=None, logfile=None):
+        print "XAS DB ", dbname
         self.engine = None
         self.session = None
         self.metadata = None
         self.logfile = logfile
         if dbname is not None:
             self.connect(dbname)
-            
+
     def create_newdb(self, dbname, connect=False):
         "create a new, empty database"
         if os.path.exists(dbname):
@@ -231,15 +232,15 @@ class XASDataLibrary(object):
         if self.logfile.endswith('.xdl'):
             self.logfile = self.logfile[:-4]
         self.logfile = "%s.log" % self.logfile
-        
+
         self.metadata =  MetaData(self.engine)
-        
+
         self.metadata.reflect()
         tables = self.tables = self.metadata.tables
 
         self.session = sessionmaker(bind=self.engine)()
 
-        mapper(Mode,     tables['mode'], 
+        mapper(Mode,     tables['mode'],
                properties={'spectra':
                            relationship(Spectra, backref='mode',
                                         secondary=tables['spectra_mode'])})
@@ -247,11 +248,11 @@ class XASDataLibrary(object):
         mapper(Edge, tables['edge'],
                properties={'spectra':
                            relationship(Spectra, backref='edge')})
-                
+
         mapper(Element, tables['element'],
                properties={'spectra':
                            relationship(Spectra, backref='element')})
-               
+
         mapper(Format, tables['format'],
                properties={'spectra':
                            relationship(Spectra, backref='format')})
@@ -263,7 +264,7 @@ class XASDataLibrary(object):
         mapper(Citation, tables['citation'],
                properties={'spectra':
                            relationship(Spectra, backref='citation')})
-               
+
         mapper(Ligand,   tables['ligand'],
                properties={'spectra':
                            relationship(Spectra, backref='ligand',
@@ -303,21 +304,21 @@ class XASDataLibrary(object):
                                         secondary=tables['spectra_suite'])})
 
         mapper(Sample,  tables['sample'])
-        mapper(Spectra, tables['spectra'])        
+        mapper(Spectra, tables['spectra'])
         mapper(Spectra_Rating,   tables['spectra_rating'])
         mapper(Suite_Rating,   tables['suite_rating'])
         mapper(Info,     tables['info'])
-        
+
         self.update_mod_time =  None
 
         logging.basicConfig()
         logging.getLogger('sqlalchemy.engine'
                           ).addHandler(logging.FileHandler(self.logfile))
-        
+
     def commit(self):
         "commit session state"
         return self.session.commit()
-        
+
     def close(self):
         "close session"
         self.session.commit()
@@ -337,7 +338,7 @@ class XASDataLibrary(object):
             table.insert().execute(key=key, value=value)
         else:
             table.update(whereclause="key='%s'" % key).execute(value=value)
-            
+
     def set_mod_time(self):
         """set modify_date in info table"""
         if self.update_mod_time is None:
@@ -395,7 +396,7 @@ arguments
                 return default
 
         return default
-    
+
     def get_elements(self, show_all=True):
         """return list of elements,
         with_spectra:  return only elements with spectra in database
@@ -413,7 +414,7 @@ arguments
         with_spectra:  return only edges with spectra in database
         """
         if show_all:
-            return [f.name for f in self.query(Edge)]            
+            return [f.name for f in self.query(Edge)]
         else:
             print 'limit!'
             return [f.name for f in self.query(Edge)]
@@ -426,7 +427,7 @@ arguments
         kws['notes'] = notes
         kws['attributes'] = attributes
 
-        return self.__addRow(EnergyUnits, ('units',), (units,), **kws)        
+        return self.__addRow(EnergyUnits, ('units',), (units,), **kws)
 
     def add_mode(self, name, notes='', attributes='', **kws):
         """add collection mode: name required
@@ -435,7 +436,7 @@ arguments
         kws['notes'] = notes
         kws['attributes'] = attributes
 
-        return self.__addRow(Mode, ('name',), (name,), **kws)        
+        return self.__addRow(Mode, ('name',), (name,), **kws)
 
     def add_format(self, name, notes='', attributes='', **kws):
         """add data format: name required
@@ -444,7 +445,7 @@ arguments
         kws['notes'] = notes
         kws['attributes'] = attributes
 
-        return self.__addRow(Format, ('name',), (name,), **kws)        
+        return self.__addRow(Format, ('name',), (name,), **kws)
 
     def add_crystal_structure(self, name, notes='',
                               attributes='', format=None,
@@ -473,7 +474,7 @@ arguments
 
     def add_beamline(self, name, facility=None,
                      monochromator=None,
-                     xray_source=None,  notes='',                     
+                     xray_source=None,  notes='',
                      attributes='', **kws):
         """add beamline by name, with facility:
                facility= Facility instance or id
@@ -503,11 +504,11 @@ arguments
                                                           energy_units,
                                                           name='units')
 
-        return self.__addRow(Monochromator, ('name',), (name,), **kws)        
+        return self.__addRow(Monochromator, ('name',), (name,), **kws)
 
     def add_citation(self, name, notes='', attributes='',
-                     journal='',  authors='',  title='', 
-                     volume='', pages='',  year='', 
+                     journal='',  authors='',  title='',
+                     volume='', pages='',  year='',
                      doi='',  **kws):
         """add literature citation: name required
         notes and attributes optional
@@ -521,7 +522,7 @@ arguments
         kws['pages'] = pages
         kws['year'] = year
         kws['doi'] = doi
-        return self.__addRow(Citation, ('name',), (name,), **kws)        
+        return self.__addRow(Citation, ('name',), (name,), **kws)
 
     def add_info(self, key, value):
         """add Info key value pair -- returns Info instance"""
@@ -534,7 +535,7 @@ arguments
         kws['notes'] = notes
         kws['attributes'] = attributes
 
-        return self.__addRow(Ligand, ('name',), (name,), **kws)        
+        return self.__addRow(Ligand, ('name',), (name,), **kws)
 
     def add_person(self, name, email,
                    affiliation='', attributes='', **kws):
@@ -560,7 +561,7 @@ arguments
         kws['person_id'] = self._get_foreign_keyid(Person, person)
         kws['crystal_structure_id'] = self._get_foreign_keyid(CrystalStructure,
                                                               crystal_structure)
-        return self.__addRow(Sample, ('name',), (name,), **kws)        
+        return self.__addRow(Sample, ('name',), (name,), **kws)
 
 
     def add_suite(self, name, notes='', attributes='',
@@ -572,7 +573,7 @@ arguments
         kws['person_id'] = self._get_foreign_keyid(Person, person,
                                                    name='email')
 
-        return self.__addRow(Suite, ('name',), (name,), **kws)        
+        return self.__addRow(Suite, ('name',), (name,), **kws)
 
     def add_suite_rating(self, person, suite, score, comments=None):
         """add a score to a suite:  The following are required:
@@ -609,7 +610,7 @@ Optional:
     def import_XDIspectra(self, fname):
         """import a spectra from XDI ASCII Format"""
         print 'Hello!'
-        
+
     def add_spectra(self, name, notes='', attributes='', file_link='',
                     data_energy='', data_i0='', data_itrans='',
                     data_iemit='', data_irefer='', data_dtime_corr='',
@@ -626,14 +627,14 @@ Optional:
 
         spectra_names = self.query('name'
                                    ).from_statement('select name from spectra').all()
- 
+
         if len(spectra_names) > 1:
             if any([entry[0] == name for entry in spectra_names]):
                 raise XASDBException("A spectra named '%s' already exists" % name)
-                
+
         # eif  name in spectra_names:
         # return
-    
+
         kws['notes'] = notes
         kws['attributes'] = attributes
 
@@ -661,7 +662,7 @@ Optional:
             if val is None:
                 val = datetime(1,1,1)
             kws[attr] = val
-            
+
         kws['calc_mu_trans'] = calc_mu_trans
         kws['calc_mu_emit'] = calc_mu_emit
         kws['calc_mu_refer'] = calc_mu_refer
@@ -688,6 +689,6 @@ Optional:
                                                          energy_units,
                                                          name='units')
         try:
-            return self.__addRow(Spectra, ('name',), (name,), **kws)        
+            return self.__addRow(Spectra, ('name',), (name,), **kws)
         except:
             return None

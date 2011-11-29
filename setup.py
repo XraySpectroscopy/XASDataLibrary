@@ -4,7 +4,7 @@ import sys
 import lib
 
 #
-no_sqlachemy="""
+no_sqlalchemy="""
 *******************************************************
 *** WARNING - WARNING - WARNING - WARNING - WARNING ***
 
@@ -22,7 +22,8 @@ try:
     import sqlalchemy
     vers_info = sqlalchemy.__version__.split('.')
     assert int(vers_info[1]) >= 6
-    assert int(vers_info[2]) >= 5
+    if int(vers_info[1]) == 6:
+        assert int(vers_info[2]) >= 5
 except:
     print no_sqlalchemy
     sys.exit()

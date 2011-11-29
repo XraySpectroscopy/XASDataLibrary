@@ -11,16 +11,10 @@ try:
 except ImportError:
     HAS_NUMPY = False
 
-PRINTABLES = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ!"#$%&\'()*+,-./:;<=>?@[\\]^_`{|}~ \t\n\r\x0b\x0c'
-
-ALLOWED_CRYSTALS = ("Si", "Ge", "Diamond", "YB66",
-                    "InSb", "Beryl", "Multilayer")
-MATHEXPR = r'(-+)?(ln|exp|sin|asin)?\(?(\$\d)([/\*])*(\$\d)*\)?$'
 DATETIME = r'(\d{4})-(\d{1,2})-(\d{1,2})[ T](\d{1,2}):(\d{1,2}):(\d{1,2})$'
 
 MATCH = {'word':       re.compile(r'[a-zA-Z0-9_]+$').match,
          'properword': re.compile(r'[a-zA-Z_][a-zA-Z0-9_-]*$').match,
-         'mathexpr':   re.compile(MATHEXPR).match,
          'datetime':   re.compile(DATETIME).match
          }
 
@@ -28,23 +22,6 @@ def validate_datetime(sinput):
     "validate allowed datetimes"
     return MATCH['datetime'](sinput)
 
-def validate_mathexpr(sinput):
-    "validate mathematical expression"
-    return MATCH['mathexpr'](sinput)
-
-def validate_crystal(sinput):
-    """validate allowed names of crystal reflections:
-    Si 111,  Ge 220 etc are allowed:  ALLOWED CRYSTAL  3_integers
-    """    
-    xtal, reflection  = sinput.split(' ', 1)
-    if xtal.lower() not in (a.lower() for a in  ALLOWED_CRYSTALS):
-        return False
-    try:
-        refl = [int(i) for i in reflection.replace(' ','')]
-        return len(refl)>2
-    except ValueError:
-        return False
-    
 def validate_int(sinput):
     "validate for int"
     try:
@@ -52,7 +29,7 @@ def validate_int(sinput):
         return True
     except ValueError:
         return False
-    
+
 def validate_float(sinput):
     "validate for float"
     try:
@@ -80,7 +57,7 @@ def validate_words(sinput):
 def validate_edge(sinput):
     "validate for words"
     return MATCH['properword'](sinput) and \
-           sinput.lower() in ('k', 'l3', 'l2', 'l1', 'm45', 'm4', 'm5')
+           sinput.upper() in xdi_dict.EDGES
 
 def validate_properword(sinput):
     "validate for words"
@@ -109,34 +86,11 @@ class XDIFileException(Exception):
     def __str__(self):
         return self.msg
 
-COLUMN_NAMES = ('energy', 'i0', 'itrans', 'ifluor', 'irefer',
-                'mutrans', 'mufluor', 'murefer')
-
-DEFINED_FIELDS = {
-    "abscissa":    validate_mathexpr,
-    "beamline":    validate_words,
-    "collimation": validate_words,
-    "crystal" :    validate_crystal,
-    "d_spacing" :  validate_float,
-    "element":     validate_words,
-    "edge":        validate_edge,
-    "edge_energy": validate_float, 
-    "end_time"   : validate_datetime,
-    "focusing"   : validate_words, 
-    "harmonic_rejection": validate_chars,
-    "mu_fluorescence" : validate_mathexpr,
-    "mu_reference"    : validate_mathexpr,
-    "mu_transmission" : validate_mathexpr,
-    "ring_current"  : validate_float,
-    "ring_energy"   : validate_float,
-    "start_time"    : validate_datetime, 
-    "source"        : validate_words, 
-    "undulator_harmonic" : validate_int}
 
 class XDIFile(object):
     """ XAS Data Interchange Format:
 
-    See https://github.com/bruceravel/XAS-Data-Interchange
+    See https://github.com/XraySpectrscopy/XAS-Data-Interchange
 
     for further details
 
@@ -150,11 +104,11 @@ class XDIFile(object):
       column_data: dict of data for arrays -- same keys as
                  for columns.
 
-      
+
       comments:  list of user comments
       labels:    original column labels.
       abscissa:  column # for abscissa of data
-      beamline:    text description of beamline 
+      beamline:    text description of beamline
       collimation:  text description of source collimation
       crystal :    text description of crystal
       d_spacing :  monochromator d spacing (Angstroms?)
@@ -162,19 +116,19 @@ class XDIFile(object):
       end_time   : ending datetime
       focusing   : text description of beamline focusing
       harmonic_rejection: text description of harmonic rejection
-      mu_fluorescence : math expression to calculate mu_fluorescence 
+      mu_fluorescence : math expression to calculate mu_fluorescence
       mu_reference    : math expression to calculate mu_reference
-      mu_transmission : math expression to calculate mu_transmission 
+      mu_transmission : math expression to calculate mu_transmission
       ring_current  : value of ring current (mA?)
       ring_energy   : value of ring energy (GeV?)
-      start_time    : starting datetime, 
+      start_time    : starting datetime,
       source        : text description of source
       undulator_harmonic : value of undulator harmonic
-       
+
     Principle methods:
       read():     read XDI data file, set column data and attributes
       write(filename):  write xdi_file data to an XDI file.
-      
+
     """
     def __init__(self, fname=None):
         self.fname = fname
@@ -214,9 +168,9 @@ class XDIFile(object):
 
         if self.columns['energy'] is None:
             self.error("cannot write datafile '%s': No data to write" % fname)
-        
+
         print self.app_attrs['pylib'].keys()
-        
+
         topline = "# XDI/1.0"
         if self.app_info is not None:
             app_strings = []
@@ -232,7 +186,7 @@ class XDIFile(object):
                 icol = icol + 1
                 buff.append('# Column_%s: %i' % (attrib, icol))
                 labels.append(attrib)
-                
+
         buff.append('# Abscissa: $1')
         for attrib in sorted(DEFINED_FIELDS):
             if attrib.startswith('abscissa'):
@@ -240,29 +194,29 @@ class XDIFile(object):
             if self.attrs.get(attrib, None) is not None:
                 buff.append("# %s: %s" % (attrib.title(),
                                           str(self.attrs[attrib])))
-                
+
         for app in sorted(self.app_attrs):
             for key in sorted(self.app_attrs[app]):
                 value = str(self.app_attrs[app][key])
                 label = '%s_%s' % (app, key)
                 buff.append("# %s: %s" % (label.title(), value))
-        
+
         buff.append('# ///')
         for cline in self.comments:
             buff.append("# %s" % cline)
-        
-        buff.append('#----')        
+
+        buff.append('#----')
         buff.append('# %s' % ' '.join(labels))
         for idx in range(len(self.column_data['energy'])):
             dat = []
             for lab in labels:
                 dat.append(str(self.column_data[lab][idx]))
             buff.append("  %s" % '  '.join(dat))
-        
+
         fout = open(fname, 'w')
         fout.writelines(('%s\n' % l for l in buff))
         fout.close()
-    
+
     def read(self, fname=None):
         "read, validate XDI datafile"
         if fname is None and self.fname is not None:
@@ -323,8 +277,8 @@ class XDIFile(object):
                     validator = validate_int
                     isColumnLabel = True
                     col_label = attrib[7:]
-                    
-                if (attrib not in DEFINED_FIELDS and 
+
+                if (attrib not in DEFINED_FIELDS and
                     not validate_properword(fieldname)):
                     self.error("invalid field name '%s'" % fieldname)
                 if not validator(value):
@@ -346,15 +300,15 @@ class XDIFile(object):
         if self.has_numpy:
             self.rawdata = np.array(self.rawdata)
         self.assign_arrays()
-        
+
     def assign_arrays(self):
         """assign data arrays for i0, itrans, ifluor, irefer"""
         cols = self.columns
-        if cols['energy'] is None:            
+        if cols['energy'] is None:
             expr = validate_mathexpr(self.attrs['abscissa']).groups()
             cols['energy'] = int(expr[2].replace('$', ''))
 
-            
+
         # is there transmission data?
         if cols['mutrans'] is None and cols['itrans'] is None and \
            self.attrs['mu_transmission'] is not None:
@@ -369,7 +323,7 @@ class XDIFile(object):
 
         # is there reference data?
         if cols['murefer'] is None and cols['irefer'] is None and \
-           self.attrs['mu_reference'] is not None:            
+           self.attrs['mu_reference'] is not None:
             refer =  validate_mathexpr(self.attrs['mu_reference']).groups()
             if refer is not None and refer[1] == 'ln' and refer[3] == '/':
                 if refer[0] == '-':
@@ -379,11 +333,11 @@ class XDIFile(object):
 
         # is there fluoreecence data?
         if cols['mufluor'] is None and cols['ifluor'] is None and \
-           self.attrs['mu_fluorescence'] is not None:            
+           self.attrs['mu_fluorescence'] is not None:
             fluor =  validate_mathexpr(self.attrs['mu_fluorescence']).groups()
             if fluor is not None:
                 cols['ifluor'] = int(fluor[2].replace('$', ''))
-            
+
         # set column_data and mu arrays
         for name in COLUMN_NAMES:
             if cols[name] is not None:
@@ -396,7 +350,7 @@ class XDIFile(object):
                 dat['mutrans'] = self._op('itrans', 'i0', '/', use_log=True)
             elif (cols['itrans'] is None and cols['mutrans'] is not None):
                 dat['itrans'] = self._op('i0', 'mutrans', 'mul_exp')
- 
+
             if (cols['mufluor'] is None and cols['ifluor'] is not None):
                 dat['mufluor'] = self._op('ifluor', 'i0', '/')
             elif (cols['ifluor'] is None and cols['mufluor'] is not None):
@@ -407,9 +361,9 @@ class XDIFile(object):
                 dat['murefer'] = self._op('irefer', 'itrans', '/', use_log=True)
             elif (cols['irefer'] is None and cols['murefer'] is not None):
                 dat['irefer'] = self._op('itrans', 'murefer', 'mul_exp')
-            
+
     def _op(self, col1, col2, op, use_log=False):
-        "support two-array operations for intensity <-> mu calcs " 
+        "support two-array operations for intensity <-> mu calcs "
         dat1 = self.column_data[col1]
         dat2 = self.column_data[col2]
         if self.has_numpy:
@@ -431,7 +385,7 @@ class XDIFile(object):
             if use_log:
                 out = [math.log(d1) for d1 in out]
         return out
-        
+
     def get_column(self, idx):
         if idx is None or idx < 1:
             return None
@@ -439,5 +393,5 @@ class XDIFile(object):
             return self.rawdata[:, idx-1]
         else:
             return [row[idx-1] for row in self.rawdata]
-    
+
 

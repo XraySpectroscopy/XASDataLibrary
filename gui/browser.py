@@ -32,15 +32,15 @@ class MainFrame(wx.Frame):
 
         self.font = self.GetFont()
         self.SetFont(self.font)
-        
+
         self.xasdb = None
 
         self.current_filter = self.filters[0]
         self.create_frame()
         self.SetTitle("%s: %s" % (self.title, 'No Library Open'))
         self.ReadXDLFile(dbfile)
-        
-    def ReadXDLFile(self, dbname=None):            
+
+    def ReadXDLFile(self, dbname=None):
         if dbname is not None and isXASDataLibrary(dbname):
             self.xasdb = XASDataLibrary(dbname)
             self.SetTitle("%s :%s " % (self.title,
@@ -72,7 +72,7 @@ class MainFrame(wx.Frame):
 
     def onNewThing(self, evt=None):
         print 'this thing is not yet implemented!'
-        
+
     def ImportSpectra(self, evt=None):
         "import spectra from ASCII Column file"
         wildcard = "XAS Data Interchange (*.xdi)|*.xdi|"  \
@@ -115,7 +115,7 @@ class MainFrame(wx.Frame):
         self.spectra["<Add New Spectra>"] = None
         for row in self.xasdb.query(xasdb.Spectra):
             self.spectra[row.name] = row.id
-        
+
 
     def create_frame(self):
         "create top level frame"
@@ -136,7 +136,7 @@ class MainFrame(wx.Frame):
                       action=self.ImportSpectra)
         add_menu(self, fmenu, "Export Spectra",
                       "Write Spectra to ASCII (XDI) File",
-                      action=self.ExportSpectra)        
+                      action=self.ExportSpectra)
         fmenu.AppendSeparator()
         add_menu(self, fmenu, "E&xit\tAlt-X", "Exit this Program",
                       action=self.onClose)
@@ -147,20 +147,20 @@ class MainFrame(wx.Frame):
                  action=self.onNewThing)
         add_menu(self, omenu, "View/Add Samples",
                  "Manage Samples",
-                 action=self.onNewThing)        
+                 action=self.onNewThing)
         add_menu(self, omenu, "View/Add People",
                  "Manage People Adding to Library",
                  action=self.onNewThing)
         add_menu(self, omenu, "View/Add Beamlines",
                  "Manage Beamline, Facilities, Monochromators",
-                 action=self.onNewThing)        
+                 action=self.onNewThing)
 
         # and put the menu on the menubar
         menuBar.Append(fmenu, "&File")
         menuBar.Append(omenu, "&Tables")
         self.SetMenuBar(menuBar)
         self.CreateStatusBar(1, wx.CAPTION|wx.THICK_FRAME)
-        
+
         # Now create the Main Panel to put the other controls on.
         #  SelectFilter | CurrentFilter | SpectraList
         #  ------------------------------------------
@@ -179,7 +179,7 @@ class MainFrame(wx.Frame):
         sizer.Add(self.filterchoice, 0, wx.ALIGN_LEFT|wx.GROW|wx.ALL, 0)
 
         pack(topsection, sizer)
-        
+
         splitter1  = wx.SplitterWindow(self, style=wx.SP_LIVE_UPDATE)
         splitter1.SetMinimumPaneSize(200)
 
@@ -188,14 +188,14 @@ class MainFrame(wx.Frame):
 
         splitter2 = wx.SplitterWindow(self.top_panel, style=wx.SP_LIVE_UPDATE)
         splitter2.SetMinimumPaneSize(200)
-        
+
         # left hand side -- filter
         self.left_panel   = wx.Panel(splitter2)
         self.selection_list  = wx.ListBox(self.left_panel)
         self.selection_label = wx.StaticText(self.left_panel,
                                              label=self.current_filter)
         sizer = wx.BoxSizer(wx.VERTICAL)
-        
+
         sizer.Add(self.selection_label, 0, wx.ALIGN_LEFT|wx.ALL, 1)
         sizer.Add(self.selection_list, 1, wx.ALIGN_LEFT|wx.GROW|wx.ALL, 1)
 
@@ -216,25 +216,25 @@ class MainFrame(wx.Frame):
         self.spectra_list.SetBackgroundColour(wx.Colour(250, 250, 240))
 
         self.selection_list.Clear()
-        for name in ('Suite1', 'Suite2'):
+        for name in ('Fe Compounds, GSECARS', 'As standards'):
             self.selection_list.Append(name)
 
         self.spectra_list.Clear()
-        for name in ('S1', 'S2'):
+        for name in ('FeO', 'Fe2O3', 'Fe3O4', 'FeCO3', 'Fe metal', 'maghemite'):
             self.spectra_list.Append(name)
 
         self.selection_list.Bind(wx.EVT_LISTBOX, self.onSelectionSelect)
         self.spectra_list.Bind(wx.EVT_LISTBOX, self.onSpectraSelect)
-        
+
         splitter2.SplitVertically(self.left_panel, self.right_panel, 0)
 
         sizer2 = wx.BoxSizer(wx.HORIZONTAL)
         sizer2.Add(splitter2, 1, wx.GROW|wx.ALL, 5)
         pack(self.top_panel, sizer2)
-        
+
 
         splitter1.SplitHorizontally(self.top_panel, self.bot_panel, 1)
-       
+
         sizer = wx.BoxSizer(wx.VERTICAL)
         sizer.Add(topsection, 0, wx.ALL|wx.GROW, 1)
         sizer.Add(splitter1, 1, wx.GROW|wx.ALL, 1)
@@ -264,14 +264,14 @@ class MainFrame(wx.Frame):
         self.selection_list.Clear()
         for name in sel_list:
             self.selection_list.Append(name)
-        
+
     def onSelectionSelect(self, evt=None):
         print 'onSelection Select %s=%s'  % (self.current_filter, evt.GetString())
-        
+
 
     def onSpectraSelect(self, evt=None):
         print 'onSpectra Select ' , evt.GetString()
-        
+
     def onClose(self, evt=None):
         "quit application"
         ret = popup(self, "Really Quit?", "Exit XAS Data Library?",
@@ -285,20 +285,20 @@ class TestApp(wx.App, wx.lib.mixins.inspection.InspectionMixin):
     def __init__(self, dbfile=None, **kws):
         self.dbfile = dbfile
         wx.App.__init__(self)
-        
+
     def OnInit(self):
-        self.Init() 
+        self.Init()
         frame = MainFrame(dbfile=dbfile)
         frame.Show()
         self.SetTopWindow(frame)
         return True
-        
+
 if __name__ == '__main__':
     import sys
     dbfile = None
     if len(sys.argv) > 1:
         dbfile = sys.argv[1]
-    #app = wx.PySimpleApp()        
+    #app = wx.PySimpleApp()
     #MainFrame(dbfile=dbfile).Show()
     #app.MainLoop()
     TestApp(dbfile=dbfile).MainLoop()

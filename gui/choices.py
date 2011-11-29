@@ -17,12 +17,12 @@ class _dbChoice(wx.Choice):
         self.SetItems(choices)
         if len(self.choices)  > 0:
             self.SetSelection(0)
-        
+
     def SetChoices(self, choices):
         self.Clear()
         self.SetItems(choices)
         self.choices = choices
-        
+
     def Select(self, choice):
         if isinstance(choice, int):
             choice = '%i' % choice
@@ -58,13 +58,13 @@ class HyperChoice(object):
         table = self.label.replace(':', '')
         print 'onClick for table= ', table, hasattr(table_managers, table)
         print self.choice
-    
+
 class ColumnChoice(_dbChoice):
     def __init__(self, parent, columns=None, size=(75,-1)):
         if columns is None:
             columns = ['1', '2', '3']
         _dbChoice.__init__(self, parent, choices=columns, size=size)
-        
+
 class TypeChoice(_dbChoice):
     def __init__(self, parent, choices=None, size=(150,-1)):
         _dbChoice.__init__(self, parent, choices=choices, size=size)
@@ -102,7 +102,7 @@ class BeamlineChoice(_dbChoice):
             choices.sort()
         _dbChoice.__init__(self, parent, choices=choices,
                            db=db, size=size)
-            
+
     def Select(self, choice):
         if choice is None:
             return
@@ -126,19 +126,19 @@ class BeamlineChoice(_dbChoice):
             for name in bnames:
                 if name.lower() in choice:
                     _bl = name
-                    break                
+                    break
             newchoice = "%s: %s" % (_fac, _bl)
             if newchoice in self.choices:
                 self.SetSelection(self.choices.index(newchoice))
 
 class MonochromatorChoice(_dbChoice):
     def __init__(self, parent, db=None, show_all=True,  size=(150,-1)):
-        choices = []
+        choices = ['Si(111), water-cooled']
         if db is not None:
             choices = ["%s" % (row.name) for row in db.query(xasdb.Monochromator)]
             choices.sort()
         _dbChoice.__init__(self, parent, choices=choices, size=size)
-            
+
     def Select(self, choice):
         if choice is None:
             return
@@ -152,7 +152,7 @@ class MonochromatorChoice(_dbChoice):
             choice = choice.lower()
             for delim in '()[]{}<> ':
                 choice = choice.replace(delim, '')
-            choice = choice.replace('-', ',').split(',')[0]                
+            choice = choice.replace('-', ',').split(',')[0]
             for index, name in enumerate(self.choices):
                 nam = name.lower()
                 for delim in '()[]{}<> ':
@@ -165,7 +165,7 @@ class MonochromatorChoice(_dbChoice):
 
 class ElementChoice(_dbChoice):
     def __init__(self, parent, db=None, show_all=True,  size=(150,-1)):
-        choices, self.names, self.symbols, self.atnums = [], [], [], []
+        choices, self.names, self.symbols, self.atnums = ['Cu', 'Fe'], [], [], []
         if db is not None:
             elements = db.get_elements(show_all=show_all)
             choices = ["%s: %s" % (elem[1], elem[0]) for elem in elements]
@@ -190,7 +190,7 @@ class ElementChoice(_dbChoice):
 
 class EdgeChoice(_dbChoice):
     def __init__(self, parent, db=None, show_all=True,  size=(75,-1)):
-        choices = []
+        choices = ['K', 'L3', 'L2', 'L1', 'M45']
         if db is not None:
             choices = db.get_edges(show_all=show_all)
         _dbChoice.__init__(self, parent, choices=choices, size=size)
@@ -225,4 +225,4 @@ def DateCtrl(parent, use_now=False):
     return datectrl
 
 
-      
+
