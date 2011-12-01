@@ -1,1 +1,0 @@
-COLUMN_NAMES = ['energy', 'angle', 'i0', 'itrans', 'ifluor', 'irefer', 'mutrans', 'mufluor', 'murefer', 'k', 'chi']
