@@ -1,30 +1,29 @@
 # XDI/1.0 GSE/1.0
-# Column_energy: 1
-# Column_i0: 2
-# Column_itrans: 3
-# Column_mutrans: 4
-# Edge: K
-# Element: Cu
-# Abscissa: $1
-# Beamline: APS 13ID
-# Collimation: none
-# Crystal: Si 111
-# Edge_Energy: 8980.0
-# Focusing: yes
-# Harmonic_Rejection: rhodium-coated mirror
-# Ring_Energy: 7.00
-# Source: APS Undulator A
-# Start_Time: 2001-06-26T22:27:31
-# Gse_Detector_I0: 10cm / N2
-# Gse_Detector_I1: 10cm / N2
-# Gse_Sample_Crystalstructure: Cu
-# Gse_Sample_Prep: Cu metal foil
-# Gse_Sample_Temperature: Room Temperature
-# Pylib_Original_Labels: energy xmu i0
+# Column.1: energy eV
+# Column.2: i0
+# Column.3: itrans
+# Column.4: murefer
+# Scan.edge: K
+# Scan.element: Cu
+# Scan.edge_energy: 8980.0
+# Mono.name: Si 111
+# Mono.d_spacing: 3.13553
+# Beamline.name: APS 13ID
+# Beamline.collimation: none
+# Beamline.focusing: yes
+# Beamline.harmonic_rejection: rhodium-coated mirror
+# Facility.energy: 7.00 GeV
+# Facility.xray_source: APS Undulator A
+# Scan.start_time: 2001-06-26T22:27:31
+# Detector.I0: 10cm  N2
+# Detector.I1: 10cm  N2
+# Sample.name: Cu
+# Sample.prep: Cu metal foil
+# GSE.EXTRA:  config 1
 # ///
 # Cu foil Room Temperature
 #----
-# energy i0 itrans mutrans
+# energy i0 itrans mufluor
   8779.0  149013.7  550643.089065  -1.3070486
   8789.0  144864.7  531876.119084  -1.3006104
   8799.0  132978.7  489591.10592  -1.3033816

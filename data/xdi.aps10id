@@ -1,25 +1,29 @@
 # XDI/1.0 MX/2.0
-# Beamline: APS 10ID
-# Source: APS Undulator A
-# Ring_energy: 7.00
-# Undulator_harmonic: 3
-# Crystal: Si 111
-# Collimation: none
-# Harmonic_rejection: flat Rh-coated mirror
-# Focusing: none
-# Start_time: 2005-03-08T20:08:57
-# Edge_energy: 7112.00
-# Abscissa: $1
-# Mu_transmission: ln($2/$3)
-# Mu_fluorescence: $4/$2
-# Mu_reference: ln($3/$5)
-# MX-Num-regions: 1
-# MX-SRB: 6900
-# MX-SRSS: 0.5
-# MX-SPP: 0.1
-# MX-Settling-time: 0
-# MX-Offsets: 11408.00 11328.00 13200.00 10774.00
-# MX-Gains: 8.00 7.00 7.00 9.00
+# Column.1: energy eV
+# Column.2: i0
+# Column.3: itrans
+# Column.4: ifluor
+# Column.5: irefer
+# Mono.name: Si 111
+# Mono.d_spacing: 3.13553
+# Beamline.collimation: none
+# Beamline.armonic_rejection: flat Rh-coated mirror
+# Beamline.undulator_harmonic: 3
+# Beamline.focusing: none
+# Beamline.name: APS 10ID
+# Facility.xray_source: APS Undulator A
+# Facility.energy: 7.00 GeV
+# Scan.start_time: 2005-03-08T20:08:57
+# Scan.edge_energy: 7112.00
+# Scan.edge: K
+# Scan.element: Fe
+# MX.Num-regions: 1
+# MX.SRB: 6900
+# MX.SRSS: 0.5
+# MX.SPP: 0.1
+# MX.Settling-time: 0
+# MX.Offsets: 11408.00 11328.00 13200.00 10774.00
+# MX.Gains: 8.00 7.00 7.00 9.00
 #///
 # Fe K-edge, Lepidocrocite powder on kapton tape, RT
 # 4 layers of tape
