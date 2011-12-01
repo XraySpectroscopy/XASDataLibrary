@@ -13,17 +13,19 @@ no_sqlalchemy="""
 Version 0.6.5 or higher is needed for the xafs database
 
 try:
-      easy_install sqlalchemy
+      easy_install -U sqlalchemy
 
 *******************************************************
 """
 
 try:
     import sqlalchemy
-    vers_info = sqlalchemy.__version__.split('.')
-    assert int(vers_info[1]) >= 6
-    if int(vers_info[1]) == 6:
-        assert int(vers_info[2]) >= 5
+    major, minor, release = [int(i) for i in  sqlalchemy.__version__.split('.')]
+    assert major == 0
+    assert minor >= 6
+    if minor == 6:
+        assert release >= 5
+    
 except:
     print no_sqlalchemy
     sys.exit()

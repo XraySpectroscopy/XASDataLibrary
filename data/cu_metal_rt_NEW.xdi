@@ -15,8 +15,8 @@
 # Facility.energy: 7.00 GeV
 # Facility.xray_source: APS Undulator A
 # Scan.start_time: 2001-06-26T22:27:31
-# Detector.I0: 10cm / N2
-# Detector.I1: 10cm / N2
+# Detector.I0: 10cm  N2
+# Detector.I1: 10cm  N2
 # Sample.name: Cu
 # Sample.prep: Cu metal foil
 # ///

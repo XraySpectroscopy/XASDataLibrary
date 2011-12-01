@@ -474,8 +474,8 @@ class FileImporter(wx.Frame):
 
     def ShowFile(self, fname=None):
         if fname is not None:
-            text = open(fname+'.NEW','r').read()
-
+            text = open(fname, 'r').read()
+           
             short_fname =os.path.basename(fname)
             self.name.SetValue(short_fname.replace('/', '_'))
             self.filename.SetLabel(fname)

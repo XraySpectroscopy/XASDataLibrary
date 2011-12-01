@@ -18,7 +18,7 @@ from ordereddict import OrderedDict
 from utils import pack, add_btn, add_menu, popup, FileOpen, FileSave
 
 from SpectraPanel import SpectraPanel
-from FileImporter import FileImporter
+from fileimporter import FileImporter
 
 class MainFrame(wx.Frame):
     """This is the main XAS DataBrowser Frame."""
