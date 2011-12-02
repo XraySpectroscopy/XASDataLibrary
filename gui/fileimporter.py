@@ -458,13 +458,32 @@ class FileImporter(wx.Frame):
 
     def onImport(self, event=None):
         print "Import Data to db! ", self.db
-        print self.db
-        print dir(self.db)
-        # self.db.add_person()
-        en = self.xdifile.energy
-        
-        self.db.add_spectra(self.name.GetValue(),
-                            energy=en)
+        kws = {}
+        for attr in ('energy', 'i0', 'itrans', 'ifluor', 'irefer',
+                     'mutrans', 'mufluor', 'murefer', 'k', 'chi'):            
+            if hasattr(self.xdifile, attr):
+                kws[attr] = getattr(self.xdifile, attr)
+
+        for name, choice_widget in (('edge', self.edge), ('element', self.elem)):
+            val = choice_widget.GetStringSelection()
+            if val not in (None, '', 'None'):
+                kws[name] = val
+
+        sdate = self.collection_datetime[1].GetValue()
+        stime = self.collection_datetime[2].GetValue()
+                
+        print '--> db.add_spectra ', kws.keys()
+        print type(sdate)
+        print dir(sdate)
+        # self.db.add_spectra(self.name.GetValue(), **kws)
+
+        # name, notes='', attributes='', file_link='',
+        #            notes_i0='', notes_itrans='', notes_ifluor='',
+        #            notes_irefer='', temperature='', submission_date=None,
+        #            collection_date=None, reference_used='',
+        #            energy_units=None, monochromator=None, person=None,
+        #            sample=None, beamline=None,
+        #            data_format=None, citation=None, reference=None, **kws):
         
 
     def onEnergyChoice(self, evt=None):
@@ -591,7 +610,7 @@ class FileImporter(wx.Frame):
             elif name == 'mufluor':
                 self.column_if.Select(num)
                 self.type_if.Select('mu')
-            elif namee == 'ifluor':
+            elif name == 'ifluor':
                 self.column_if.Select(num)
                 self.type_if.Select('intensity')
 
