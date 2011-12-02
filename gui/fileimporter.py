@@ -472,9 +472,11 @@ class FileImporter(wx.Frame):
         sdate = self.collection_datetime[1].GetValue()
         stime = self.collection_datetime[2].GetValue()
                 
-        print '--> db.add_spectra ', kws.keys()
-        print type(sdate)
+        #print '--> db.add_spectra ', kws.keys()
+        #print 'sdata  ', type(sdate), sdate
         print dir(sdate)
+        print sdate.GetDateOnly()
+        print sdate.ToUTC()
         # self.db.add_spectra(self.name.GetValue(), **kws)
 
         # name, notes='', attributes='', file_link='',
