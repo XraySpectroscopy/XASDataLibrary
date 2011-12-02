@@ -464,7 +464,7 @@ class FileImporter(wx.Frame):
         en = self.xdifile.energy
         
         self.db.add_spectra(self.name.GetValue(),
-                            data_energy=en)
+                            energy=en)
         
 
     def onEnergyChoice(self, evt=None):
