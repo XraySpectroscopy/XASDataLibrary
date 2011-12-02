@@ -4,7 +4,8 @@ import wx
 import wx.lib.agw.pycollapsiblepane as CP
 
 import xasdb
-from xasdb import XDIFile, isotime2datetime
+from xasdb import isotime2datetime
+from xdi import XDIFile
 
 from utils import pack, add_btn, add_menu, popup, FileOpen, FileSave, FloatCtrl
 
@@ -30,8 +31,7 @@ def Title(parent, text, colour=(50, 50, 180)):
 
 class FileImporter(wx.Frame):
     title = 'ASCII File Importer'
-    energy_choices = ('energy (eV)', 'energy (keV)',
-                      'angle (degrees)', 'angle steps')
+    energy_choices = ('energy (eV)', 'energy (keV)', 'angle (degrees)')
 
     def __init__(self, fname=None, db=None):
         wx.Frame.__init__(self, parent=None,
@@ -283,7 +283,7 @@ class FileImporter(wx.Frame):
         self.sample_source = wx.TextCtrl(panel, value='', size=(220, 75),
                                          style=wx.TE_MULTILINE)
 
-        self.user_notes = wx.TextCtrl(panel, value='', size=(320, 75),
+        self.user_notes = wx.TextCtrl(panel, value='', size=(400, 100),
                                       style=wx.TE_MULTILINE)
 
         irow = 1
@@ -373,7 +373,7 @@ class FileImporter(wx.Frame):
         self.column_ir = ColumnChoice(panel)
 
         self.type_en = TypeChoice(panel, self.energy_choices)
-        self.type_i0 = TypeChoice(panel, ('intensity',))
+        self.type_i0 = TypeChoice(panel, ('not collected', 'intensity',))
         self.type_it = TypeChoice(panel, ('not collected', 'intensity','mu'))
         self.type_if = TypeChoice(panel, ('not collected', 'intensity','mu'))
         self.type_ir = TypeChoice(panel, ('not collected', 'intensity','mu'))
@@ -451,13 +451,21 @@ class FileImporter(wx.Frame):
         sizer.Add(self.mono_steps ,       (irow, 4), (1, 1), namestyle, 1)
         sizer.Add(stext('steps/degree'),  (irow, 5), (1, 1), labstyle, 1)
 
-        self.mono_dspacing.DisableEntry()
-        self.mono_steps.DisableEntry()
+        #self.mono_dspacing.DisableEntry()
+        #self.mono_steps.DisableEntry()
 
         pack(panel, sizer)
 
-    def onImport(self, evt=None):
-        print "Import Data to db!"
+    def onImport(self, event=None):
+        print "Import Data to db! ", self.db
+        print self.db
+        print dir(self.db)
+        # self.db.add_person()
+        en = self.xdifile.energy
+        
+        self.db.add_spectra(self.name.GetValue(),
+                            data_energy=en
+        
 
     def onEnergyChoice(self, evt=None):
         """ on selection of energy type """
@@ -492,34 +500,37 @@ class FileImporter(wx.Frame):
 
     def fill_from_xdifile(self, xfile):
         "fill in form from XDIFile"
-        edge = xfile.attrs['edge']
-        elem = 'Cu' # xfile.attrs['element']
-        self.user_notes.SetValue('\n'.join(xfile.comments))
+        def get_attr(name):
+            if '.' in name:
+                family, member = name.lower().split('.', 1)
+                if family in xfile.attrs:
+                    return xfile.attrs[family].get(member, None)
+            return None
+               
+        self.user_notes.SetValue(xfile.comments)
+        self.edge.Select(get_attr('scan.edge'))
+        self.elem.Select(get_attr('scan.element'))
 
-
-        self.edge.Select(edge)
-        self.elem.Select(elem)
-
-        for attr, widget, cast in (('collimation', self.collimation, str),
-                                   ('source',      self.xray_source, str),
-                                   ('focusing',    self.focusing, str),
-                                   ('harmonic_rejection',  self.harmonic_rej, str),
-                                   ('d_spacing',    self.mono_dspacing, float),
-                                   ('ring_current', self.ring_current, float),
-                                   ('ring_energy',  self.ring_energy, float)):
-
-            value = xfile.attrs.get(attr, None)
+        for entry in (('beamline.collimation',        self.collimation,   str),
+                      ('beamline.focusing',           self.focusing,      str),
+                      ('beamline.harmonic_rejection', self.harmonic_rej,  str),
+                      ('mono.d_spacing',              self.mono_dspacing, float),
+                      ('facility.xray_source',        self.xray_source,   str),
+                      ('facility.ring_current',       self.ring_current,  str),
+                      ('facility.energy',             self.ring_energy,   float)):
+            
+            attr, widget, cast = entry
+            value = get_attr(attr)
             if value not in (None, 'none', 'None'):
                 widget.SetValue(cast(value))
 
-        self.mono_dspacing.SetValue(3.13553)
 
         # beamline, facility, mono settings --- tricky
-        beamline =  xfile.attrs.get('beamline', None)
+        beamline =  get_attr('beamline.name')
         if beamline not in (None, 'none', 'None'):
             self.beamline.Select(beamline)
 
-        m_xtal =  xfile.attrs.get('crystal', None)
+        m_xtal =  get_attr('mono.name')
         if m_xtal not in (None, 'none', 'None'):
             try:
                 m_name = self.monochromator.Select(m_xtal)
@@ -532,14 +543,11 @@ class FileImporter(wx.Frame):
                     self.mono_stepsd.Disable()
             except:
                 pass
-
+ 
         # set date/time
-        isotime = None
-        if xfile.attrs.get('end_time', None) is not None:
-            isotime = xfile.attrs['end_time']
-        elif xfile.attrs.get('start_time', None) is not None:
-            isotime = xfile.attrs['start_time']
-
+        isotime = get_attr('scan.end_time')
+        if isotime is None:
+            isotime = get_attr('scan.start_time')
         if isotime is not None:
             dtime = isotime2datetime(isotime)
             wxdate = wx.DateTime()
@@ -549,47 +557,50 @@ class FileImporter(wx.Frame):
             self.collection_datetime[1].SetValue(wxdate)
             self.collection_datetime[2].SetValue(wxdate)
 
-
         nrow, ncol =  xfile.rawdata.shape
         col_choices = ['%i' % (i+1) for i in range(ncol)]
-
+        self.column_en.SetChoices(col_choices)
         self.column_i0.SetChoices(col_choices)
         self.column_it.SetChoices(col_choices)
         self.column_if.SetChoices(col_choices)
         self.column_ir.SetChoices(col_choices)
+ 
+        for num, name in xfile.column_labels.items():
+            if name == 'energy':
+                self.column_en.Select(num)
+                extra = xfile.column_attrs.get(num, 'eV')
+                if extra in ('eV', 'keV'):
+                    self.type_it.Select('energy (%s)' % extra)                                    
+            elif name == 'angle':
+                self.column_en.Select(num)
+                extra = xfile.column_attrs.get(num, 'degrees')
+                if extra.startswith('deg'): extra = 'degrees'
+                if extra.startswith('rad'): extra = 'radians'
+                if extra in ('degrees', 'radians'):
+                    self.type_it.Select('angle (%s)' % extra)
+            elif name == 'i0':
+                self.column_i0.Select(num)
+                self.type_i0.Select('intensity')
+            elif name == 'mutrans':
+                self.column_it.Select(num)
+                self.type_it.Select('mu')
+            elif name == 'itrans':
+                self.column_it.Select(num)
+                self.type_it.Select('intensity')
 
-        for key, val in xfile.columns.items():
-            if val is not None:
-                if key == 'energy':
-                    self.column_en.Select(val)
-                elif key == 'i0':
-                    self.column_i0.Select(val)
-                elif key.endswith('trans'):
-                    self.column_it.Select(val)
-                    self.type_it.Select('intensity')
-                    if key.startswith('mu'):
-                        self.type_it.Select('mu')
-                elif key.endswith('refer'):
-                    self.column_ir.Select(val)
-                    self.type_ir.Select('intensity')
-                    if key.startswith('mu'):
-                        self.type_ir.Select('mu')
-                elif key.endswith('fluor') or key.endswith('emit'):
-                    self.column_if.Select(val)
-                    self.type_if.Select('intensity')
-                    if key.startswith('mu'):
-                        self.type_if.Select('mu')
+            elif name == 'mufluor':
+                self.column_if.Select(num)
+                self.type_if.Select('mu')
+            elif namee == 'ifluor':
+                self.column_if.Select(num)
+                self.type_if.Select('intensity')
 
-        # guess energy data
-        en = xfile.column_data['energy'][:2]
-        enguess = self.energy_choices[0]
-        if en[1] < en[0]:
-            enguess =self.energy_choices[3]
-            if en[1] > 90:
-                enguess =self.energy_choices[4]
-        elif en[1] < 200:
-            enguess = self.energy_choices[1]
-        self.type_en.Select(enguess)
+            elif name == 'murefer':
+                self.column_ir.Select(num)
+                self.type_ir.Select('mu')
+            elif name == 'irefer':
+                self.column_ir.Select(num)
+                self.type_ir.Select('intensity')
 
     def onClose(self, evt=None):
         "quit frame"

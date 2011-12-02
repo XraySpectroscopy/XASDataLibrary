@@ -41,6 +41,7 @@ class MainFrame(wx.Frame):
         self.ReadXDLFile(dbfile)
 
     def ReadXDLFile(self, dbname=None):
+
         if dbname is not None and isXASDataLibrary(dbname):
             self.xasdb = XASDataLibrary(dbname)
             self.SetTitle("%s :%s " % (self.title,
@@ -61,7 +62,7 @@ class MainFrame(wx.Frame):
         wildcard = "XAS Data Libraries (*.xdl)|*.xdl|"  \
            "All files (*.*)|*.*"
         dbname = FileSave(self, "Create New XAS Data Library",
-                          wildcard=wildcard)
+                          wildcard=wildcard, default='MySpectra.xdl')
         if dbname is not None:
             self.xasdb = XASDataLibrary()
             if not dbname.endswith('.xdl'):
@@ -77,6 +78,9 @@ class MainFrame(wx.Frame):
         "import spectra from ASCII Column file"
         wildcard = "XAS Data Interchange (*.xdi)|*.xdi|"  \
            "All files (*.*)|*.*"
+        if self.xasdb is None:
+            return
+        
         fname = FileOpen(self, "Import Spectra",
                           wildcard=wildcard)
         if fname is not None:

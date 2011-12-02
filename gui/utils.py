@@ -93,10 +93,11 @@ def FileOpen(parent, message, wildcard=None):
     return out
 
 
-def FileSave(parent, message, wildcard=None):
+def FileSave(parent, message, default=None, wildcard=None):
     "File Save dialog"
     out = None
     dlg = wx.FileDialog(parent, message=message,
+                        defaultFile=default,
                         wildcard=wildcard,
                         style=wx.SAVE|wx.CHANGE_DIR)
     if dlg.ShowModal() == wx.ID_OK:

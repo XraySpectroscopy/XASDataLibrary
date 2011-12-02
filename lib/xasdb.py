@@ -612,10 +612,10 @@ Optional:
         print 'Hello!'
 
     def add_spectra(self, name, notes='', attributes='', file_link='',
-                    data_energy='', data_i0='', data_itrans='',
-                    data_iemit='', data_irefer='', data_dtime_corr='',
-                    calc_mu_trans=None, calc_mu_emit=None, calc_mu_refer=None,
-                    notes_i0='', notes_itrans='', notes_iemit='',
+                    energy=None, i0=None, itrans=None,
+                    ifluor=None, irefer=None, k=None, chi=None,
+                    mutrans=None, mufluor=None, murefer=None,
+                    notes_i0='', notes_itrans='', notes_ifluor='',
                     notes_irefer='', temperature='', submission_date=None,
                     collection_date=None, reference_used='',
                     energy_units=None, monochromator=None, person=None,
@@ -640,12 +640,12 @@ Optional:
 
         kws['file_link'] = file_link
 
-        for attr, val in (('data_energy', data_energy),
-                          ('data_i0', data_i0),
-                          ('data_itrans', data_itrans),
-                          ('data_iemit', data_iemit),
-                          ('data_irefer', data_irefer),
-                          ('data_dtime_corr', data_dtime_corr)):
+        for attr, val in (('energy', energy), ('i0', i0), ('k', k),
+                          ('chi',  chi), ('itrans', itrans),
+                          ('ifluor', ifluor),  ('irefer', irefer),
+                          ('mutrans', mutrans), ('mufluor', mufluor),
+                          ('murefer', murefer)):
+
             if isinstance(val, numpy.ndarray):
                 val = list(val.flatten())
             kws[attr] = json_encode(val)
@@ -663,12 +663,9 @@ Optional:
                 val = datetime(1,1,1)
             kws[attr] = val
 
-        kws['calc_mu_trans'] = calc_mu_trans
-        kws['calc_mu_emit'] = calc_mu_emit
-        kws['calc_mu_refer'] = calc_mu_refer
         kws['notes_i0'] = notes_i0
         kws['notes_itrans'] = notes_itrans
-        kws['notes_iemit'] = notes_iemit
+        kws['notes_ifluor'] = notes_ifluor
         kws['notes_irefer'] = notes_irefer
         kws['temperature'] = temperature
 
