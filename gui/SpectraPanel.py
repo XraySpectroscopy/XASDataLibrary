@@ -48,7 +48,7 @@ class SpectraPanel(wx.Panel):
         self.data_panel.SetBackgroundColour(wx.Colour(250, 250, 250))
 
         dpan = self.data_panel
-        dlabel  = wx.StaticText(dpan, label='Data:   FeO')
+        dlabel  = wx.StaticText(dpan, label='No Data Selected')
         sizer =  wx.BoxSizer(wx.VERTICAL)
         sizer.Add(dlabel,   0, wx.ALIGN_LEFT|wx.ALIGN_TOP, 5)
         pack(dpan, sizer)

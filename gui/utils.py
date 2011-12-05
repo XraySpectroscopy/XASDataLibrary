@@ -107,7 +107,7 @@ def FileSave(parent, message, default=None, wildcard=None):
     return out
 
 
-def set_float(val, default=0):
+def set_float(val, default=None):
     """ utility to set a floating value,
     useful for converting from strings """
     if val in (None, ''):
@@ -122,7 +122,6 @@ class FloatCtrl(wx.TextCtrl):
     a wx.TextCtrl that allows only numerical input, can take a precision argument
     and optional upper / lower bounds
     Options:
-
     """
     def __init__(self, parent, value='', minval=None, maxval=None,
                  precision=3, bell_on_invalid = True,
@@ -196,12 +195,12 @@ class FloatCtrl(wx.TextCtrl):
     def SetValue(self, value=None, act=True):
         " main method to set value "
         if value is None:
-            value = wx.TextCtrl.GetValue(self).strip()
+            value = set_float(wx.TextCtrl.GetValue(self).strip())
         self.__CheckValid(value)
         self.__GetMark()
+        value = set_float(value)
         if value is not None:
-            wx.TextCtrl.SetValue(self, self.format % set_float(value))
-
+            wx.TextCtrl.SetValue(self, self.format % value)
         if self.is_valid and hasattr(self.__action, '__call__') and act:
             self.__action(value=self.__val)
         elif not self.is_valid and self.bell_on_invalid:

@@ -33,6 +33,7 @@ class BaseTableFrame(wx.Frame):
         wx.Frame.__init__(self, parent, -1,  title, style=style,
                            size=size, pos=pos)
         self.rows = {}
+        self.current = None
         self.buildFrame()
 
     def show_selection(self, name=None):
@@ -46,6 +47,7 @@ class BaseTableFrame(wx.Frame):
         if evt is not None:
             sel = str(self.rowlist.GetStringSelection())
             row = self.rows.get(sel, None)
+            self.current = sel
         return row
 
     def show_row(self, row=None):
@@ -63,7 +65,10 @@ class BaseTableFrame(wx.Frame):
             if dtype == 'foreign':
                 if hasattr(val, 'name'):
                     val = val.name
-                widget.SetStringSelection(val)
+                try:
+                    widget.SetStringSelection(val)
+                except TypeError:
+                    pass
             else:
                 widget.SetValue(clean(val))
 
@@ -86,7 +91,7 @@ class BaseTableFrame(wx.Frame):
         "save table row"
         self.save_row(self.__event_row(evt))
         self.set_rowlist()
-
+            
     def onRemove(self, evt=None):
         "remove table row"
         self.remove_row(self.__event_row(evt))
@@ -102,7 +107,6 @@ class BaseTableFrame(wx.Frame):
         self.rightpanel = wx.Panel(splitter)
 
         self.set_rowlist()
-        self.rowlist.Select(0)
 
         rpanel = self.rightpanel
         rsizer =  wx.BoxSizer(wx.VERTICAL)
@@ -144,11 +148,17 @@ class BaseTableFrame(wx.Frame):
             self.rows[name] = row
             self.rowlist.Append(name)
 
+        if self.current is None:
+            self.rowlist.Select(0)
+        else:
+            self.rowlist.SetStringSelection(self.current)
+            
         # this tweaking of the splitter sash seems to be needed to
         # keep sash and scrollbar visible when the list is repopulated
         sash = max(165, self.rowlist.GetParent().GetSashPosition())
         idx = len(names)
         self.rowlist.GetParent().SetSashPosition(sash + (-1 + 2*(idx%2)))
+        
         if hasattr(self.rowupdate_cb, '__call__'):
             self.rowupdate_cb(names)
 
@@ -205,6 +215,7 @@ class PersonManager(BaseTableFrame):
         BaseTableFrame.__init__(self, parent, tablename='Person',
                                  db=db, rowupdate_cb=rowupdate_cb,
                                  size=(450,350), **kws)
+        
     def save_row(self, row=None):
         "save table entry"
         if row is None:
@@ -335,3 +346,24 @@ class BeamlineManager(BaseTableFrame):
                 setattr(row, attr, val)
         self.db.commit()
 
+
+class SuiteManager(BaseTableFrame):
+    attrs = (('name', None, None),
+             ('notes', 'multi', 75))
+    table =  xasdb.Suite
+    def __init__(self, parent=None, rowupdate_cb=None, db=None, **kws):
+        BaseTableFrame.__init__(self, parent, tablename='Suite of Samples',
+                                 db=db, rowupdate_cb=rowupdate_cb,
+                                 size=(450,350), **kws)
+
+    def save_row(self, row=None):
+        "save table entry"
+        if row is None:
+            name = self.name.GetValue()
+            notes = self.notes.GetValue()
+            self.db.add_suite(name, notes=notes)
+        else:
+            for attr, dtype, extra in self.attrs:
+                val = getattr(self, attr).GetValue()
+                setattr(row, attr, val)
+        self.db.commit()

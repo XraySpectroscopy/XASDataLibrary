@@ -37,7 +37,7 @@ class FileImporter(wx.Frame):
 
     def __init__(self, fname=None, db=None):
         wx.Frame.__init__(self, parent=None,
-                          title=self.title, size=(700, 600))
+                          title=self.title, size=(650, 650))
         self.fname = fname
         self.db    = db
         menuBar = wx.MenuBar()
@@ -50,12 +50,12 @@ class FileImporter(wx.Frame):
         self.CreateStatusBar(1, wx.CAPTION|wx.THICK_FRAME)
 
         splitter  = wx.SplitterWindow(self, style=wx.SP_LIVE_UPDATE)
-        splitter.SetMinimumPaneSize(175)
+        splitter.SetMinimumPaneSize(150)
 
         self.top_panel = wx.Panel(splitter) # top
         self.bot_panel = wx.Panel(splitter) # bottom
         self.filename  = wx.StaticText(self.bot_panel, -1, label='')
-        self.fileview  = wx.TextCtrl(self.bot_panel, size=(150, 175),
+        self.fileview  = wx.TextCtrl(self.bot_panel, size=(175, 175),
                                      style=wx.TE_READONLY|wx.TE_MULTILINE|wx.HSCROLL)
 
         self.fileview.SetBackgroundColour(wx.Colour(250, 250, 250))
@@ -370,9 +370,9 @@ class FileImporter(wx.Frame):
         self.mono_choice   = _mono.choice
 
         self.mono_dspacing = FloatCtrl(panel, precision=6,
-                                       value=0, minval=0, maxval=100.0)
+                                       value=0, minval=0)
         self.mono_steps    = FloatCtrl(panel, precision=2,
-                                       value=0, minval=0, maxval=1e12)
+                                       value=0, minval=0)
 
         self.type_en.Bind(wx.EVT_CHOICE, self.onEnergyChoice)
 

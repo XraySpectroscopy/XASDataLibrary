@@ -15,10 +15,12 @@ import xasdb
 from xasdb import XASDataLibrary, isXASDataLibrary, XDIFile
 from ordereddict import OrderedDict
 
-from utils import pack, add_btn, add_menu, popup, FileOpen, FileSave
+from utils import pack, add_btn, add_menu, popup, FileOpen, FileSave, Closure
 
 from SpectraPanel import SpectraPanel
 from fileimporter import FileImporter
+
+from table_managers import PersonManager, SampleManager, BeamlineManager, SuiteManager
 
 class MainFrame(wx.Frame):
     """This is the main XAS DataBrowser Frame."""
@@ -34,7 +36,7 @@ class MainFrame(wx.Frame):
         self.SetFont(self.font)
 
         self.xasdb = None
-
+        self.editors = {}
         self.current_filter = self.filters[0]
         self.create_frame()
         self.SetTitle("%s: %s" % (self.title, 'No Library Open'))
@@ -121,6 +123,25 @@ class MainFrame(wx.Frame):
             self.spectra[row.name] = row.id
 
 
+    def __onManager(self, name, manager):
+        try:
+            self.editors[name].Raise()
+        except:
+            self.editors[name] = manager(parent=self, db=self.xasdb)
+
+    def onPersonManager(self, evt=None, **kws):
+        self.__onManager('person', PersonManager)
+
+    def onSampleManager(self, evt=None, **kws):
+        self.__onManager('sample', SampleManager)
+
+    def onBeamlineManager(self, evt=None, **kws):
+        self.__onManager('beamline', BeamlineManager)
+
+    def onSuiteManager(self, evt=None, **kws):
+        self.__onManager('suite', SuiteManager)
+
+        
     def create_frame(self):
         "create top level frame"
         # Create the menubar
@@ -146,18 +167,18 @@ class MainFrame(wx.Frame):
                       action=self.onClose)
 
         omenu = wx.Menu()
-        add_menu(self, omenu, "View/Add Suites of Spectra",
+        add_menu(self, omenu, "Suites of Spectra",
                  "Manage Suites of Spectra",
-                 action=self.onNewThing)
-        add_menu(self, omenu, "View/Add Samples",
+                 action=self.onSuiteManager)
+        add_menu(self, omenu, "Samples",
                  "Manage Samples",
-                 action=self.onNewThing)
-        add_menu(self, omenu, "View/Add People",
+                 action=self.onSampleManager)
+        add_menu(self, omenu, "People",
                  "Manage People Adding to Library",
-                 action=self.onNewThing)
-        add_menu(self, omenu, "View/Add Beamlines",
-                 "Manage Beamline, Facilities, Monochromators",
-                 action=self.onNewThing)
+                 action=self.onPersonManager)
+        add_menu(self, omenu, "Beamlines",
+                 "Manage Beamline",
+                 action=self.onBeamlineManager)
 
         # and put the menu on the menubar
         menuBar.Append(fmenu, "&File")
@@ -216,7 +237,7 @@ class MainFrame(wx.Frame):
 
         pack(self.right_panel, sizer)
 
-        self.selection_list.SetBackgroundColour(wx.Colour(255, 240, 250))
+        self.selection_list.SetBackgroundColour(wx.Colour(255, 250, 250))
         self.spectra_list.SetBackgroundColour(wx.Colour(250, 250, 240))
 
         self.selection_list.Clear()
@@ -224,8 +245,9 @@ class MainFrame(wx.Frame):
         # self.selection_list.Append(name)
 
         self.spectra_list.Clear()
-        # for name in ('FeO', 'Fe2O3', 'Fe3O4', 'FeCO3', 'Fe metal', 'maghemite'):
-        #    self.spectra_list.Append(name)
+        # 'FeCO3', 'Fe metal', 'maghemite'):
+        for name in ('Fe metal', 'Fe2O3', 'FeO'):
+            self.spectra_list.Append(name)
 
         self.selection_list.Bind(wx.EVT_LISTBOX, self.onSelectionSelect)
         self.spectra_list.Bind(wx.EVT_LISTBOX, self.onSpectraSelect)
