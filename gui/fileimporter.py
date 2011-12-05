@@ -5,13 +5,15 @@ import wx.lib.agw.pycollapsiblepane as CP
 
 import xasdb
 from xasdb import isotime2datetime
-from xdi import XDIFile
+from xdifile import XDIFile
 
 from utils import pack, add_btn, add_menu, popup, FileOpen, FileSave, FloatCtrl
 
 from choices import ElementChoice, EdgeChoice, ColumnChoice, TypeChoice, \
      PersonChoice, BeamlineChoice, MonochromatorChoice, DateTimeCtrl, \
      CitationChoice, SampleChoice, HyperChoice
+
+from table_managers import PersonManager, MonochromatorManager, SampleManager, BeamlineManager
 
 titlestyle  = wx.ALIGN_CENTER|wx.ALIGN_CENTER_VERTICAL|wx.ALL|wx.GROW
 labstyle    = wx.ALIGN_LEFT|wx.ALIGN_CENTER_VERTICAL|wx.ALL
@@ -81,7 +83,6 @@ class FileImporter(wx.Frame):
         self.buildDataPanel()
         self.buildBeamlinePanel()
         self.buildSamplePanel()
-        self.buildCitationPanel()
 
         top_sizer.Add(title_row, 0, wx.ALIGN_LEFT|wx.GROW|wx.ALL, 1)
         top_sizer.Add(self.nb,   1, wx.ALIGN_CENTER|wx.GROW|wx.ALL, 1)
@@ -107,26 +108,30 @@ class FileImporter(wx.Frame):
         # monochromator
         # energy units
         panel = self.beamline_panel  = wx.Panel(self.nb)
-        self.nb.AddPage(panel, 'Beamline')
+        self.nb.AddPage(panel, 'Data Collection')
 
         sizer = wx.GridBagSizer(10, 6)
 
         def stext(label):
             return wx.StaticText(panel, label=label)
 
-        _person   = HyperChoice(panel, PersonChoice, label='Person:', db=self.db)
+        _person   = HyperChoice(panel, PersonChoice, label='Person:',
+                                manager=PersonManager, db=self.db)
         self.person = _person.choice
 
-        _beamline = HyperChoice(panel, BeamlineChoice, label='Beamline:', db=self.db)
+        _beamline = HyperChoice(panel, BeamlineChoice, label='Beamline:',
+                                manager=BeamlineManager, db=self.db)
         self.beamline = _beamline.choice
 
-        _mono = HyperChoice(panel, MonochromatorChoice, label='Monochromator:', db=self.db)
-        self.monochromator = _mono.choice
+        _cite = HyperChoice(panel, CitationChoice,
+                            label='Citation:', db=self.db)
+        self.citation = _cite.choice
+
 
         self.collection_datetime = DateTimeCtrl(panel, name="collection_time")
         self.submission_datetime = DateTimeCtrl(panel, name="collection_time", use_now=True)
 
-        sizer.Add(Title(panel, 'Beamline Information:'),  (0, 0), (1, 3), titlestyle, 1)
+        sizer.Add(Title(panel, 'Data Collection Information:'),  (0, 0), (1, 3), titlestyle, 1)
 
         irow = 1
 
@@ -148,8 +153,8 @@ class FileImporter(wx.Frame):
         sizer.Add(self.beamline,           (irow, 1), (1, 1), namestyle, 1)
 
         irow += 1
-        sizer.Add(_mono.link,                  (irow, 0), (1, 1), labstyle, 1)
-        sizer.Add(self.monochromator,          (irow, 1), (1, 1), namestyle, 1)
+        sizer.Add(_cite.link,              (irow, 0), (1, 1), labstyle, 1)
+        sizer.Add(self.citation,           (irow, 1), (1, 1), namestyle, 1)
 
 
         ## RHS of Beamline Panel
@@ -157,11 +162,11 @@ class FileImporter(wx.Frame):
                   (1, 2), (6, 1), wx.ALIGN_CENTER|wx.GROW|wx.ALL, 0)
 
         irow = 1
-        self.ring_current = FloatCtrl(panel, precision=2, value=0, min=0, max=1e6)
-        self.ring_energy  = FloatCtrl(panel, precision=3, value=0, min=0, max=1e3)
-        self.collimation  = wx.TextCtrl(panel, value='', size=(180, -1))
-        self.focusing     = wx.TextCtrl(panel, value='', size=(180, -1))
+        self.ring_current = FloatCtrl(panel, precision=2, value=0, minval=0, maxval=1e6)
+        self.ring_energy  = FloatCtrl(panel, precision=3, value=0, minval=0, maxval=1e3)
         self.xray_source  = wx.TextCtrl(panel, value='', size=(180, -1))
+        self.focusing     = wx.TextCtrl(panel, value='', size=(180, -1))
+        self.collimation  = wx.TextCtrl(panel, value='', size=(180, -1))
         self.harmonic_rej = wx.TextCtrl(panel, value='', size=(180, -1))
 
         sizer.Add(stext('Ring Current:'), (irow, 4), (1, 1), labstyle, 1)
@@ -191,62 +196,62 @@ class FileImporter(wx.Frame):
 
         pack(panel, sizer)
 
-    def buildCitationPanel(self):
-        "build Citation / Misc panel"
-        panel = self.refer_panel = wx.Panel(self.nb)
-        self.nb.AddPage(panel, 'Literature Citation')
-
-        sizer = wx.GridBagSizer(10, 6)
-
-        def stext(label):
-            return wx.StaticText(panel, label=label)
-
-        self.cite_authors = wx.TextCtrl(panel, value='', size=(225, 85),
-                                       style=wx.TE_MULTILINE)
-        self.cite_journal = wx.TextCtrl(panel, value='', size=(225, -1))
-        self.cite_title   = wx.TextCtrl(panel, value='', size=(225, -1))
-        self.cite_volume  = wx.TextCtrl(panel, value='', size=(120, -1))
-        self.cite_pages   = wx.TextCtrl(panel, value='', size=(120, -1))
-        self.cite_year    = wx.TextCtrl(panel, value='', size=(120, -1))
-        self.cite_doi     = wx.TextCtrl(panel, value='', size=(225, -1))
-
-        _cite = HyperChoice(panel, CitationChoice,
-                              label='Citation:', db=self.db)
-        self.citation = _cite.choice
-
-        sizer.Add(_cite.link,     (0, 0), (1, 1), labstyle, 1)
-        sizer.Add(self.citation,  (0, 1), (1, 1), choicestyle, 1)
-
-        irow = 1
-        sizer.Add(stext('Journal:'),  (irow, 0), (1, 1), labstyle, 1)
-        sizer.Add(self.cite_journal,  (irow, 1), (1, 1), namestyle, 1)
-
-        irow += 1
-        sizer.Add(stext('Title:'),    (irow, 0), (1, 1), labstyle, 1)
-        sizer.Add(self.cite_title,    (irow, 1), (1, 1), namestyle, 1)
-        irow += 1
-        sizer.Add(stext('Volume:'),    (irow, 0), (1, 1), labstyle, 1)
-        sizer.Add(self.cite_volume,    (irow, 1), (1, 1), namestyle, 1)
-
-        irow += 1
-        sizer.Add(stext('Pages:'),    (irow, 0), (1, 1), labstyle, 1)
-        sizer.Add(self.cite_pages,    (irow, 1), (1, 1), namestyle, 1)
-
-        irow += 1
-        sizer.Add(stext('Year:'),     (irow, 0), (1, 1), labstyle, 1)
-        sizer.Add(self.cite_year,     (irow, 1), (1, 1), namestyle, 1)
-
-        sizer.Add(stext('Authors:'),   (1, 3),  (1, 1), labstyle, 1)
-        sizer.Add(self.cite_authors,   (1, 4),  (3, 1), namestyle, 1)
-        sizer.Add(stext('DOI:'),      (4, 3), (1, 1), labstyle, 1)
-        sizer.Add(self.cite_doi,      (4, 4), (1, 1), namestyle, 1)
-
-        sizer.Add(wx.StaticLine(panel, size=(-1, 150),
-                                style=wx.LI_VERTICAL),
-                  (1, 2), (5, 1), wx.ALIGN_CENTER|wx.GROW|wx.ALL, 0)
-
-
-        pack(panel, sizer)
+#     def buildCitationPanel(self):
+#         "build Citation / Misc panel"
+#         panel = self.refer_panel = wx.Panel(self.nb)
+#         self.nb.AddPage(panel, 'Literature Citation')
+#
+#         sizer = wx.GridBagSizer(10, 6)
+#
+#         def stext(label):
+#             return wx.StaticText(panel, label=label)
+#
+#         self.cite_authors = wx.TextCtrl(panel, value='', size=(225, 85),
+#                                        style=wx.TE_MULTILINE)
+#         self.cite_journal = wx.TextCtrl(panel, value='', size=(225, -1))
+#         self.cite_title   = wx.TextCtrl(panel, value='', size=(225, -1))
+#         self.cite_volume  = wx.TextCtrl(panel, value='', size=(120, -1))
+#         self.cite_pages   = wx.TextCtrl(panel, value='', size=(120, -1))
+#         self.cite_year    = wx.TextCtrl(panel, value='', size=(120, -1))
+#         self.cite_doi     = wx.TextCtrl(panel, value='', size=(225, -1))
+#
+#         _cite = HyperChoice(panel, CitationChoice,
+#                             label='Citation:', db=self.db)
+#         self.citation = _cite.choice
+#
+#         sizer.Add(_cite.link,     (0, 0), (1, 1), labstyle, 1)
+#         sizer.Add(self.citation,  (0, 1), (1, 1), choicestyle, 1)
+#
+#         irow = 1
+#         sizer.Add(stext('Journal:'),  (irow, 0), (1, 1), labstyle, 1)
+#         sizer.Add(self.cite_journal,  (irow, 1), (1, 1), namestyle, 1)
+#
+#         irow += 1
+#         sizer.Add(stext('Title:'),    (irow, 0), (1, 1), labstyle, 1)
+#         sizer.Add(self.cite_title,    (irow, 1), (1, 1), namestyle, 1)
+#         irow += 1
+#         sizer.Add(stext('Volume:'),    (irow, 0), (1, 1), labstyle, 1)
+#         sizer.Add(self.cite_volume,    (irow, 1), (1, 1), namestyle, 1)
+#
+#         irow += 1
+#         sizer.Add(stext('Pages:'),    (irow, 0), (1, 1), labstyle, 1)
+#         sizer.Add(self.cite_pages,    (irow, 1), (1, 1), namestyle, 1)
+#
+#         irow += 1
+#         sizer.Add(stext('Year:'),     (irow, 0), (1, 1), labstyle, 1)
+#         sizer.Add(self.cite_year,     (irow, 1), (1, 1), namestyle, 1)
+#
+#         sizer.Add(stext('Authors:'),   (1, 3),  (1, 1), labstyle, 1)
+#         sizer.Add(self.cite_authors,   (1, 4),  (3, 1), namestyle, 1)
+#         sizer.Add(stext('DOI:'),      (4, 3), (1, 1), labstyle, 1)
+#         sizer.Add(self.cite_doi,      (4, 4), (1, 1), namestyle, 1)
+#
+#         sizer.Add(wx.StaticLine(panel, size=(-1, 150),
+#                                 style=wx.LI_VERTICAL),
+#                   (1, 2), (5, 1), wx.ALIGN_CENTER|wx.GROW|wx.ALL, 0)
+#
+#
+#         pack(panel, sizer)
 
     def buildSamplePanel(self):
         "build Sample  panel"
@@ -263,27 +268,15 @@ class FileImporter(wx.Frame):
         def stext(label):
             return wx.StaticText(panel, label=label)
 
-        tpanel = wx.Panel(panel)
-        tsizer = wx.BoxSizer(wx.HORIZONTAL)
-        self.sample_temperature  = FloatCtrl(tpanel, precision=3, size=(100, -1),
-                                             value=300, min=-500)
+        # self.sample_formula = wx.TextCtrl(panel, value='', size=(220, -1))
+        # self.refer_formula  = wx.TextCtrl(panel, value='', size=(220, -1))
 
-        self.temperature_units = TypeChoice(tpanel, choices=('K','C','F'), size=(50, -1))
-        self.temperature_units.SetSelection(0)
+        # self.sample_xtal    = add_btn(panel, "Add Crystal Structure Data",
+        #                                       action=self.onSampleXTAL)
+        # self.sample_source = wx.TextCtrl(panel, value='', size=(220, 75),
+        #                                          style=wx.TE_MULTILINE)
 
-        tsizer.Add(self.sample_temperature, 0, wx.ALIGN_CENTER|wx.ALL, 1)
-        tsizer.Add(self.temperature_units,  0, wx.ALIGN_CENTER|wx.ALL, 1)
-        pack(tpanel, tsizer)
-
-        self.sample_formula = wx.TextCtrl(panel, value='', size=(220, -1))
-        self.refer_formula  = wx.TextCtrl(panel, value='', size=(220, -1))
-
-        self.sample_xtal    = add_btn(panel, "Add Crystal Structure Data",
-                                      action=self.onSampleXTAL)
-        self.sample_source = wx.TextCtrl(panel, value='', size=(220, 75),
-                                         style=wx.TE_MULTILINE)
-
-        self.user_notes = wx.TextCtrl(panel, value='', size=(400, 100),
+        self.user_notes = wx.TextCtrl(panel, value='', size=(450, 90),
                                       style=wx.TE_MULTILINE)
 
         irow = 1
@@ -296,29 +289,35 @@ class FileImporter(wx.Frame):
         sizer.Add(wx.StaticLine(panel, size=(150, 1), style=wx.LI_HORIZONTAL),
                   (1, 0), (1, 5), wx.ALIGN_CENTER|wx.GROW|wx.ALL, 0)
 
-        _sample = HyperChoice(panel, SampleChoice, label='Sample:', db=self.db)
+        _sample = HyperChoice(panel, SampleChoice, label='Sample:',
+                              manager=SampleManager, db=self.db)
         self.sample = _sample.choice
 
         _refsample = HyperChoice(panel, SampleChoice, label='Reference Sample:',
-                               db=self.db)
+                                 manager=SampleManager, db=self.db)
+
         self.refsample = _refsample.choice
 
         sizer.Add(_sample.link,  (2, 0), (1, 1), labstyle, 1)
         sizer.Add(self.sample,   (2, 1), (1, 1), namestyle, 1)
 
-        sizer.Add(self.sample_xtal,   (2, 2), (1, 2), rlabstyle, 1)
-
         irow = 3
-        sizer.Add(stext('Chemical Formula:'),  (irow, 0), (1, 1), labstyle, 1)
-        sizer.Add(self.sample_formula,         (irow, 1), (1, 1), namestyle, 1)
+        tpanel = wx.Panel(panel)
+        tsizer = wx.BoxSizer(wx.HORIZONTAL)
+        self.sample_temperature  = FloatCtrl(tpanel, precision=3, size=(100, -1),
+                                             value=300, minval=-500)
 
-        sizer.Add(stext('Temperature:'),       (irow+1, 0), (1, 1), tlabstyle, 1)
-        sizer.Add(tpanel,                      (irow+1, 1), (1, 2), tnamestyle, 1)
+        self.temperature_units = TypeChoice(tpanel, choices=('K','C','F'), size=(50, -1))
+        self.temperature_units.SetSelection(0)
 
-        sizer.Add(stext('Source:'),          (irow, 2), (1, 1), labstyle, 1)
-        sizer.Add(self.sample_source,        (irow, 3), (2, 1), namestyle, 1)
+        tsizer.Add(self.sample_temperature, 0, wx.ALIGN_CENTER|wx.ALL, 1)
+        tsizer.Add(self.temperature_units,  0, wx.ALIGN_CENTER|wx.ALL, 1)
+        pack(tpanel, tsizer)
 
-        irow += 2
+        sizer.Add(stext('Temperature:'),       (irow, 0), (1, 1), tlabstyle, 1)
+        sizer.Add(tpanel,                      (irow, 1), (1, 2), tnamestyle, 1)
+
+        irow += 1
         sizer.Add(wx.StaticLine(panel, size=(150, 1), style=wx.LI_HORIZONTAL),
                   (irow, 0), (1, 5), wx.ALIGN_CENTER|wx.GROW|wx.ALL, 0)
 
@@ -326,27 +325,8 @@ class FileImporter(wx.Frame):
         sizer.Add(_refsample.link,  (irow, 0), (1, 1), labstyle, 1)
         sizer.Add(self.refsample,   (irow, 1), (1, 1), namestyle, 1)
 
-        irow += 1
-        sizer.Add(stext('Chemical Formula:'),  (irow, 0), (1, 1), labstyle, 1)
-        sizer.Add(self.refer_formula,          (irow, 1), (1, 1), namestyle, 1)
 
         pack(panel, sizer)
-
-
-    def onAddPerson(self, evt=None, label=None):
-        print 'Add person ', label
-
-    def onAddBeamline(self, evt=None, label=None):
-        print 'Add beamline ', label
-
-    def onAddMono(self, evt=None, label=None):
-        print 'Add monochromator ', label
-
-    def onSampleXTAL(self, evt=None):
-        print 'Add Sample XTAL ', evt
-
-    def onReferXTAL(self, evt=None):
-        print 'Add Refer XTAL ', evt
 
     def buildDataPanel(self):
         "build Data / Column selection panel"
@@ -359,8 +339,8 @@ class FileImporter(wx.Frame):
         def stext(label):
             return wx.StaticText(panel, label=label)
 
-        self.elem    = ElementChoice(panel, db=self.db, show_all=True)
-        self.edge    = EdgeChoice(panel, db=self.db, show_all=True)
+        self.elem    = ElementChoice(panel, db=self.db)
+        self.edge    = EdgeChoice(panel, db=self.db)
         self.name    = wx.TextCtrl(panel, value='', size=(220,-1))
         self.name_ok = stext('')
 
@@ -385,13 +365,14 @@ class FileImporter(wx.Frame):
         self.type_ir.SetSelection(0)
         self.type_if.SetSelection(0)
 
-        _mono = HyperChoice(panel, MonochromatorChoice, label='Monochromator:', db=self.db)
+        _mono = HyperChoice(panel, MonochromatorChoice, label='Monochromator:',
+                            manager=MonochromatorManager, db=self.db)
         self.mono_choice   = _mono.choice
 
         self.mono_dspacing = FloatCtrl(panel, precision=6,
-                                       value=0, min=0, max=100.0)
+                                       value=0, minval=0, maxval=100.0)
         self.mono_steps    = FloatCtrl(panel, precision=2,
-                                       value=0, min=0, max=1e10)
+                                       value=0, minval=0, maxval=1e12)
 
         self.type_en.Bind(wx.EVT_CHOICE, self.onEnergyChoice)
 
@@ -460,7 +441,7 @@ class FileImporter(wx.Frame):
         print "Import Data to db! ", self.db
         kws = {}
         for attr in ('energy', 'i0', 'itrans', 'ifluor', 'irefer',
-                     'mutrans', 'mufluor', 'murefer', 'k', 'chi'):            
+                     'mutrans', 'mufluor', 'murefer', 'k', 'chi'):
             if hasattr(self.xdifile, attr):
                 kws[attr] = getattr(self.xdifile, attr)
 
@@ -471,7 +452,7 @@ class FileImporter(wx.Frame):
 
         sdate = self.collection_datetime[1].GetValue()
         stime = self.collection_datetime[2].GetValue()
-                
+
         #print '--> db.add_spectra ', kws.keys()
         #print 'sdata  ', type(sdate), sdate
         print dir(sdate)
@@ -486,7 +467,7 @@ class FileImporter(wx.Frame):
         #            energy_units=None, monochromator=None, person=None,
         #            sample=None, beamline=None,
         #            data_format=None, citation=None, reference=None, **kws):
-        
+
 
     def onEnergyChoice(self, evt=None):
         """ on selection of energy type """
@@ -504,7 +485,7 @@ class FileImporter(wx.Frame):
     def ShowFile(self, fname=None):
         if fname is not None:
             text = open(fname, 'r').read()
-           
+
             short_fname =os.path.basename(fname)
             self.name.SetValue(short_fname.replace('/', '_'))
             self.filename.SetLabel(fname)
@@ -527,7 +508,7 @@ class FileImporter(wx.Frame):
                 if family in xfile.attrs:
                     return xfile.attrs[family].get(member, None)
             return None
-               
+
         self.user_notes.SetValue(xfile.comments)
         self.edge.Select(get_attr('scan.edge'))
         self.elem.Select(get_attr('scan.element'))
@@ -539,12 +520,11 @@ class FileImporter(wx.Frame):
                       ('facility.xray_source',        self.xray_source,   str),
                       ('facility.ring_current',       self.ring_current,  str),
                       ('facility.energy',             self.ring_energy,   float)):
-            
+
             attr, widget, cast = entry
             value = get_attr(attr)
             if value not in (None, 'none', 'None'):
                 widget.SetValue(cast(value))
-
 
         # beamline, facility, mono settings --- tricky
         beamline =  get_attr('beamline.name')
@@ -564,7 +544,7 @@ class FileImporter(wx.Frame):
                     self.mono_stepsd.Disable()
             except:
                 pass
- 
+
         # set date/time
         isotime = get_attr('scan.end_time')
         if isotime is None:
@@ -585,13 +565,13 @@ class FileImporter(wx.Frame):
         self.column_it.SetChoices(col_choices)
         self.column_if.SetChoices(col_choices)
         self.column_ir.SetChoices(col_choices)
- 
+
         for num, name in xfile.column_labels.items():
             if name == 'energy':
                 self.column_en.Select(num)
                 extra = xfile.column_attrs.get(num, 'eV')
                 if extra in ('eV', 'keV'):
-                    self.type_it.Select('energy (%s)' % extra)                                    
+                    self.type_it.Select('energy (%s)' % extra)
             elif name == 'angle':
                 self.column_en.Select(num)
                 extra = xfile.column_attrs.get(num, 'degrees')

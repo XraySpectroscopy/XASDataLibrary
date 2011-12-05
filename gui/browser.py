@@ -50,23 +50,23 @@ class MainFrame(wx.Frame):
                 print 'Spectra: ', s
 
     def onReadXDLFile(self, evt=None):
-        "open an XDL file"
-        wildcard = "XAS Data Libraries (*.xdl)|*.xdl|"  \
-           "All files (*.*)|*.*"
-        dbname = FileOpen(self, "Open XAS Data Library",
+        "open an XDB file"
+        wildcard = "XAS Databases (*.xdb)|*.xdb|"  \
+           "All files (*)|*"
+        dbname = FileOpen(self, "Open XAS Database",
                           wildcard=wildcard)
         self.ReadXDLFile(dbname)
 
     def OpenNewXDLFile(self, evt=None):
         "create new XDL file"
-        wildcard = "XAS Data Libraries (*.xdl)|*.xdl|"  \
-           "All files (*.*)|*.*"
-        dbname = FileSave(self, "Create New XAS Data Library",
-                          wildcard=wildcard, default='MySpectra.xdl')
+        wildcard = "XAS Databases (*.xdb)|*.xdb|"  \
+           "All files (*)|*"
+        dbname = FileSave(self, "Create New XAS Database",
+                          wildcard=wildcard, default='MySpectra.xdb')
         if dbname is not None:
             self.xasdb = XASDataLibrary()
-            if not dbname.endswith('.xdl'):
-                dbname = dbname + '.xdl'
+            if not dbname.endswith('.xdb'):
+                dbname = dbname + '.xdb'
             self.xasdb.create_newdb(dbname, connect=True)
             if len(list(self.xasdb.query(xasdb.Person))) == 0:
                 print 'No People yet defined!!'
@@ -77,10 +77,10 @@ class MainFrame(wx.Frame):
     def ImportSpectra(self, evt=None):
         "import spectra from ASCII Column file"
         wildcard = "XAS Data Interchange (*.xdi)|*.xdi|"  \
-           "All files (*.*)|*.*"
+           "All files (*)|*"
         if self.xasdb is None:
             return
-        
+
         fname = FileOpen(self, "Import Spectra",
                           wildcard=wildcard)
         if fname is not None:
@@ -220,12 +220,12 @@ class MainFrame(wx.Frame):
         self.spectra_list.SetBackgroundColour(wx.Colour(250, 250, 240))
 
         self.selection_list.Clear()
-        for name in ('Fe Compounds, GSECARS', 'As standards'):
-            self.selection_list.Append(name)
+        # for name in ('Fe Compounds, GSECARS', 'As standards'):
+        # self.selection_list.Append(name)
 
         self.spectra_list.Clear()
-        for name in ('FeO', 'Fe2O3', 'Fe3O4', 'FeCO3', 'Fe metal', 'maghemite'):
-            self.spectra_list.Append(name)
+        # for name in ('FeO', 'Fe2O3', 'Fe3O4', 'FeCO3', 'Fe metal', 'maghemite'):
+        #    self.spectra_list.Append(name)
 
         self.selection_list.Bind(wx.EVT_LISTBOX, self.onSelectionSelect)
         self.spectra_list.Bind(wx.EVT_LISTBOX, self.onSpectraSelect)
@@ -235,7 +235,6 @@ class MainFrame(wx.Frame):
         sizer2 = wx.BoxSizer(wx.HORIZONTAL)
         sizer2.Add(splitter2, 1, wx.GROW|wx.ALL, 5)
         pack(self.top_panel, sizer2)
-
 
         splitter1.SplitHorizontally(self.top_panel, self.bot_panel, 1)
 
@@ -302,7 +301,7 @@ if __name__ == '__main__':
     dbfile = None
     if len(sys.argv) > 1:
         dbfile = sys.argv[1]
-    #app = wx.PySimpleApp()
-    #MainFrame(dbfile=dbfile).Show()
-    #app.MainLoop()
-    TestApp(dbfile=dbfile).MainLoop()
+    app = wx.PySimpleApp()
+    MainFrame(dbfile=dbfile).Show()
+    app.MainLoop()
+    # TestApp(dbfile=dbfile).MainLoop()

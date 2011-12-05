@@ -310,7 +310,6 @@ class XASDataLibrary(object):
         mapper(Info,     tables['info'])
 
         self.update_mod_time =  None
-
         logging.basicConfig()
         logging.getLogger('sqlalchemy.engine'
                           ).addHandler(logging.FileHandler(self.logfile))

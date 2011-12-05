@@ -1,5 +1,6 @@
 import wx
 import string
+import fpformat
 
 class Closure:
     """A simple Closure class for extended callbacks
@@ -71,7 +72,7 @@ def popup(parent, message, title, style=None):
     dlg = wx.MessageDialog(parent, message, title, style)
     ret = dlg.ShowModal()
     dlg.Destroy()
-    return ret    
+    return ret
 
 def add_menu(parent, menu, label, help, action=None):
     "add a menu item with action"
@@ -80,7 +81,7 @@ def add_menu(parent, menu, label, help, action=None):
     if action is not None:
         parent.Bind(wx.EVT_MENU, action, id=id)
 
-    
+
 def FileOpen(parent, message, wildcard=None):
     "File Open dialog"
     out = None
@@ -105,8 +106,8 @@ def FileSave(parent, message, default=None, wildcard=None):
     dlg.Destroy()
     return out
 
-                       
-def set_float(val, default=None):
+
+def set_float(val, default=0):
     """ utility to set a floating value,
     useful for converting from strings """
     if val in (None, ''):
@@ -115,82 +116,69 @@ def set_float(val, default=None):
         return float(val)
     except ValueError:
         return default
-        
 
 class FloatCtrl(wx.TextCtrl):
     """ Numerical Float Control::
     a wx.TextCtrl that allows only numerical input, can take a precision argument
     and optional upper / lower bounds
     Options:
-      
+
     """
-    def __init__(self, parent, value='', min='', max='', 
+    def __init__(self, parent, value='', minval=None, maxval=None,
                  precision=3, bell_on_invalid = True,
-                 action=None, action_kw={}, **kwargs):
-        
+                 action=None, action_kw=None, **kws):
+
         self.__digits = '0123456789.-'
         self.__prec   = precision
         if precision is None:
             self.__prec = 0
         self.format   = '%%.%if' % self.__prec
-        
+        self.is_valid = True
         self.__val = set_float(value)
-        self.__max = set_float(max)
-        self.__min = set_float(min)
+        self.__max = set_float(maxval)
+        self.__min = set_float(minval)
+        self.__bound_val = None
+        self.__mark = None
+        self.__action = None
 
-        self.fgcol_valid   ="Black"
-        self.bgcol_valid   ="White"
-        self.fgcol_invalid ="Red"
-        self.bgcol_invalid =(254, 254, 80)
+        self.fgcol_valid   = "Black"
+        self.bgcol_valid   = "White"
+        self.fgcol_invalid = "Red"
+        self.bgcol_invalid = (254, 254, 80)
         self.bell_on_invalid = bell_on_invalid
-        
-        # set up action 
-        self.__action = Closure()  
-        if hasattr(action, '__call__'):
-            self.__action.func = action
-        if len(list(action_kw.keys()))>0:
-            self.__action.kw = action_kw
+
+        # set up action
+        if action_kw is None:
+            action_kw = {}
+        self.SetAction(action, **action_kw)
 
         this_sty =  wx.TE_PROCESS_ENTER|wx.TE_RIGHT
-        kw = kwargs
-        if 'style' in kw:
-            this_sty = this_sty | kw['style']
-        kw['style'] = this_sty
-            
-        wx.TextCtrl.__init__(self, parent, wx.ID_ANY, **kw)        
+        if 'style' in kws:
+            this_sty = this_sty | kws['style']
+        kws['style'] = this_sty
+
+        wx.TextCtrl.__init__(self, parent, wx.ID_ANY, **kws)
 
         self.__CheckValid(self.__val)
         self.SetValue(self.__val)
-              
-        self.Bind(wx.EVT_CHAR, self.onChar)
-        self.Bind(wx.EVT_TEXT, self.onText)
 
-        self.Bind(wx.EVT_SET_FOCUS,  self.onSetFocus)
-        self.Bind(wx.EVT_KILL_FOCUS, self.onKillFocus)
-        self.Bind(wx.EVT_SIZE, self.onResize)
+        self.Bind(wx.EVT_CHAR, self.OnChar)
+        self.Bind(wx.EVT_TEXT, self.OnText)
+
+        self.Bind(wx.EVT_SET_FOCUS,  self.OnSetFocus)
+        self.Bind(wx.EVT_KILL_FOCUS, self.OnKillFocus)
         self.__GetMark()
 
-    def DisableEntry(self):
-        self.SetBackgroundColour((220,220,220))
-        self.Disable()
-
-    def EnableEntry(self):
-        self.Enable()
-        self.SetBackgroundColour(self.bgcol_valid)
-        
-    def SetAction(self, action, action_kw={}):
-        self.__action = Closure()  
+    def SetAction(self, action, **kws):
+        "set callback action"
         if hasattr(action,'__call__'):
-            self.__action.func = action
-        if len(list(action_kw.keys()))>0:
-            self.__action.kw = action_kw
-        
-    def SetPrecision(self, prec):
-        if prec is None:
-            prec = 0
+            self.__action = Closure(action, **kws)
+
+    def SetPrecision(self, prec=0):
+        "set precision"
         self.__prec = prec
         self.format = '%%.%if' % prec
-        
+
     def __GetMark(self):
         " keep track of cursor position within text"
         try:
@@ -200,46 +188,38 @@ class FloatCtrl(wx.TextCtrl):
             self.__mark = 0
 
     def __SetMark(self, mark=None):
-        " "
+        "set mark for later"
         if mark is None:
             mark = self.__mark
-        self.SetSelection(mark,mark)
+        self.SetSelection(mark, mark)
 
     def SetValue(self, value=None, act=True):
         " main method to set value "
-        if value == None:
+        if value is None:
             value = wx.TextCtrl.GetValue(self).strip()
         self.__CheckValid(value)
         self.__GetMark()
-        if self.__valid:
-            self.__Text_SetValue(self.__val)
-            self.SetForegroundColour(self.fgcol_valid)
-            self.SetBackgroundColour(self.bgcol_valid)
-            if  hasattr(self.__action, '__call__') and act:
-                self.__action(value=self.__val)
-        else:
-            self.__val = self.__bound_val
-            self.__Text_SetValue(self.__val)
-            self.__CheckValid(self.__val)
-            self.SetForegroundColour(self.fgcol_invalid)
-            self.SetBackgroundColour(self.bgcol_invalid)
-            if self.bell_on_invalid:
-                wx.Bell()
+        if value is not None:
+            wx.TextCtrl.SetValue(self, self.format % set_float(value))
+
+        if self.is_valid and hasattr(self.__action, '__call__') and act:
+            self.__action(value=self.__val)
+        elif not self.is_valid and self.bell_on_invalid:
+            wx.Bell()
+
         self.__SetMark()
-        
-    def onKillFocus(self, event):
+
+    def OnKillFocus(self, event):
+        "focus lost"
         self.__GetMark()
         event.Skip()
 
-    def onResize(self, event):
-        event.Skip()
-        
-    def onSetFocus(self, event=None):
+    def OnSetFocus(self, event):
+        "focus gained - resume editing from last mark point"
         self.__SetMark()
-        if event:
-            event.Skip()
-      
-    def onChar(self, event):
+        event.Skip()
+
+    def OnChar(self, event):
         """ on Character event"""
         key   = event.GetKeyCode()
         entry = wx.TextCtrl.GetValue(self).strip()
@@ -247,17 +227,20 @@ class FloatCtrl(wx.TextCtrl):
         # really, the order here is important:
         # 1. return sends to ValidateEntry
         if key == wx.WXK_RETURN:
-            self.SetValue(entry)
+            if not self.is_valid:
+                wx.TextCtrl.SetValue(self, self.format % set_float(self.__bound_val))
+            else:
+                self.SetValue(entry)
             return
 
         # 2. other non-text characters are passed without change
         if (key < wx.WXK_SPACE or key == wx.WXK_DELETE or key > 255):
             event.Skip()
             return
-        
+
         # 3. check for multiple '.' and out of place '-' signs and ignore these
         #    note that chr(key) will now work due to return at #2
-        
+
         has_minus = '-' in entry
         ckey = chr(key)
         if ((ckey == '.' and (self.__prec == 0 or '.' in entry) ) or
@@ -270,8 +253,9 @@ class FloatCtrl(wx.TextCtrl):
             return
         # return without event.Skip() : do not propagate event
         return
-        
-    def onText(self, event=None):
+
+    def OnText(self, event=None):
+        "text event"
         try:
             if event.GetString() != '':
                 self.__CheckValid(event.GetString())
@@ -286,37 +270,40 @@ class FloatCtrl(wx.TextCtrl):
             return int(self.__val)
 
     def GetMin(self):
+        "return min value"
         return self.__min
+
     def GetMax(self):
+        "return max value"
         return self.__max
-    def SetMin(self,min):
-        self.__min = set_float(min)
-    def SetMax(self,max):
-        self.__max = set_float(max)
-    
-    def __Text_SetValue(self, value):
-        wx.TextCtrl.SetValue(self, self.format % set_float(value))
-        self.Refresh()
-    
+
+    def SetMin(self, val):
+        "set min value"
+        self.__min = set_float(val)
+
+    def SetMax(self, val):
+        "set max value"
+        self.__max = set_float(val)
+
     def __CheckValid(self, value):
-        v = self.__val
+        "check for validity of value"
+        val = self.__val
+        self.is_valid = True
         try:
-            self.__valid = True
-            v = set_float(value)
-            if self.__min != None and (v < self.__min):
-                self.__valid = False
-                v = self.__min
-            if self.__max != None and (v > self.__max):
-                self.__valid = False
-                v = self.__max
+            val = set_float(value)
+            if self.__min is not None and (val < self.__min):
+                self.is_valid = False
+                val = self.__min
+            if self.__max is not None and (val > self.__max):
+                self.is_valid = False
+                val = self.__max
         except:
-            self.__valid = False
-        self.__bound_val = v
-        if self.__valid:
-            self.__bound_val = self.__val = v
-            self.SetForegroundColour(self.fgcol_valid)
-            self.SetBackgroundColour(self.bgcol_valid)
-        else:
-            self.SetForegroundColour(self.fgcol_invalid)
-            self.SetBackgroundColour(self.bgcol_invalid)            
+            self.is_valid = False
+        self.__bound_val = self.__val = val
+        fgcol, bgcol = self.fgcol_valid, self.bgcol_valid
+        if not self.is_valid:
+            fgcol, bgcol = self.fgcol_invalid, self.bgcol_invalid
+
+        self.SetForegroundColour(fgcol)
+        self.SetBackgroundColour(bgcol)
         self.Refresh()
