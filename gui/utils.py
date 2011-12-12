@@ -1,4 +1,7 @@
 import wx
+import wx.lib.filebrowsebutton as filebrowse
+FileBrowser = filebrowse.FileBrowseButtonWithHistory
+
 import string
 import fpformat
 
@@ -306,3 +309,4 @@ class FloatCtrl(wx.TextCtrl):
         self.SetForegroundColour(fgcol)
         self.SetBackgroundColour(bgcol)
         self.Refresh()
+
