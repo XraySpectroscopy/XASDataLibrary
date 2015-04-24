@@ -356,17 +356,23 @@ class XASDataLibrary(object):
     def _get_foreign_keyid(self, table, value, name='name',
                            keyid='id', default=None):
         """generalized lookup for foreign key
-arguments
-    table: a valid table class, as mapped by mapper.
-    value: can be one of the following
-         table instance:  keyid is returned
-         string:          'name' attribute (or set which attribute with 'name' arg)
-            a valid id
-            """
+        Parameters
+        ----------
+         table : a valid table class, as mapped by mapper.
+         value : value in row of foreign table 
+         name  : column name to use for looking up value.  The default 
+                 is 'name', meaning that the value passed in should be 
+                 the row name 
+         keyid : name of column to use for returned id (default is 'id')
+
+        Returns
+        -------
+          id of matching row, or None if no match is found
+        """
         if isinstance(value, table):
             return getattr(table, keyid)
         else:
-            if isinstance(value, (str, unicode)):
+            if isinstance(value, basestring):
                 xfilter = getattr(table, name)
             elif isinstance(value, int):
                 xfilter = getattr(table, keyid)
@@ -383,7 +389,10 @@ arguments
 
     def get_elements(self, show_all=True):
         """return list of elements,
-        with_spectra:  return only elements with spectra in database
+        Arguments
+        ---------
+        show_all : bool
+            show all elements (default) or only those with data in the database
         """
         if show_all:
             out = []
@@ -395,7 +404,10 @@ arguments
 
     def get_edges(self, show_all=True):
         """return list of edges,
-        with_spectra:  return only edges with spectra in database
+        Arguments
+        ---------
+        show_all : bool
+             show all edges (default) or only those with data in the database
         """
         if show_all:
             return [f.name for f in self.query(Edge)]
