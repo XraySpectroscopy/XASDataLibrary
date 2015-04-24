@@ -111,10 +111,6 @@ class Beamline(_BaseTable):
     "beamline table"
     pass
 
-class Monochromator(_BaseTable):
-    "monochromator table"
-    pass
-
 class EnergyUnits(_BaseTable):
     "Energy Units table"
     def __repr__(self):
@@ -151,11 +147,6 @@ class CrystalStructure(_BaseTable):
 
 class Citation(_BaseTable):
     "literature citation table"
-    pass
-
-
-class Format(_BaseTable):
-    "data format table"
     pass
 
 class Person(_BaseTable):
@@ -253,10 +244,6 @@ class XASDataLibrary(object):
                properties={'spectra':
                            relationship(Spectra, backref='element')})
 
-        mapper(Format, tables['format'],
-               properties={'spectra':
-                           relationship(Spectra, backref='format')})
-
         mapper(Beamline, tables['beamline'],
                properties={'spectra':
                            relationship(Spectra, backref='beamline')})
@@ -274,12 +261,6 @@ class XASDataLibrary(object):
                properties={'samples':
                            relationship(Sample, backref='structure')})
 
-        mapper(Monochromator,   tables['monochromator'],
-               properties={'beamlines':
-                           relationship(Beamline, backref='monochromator'),
-                           'spectra':
-                           relationship(Spectra, backref='monochromator')})
-
         mapper(Facility, tables['facility'],
                properties={'beamlines':
                            relationship(Beamline, backref='facility')})
@@ -292,11 +273,7 @@ class XASDataLibrary(object):
                            'spectra':
                            relationship(Spectra, backref='person')})
 
-        mapper(EnergyUnits,   tables['energy_units'],
-               properties={'monochromator':
-                           relationship(Monochromator, backref='energy_units'),
-                           'spectra':
-                           relationship(Spectra, backref='energy_units')})
+        mapper(EnergyUnits,   tables['energy_units'])
 
         mapper(Suite,   tables['suite'],
                properties={'spectra':
@@ -437,15 +414,6 @@ arguments
 
         return self.__addRow(Mode, ('name',), (name,), **kws)
 
-    def add_format(self, name, notes='', attributes='', **kws):
-        """add data format: name required
-        notes and attributes optional
-        returns Format instance"""
-        kws['notes'] = notes
-        kws['attributes'] = attributes
-
-        return self.__addRow(Format, ('name',), (name,), **kws)
-
     def add_crystal_structure(self, name, notes='',
                               attributes='', format=None,
                               data=None, **kws):
@@ -472,38 +440,18 @@ arguments
         return self.__addRow(Facility, ('name',), (name,), **kws)
 
     def add_beamline(self, name, facility=None,
-                     monochromator=None,
                      xray_source=None,  notes='',
                      attributes='', **kws):
         """add beamline by name, with facility:
                facility= Facility instance or id
-               monochromator= Monochromator or id
                returns Beamline instance"""
 
         kws['notes'] = notes
         kws['attributes'] = attributes
         kws['xray_source'] = xray_source
         kws['facility_id'] = self._get_foreign_keyid(Facility, facility)
-        kws['monochromator_id'] = self._get_foreign_keyid(Monochromator,
-                                                         monochromator)
 
         return self.__addRow(Beamline, ('name',), (name,), **kws)
-
-    def add_monochromator(self, name, notes='', attributes='',
-                          steps_per_degree=None, energy_units=None,
-                          dspacing=None, pixel_to_energy=None, **kws):
-        """add monochromator: name required
-        notes and attributes optional
-        returns Monochromator instance"""
-        kws['notes'] = notes
-        kws['attributes'] = attributes
-        kws['dspacing'] = dspacing
-        kws['steps_per_degreee'] = steps_per_degree
-        kws['energy_units_id'] =  self._get_foreign_keyid(EnergyUnits,
-                                                          energy_units,
-                                                          name='units')
-
-        return self.__addRow(Monochromator, ('name',), (name,), **kws)
 
     def add_citation(self, name, notes='', attributes='',
                      journal='',  authors='',  title='',
@@ -579,12 +527,13 @@ arguments
    person: instance of Person table, a valid email, or Person id
    suite:  instance of Suite table, a valid suite name, or Suite id
    score:  an integer value 0 to 5.
-Optional:
+        Optional:
    comments text of comments"""
 
         kws['person_id'] = self._get_foreign_keyid(Person, person,
                                                    name='email')
         kws['suite_id'] = self._get_foreign_keyid(Suite, suite)
+        kws['datetime'] = datetime.now()
         if comments is not None:
             kws['comments'] = comments
         score = valid_score(score)
@@ -601,6 +550,7 @@ Optional:
         kws['person_id'] = self._get_foreign_keyid(Person, person,
                                                    name='email')
         kws['spectra_id'] = self._get_foreign_keyid(Spectra, specctra)
+        kws['datetime'] = datetime.now()        
         if comments is not None:
             kws['comments'] = comments
         score = valid_score(score)
@@ -608,16 +558,17 @@ Optional:
 
     def import_XDIspectra(self, fname):
         """import a spectra from XDI ASCII Format"""
-        print 'Hello!'
+        print 'import XDIspectra.... ', fname
+        print 'not implemented '
 
     def add_spectra(self, name, notes='', attributes='', file_link='',
                     energy=None, i0=None, itrans=None,
                     ifluor=None, irefer=None, k=None, chi=None,
-                    mutrans=None, mufluor=None, murefer=None,
+                    mutrans=None, mufluor=None, murefer=None,  dspacing=0.0,
                     notes_i0='', notes_itrans='', notes_ifluor='',
                     notes_irefer='', temperature='', submission_date=None,
                     collection_date=None, reference_used='',
-                    energy_units=None, monochromator=None, person=None,
+                    energy_units=None, person=None,
                     edge=None, element=None, sample=None, beamline=None,
                     data_format=None, citation=None, reference=None, **kws):
 
@@ -667,18 +618,16 @@ Optional:
         kws['notes_ifluor'] = notes_ifluor
         kws['notes_irefer'] = notes_irefer
         kws['temperature'] = temperature
+        kws['dspacing'] = dspacing
 
         kws['reference_used'] = reference_used
         kws['beamline_id'] = self._get_foreign_keyid(Beamline, beamline)
-        kws['monochromator_id'] = self._get_foreign_keyid(Monochromator,
-                                                         monochromator)
         kws['person_id'] = self._get_foreign_keyid(Person, person,
                                                    name='email')
         kws['edge_id'] = self._get_foreign_keyid(Edge, edge)
         kws['element_z'] = self._get_foreign_keyid(Element, element,
                                                    keyid='z', name='symbol')
         kws['sample_id'] = self._get_foreign_keyid(Sample, sample)
-        kws['format_id'] = self._get_foreign_keyid(Format, data_format)
         kws['citation_id'] = self._get_foreign_keyid(Citation, citation)
         kws['reference_id'] = self._get_foreign_keyid(Sample, reference)
         kws['energy_units_id'] = self._get_foreign_keyid(EnergyUnits,

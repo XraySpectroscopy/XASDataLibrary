@@ -3,7 +3,7 @@
    Matthew Newville <newville@cars.uchicago.edu>
    CARS, University of Chicago
 
-   last update:  2001-March-06
+   last update:  2015-April-24
       
 == License:
    To the extent possible, the authors have waived all rights
@@ -19,14 +19,11 @@
 
 """
 
-__version__ = '0.1.0'
+__version__ = '0.1.1'
 
 import time
 import sys
 from . import xasdb
-from . import xdiformat
-
-XDIFile = xdiformat.XDIFile
 
 isXASDataLibrary = xasdb.isXASDataLibrary
 isotime2datetime = xasdb.isotime2datetime
