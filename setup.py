@@ -1,8 +1,7 @@
 #!/usr/bin/env python
 from distutils.core import setup
 import sys
-import lib
-
+import xasdb
 #
 no_sqlalchemy="""
 *******************************************************
@@ -21,23 +20,21 @@ try:
 try:
     import sqlalchemy
     major, minor, release = [int(i) for i in  sqlalchemy.__version__.split('.')]
-    assert major == 0
-    assert minor >= 6
-    if minor == 6:
-        assert release >= 5
+    assert minor > 6
     
 except:
     print no_sqlalchemy
     sys.exit()
     
 setup(name = 'xasdb',
-      version = lib.__version__,
+      version = xasdb.__version__,
       author = 'Matthew Newville',
       author_email = 'newville@cars.uchicago.edu',
       url         = 'http://xas.org/XasDataLibrary',
       license = 'Public Domain',
       description = 'x-ray absorption spectra library',
-      package_dir = {'xasdb': 'lib'},
-      packages = ['xasdb','xasdb.wx'])
+      package_dir = {'xasdb': 'xasdb'},
+      packages = ['xasdb','xasdb.wx']
+)
 
 

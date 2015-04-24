@@ -149,7 +149,6 @@ def  make_newdb(dbname, server= 'sqlite', user='',
         engine = create_engine('sqlite:///%s' % (dbname),
                                poolclass=SingletonThreadPool)
     else: # postgres
-        
         conn_str= 'postgresql://%s:%s@%s:%i/%s'
         if port is None:
             port = 5432

@@ -23,27 +23,19 @@ __version__ = '0.1.1'
 
 import time
 import sys
-from . import xasdb
+from .xasdb import isXASDataLibrary, XASDataLibrary
+from .creator import make_newdb
 
-isXASDataLibrary = xasdb.isXASDataLibrary
-isotime2datetime = xasdb.isotime2datetime
+def create_xasdb(dbname, server='sqlite', user='',
+              password='', port=5432, host=''):
+    """create a new XAS Data Library"""
+    return make_newdb(dbname,
+                      server=server, user=user,
+                      password=password, port=port, host=host)
 
-Info = xasdb.Info
-Mode = xasdb.Mode
-Facility = xasdb.Facility
-Beamline = xasdb.Beamline
-Monochromator = xasdb.Monochromator
-EnergyUnits = xasdb.EnergyUnits
-Edge = xasdb.Edge
-Element = xasdb.Element
-Ligand = xasdb.Ligand
-CrystalStructure = xasdb.CrystalStructure
-Citation = xasdb.Citation
-Format = xasdb.Format
-Person = xasdb.Person
-Spectra_Rating = xasdb.Spectra_Rating
-Suite_Rating = xasdb.Suite_Rating
-Suite = xasdb.Suite
-Sample = xasdb.Sample
-Spectra = xasdb.Spectra
-XASDataLibrary = xasdb.XASDataLibrary
+def connect_xasdb(dbname, server='sqlite', user='',
+            password='', port=5432, host=''):
+    """connect to a XAS Data Library"""
+    return XASDataLibrary(dbname,
+                          server=server, user=user,
+                          password=password, port=port, host=host)

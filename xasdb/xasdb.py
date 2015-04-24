@@ -191,39 +191,40 @@ class Spectra(_BaseTable):
 
 
 class XASDataLibrary(object):
-    "full interface to XAS Spectral Library"
-    def __init__(self, dbname=None, logfile=None):
-        print "XAS DB ", dbname
+    """"full interface to XAS Spectral Library"""
+    def __init__(self, dbname=None, server= 'sqlite', user='',
+                 password='',  host='', port=5432, logfile=None):
         self.engine = None
         self.session = None
         self.metadata = None
         self.logfile = logfile
         if dbname is not None:
-            self.connect(dbname)
-
-    def create_newdb(self, dbname, connect=False):
+            self.connect(dbname, server=server, user=user,
+                         password=password, port=port, host=host)
+            
+    def create_newdb(self, dbname,  server='sqlite', user='',
+                     password='', port=5432, host='', connect=True):
         "create a new, empty database"
-        if os.path.exists(dbname):
+        if server.startswith('sqlit') and os.path.exists(dbname):
             backup_versions(dbname)
-        make_newdb(dbname)
+        make_newdb(dbname, server=server, user=user,
+                   password=password, port=port, host=host)
         if connect:
-            self.connect(dbname)
+            self.connect(dbname, server=server, user=user,
+                   password=password, port=port, host=host)
 
-    def connect(self, dbname):
+    def connect(self, dbname, server='sqlite', user='',
+                password='', port=5432, host=''):
         "connect to an existing database"
-        if not os.path.exists(dbname):
-            raise IOError("Database '%s' not found!" % dbname)
-
-        if not isXASDataLibrary(dbname):
-            raise ValueError("'%s' is not an XAS Data Library file!" % dbname)
 
         self.dbname = dbname
-        self.engine = create_engine('sqlite:///%s' % self.dbname)
-        self.logfile = self.dbname
-        if self.logfile.endswith('.xdl'):
-            self.logfile = self.logfile[:-4]
-        self.logfile = "%s.log" % self.logfile
-
+        if server.startswith('sqlit'):
+            self.engine = create_engine('sqlite:///%s' % self.dbname)
+        else:
+            conn_str= 'postgresql://%s:%s@%s:%i/%s'
+            engine = create_engine(conn_str % (user, password, host,
+                                               port, dbname))
+            
         self.metadata =  MetaData(self.engine)
 
         self.metadata.reflect()
@@ -287,9 +288,16 @@ class XASDataLibrary(object):
         mapper(Info,     tables['info'])
 
         self.update_mod_time =  None
+
+        if self.logfile is None:
+            self.logfile = self.dbname
+            if self.logfile.endswith('.xdl'):
+                self.logfile = self.logfile[:-4]
+        logfile = "%s.log" % self.logfile
+
         logging.basicConfig()
-        logging.getLogger('sqlalchemy.engine'
-                          ).addHandler(logging.FileHandler(self.logfile))
+        logger = logging.getLogger('sqlalchemy.engine')
+        logger.addHandler(logging.FileHandler(logfile))
 
     def commit(self):
         "commit session state"
@@ -431,7 +439,6 @@ arguments
         """add edge: name and level required
         returns Edge instance"""
         return self.__addRow(Edge, ('name', 'level'), (name, level))
-
 
     def add_facility(self, name, notes='', attributes='', **kws):
         """add facilty by name, return Facility instance"""
