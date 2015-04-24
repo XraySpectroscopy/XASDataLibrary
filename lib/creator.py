@@ -4,12 +4,14 @@
 """
 import sys
 import os
+import time
 import shutil
 from datetime import datetime
 
 from sqlalchemy.orm import sessionmaker, create_session
 from sqlalchemy import MetaData, create_engine, \
      Table, Column, Integer, Float, String, Text, DateTime, ForeignKey
+from sqlalchemy.pool import SingletonThreadPool
 
 def PointerCol(name, other=None, keyid='id', **kws):
     if other is None:
@@ -41,45 +43,42 @@ class InitialData:
                ["create_date", '<now>'], 
                ["modify_date", '<now>']]
 
-    monos = [['Si(111), generic', 'nominal lattice constant, 8000 steps/degree', 3.135560, 8000, 1],
-             ['Si(220), generic', 'nominal lattice constant, 8000 steps/degree', 1.920156, 8000, 1],
-             ['Si(311), generic', 'nominal lattice constant, 8000 steps/degree', 1.637514, 8000, 1]]
-
-    formats = [["internal-json", "Read data_* values of spectra table as json"],
-               ["external-xdi",  "Read data from extenal XDI formatted file"]]
-
     e_units = [["eV", "electronVolts"],
                ["keV", "kiloelectronVolts"],
-               ["degrees","angle in degrees for Bragg Monochromator.  Need mono dspacing to convert to eV"],
-               ["steps",  "angular steps for Bragg Monochromator. Need mono dspacing and steps_per_degree to convert to eV"]]
+               ["degrees","angle in degrees for Bragg monochromator.  Needs mono dspacing"],
+    ]
     
     modes = [["transmission", "transmission intensity through sample"],
-             ["fluorescence, total yield", "total x-ray fluorescence intensity, no energy analysis"],
-             ["fluorescence, energy analyzed", '''x-ray fluorescence measured with an energy dispersive (solid-state) detector.
- Measurements will often need to be corrected for dead-time effects'''],
+             ["fluorescence, total yield", "total x-ray fluorescence, no energy analysis"],
+             ["fluorescence, energy analyzed",
+              "x-ray fluorescence with an energy dispersive (solid-state) detector"],
              ["xeol", "visible or uv light emission"],
              ["electron emission", "emitted electrons from sample"]]
     
-    facilities = [['APS',  'Advanced Photon Source, ANL, Argonne, IL, USA'],
-                  ['ALS',  'Advanced Light Source, LBNL, Berkeley, CA, USA'],                  
-                  ['NSLS', 'National Synchrotron Light Source, BNL, Upton, IL, USA'],
-                  ['SSRL', 'Stanford Synchrotron Radiation Laboratory, SLAC, Palo Alto, CA, USA'],
-                  ['ESRF', 'European Synchrotron Radiation Facility, Grenoble, France'],
-                  ['DLS',  'Diamond Light Source, Didcot, Oxfordshire, Great Britian'],
-                  ['SOLEIL',  'Synchrotron SOLEIL, GIF-sur-YVETTE, France'],
-                  ['SPring-8', 'SPring=8 Synchrotron,  Hyogo, Japan'],
-                  ['Photon Factory', 'Photon Factory, KEK, Tsukuba, Japan'],
-                  ['DESY', 'DESY Synchrotron, Hamburg, Germany']]
-
-    beamlines = [['13ID',  'GSECARS 13-ID',   'APS Undulator A',     1],
-                 ['13BM',  'GSECARS 13-BM',   'APS bending magnet',  1],
-                 ['10ID',  'MR-CAT  10-ID',   'APS Undulator A',     1],
-                 ['10BM',  'MR-CAT  10-BM',   'APS Bending Magnet',  1],
-                 ['20ID',  'PNC/XOR 20-ID',   'APS Undulator A',     1],
-                 ['20BM',  'PNC/XOR 20-BM',   'APS Bending Magnet',  1],
+    facilities = [['SSRL','Stanford Synchrotron Radiation Laboratory, Palo Alto, CA, USA'],
+                  ['SRS','Synchrotron Radiation Source, Daresbury Lab, Cheshire, UK'],
+                  ['NSLS','National Synchrotron Light Source, BNL, Upton, IL, USA'],
+                  ['Photon Factory','Photon Factory, KEK, Tsukuba, Japan'],
+                  ['ESRF','European Synchrotron Radiation Facility, Grenoble, France'],
+                  ['APS','Advanced Photon Source, ANL, Argonne, IL, USA'],
+                  ['ALS','Advanced Light Source, LBNL, Berkeley, CA, USA'],
+                  ['DLS','Diamond Light Source, Didcot, Oxfordshire, Great Britian'],
+                  ['SOLEIL','Synchrotron SOLEIL, GIF-sur-YVETTE, France'],
+                  ['SPring-8','SPring-8 Synchrotron,  Hyogo, Japan'],
+                  ['DESY','DESY Synchrotron, Hamburg, Germany'],
+                  ['ANKA','Karlsruhe, KIT, Germany'],
+                  ['Elettra','Elettra, Trieste, Italy'],
+                  ['AS','Australian Synchrotron, Melbourne, Victoria, Australia']]
+    
+    beamlines = [['13ID',  'GSECARS 13-ID',   'APS Undulator A',     6],
+                 ['13BM',  'GSECARS 13-BM',   'APS bending magnet',  6],
+                 ['10ID',  'MR-CAT  10-ID',   'APS Undulator A',     6],
+                 ['10BM',  'MR-CAT  10-BM',   'APS Bending Magnet',  6],
+                 ['20ID',  'PNC/XOR 20-ID',   'APS Undulator A',     6],
+                 ['20BM',  'PNC/XOR 20-BM',   'APS Bending Magnet',  6],
                  ['X11A',  'NSLS X11-A',      'NSLS bending magnet', 3],
-                 ['4-3',   'SSRL, 4-3',       'SSRL',                4],
-                 ['4-1',   'SSRL, 4-1',       'SSRL',                4]]
+                 ['4-3',   'SSRL, 4-3',       'SSRL',                1],
+                 ['4-1',   'SSRL, 4-1',       'SSRL',                1]]
    
     edges = [["K", "1s"], ["L3", "2p3/2"],
              ["L2", "2p1/2"], ["L1", "2s"], ["M4,5", "3d3/2,5/2"]]
@@ -141,12 +140,39 @@ class InitialData:
                 [109, "Mt", "meitnerium"],  [110, "Ds", "darmstadtium"], 
                 [111, "Rg", "roentgenium"], [112, "Cn", "copernicium"] ]
                 
-                
-def  make_newdb(dbname, server= 'sqlite'):
-    engine  = create_engine('%s:///%s' % (server, dbname))
+def  make_newdb(dbname, server= 'sqlite', user='',
+                password='',  host='', port=None):
+    """create initial xafs data library.  server can be 
+    'sqlite' or 'postgresql' 
+    """
+    if server.startswith('sqlit'):
+        engine = create_engine('sqlite:///%s' % (dbname),
+                               poolclass=SingletonThreadPool)
+    else: # postgres
+        
+        conn_str= 'postgresql://%s:%s@%s:%i/%s'
+        if port is None:
+            port = 5432
+
+        dbname = dbname.lower()
+        # first we check if dbname exists....
+        query = "select datname from pg_database"
+        pg_engine = create_engine(conn_str % (user, password,
+                                       host, port, 'postgres'))
+        conn = pg_engine.connect()
+        conn.execution_options(autocommit=True)
+        conn.execute("commit")
+        dbs = [i[0].lower() for i in conn.execute(query).fetchall()]
+        if  dbname not in dbs:
+            conn.execute("create database %s" % dbname)
+            conn.execute("commit")
+        conn.close()
+        time.sleep(0.5)
+        
+        engine = create_engine(conn_str % (user, password, host, port, dbname))
+
     metadata =  MetaData(engine)
 
-    format  = NamedTable('format', metadata)
     ligand  = NamedTable('ligand', metadata)
     mode    = NamedTable('mode', metadata)
     facility = NamedTable('facility', metadata)
@@ -164,13 +190,8 @@ def  make_newdb(dbname, server= 'sqlite'):
 
     energy_units = NamedTable('energy_units', metadata, nameid='units')
 
-    mono = NamedTable('monochromator', metadata,
-                      cols=[Column('dspacing', Float(precision=8)),
-                            Column('steps_per_degree', Float(precision=8)),
-                            PointerCol('energy_units')])
-    
     crystal_structure = NamedTable('crystal_structure', metadata,
-                         cols=[StrCol('format'), 
+                         cols=[StrCol('format'),
                                StrCol('data')])
     
     person = NamedTable('person', metadata, nameid='email',
@@ -192,8 +213,7 @@ def  make_newdb(dbname, server= 'sqlite'):
                               PointerCol('person'),
                               PointerCol('crystal_structure')])
     
-    scols = [StrCol('file_link'),
-             StrCol('energy'),
+    scols = [StrCol('energy'),
              StrCol('i0'),
              StrCol('itrans'),
              StrCol('ifluor'),
@@ -206,38 +226,32 @@ def  make_newdb(dbname, server= 'sqlite'):
              StrCol('notes_fluor'),
              StrCol('notes_refer'),
              StrCol('temperature'),
-             Column('submission_date', DateTime),
-             Column('collection_date', DateTime),
+             Column('dspacing', Float),
+             Column('submission_date', DateTime(timezone=True)),
+             Column('collection_date', DateTime(timezone=True)),
              Column('reference_used', Integer), # , server_default=0),
              PointerCol('energy_units'),
-             PointerCol('monochromator'),
              PointerCol('person'),
              PointerCol('edge'),
-             PointerCol('element',keyid='z'),
+             PointerCol('element', keyid='z'),
              PointerCol('sample'),
              PointerCol('beamline'),
-             PointerCol('format'),
              PointerCol('citation'),
              PointerCol('reference', 'sample')]
     
-    spectra = NamedTable('spectra', metadata,
-                         cols=scols)
-    
+    spectra = NamedTable('spectra', metadata, cols=scols)    
     
     suite = NamedTable('suite', metadata, 
                        cols=[PointerCol('person')])
     
-    
     beamline = NamedTable('beamline', metadata, 
                           cols=[StrCol('xray_source'),
-                                PointerCol('monochromator'),
-                                PointerCol('facility'),
-                                ])
-    
-    
+                                PointerCol('facility')] )
+
     spectra_rating = Table('spectra_rating', metadata,
                            Column('id', Integer, primary_key=True), 
                            Column('score', Integer),
+                           Column('datetime', DateTime(timezone=True)),
                            StrCol('comments'),
                            PointerCol('person') ,
                            PointerCol('spectra'))
@@ -245,7 +259,8 @@ def  make_newdb(dbname, server= 'sqlite'):
     suite_rating = Table('suite_rating', metadata,
                            Column('id', Integer, primary_key=True), 
                            Column('score', Integer),
-                           StrCol('comments'),
+                           Column('datetime', DateTime(timezone=True)),
+                           StrCol('comments'), 
                            PointerCol('person') ,                         
                            PointerCol('suite'))
     
@@ -283,15 +298,6 @@ def  make_newdb(dbname, server= 'sqlite'):
     for name, notes in InitialData.modes:
         mode.insert().execute(name=name, notes=notes)
 
-    for name, notes, dspacing, steps, units_id in InitialData.monos:
-        mono.insert().execute(name=name, notes=notes,
-                              dspacing=dspacing,
-                              steps_per_degree=steps,
-                              energy_units_id=units_id)
-
-    for name, notes in InitialData.formats:
-        format.insert().execute(name=name, notes=notes)
-
     for name, notes in InitialData.facilities:
         facility.insert().execute(name=name, notes=notes)
 
@@ -309,9 +315,12 @@ def  make_newdb(dbname, server= 'sqlite'):
     session.commit()    
 
 
-def dumpsql(dbname, fname='xdl_init.sql'):
+def dumpsql(dbname, fname='xdl_init.sql', server='sqlite'):
     """ dump SQL statements for an sqlite db"""
-    os.system('echo .dump | sqlite3 %s > %s' % (dbname, fname))
+    if server.startswith('sqlit'):
+        os.system('echo .dump | sqlite3 %s > %s' % (dbname, fname))
+    else:
+        os.system('pg_dump %s > %s' % (dbname, fname))
     
 def backup_versions(fname, max=10):
     """keep backups of a file -- up to 'max', in order"""
@@ -327,10 +336,10 @@ def backup_versions(fname, max=10):
 
     
 if __name__ == '__main__':
-    dbname = 'example.xdl'
+    dbname = 'xafs_data_library'
     if os.path.exists(dbname):
         backup_versions(dbname)
         
-    make_newdb(dbname)
+    make_newdb(dbname, server='postgresql')
     print '''%s  created and initialized.''' % dbname
     dumpsql(dbname)
