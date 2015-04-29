@@ -23,7 +23,12 @@ __version__ = '0.1.1'
 
 import time
 import sys
-from .xasdb import isXASDataLibrary, XASDataLibrary
+from .xasdb import (isXASDataLibrary, XASDataLibrary, XASDBException,
+                    Info, Mode, Facility, Beamline, EnergyUnits, Edge,
+                    Element, Ligand, Crystal_Structure, Citation,
+                    Person, Spectrum_Rating, Suite_Rating, Suite,
+                    Sample, Spectrum)
+
 from .creator import make_newdb
 
 def create_xasdb(dbname, server='sqlite', user='',
