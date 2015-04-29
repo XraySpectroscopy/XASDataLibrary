@@ -11,7 +11,7 @@ import os
 import sys
 import json
 import logging
-import numpy
+import numpy as np
 from datetime import datetime
 
 from .creator import make_newdb, backup_versions
@@ -54,9 +54,11 @@ def json_encode(val):
     "simple wrapper around json.dumps"
     if val is None or isinstance(val, (str, unicode)):
         return val
+    if isinstance(val, np.ndarray):
+        val = val.flatten().tolist()
     return  json.dumps(val)
 
-def valid_score(score, smin=0, smax=5):
+def valid_score(score, smin=0, smax=10):
     """ensure that the input score is an integr
     in the range [smin, smax]  (inclusive)"""
     return max(smin, min(smax, int(score)))
@@ -88,7 +90,6 @@ class _BaseTable(object):
         name = self.__class__.__name__
         fields = ['%s' % getattr(self, 'name', 'UNNAMED')]
         return "<%s(%s)>" % (name, ', '.join(fields))
-
 
 class Info(_BaseTable):
     "general information table (versions, etc)"
@@ -140,7 +141,7 @@ class Ligand(_BaseTable):
     "ligand table"
     pass
 
-class CrystalStructure(_BaseTable):
+class Crystal_Structure(_BaseTable):
     "crystal structure table"
     pass
 
@@ -156,15 +157,20 @@ class Person(_BaseTable):
                   getattr(self, 'email', 'NO EMAIL')]
         return "<%s(%s)>" % (name, ', '.join(fields))
 
-class Spectra_Rating(_BaseTable):
+class Spectrum_Ligand(_BaseTable):
+    "spectrum ligand"
+    ligand, spectrum = None, None
+    
+class Spectrum_Rating(_BaseTable):
     "spectra rating"
     def __repr__(self):
         name = self.__class__.__name__
         fields = ['%i' % (int(getattr(self, 'score', 0)))]
         if getattr(self, 'spectra', None) is not None:
-            fields.append('Spectra %i' % getattr(self, 'spectra', 0))
+            fields.append('Spectrum %i' % getattr(self, 'spectra', 0))
 
         return "<%s(%s)>" % (name, ', '.join(fields))
+
 
 class Suite_Rating(_BaseTable):
     "suite rating table"
@@ -257,7 +263,7 @@ class XASDataLibrary(object):
                            relationship(Spectrum, backref='ligand',
                                         secondary=tables['spectrum_ligand'])})
 
-        mapper(CrystalStructure,   tables['crystal_structure'],
+        mapper(Crystal_Structure,   tables['crystal_structure'],
                properties={'samples':
                            relationship(Sample, backref='structure')})
 
@@ -283,6 +289,7 @@ class XASDataLibrary(object):
         mapper(Sample,  tables['sample'])
         mapper(Spectrum, tables['spectrum'])
         mapper(Spectrum_Rating,   tables['spectrum_rating'])
+        # mapper(Spectrum_Ligand,   tables['spectrum_ligand'])
         mapper(Suite_Rating,   tables['suite_rating'])
         mapper(Info,     tables['info'])
 
@@ -329,7 +336,7 @@ class XASDataLibrary(object):
                 whereclause="key='modify_date'")
         self.update_mod_time.execute(value=datetime.isoformat(datetime.now()))
 
-    def __addRow(self, table, argnames, argvals, **kws):
+    def addrow(self, table, argnames, argvals, **kws):
         """add generic row"""
         me = table() #
         arg0 = argnames[0]
@@ -352,8 +359,8 @@ class XASDataLibrary(object):
         return self.query(table).filter(getattr(table, arg0)==val0).one()
 
 
-    def _get_foreign_keyid(self, table, value, name='name',
-                           keyid='id', default=None):
+    def foreign_keyid(self, table, value, name='name',
+                      keyid='id', default=None):
         """generalized lookup for foreign key
         Parameters
         ----------
@@ -422,7 +429,7 @@ class XASDataLibrary(object):
         kws['notes'] = notes
         kws['attributes'] = attributes
 
-        return self.__addRow(EnergyUnits, ('units',), (units,), **kws)
+        return self.addrow(EnergyUnits, ('units',), (units,), **kws)
 
     def add_mode(self, name, notes='', attributes='', **kws):
         """add collection mode: name required
@@ -431,7 +438,7 @@ class XASDataLibrary(object):
         kws['notes'] = notes
         kws['attributes'] = attributes
 
-        return self.__addRow(Mode, ('name',), (name,), **kws)
+        return self.addrow(Mode, ('name',), (name,), **kws)
 
     def add_crystal_structure(self, name, notes='',
                               attributes='', format=None,
@@ -444,18 +451,18 @@ class XASDataLibrary(object):
         kws['format'] = format
         kws['data'] = data
 
-        return self.__addRow(CrystalStructure, ('name',), (name,), **kws)
+        return self.addrow(Crystal_Structure, ('name',), (name,), **kws)
 
     def add_edge(self, name, level):
         """add edge: name and level required
         returns Edge instance"""
-        return self.__addRow(Edge, ('name', 'level'), (name, level))
+        return self.addrow(Edge, ('name', 'level'), (name, level))
 
     def add_facility(self, name, notes='', attributes='', **kws):
         """add facilty by name, return Facility instance"""
         kws['notes'] = notes
         kws['attributes'] = attributes
-        return self.__addRow(Facility, ('name',), (name,), **kws)
+        return self.addrow(Facility, ('name',), (name,), **kws)
 
     def add_beamline(self, name, facility=None,
                      xray_source=None,  notes='',
@@ -467,9 +474,9 @@ class XASDataLibrary(object):
         kws['notes'] = notes
         kws['attributes'] = attributes
         kws['xray_source'] = xray_source
-        kws['facility_id'] = self._get_foreign_keyid(Facility, facility)
+        kws['facility_id'] = self.foreign_keyid(Facility, facility)
 
-        return self.__addRow(Beamline, ('name',), (name,), **kws)
+        return self.addrow(Beamline, ('name',), (name,), **kws)
 
     def add_citation(self, name, notes='', attributes='',
                      journal='',  authors='',  title='',
@@ -487,11 +494,11 @@ class XASDataLibrary(object):
         kws['pages'] = pages
         kws['year'] = year
         kws['doi'] = doi
-        return self.__addRow(Citation, ('name',), (name,), **kws)
+        return self.addrow(Citation, ('name',), (name,), **kws)
 
     def add_info(self, key, value):
         """add Info key value pair -- returns Info instance"""
-        return self.__addRow(Info, ('key', 'value'), (key, value))
+        return self.addrow(Info, ('key', 'value'), (key, value))
 
     def add_ligand(self, name, notes='', attributes='', **kws):
         """add ligand: name required
@@ -500,7 +507,7 @@ class XASDataLibrary(object):
         kws['notes'] = notes
         kws['attributes'] = attributes
 
-        return self.__addRow(Ligand, ('name',), (name,), **kws)
+        return self.addrow(Ligand, ('name',), (name,), **kws)
 
     def add_person(self, name, email,
                    affiliation='', attributes='', **kws):
@@ -510,7 +517,7 @@ class XASDataLibrary(object):
         returns Person instance"""
         kws['affiliation'] = affiliation
         kws['attributes'] = attributes
-        return self.__addRow(Person, ('email', 'name'),
+        return self.addrow(Person, ('email', 'name'),
                              (email, name), **kws)
 
     def add_sample(self, name, notes='', attributes='',
@@ -523,10 +530,10 @@ class XASDataLibrary(object):
         kws['attributes'] = attributes
         kws['formula'] = formula
         kws['material_source'] = material_source
-        kws['person_id'] = self._get_foreign_keyid(Person, person)
-        kws['crystal_structure_id'] = self._get_foreign_keyid(CrystalStructure,
-                                                              crystal_structure)
-        return self.__addRow(Sample, ('name',), (name,), **kws)
+        kws['person_id'] = self.foreign_keyid(Person, person)
+        kws['crystal_structure_id'] = self.foreign_keyid(Crystal_Structure,
+                                                         crystal_structure)
+        return self.addrow(Sample, ('name',), (name,), **kws)
 
 
     def add_suite(self, name, notes='', attributes='',
@@ -535,27 +542,27 @@ class XASDataLibrary(object):
         returns Suite instance"""
         kws['notes'] = notes
         kws['attributes'] = attributes
-        kws['person_id'] = self._get_foreign_keyid(Person, person,
+        kws['person_id'] = self.foreign_keyid(Person, person,
                                                    name='email')
 
-        return self.__addRow(Suite, ('name',), (name,), **kws)
+        return self.addrow(Suite, ('name',), (name,), **kws)
 
     def add_suite_rating(self, person, suite, score, comments=None):
         """add a score to a suite:  The following are required:
    person: instance of Person table, a valid email, or Person id
    suite:  instance of Suite table, a valid suite name, or Suite id
-   score:  an integer value 0 to 5.
+   score:  an integer value 0 to 10.
         Optional:
    comments text of comments"""
 
-        kws['person_id'] = self._get_foreign_keyid(Person, person,
+        kws['person_id'] = self.foreign_keyid(Person, person,
                                                    name='email')
-        kws['suite_id'] = self._get_foreign_keyid(Suite, suite)
+        kws['suite_id'] = self.foreign_keyid(Suite, suite)
         kws['datetime'] = datetime.now()
         if comments is not None:
             kws['comments'] = comments
         score = valid_score(score)
-        self.__addRow(Suite_Rating, ('score',), (score,), **kws)
+        self.addrow(Suite_Rating, ('score',), (score,), **kws)
 
     def add_spectrum_rating(self, person, spectrum, score, comments=None):
         """add a score to a suite:  The following are required:
@@ -565,19 +572,14 @@ class XASDataLibrary(object):
 Optional:
    comments text of comments"""
 
-        kws['person_id'] = self._get_foreign_keyid(Person, person,
+        kws['person_id'] = self.foreign_keyid(Person, person,
                                                    name='email')
-        kws['spectrum_id'] = self._get_foreign_keyid(Spectrum, specctra)
+        kws['spectrum_id'] = self.foreign_keyid(Spectrum, specctra)
         kws['datetime'] = datetime.now()        
         if comments is not None:
             kws['comments'] = comments
         score = valid_score(score)
-        self.__addRow(Spectrum_Rating, ('score',), (score,), **kws)
-
-    def import_XDIspectrum(self, fname):
-        """import a spectrum from XDI ASCII Format"""
-        print 'import XDIspectrum.... ', fname
-        print 'not implemented '
+        self.addrow(Spectrum_Rating, ('score',), (score,), **kws)
 
     def add_spectrum(self, name, notes='', attributes='', file_link='',
                     energy=None, i0=None, itrans=None,
@@ -613,9 +615,6 @@ Optional:
                           ('ifluor', ifluor),  ('irefer', irefer),
                           ('mutrans', mutrans), ('mufluor', mufluor),
                           ('murefer', murefer)):
-
-            if isinstance(val, numpy.ndarray):
-                val = list(val.flatten())
             kws[attr] = json_encode(val)
 
         if submission_date is None:
@@ -639,19 +638,78 @@ Optional:
         kws['dspacing'] = dspacing
 
         kws['reference_used'] = reference_used
-        kws['beamline_id'] = self._get_foreign_keyid(Beamline, beamline)
-        kws['person_id'] = self._get_foreign_keyid(Person, person,
-                                                   name='email')
-        kws['edge_id'] = self._get_foreign_keyid(Edge, edge)
-        kws['element_z'] = self._get_foreign_keyid(Element, element,
-                                                   keyid='z', name='symbol')
-        kws['sample_id'] = self._get_foreign_keyid(Sample, sample)
-        kws['citation_id'] = self._get_foreign_keyid(Citation, citation)
-        kws['reference_id'] = self._get_foreign_keyid(Sample, reference)
-        kws['energy_units_id'] = self._get_foreign_keyid(EnergyUnits,
-                                                         energy_units,
-                                                         name='units')
+        kws['beamline_id'] = self.foreign_keyid(Beamline, beamline)
+        kws['person_id'] = self.foreign_keyid(Person, person,
+                                              name='email')
+        kws['edge_id'] = self.foreign_keyid(Edge, edge)
+        kws['element_z'] = self.foreign_keyid(Element, element,
+                                              keyid='z', name='symbol')
+        kws['sample_id'] = self.foreign_keyid(Sample, sample)
+        kws['citation_id'] = self.foreign_keyid(Citation, citation)
+        kws['reference_id'] = self.foreign_keyid(Sample, reference)
+        kws['energy_units_id'] = self.foreign_keyid(EnergyUnits,
+                                                    energy_units,
+                                                    name='units')
         try:
-            return self.__addRow(Spectrum, ('name',), (name,), **kws)
+            return self.addrow(Spectrum, ('name',), (name,), **kws)
         except:
             return None
+
+    def get_beamline(self, facility=None):
+        """get all beamlines for a facility
+        Parameters
+        ----------
+        facility  id, name, or Facility instance for facility
+
+        Returns
+        -------
+        list of matching beamlines
+
+        """
+        tab = self.tables['beamline']
+        fac_id = None
+        if isinstance(facility, Facility):
+            fac_id = facility.id
+        elif isinstance(facility, int):
+            fac_id = facility
+        elif isinstance(facility, basestring):
+            ftab = self.tables['facility']
+            row  = ftab.select(ftab.c.name==facility).execute().fetchone()
+            fac_id = row.id
+
+        if fac_id is not None:
+            query = tab.select(tab.c.facility_id==fac_id)
+        else:
+            query = tab.select()
+        return query.execute().fetchall()
+
+    
+    def get_suite_ratings(self, spectrum):
+        "get all ratings for a suite"
+        raise NotImplementedError
+    
+    def get_spectrum_ratings(self, spectrum):
+        "get all ratings for a spectrum"
+        raise NotImplementedError
+
+    def get_spectra(self, edge=None, element=None, suite=None, beamline=None,
+                    facility=None, person=None, mode=None, sample=None,
+                    citation=None, ligand=None): 
+        """get all spectra matching some set of criteria
+        
+        Parameters
+        ----------
+        edge
+        element
+        suite
+        beamline
+        facility
+        person
+        mode
+        sample
+        citation
+        ligand
+        """
+        q = self.tables['spectrum']
+        
+        raise NotImplementedError
