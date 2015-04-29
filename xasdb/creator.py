@@ -14,19 +14,22 @@ from sqlalchemy import MetaData, create_engine, \
 from sqlalchemy.pool import SingletonThreadPool
 
 def PointerCol(name, other=None, keyid='id', **kws):
+    "pointer column"
     if other is None:
         other = name
     return Column("%s_%s" % (name, keyid), None,
                   ForeignKey('%s.%s' % (other, keyid), **kws))
     
 def StrCol(name, size=None, **kws):
+    "string column"
     if size is None:
         return Column(name, Text, **kws)
     else:
         return Column(name, String(size), **kws)
 
 def NamedTable(tablename, metadata, keyid='id', nameid='name',
-               name=True,notes=True, attributes=True, cols=None):
+               name=True, notes=True, attributes=True, cols=None):
+    """create table with name, id, and several common attributes"""
     args  = [Column(keyid, Integer, primary_key=True)]
     if name:
         args.append(StrCol(nameid, nullable=False, unique=True))
@@ -45,8 +48,7 @@ class InitialData:
 
     e_units = [["eV", "electronVolts"],
                ["keV", "kiloelectronVolts"],
-               ["degrees","angle in degrees for Bragg monochromator.  Needs mono dspacing"],
-    ]
+               ["degrees","angle in degrees for Bragg monochromator.  Needs mono d_spacing"] ]
     
     modes = [["transmission", "transmission intensity through sample"],
              ["fluorescence, total yield", "total x-ray fluorescence, no energy analysis"],
@@ -225,10 +227,10 @@ def  make_newdb(dbname, server= 'sqlite', user='',
              StrCol('notes_fluor'),
              StrCol('notes_refer'),
              StrCol('temperature'),
-             Column('dspacing', Float),
+             Column('d_spacing', Float),
              Column('submission_date', DateTime(timezone=True)),
              Column('collection_date', DateTime(timezone=True)),
-             Column('reference_used', Integer), # , server_default=0),
+             Column('reference_used', Integer),
              PointerCol('energy_units'),
              PointerCol('person'),
              PointerCol('edge'),
@@ -238,7 +240,7 @@ def  make_newdb(dbname, server= 'sqlite', user='',
              PointerCol('citation'),
              PointerCol('reference', 'sample')]
     
-    spectra = NamedTable('spectra', metadata, cols=scols)    
+    spectrum = NamedTable('spectrum', metadata, cols=scols)    
     
     suite = NamedTable('suite', metadata, 
                        cols=[PointerCol('person')])
@@ -247,13 +249,13 @@ def  make_newdb(dbname, server= 'sqlite', user='',
                           cols=[StrCol('xray_source'),
                                 PointerCol('facility')] )
 
-    spectra_rating = Table('spectra_rating', metadata,
+    spectrum_rating = Table('spectrum_rating', metadata,
                            Column('id', Integer, primary_key=True), 
                            Column('score', Integer),
                            Column('datetime', DateTime(timezone=True)),
                            StrCol('comments'),
                            PointerCol('person') ,
-                           PointerCol('spectra'))
+                           PointerCol('spectrum'))
 
     suite_rating = Table('suite_rating', metadata,
                            Column('id', Integer, primary_key=True), 
@@ -263,20 +265,20 @@ def  make_newdb(dbname, server= 'sqlite', user='',
                            PointerCol('person') ,                         
                            PointerCol('suite'))
     
-    spectra_suite = Table('spectra_suite', metadata,
+    spectrum_suite = Table('spectrum_suite', metadata,
                           Column('id', Integer, primary_key=True), 
                           PointerCol('suite') ,
-                          PointerCol('spectra'))
+                          PointerCol('spectrum'))
 
-    spectra_mode = Table('spectra_mode', metadata,
+    spectrum_mode = Table('spectrum_mode', metadata,
                          Column('id', Integer, primary_key=True), 
                          PointerCol('mode') ,
-                         PointerCol('spectra'))
+                         PointerCol('spectrum'))
     
-    spectra_ligand = Table('spectra_ligand', metadata,
+    spectrum_ligand = Table('spectrum_ligand', metadata,
                            Column('id', Integer, primary_key=True), 
                            PointerCol('ligand'),
-                           PointerCol('spectra'))                                    
+                           PointerCol('spectrum'))                                    
 
     info = Table('info', metadata,
                  Column('key', Text, primary_key=True, unique=True), 
@@ -335,10 +337,10 @@ def backup_versions(fname, max=10):
 
     
 if __name__ == '__main__':
-    dbname = 'xafs_data_library'
+    dbname = 'example.xdl'
     if os.path.exists(dbname):
         backup_versions(dbname)
         
-    make_newdb(dbname, server='postgresql')
+    make_newdb(dbname, server='sqlite')
     print '''%s  created and initialized.''' % dbname
     dumpsql(dbname)

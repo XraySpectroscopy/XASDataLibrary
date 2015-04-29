@@ -98,7 +98,6 @@ class Info(_BaseTable):
                                getattr(self, 'value', '?'))]
         return "<%s(%s)>" % (name, ', '.join(fields))
 
-
 class Mode(_BaseTable):
     "collection mode table"
     pass
@@ -185,7 +184,7 @@ class Sample(_BaseTable):
     "sample table"
     pass
 
-class Spectra(_BaseTable):
+class Spectrum(_BaseTable):
     "spectra table"
     pass
 
@@ -232,31 +231,31 @@ class XASDataLibrary(object):
 
         self.session = sessionmaker(bind=self.engine)()
 
-        mapper(Mode,     tables['mode'],
-               properties={'spectra':
-                           relationship(Spectra, backref='mode',
-                                        secondary=tables['spectra_mode'])})
+        mapper(Mode, tables['mode'],
+               properties={'spectrum':
+                           relationship(Spectrum, backref='mode',
+                                        secondary=tables['spectrum_mode'])})
 
         mapper(Edge, tables['edge'],
-               properties={'spectra':
-                           relationship(Spectra, backref='edge')})
+               properties={'spectrum':
+                           relationship(Spectrum, backref='edge')})
 
         mapper(Element, tables['element'],
-               properties={'spectra':
-                           relationship(Spectra, backref='element')})
+               properties={'spectrum':
+                           relationship(Spectrum, backref='element')})
 
         mapper(Beamline, tables['beamline'],
-               properties={'spectra':
-                           relationship(Spectra, backref='beamline')})
+               properties={'spectrum':
+                           relationship(Spectrum, backref='beamline')})
 
         mapper(Citation, tables['citation'],
-               properties={'spectra':
-                           relationship(Spectra, backref='citation')})
+               properties={'spectrum':
+                           relationship(Spectrum, backref='citation')})
 
         mapper(Ligand,   tables['ligand'],
-               properties={'spectra':
-                           relationship(Spectra, backref='ligand',
-                                        secondary=tables['spectra_ligand'])})
+               properties={'spectrum':
+                           relationship(Spectrum, backref='ligand',
+                                        secondary=tables['spectrum_ligand'])})
 
         mapper(CrystalStructure,   tables['crystal_structure'],
                properties={'samples':
@@ -271,19 +270,19 @@ class XASDataLibrary(object):
                            relationship(Suite, backref='person'),
                            'samples':
                            relationship(Sample, backref='person'),
-                           'spectra':
-                           relationship(Spectra, backref='person')})
+                           'spectrum':
+                           relationship(Spectrum, backref='person')})
 
         mapper(EnergyUnits,   tables['energy_units'])
 
         mapper(Suite,   tables['suite'],
-               properties={'spectra':
-                           relationship(Spectra, backref='suite',
-                                        secondary=tables['spectra_suite'])})
+               properties={'spectrum':
+                           relationship(Spectrum, backref='suite',
+                                        secondary=tables['spectrum_suite'])})
 
         mapper(Sample,  tables['sample'])
-        mapper(Spectra, tables['spectra'])
-        mapper(Spectra_Rating,   tables['spectra_rating'])
+        mapper(Spectrum, tables['spectrum'])
+        mapper(Spectrum_Rating,   tables['spectrum_rating'])
         mapper(Suite_Rating,   tables['suite_rating'])
         mapper(Info,     tables['info'])
 
@@ -558,29 +557,29 @@ class XASDataLibrary(object):
         score = valid_score(score)
         self.__addRow(Suite_Rating, ('score',), (score,), **kws)
 
-    def add_spectra_rating(self, person, spectra, score, comments=None):
+    def add_spectrum_rating(self, person, spectrum, score, comments=None):
         """add a score to a suite:  The following are required:
    person: instance of Person table, a valid email, or Person id
-   spectra: instance of Spectra table, a valid spectra name, or spectra id
+   spectrum: instance of Spectrum table, a valid spectrum name, or spectrum id
    score:  an integer value 0 to 5.
 Optional:
    comments text of comments"""
 
         kws['person_id'] = self._get_foreign_keyid(Person, person,
                                                    name='email')
-        kws['spectra_id'] = self._get_foreign_keyid(Spectra, specctra)
+        kws['spectrum_id'] = self._get_foreign_keyid(Spectrum, specctra)
         kws['datetime'] = datetime.now()        
         if comments is not None:
             kws['comments'] = comments
         score = valid_score(score)
-        self.__addRow(Spectra_Rating, ('score',), (score,), **kws)
+        self.__addRow(Spectrum_Rating, ('score',), (score,), **kws)
 
-    def import_XDIspectra(self, fname):
-        """import a spectra from XDI ASCII Format"""
-        print 'import XDIspectra.... ', fname
+    def import_XDIspectrum(self, fname):
+        """import a spectrum from XDI ASCII Format"""
+        print 'import XDIspectrum.... ', fname
         print 'not implemented '
 
-    def add_spectra(self, name, notes='', attributes='', file_link='',
+    def add_spectrum(self, name, notes='', attributes='', file_link='',
                     energy=None, i0=None, itrans=None,
                     ifluor=None, irefer=None, k=None, chi=None,
                     mutrans=None, mufluor=None, murefer=None,  dspacing=0.0,
@@ -591,17 +590,17 @@ Optional:
                     edge=None, element=None, sample=None, beamline=None,
                     data_format=None, citation=None, reference=None, **kws):
 
-        """add spectra: name required
-        returns Spectra instance"""
+        """add spectrum: name required
+        returns Spectrum instance"""
 
-        spectra_names = self.query('name'
-                                   ).from_statement('select name from spectra').all()
+        spectrum_names = self.query('name'
+                                   ).from_statement('select name from spectrum').all()
 
-        if len(spectra_names) > 1:
-            if any([entry[0] == name for entry in spectra_names]):
-                raise XASDBException("A spectra named '%s' already exists" % name)
+        if len(spectrum_names) > 1:
+            if any([entry[0] == name for entry in spectrum_names]):
+                raise XASDBException("A spectrum named '%s' already exists" % name)
 
-        # eif  name in spectra_names:
+        # eif  name in spectrum_names:
         # return
 
         kws['notes'] = notes
@@ -653,6 +652,6 @@ Optional:
                                                          energy_units,
                                                          name='units')
         try:
-            return self.__addRow(Spectra, ('name',), (name,), **kws)
+            return self.__addRow(Spectrum, ('name',), (name,), **kws)
         except:
             return None
