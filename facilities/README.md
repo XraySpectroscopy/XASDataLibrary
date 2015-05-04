@@ -2,12 +2,12 @@
 
 ## Facilities
 
-The file `lightsources.org.json` was kindly provided by Danielle from
-lighsources.org and Jim Birch of
-[Xeno Media](http://www.xenomedia.com/).  In contains the data the
+The file `lightsources.org.json` was kindly provided by Danielle
+Reeves of [Lighsources.org](http://www.lightsources.org) and Jim Birch
+of [Xeno Media](http://www.xenomedia.com/).  In contains the data the
 goes into the big table at
 [the Light Sources of the World page](http://www.lightsources.org/regions)
-as well as the contain information for each facilitiy.
+as well as the contact information for each facilitiy.
 
 Unfortunately, the contact information in that file is very messy --
 inconsistent content, inconsistent formatting -- so the quick-n-dirty

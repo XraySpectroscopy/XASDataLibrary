@@ -9,7 +9,10 @@ use File::Slurp;
 use Data::Dump::Color;
 use HTML::Strip;
 
-my $data = decode_json(read_file('lightsources.org.json'));
+my $json = JSON->new->allow_nonref;
+$json->pretty(1);
+
+my $data = $json->decode(read_file('lightsources.org.json'));
 #dd $data;
 
 my $hs = HTML::Strip -> new();
@@ -91,12 +94,12 @@ foreach my $d (@$data) {
 };
 
 
-open(my $S, '>', 'synchrotrons.json');
-print $S encode_json( \%synchrotrons );
+open(my $S, '>:encoding(UTF-8)', 'synchrotrons.json');
+print $S $json->encode( \%synchrotrons );
 close $S;
 
-open(my $F, '>', 'fels.json');
-print $F encode_json( \%fels );
+open(my $F, '>:encoding(UTF-8)', 'fels.json');
+print $F $json->encode( \%fels );
 close $F;
 
 # field_abbreviation_value
