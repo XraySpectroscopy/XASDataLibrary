@@ -53,3 +53,37 @@ that are not in this listing.
 
 ## Beamlines
 
+Bruce wrote a small program, `iucr.pl` to scrape information from the
+tables in the IUCr XAFS commission compenium of beamlines in
+[the Americas](http://www.iucr.org/resources/commissions/xafs/beamlines-in-the-americas),
+[Asia and Oceania](http://www.iucr.org/resources/commissions/xafs/beamlines-in-asia-and-oceania)
+and
+[Europe](http://www.iucr.org/resources/commissions/xafs/beamlines-in-europe).
+
+This results in three json files, one for each region, with entries
+that are grouped by facility and which look like this:
+
+```json
+     "BL5S1" : {
+         "facility" : "AichiSR",
+         "flux" : "10^11",
+         "name" : "",
+         "purpose" : "General Purpose XAFS",
+         "range" : "5 - 20",
+         "size" : "0.3x0.5",
+         "status" : "Operational",
+         "website" : "http://www.astf-kha.jp/synchrotron/en/userguide/gaiyou/bl5s1i_xxafs.html"
+	 }
+```
+
+The units of energy range are keV.  Unless otherwise stated, the units
+on beam size are mm.  The units on photon flux are photons/sec.
+
+## To do
+
+* Need to sync facility nomenclature between `synchrotrons.json` and
+  the regional beamline json files.
+
+* Need to snarf alternate names, where possible for beamlines,
+  e.g. "Gilda" for ESRF BM8, "GSECARS" for APS 13-BM-D, or the
+  additional column for BESSY in the Europe html page.

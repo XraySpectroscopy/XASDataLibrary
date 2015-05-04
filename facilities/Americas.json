@@ -1,0 +1,658 @@
+{
+   "ALS" : {
+      "10.3.2" : {
+         "facility" : "ALS",
+         "flux" : "10^10",
+         "name" : "",
+         "purpose" : "micro XANES",
+         "range" : "2.5 - 17",
+         "size" : "5 x 5 μm",
+         "status" : "Operational",
+         "website" : "http://www-als.lbl.gov/index.php/beamlines/beamlines-directory/126-1032.html"
+      },
+      "11.0.2" : {
+         "facility" : "ALS",
+         "flux" : "10^12 - 10^13 or 10^9",
+         "name" : "",
+         "purpose" : "micro-XANES, PES in\r non-UHV environment or XANES microscopy",
+         "range" : "0.1 - 2 or 0.13 - 2",
+         "size" : "10 μm or 20 nm",
+         "status" : "Operational",
+         "website" : "http://www-als.lbl.gov/index.php/beamlines/beamlines-directory/128-1102.html"
+      },
+      "4.0.2" : {
+         "facility" : "ALS",
+         "flux" : "10^13",
+         "name" : "",
+         "purpose" : "XMCD, XMLD,\r XANES",
+         "range" : "0.1 - 2",
+         "size" : "0.1 x 0.1",
+         "status" : "Operational",
+         "website" : "http://www-als.lbl.gov/index.php/beamlines/beamlines-directory/98-402.html"
+      },
+      "6.3.1" : {
+         "facility" : "ALS",
+         "flux" : "10^11",
+         "name" : "",
+         "purpose" : "XAFS, XMCD, XMLD",
+         "range" : "0.3 - 2",
+         "size" : "0.05 x 0.5",
+         "status" : "Operational",
+         "website" : "http://www-als.lbl.gov/index.php/beamlines/beamlines-directory/109-631.html"
+      },
+      "7.0.1" : {
+         "facility" : "ALS",
+         "flux" : "10^8 - 10^9 or 3 x 10^12",
+         "name" : "",
+         "purpose" : "Surface science, XANES and PES microscopy or Surface science, PES, XANES",
+         "range" : "0.1 - 0.8 or 0.08 - 1.2",
+         "size" : "300 nm or 50 μm",
+         "status" : "Operational",
+         "website" : "http://www-als.lbl.gov/index.php/beamlines/beamlines-directory/111-701.html"
+      },
+      "8.0.1" : {
+         "facility" : "ALS",
+         "flux" : "> 10^11",
+         "name" : "",
+         "purpose" : "XANES",
+         "range" : "0.08 - 1.25",
+         "size" : "0.03 x 0.1 mm",
+         "status" : "Operational",
+         "website" : "http://www-als.lbl.gov/index.php/beamlines/beamlines-directory/115-801.html"
+      }
+   },
+   "APS" : {
+      "10-BM-B" : {
+         "facility" : "APS",
+         "flux" : "",
+         "name" : "",
+         "purpose" : "General purpose XAFS",
+         "range" : "3 - 200",
+         "size" : "3 × 50",
+         "status" : "Operational",
+         "website" : "http://beam.aps.anl.gov/pls/apsweb/beamline_display_pkg.display_beamline?p_beamline_num_c=102"
+      },
+      "10-ID-B" : {
+         "facility" : "APS",
+         "flux" : "10^11 - 10^13",
+         "name" : "",
+         "purpose" : "General purpose XAFS, dilute elements, DAFS, XAFS microscopy in materials science",
+         "range" : "4.3- 90",
+         "size" : "2 μm ×2 μm minimum",
+         "status" : "Operational",
+         "website" : "https://beam.aps.anl.gov/pls/apsweb/beamline_display_pkg.display_beamline?p_beamline_num_c=14"
+      },
+      "11-ID-D" : {
+         "facility" : "APS",
+         "flux" : "1 x 10^12",
+         "name" : "",
+         "purpose" : "General purpose XAFS in chemistry, materials science, geoscience and physics. DAFS, time resolved XAFS",
+         "range" : "4 - 40",
+         "size" : "0.5 x 1",
+         "status" : "Operational",
+         "website" : "https://beam.aps.anl.gov/pls/apsweb/beamline_display_pkg.display_beamline?p_beamline_num_c=17"
+      },
+      "12-BM-B" : {
+         "facility" : "APS",
+         "flux" : "5 × 10^10",
+         "name" : "",
+         "purpose" : "General purpose XAFS in chemistry, materials science, geoscience and physics",
+         "range" : "4.5 - 24",
+         "size" : "1 x 1",
+         "status" : "Operational",
+         "website" : "https://beam.aps.anl.gov/pls/apsweb/beamline_display_pkg.display_beamline?p_beamline_num_c=18"
+      },
+      "13-BM-D" : {
+         "facility" : "APS",
+         "flux" : "10^9",
+         "name" : "",
+         "purpose" : "General purpose XAFS, high pressure, geoscience",
+         "range" : "4.5 - 70",
+         "size" : "0.01 x 0.03",
+         "status" : "Operational",
+         "website" : "https://beam.aps.anl.gov/pls/apsweb/beamline_display_pkg.display_beamline?p_beamline_num_c=20"
+      },
+      "13-ID-C,D" : {
+         "facility" : "APS",
+         "flux" : "10^11 - 10^13",
+         "name" : "",
+         "purpose" : "General purpose XAFS, high pressure, geoscience",
+         "range" : "4 - 45",
+         "size" : "0.06 x 0.02 to\r 0.002 x 0.002",
+         "status" : "Operational",
+         "website" : "http://beam.aps.anl.gov/pls/apsweb/beamline_display_pkg.display_beamline?p_beamline_num_c=21"
+      },
+      "16-BM-D" : {
+         "facility" : "APS",
+         "flux" : "3 × 10^9",
+         "name" : "",
+         "purpose" : "XAFS at high pressure",
+         "range" : "6 - 70",
+         "size" : "5 μm ×5 μm",
+         "status" : "Operational",
+         "website" : "https://beam.aps.anl.gov/pls/apsweb/beamline_display_pkg.display_beamline?p_beamline_num_c=100"
+      },
+      "18-ID-D" : {
+         "facility" : "APS",
+         "flux" : "2 x 10^13",
+         "name" : "",
+         "purpose" : "General purpose, microXAS in the life sciences",
+         "range" : "3.5 - 35",
+         "size" : "0.05 x 0.5",
+         "status" : "Operational",
+         "website" : "https://beam.aps.anl.gov/pls/apsweb/beamline_display_pkg.display_beamline?p_beamline_num_c=25"
+      },
+      "2-ID-D" : {
+         "facility" : "APS",
+         "flux" : "4 ×10^9",
+         "name" : "",
+         "purpose" : "microXAFS",
+         "range" : "5 - 30",
+         "size" : "2 μm × 2 μm",
+         "status" : "Operational",
+         "website" : "https://beam.aps.anl.gov/pls/apsweb/beamline_display_pkg.display_beamline?p_beamline_num_c=5"
+      },
+      "20-BM-B" : {
+         "facility" : "APS",
+         "flux" : "1 x 10^11 or 2 x 10^8",
+         "name" : "",
+         "purpose" : "General purpose XAFS, microXAFS in materials, environmental and geological science",
+         "range" : "2.7- 30",
+         "size" : "0.5 x 0.2 or 0.005 x 0.005",
+         "status" : "Operational",
+         "website" : "https://beam.aps.anl.gov/pls/apsweb/beamline_display_pkg.display_beamline?p_beamline_num_c=32"
+      },
+      "20-ID-B,C" : {
+         "facility" : "APS",
+         "flux" : "10^11 - 10^13",
+         "name" : "",
+         "purpose" : "General purpose XAFS, DAFS, microXAFS, time resolved XAFS in materials, environmental and geological science",
+         "range" : "3 - 50",
+         "size" : "2 μm × 2 μm minimum",
+         "status" : "Operational",
+         "website" : "https://beam.aps.anl.gov/pls/apsweb/beamline_display_pkg.display_beamline?p_beamline_num_c=28"
+      },
+      "4-ID-C" : {
+         "facility" : "APS",
+         "flux" : "1 x 10^12",
+         "name" : "",
+         "purpose" : "XMCD, XMLD, PES,\r magnetic scattering",
+         "range" : "0.5 - 3",
+         "size" : "0.1 × 0.1",
+         "status" : "Operational",
+         "website" : "https://beam.aps.anl.gov/pls/apsweb/beamline_display_pkg.display_beamline?p_beamline_num_c=7"
+      },
+      "4-ID-D" : {
+         "facility" : "APS",
+         "flux" : "3 x 10^13",
+         "name" : "",
+         "purpose" : "XMCD, magnetic scattering",
+         "range" : "0.5 - 50",
+         "size" : "0.1 x 0.22",
+         "status" : "Operational",
+         "website" : "https://beam.aps.anl.gov/pls/apsweb/beamline_display_pkg.display_beamline?p_beamline_num_c=31"
+      },
+      "5-BM-D" : {
+         "facility" : "APS",
+         "flux" : "5 ×10^11",
+         "name" : "",
+         "purpose" : "General purpose XAFS, in polymer and materials science",
+         "range" : "4.5 - 80",
+         "size" : "0.5 x 30",
+         "status" : "Operational",
+         "website" : "https://beam.aps.anl.gov/pls/apsweb/beamline_display_pkg.display_beamline?p_beamline_num_c=8"
+      },
+      "7-ID-B,C,D" : {
+         "facility" : "APS",
+         "flux" : "8 ×10^12",
+         "name" : "",
+         "purpose" : "time resolved XAFS",
+         "range" : "6 - 21",
+         "size" : "10 μm ×10 μm",
+         "status" : "Operational",
+         "website" : "https://beam.aps.anl.gov/pls/apsweb/beamline_display_pkg.display_beamline?p_beamline_num_c=11"
+      },
+      "9-BM-B,C" : {
+         "facility" : "APS",
+         "flux" : "1 x 10^11",
+         "name" : "",
+         "purpose" : "General purpose XAFS, in materials science and chemistry",
+         "range" : "2.1 - 23",
+         "size" : "0.5 x 0.5",
+         "status" : "Operational",
+         "website" : "https://beam.aps.anl.gov/pls/apsweb/beamline_display_pkg.display_beamline?p_beamline_num_c=82"
+      }
+   },
+   "CAMD" : {
+      "DCM" : {
+         "facility" : "CAMD",
+         "flux" : ".",
+         "name" : "",
+         "purpose" : "General purpose",
+         "range" : "0.9 - 20",
+         "size" : ".",
+         "status" : "Operational",
+         "website" : "http://www.camd.lsu.edu/beamlines.htm"
+      }
+   },
+   "CLS" : {
+      "HXMA" : {
+         "facility" : "CLS",
+         "flux" : "6 x 10^11",
+         "name" : "",
+         "purpose" : "General purpose XAFS",
+         "range" : "5 - 40",
+         "size" : "0.5 x 0.1",
+         "status" : "Operational",
+         "website" : "http://www.lightsource.ca/experimental/hxma.php"
+      },
+      "REIXS" : {
+         "facility" : "CLS",
+         "flux" : "1 x 10^13",
+         "name" : "",
+         "purpose" : "XAS, XMCD, XES, RIXS",
+         "range" : "0.08 - 2",
+         "size" : "0.01 x 0.06",
+         "status" : "Commissioning",
+         "website" : "http://www.lightsource.ca/experimental/reixs.php"
+      },
+      "SGM" : {
+         "facility" : "CLS",
+         "flux" : "4 x 10^12",
+         "name" : "",
+         "purpose" : "XAS, PES, XEOL",
+         "range" : "0.25 - 2",
+         "size" : "0.1 x 1",
+         "status" : "Operational",
+         "website" : "http://www.lightsource.ca/experimental/sgm.php"
+      },
+      "SXRMB" : {
+         "facility" : "CLS",
+         "flux" : "1 x 10^11",
+         "name" : "",
+         "purpose" : "XAS, XMCD, PES, XEOL",
+         "range" : "1.7 - 10",
+         "size" : "0.3 x 0.3",
+         "status" : "Operational",
+         "website" : "http://www.lightsource.ca/experimental/sxrmb.php"
+      },
+      "VESPERS" : {
+         "facility" : "CLS",
+         "flux" : "2 x 10^9 - 4 x 10^11",
+         "name" : "",
+         "purpose" : "microXAS",
+         "range" : "6 - 30",
+         "size" : "2 mm spot",
+         "status" : "Operational",
+         "website" : "http://www.lightsource.ca/experimental/vespers.php"
+      },
+      "VLS-PGM" : {
+         "facility" : "CLS",
+         "flux" : "2 x 10^12",
+         "name" : "",
+         "purpose" : "XAS, XEOL",
+         "range" : "0.01 - 0.25",
+         "size" : "0.5 x 0.5",
+         "status" : "Operational",
+         "website" : "http://www.lightsource.ca/experimental/vlspgm.php"
+      }
+   },
+   "LNLS" : {
+      "DXAS" : {
+         "facility" : "LNLS",
+         "flux" : "2 x 10^11",
+         "name" : "",
+         "purpose" : "Dispersive set-up",
+         "range" : "5 - 14",
+         "size" : "0.15 x 0.2",
+         "status" : "Operational",
+         "website" : "http://lnls.cnpem.br/beamlines/xafs/beamlines/dxas/"
+      },
+      "PGM" : {
+         "facility" : "LNLS",
+         "flux" : ".",
+         "name" : "",
+         "purpose" : "XAFS, XMCD, PES",
+         "range" : "0.1 - 1.5",
+         "size" : ".",
+         "status" : "Operational",
+         "website" : "http://lnls.cnpem.br/beamlines/uvsoftx/planar-grating-monochromator-pgm/pgm/"
+      },
+      "SGM" : {
+         "facility" : "LNLS",
+         "flux" : ".",
+         "name" : "",
+         "purpose" : "XANES, XMCD, PES",
+         "range" : "0.25 - 1",
+         "size" : "0.5 x 0.5",
+         "status" : "Operational",
+         "website" : "http://www.lightsource.ca/experimental/sgm.php"
+      },
+      "SXS" : {
+         "facility" : "LNLS",
+         "flux" : ".",
+         "name" : "",
+         "purpose" : "XAFS, PES, XMCD",
+         "range" : "0.9 - 5.5",
+         "size" : "1 x 3",
+         "status" : "Operational",
+         "website" : "http://lnls.cnpem.br/beamlines/uvsoftx/soft-x-rays-spectroscopy/"
+      },
+      "TGM" : {
+         "facility" : "LNLS",
+         "flux" : "10^11",
+         "name" : "",
+         "purpose" : "XAFS, PES",
+         "range" : "0.007 - 0.33",
+         "size" : "0.5 x 2",
+         "status" : "Operational",
+         "website" : "http://lnls.cnpem.br/beamlines/uvsoftx/toroidal-grating-monochromator-tgm/tgm/"
+      },
+      "XAFS1" : {
+         "facility" : "LNLS",
+         "flux" : "10^9",
+         "name" : "",
+         "purpose" : "General purpose XAFS",
+         "range" : "4 -24",
+         "size" : "1 x 1",
+         "status" : "Operational",
+         "website" : "http://lnls.cnpem.br/beamlines/xafs/beamlines/xafs1/"
+      },
+      "XAFS2" : {
+         "facility" : "LNLS",
+         "flux" : "10^10",
+         "name" : "",
+         "purpose" : "General purpose XAFS",
+         "range" : "4 - 17",
+         "size" : "0.25 x 0.45",
+         "status" : "Operational",
+         "website" : "http://lnls.cnpem.br/beamlines/xafs/beamlines/xafs2/"
+      }
+   },
+   "NSLS" : {
+      "U12A" : {
+         "facility" : "NSLS",
+         "flux" : "1 x 10^11",
+         "name" : "",
+         "purpose" : "XANES, PES",
+         "range" : "0.1 - 0.8",
+         "size" : "1 x 1",
+         "status" : "operational",
+         "website" : "http://beamlines.ps.bnl.gov/beamline.aspx?blid=U12A"
+      },
+      "U1A" : {
+         "facility" : "NSLS",
+         "flux" : ".",
+         "name" : "",
+         "purpose" : "XANES, surface science",
+         "range" : "0.1 - 1",
+         "size" : "1 x 2",
+         "status" : "operational",
+         "website" : "http://beamlines.ps.bnl.gov/beamline.aspx?blid=U1A"
+      },
+      "U4B" : {
+         "facility" : "NSLS",
+         "flux" : "1 x 10^11",
+         "name" : "",
+         "purpose" : "XMCD, PES, XAS,\r Res. Mag. Scattering",
+         "range" : "0.02 - 1.2",
+         "size" : ".",
+         "status" : "operational",
+         "website" : "http://beamlines.ps.bnl.gov/beamline.aspx?blid=U4B"
+      },
+      "U7A" : {
+         "facility" : "NSLS",
+         "flux" : "2 x 10^11",
+         "name" : "",
+         "purpose" : "XANES, PES,\r surface science",
+         "range" : "0.18 - 1.6",
+         "size" : ".",
+         "status" : "operational",
+         "website" : "http://beamlines.ps.bnl.gov/beamline.aspx?blid=U7A"
+      },
+      "X10C" : {
+         "facility" : "NSLS",
+         "flux" : "1 x 10^10",
+         "name" : "",
+         "purpose" : "General purpose XAFS",
+         "range" : "4 - 24",
+         "size" : "0.5 x 10",
+         "status" : "Closed",
+         "website" : "http://beamlines.ps.bnl.gov/beamline.aspx?blid=X10C"
+      },
+      "X11A" : {
+         "facility" : "NSLS",
+         "flux" : "1 x 10^11",
+         "name" : "",
+         "purpose" : "General purpose XAFS",
+         "range" : "4.5 - 40",
+         "size" : "0.5 x 10",
+         "status" : "operational",
+         "website" : "http://beamlines.ps.bnl.gov/beamline.aspx?blid=X11A"
+      },
+      "X11B" : {
+         "facility" : "NSLS",
+         "flux" : "",
+         "name" : "",
+         "purpose" : "General purpose XAFS",
+         "range" : "5 - 23",
+         "size" : "0.5 x 20",
+         "status" : "operational",
+         "website" : "http://beamlines.ps.bnl.gov/beamline.aspx?blid=X11B"
+      },
+      "X15B" : {
+         "facility" : "NSLS",
+         "flux" : "10^12",
+         "name" : "",
+         "purpose" : "General purpose XAFS, dilute elements,\r surface science",
+         "range" : "1.2 - 8",
+         "size" : "1 x 1",
+         "status" : "operational",
+         "website" : "http://beamlines.ps.bnl.gov/beamline.aspx?blid=X15B"
+      },
+      "X18B" : {
+         "facility" : "NSLS",
+         "flux" : "1 x 10^10",
+         "name" : "",
+         "purpose" : "General purpose",
+         "range" : "4.8 - 40",
+         "size" : "1.5 x 25",
+         "status" : "operational",
+         "website" : "http://beamlines.ps.bnl.gov/beamline.aspx?blid=X18B"
+      },
+      "X19A" : {
+         "facility" : "NSLS",
+         "flux" : "5 x 10^10",
+         "name" : "",
+         "purpose" : "General purpose, resonant XRD",
+         "range" : "2.1 - 17",
+         "size" : "1 x 2",
+         "status" : "operational",
+         "website" : "http://beamlines.ps.bnl.gov/beamline.aspx?blid=X19A"
+      },
+      "X1B" : {
+         "facility" : "NSLS",
+         "flux" : ".",
+         "name" : "",
+         "purpose" : "XAS, PES, XES, RIXS",
+         "range" : "0.2 - 1.6",
+         "size" : "0.05 x 2",
+         "status" : "operational",
+         "website" : "http://beamlines.ps.bnl.gov/beamline.aspx?blid=X1B"
+      },
+      "X23A2" : {
+         "facility" : "NSLS",
+         "flux" : "1 x 10^10",
+         "name" : "",
+         "purpose" : "General purpose,\r powder XRD,\r DAFS",
+         "range" : "4.7 - 30",
+         "size" : "1 x 25",
+         "status" : "operational",
+         "website" : "http://beamlines.ps.bnl.gov/beamline.aspx?blid=X23A2"
+      },
+      "X24A" : {
+         "facility" : "NSLS",
+         "flux" : "approx 10^12",
+         "name" : "",
+         "purpose" : "General purpose XAFS, PES, DAFS",
+         "range" : "1.8 - 6",
+         "size" : "1 mm diameter",
+         "status" : "operational",
+         "website" : "http://beamlines.ps.bnl.gov/beamline.aspx?blid=X24A"
+      },
+      "X24C" : {
+         "facility" : "NSLS",
+         "flux" : "10^9 - 10^12",
+         "name" : "",
+         "purpose" : "XANES, PES,\r reflectivity",
+         "range" : "0.006 - 1.8",
+         "size" : "1 x 2",
+         "status" : "Closed",
+         "website" : "http://beamlines.ps.bnl.gov/beamline.aspx?blid=X24C"
+      },
+      "X3B" : {
+         "facility" : "NSLS",
+         "flux" : "9 x 10^11",
+         "name" : "",
+         "purpose" : "XAFS, dilute elements",
+         "range" : "3.8-13.3",
+         "size" : "0.2 x 0.7",
+         "status" : "operational",
+         "website" : "http://beamlines.ps.bnl.gov/beamline.aspx?blid=X3B"
+      }
+   },
+   "SRC" : {
+      "CSRF\r Double crystal" : {
+         "facility" : "SRC",
+         "flux" : ".",
+         "name" : "",
+         "purpose" : "general purpose",
+         "range" : "1.5 - 4",
+         "size" : "2 x 2",
+         "status" : ".",
+         "website" : ""
+      }
+   },
+   "SSRL" : {
+      "10-1" : {
+         "facility" : "SSRL",
+         "flux" : ".",
+         "name" : "",
+         "purpose" : "XANES, PES",
+         "range" : "0.25 - 1.2",
+         "size" : "1 mm spot size",
+         "status" : "Operational",
+         "website" : "http://www-ssrl.slac.stanford.edu/beamlines/bl10-2"
+      },
+      "10-2a" : {
+         "facility" : "SSRL",
+         "flux" : ".",
+         "name" : "",
+         "purpose" : "General purpose",
+         "range" : "4.5 - 45",
+         "size" : "0.2 x 0.45 or 2 x 20",
+         "status" : "Operational",
+         "website" : "http://www-ssrl.slac.stanford.edu/beamlines/bl10-2"
+      },
+      "11-2" : {
+         "facility" : "SSRL",
+         "flux" : ".",
+         "name" : "",
+         "purpose" : "General purpose, GIXAFS",
+         "range" : "4.5 - 37",
+         "size" : "0.5 x 3 or 2 x 30",
+         "status" : "Operational",
+         "website" : "http://www-ssrl.slac.stanford.edu/beamlines/bl11-2"
+      },
+      "13-2" : {
+         "facility" : "SSRL",
+         "flux" : "",
+         "name" : "",
+         "purpose" : "XANES, surface science",
+         "range" : "0.25 - 1.1",
+         "size" : "0.01 x 0.075",
+         "status" : "Operational",
+         "website" : "http://www-ssrl.slac.stanford.edu/beamlines/bl13-2"
+      },
+      "14-3" : {
+         "facility" : "SSRL",
+         "flux" : "",
+         "name" : "",
+         "purpose" : "General purpose",
+         "range" : "2 - 5",
+         "size" : "",
+         "status" : "available during 2010",
+         "website" : "http://www-ssrl.slac.stanford.edu/beamlines/bl14-3"
+      },
+      "2-3" : {
+         "facility" : "SSRL",
+         "flux" : "10^10",
+         "name" : "",
+         "purpose" : "microXAFS",
+         "range" : "4.5 - 24",
+         "size" : "2 μm x 2 μm",
+         "status" : "Operational",
+         "website" : "http://www-ssrl.slac.stanford.edu/beamlines/bl2-3"
+      },
+      "4-1" : {
+         "facility" : "SSRL",
+         "flux" : ".",
+         "name" : "",
+         "purpose" : "General purpose",
+         "range" : "5.5 - 38",
+         "size" : "4 x 18",
+         "status" : "Operational",
+         "website" : "http://www-ssrl.slac.stanford.edu/beamlines/bl4-1"
+      },
+      "4-3" : {
+         "facility" : "SSRL",
+         "flux" : ".",
+         "name" : "",
+         "purpose" : "General purpose",
+         "range" : "2.4 - 14",
+         "size" : "3 x 16",
+         "status" : "Operational",
+         "website" : "http://www-ssrl.slac.stanford.edu/beamlines/bl4-3"
+      },
+      "6-2a" : {
+         "facility" : "SSRL",
+         "flux" : ".",
+         "name" : "",
+         "purpose" : "General purpose or XES, RIXS",
+         "range" : "2.3 - 17",
+         "size" : "0.5 x 0.5 or 2 x 20",
+         "status" : "Operational",
+         "website" : "http://www-ssrl.slac.stanford.edu/beamlines/bl6-2"
+      },
+      "7-3" : {
+         "facility" : "SSRL",
+         "flux" : "10^12",
+         "name" : "",
+         "purpose" : "BioXAS",
+         "range" : "4.6 - 37",
+         "size" : "2 x 15",
+         "status" : "Operational",
+         "website" : "http://www-ssrl.slac.stanford.edu/beamlines/bl7-3"
+      },
+      "8-2" : {
+         "facility" : "SSRL",
+         "flux" : ".",
+         "name" : "",
+         "purpose" : "XANES, PES",
+         "range" : "0.1 - 1.3",
+         "size" : "0.1 mm spot size",
+         "status" : "Operational",
+         "website" : "http://www-ssrl.slac.stanford.edu/beamlines/bl8-2"
+      },
+      "9-3" : {
+         "facility" : "SSRL",
+         "flux" : "2 10^12",
+         "name" : "",
+         "purpose" : "BioXAS",
+         "range" : "5 - 30",
+         "size" : "0.5 x 3",
+         "status" : "Operational",
+         "website" : "http://www-ssrl.slac.stanford.edu/beamlines/bl9-3"
+      }
+   }
+}
