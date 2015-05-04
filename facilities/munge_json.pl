@@ -11,6 +11,7 @@ use HTML::Strip;
 
 my $json = JSON->new->allow_nonref;
 $json->pretty(1);
+$json->canonical(1);
 
 my $data = $json->decode(read_file('lightsources.org.json'));
 
@@ -34,7 +35,7 @@ foreach my $d (@$data) {
   ## this skips over 3 US DoE nano centers
   next if not defined($d->{field_category_value});
 
-  my $key = $d->{title};
+  my $key = $d->{field_abbreviation_value};
   my $address = $d->{field_address_value};
 
   my $phone = q{};
@@ -99,12 +100,13 @@ foreach my $d (@$data) {
 
 ## the dear departed...
 
-$synchrotrons{NSLS} = $synchrotrons{'NSLS-II'};
+$synchrotrons{NSLS} = {};
+%{$synchrotrons{NSLS}} = %{$synchrotrons{'NSLS-II'}};
 $synchrotrons{NSLS}->{fullname} =~ s{ II}{};
 $synchrotrons{NSLS}->{active} = JSON::false;
 
 $synchrotrons{DORIS} = $synchrotrons{'PETRA III'};
-$synchrotrons{DORIS}->{fullname} =~ 'Doppel-Ring-Speicher';
+$synchrotrons{DORIS}->{fullname} = 'Doppel-Ring-Speicher';
 $synchrotrons{DORIS}->{active} = JSON::false;
 
 $synchrotrons{SRS}->{active} = JSON::false;
