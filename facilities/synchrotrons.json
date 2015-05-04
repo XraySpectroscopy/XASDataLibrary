@@ -1,425 +1,552 @@
 {
-   "RRCAT" : {
-      "country" : "India",
-      "phone" : "+91-731-248-8003",
-      "fullname" : "Centre for Advanced Technology",
-      "website" : "http://www.cat.ernet.in/technology/accel/indus/index.html",
-      "fax" : "91-731-248-8000",
-      "post" : "Centre for Advanced Technology Department of Atomic Energy Government of India\nP.O : CAT Indore\nM.P - 452 013\nIndia\n\nTel : +91-731-248-8003\nFax: 91-731-248-8000\nEmail: rvn@cat.ernet.in",
-      "email" : "rvn@cat.ernet.in"
-   },
-   "UVSOR" : {
-      "email" : "mkatoh@ims.ac.jp",
-      "post" : "UVSOR Facility, Institute for Molecular Science\nMyodaiji\nOkazaki 444-8585\nJapan",
-      "fax" : "+81 564 54 7079",
-      "website" : "http://www.uvsor.ims.ac.jp/defaultE.html",
-      "fullname" : "Ultraviolet Synchrotron Orbital Radiation Facility",
-      "country" : "Japan",
-      "phone" : "+81 564 55 7402"
-   },
-   "CLS" : {
-      "fullname" : "Canadian Light Source",
-      "country" : "Canada",
-      "phone" : "+1 (306) 657-3500",
-      "post" : "Canadian Light Source Inc.\nUniversity of Saskatchewan 101\nPerimeter Road Saskatoon, SK.\nCanada. S7N 0X4",
-      "website" : "http://www.lightsource.ca",
-      "fax" : "+1 (306) 657-3535",
-      "email" : ""
-   },
-   "HISOR" : {
-      "fullname" : "Hiroshima Synchrotron Radiation Center",
-      "phone" : "+81 82 424 6293",
-      "country" : "Japan",
-      "post" : "2-313 Kagamiyama\nHigashi-Hiroshima, 739-0046\nJapan",
-      "website" : "http://www.hsrc.hiroshima-u.ac.jp/index.html",
-      "fax" : "+81 82 424 6294",
-      "email" : "hisor@hiroshima-u.ac.jp"
-   },
-   "Diamond" : {
-      "email" : "dlsenquiries@diamond.ac.uk",
-      "country" : "United Kingdom",
-      "phone" : "+44 (0)1235 778000",
-      "fullname" : "Diamond Light Source",
-      "fax" : "+44 (0)1235 778499",
-      "website" : "http://www.diamond.ac.uk/",
-      "post" : "Diamond Light Source Ltd.\nDiamond House\nHarwell Science and Innovation Campus\nDidcot\nOfordshire\nOX11 0DE\nUK"
-   },
-   "PETRA III" : {
-      "email" : "photon-science@desy.de",
-      "fullname" : "PETRA III at DESY",
-      "country" : "Germany",
-      "phone" : "+49 40 / 8998-1541",
-      "post" : "DESY Photon Science\nNotkestr. 85\n22607 HAMBURG\nGermany",
-      "fax" : "+49 40 / 8998-4475",
-      "website" : "http://photon-science.desy.de"
-   },
-   "SSRC" : {
+   "DELSY" : {
       "country" : "Russia",
-      "phone" : "+7(3832)39 44 98Fax: +7(3832)34 21 63",
-      "fullname" : "Siberian Synchrotron Research Centre",
-      "website" : "http://ssrc.inp.nsk.su/",
-      "fax" : "+7(3832)34 21 63",
-      "post" : "Lavrentyev av. 11\nBudker INP\nNovosibirsk 630090\nRussia",
-      "email" : "G.N.Kulipanov@inp.nsk.su"
+      "email" : "post@jinr.ru",
+      "phone" : "+ 7 09621 65 059",
+      "fullname" : "Dubna Electron Synchrotron",
+      "fax" : "+ 7 09621 65 891",
+      "post" : "141980 Moskow\nDubna\nRussia",
+      "active" : true,
+      "website" : "http://wwwinfo.jinr.ru/delsy/"
+   },
+   "SURF" : {
+      "fullname" : "Synchrotron Ultraviolet Radiation Facility",
+      "phone" : "+1 (301) 975 6478",
+      "email" : "inquiries@nist.gov",
+      "country" : "USA",
+      "fax" : "",
+      "active" : true,
+      "post" : "NIST\n100 Bureau Drive\nStop 1070\nGaithersburg\nMD 20899-1070.",
+      "website" : "http://physics.nist.gov/MajResFac/SURF/SURF/index.html"
    },
    "SLRI" : {
-      "email" : "siampl@slri.or.th",
-      "country" : "Thailand",
-      "phone" : "+66 44 21 7040",
-      "fullname" : "Synchrotron Light Research Institute",
+      "active" : true,
+      "post" : "Synchrotron Light Research Institute (SLRI)\n111 University Avenue\nMuang District\nNakhon Ratchasima 30000\nThailand",
       "website" : "http://www.slri.or.th",
-      "fax" : "+66 44 21 7047",
-      "post" : "Synchrotron Light Research Institute (SLRI)\n111 University Avenue\nMuang District\nNakhon Ratchasima 30000\nThailand"
-   },
-   "ELETTRA" : {
-      "email" : "info@elettra.eu",
-      "phone" : "+39 (040) 37581",
-      "country" : "Italy",
-      "fullname" : "Elettra Synchrotron Light Laboratory",
-      "website" : "http://www.elettra.eu",
-      "fax" : "+39 (040) 938-0902",
-      "post" : "Elettra - Sincrotrone Trieste S.C.p.A.\nStrada Statale 14 - km 163,5 in AREA Science Park\n34012 Basovizza, Trieste\nItaly"
-   },
-   "Iranian Light Source Facility" : {
-      "fullname" : "Iranian Light Source Facility",
-      "phone" : "+98 21 2281 3738",
-      "country" : "Iran",
-      "post" : "Iranian Light Source Facility (ILSF)\nInstitute for Research in Fundamental Sciences (IPM)\nP.O. Box 19395-5746,\nTehran\nIran",
-      "website" : "http://ilsf.ipm.ac.ir/",
-      "fax" : "+98 21 2281 3722",
-      "email" : "ILSF@ipm.ir\".target=\"_blank"
-   },
-   "LNLS" : {
-      "fax" : "",
-      "website" : "http://www.lnls.br/",
-      "post" : "Rua Giuseppe Máximo Scolfaro, 10000\nCaixa Postal 6192 - CEP 13083-970\nCampinas, SP - Brazil",
-      "phone" : "+55 19 3512 1173",
-      "country" : "Brazil",
-      "fullname" : "Laboratorio Nacional de Luz Sincrotron",
-      "email" : ""
+      "email" : "siampl@slri.or.th",
+      "fullname" : "Synchrotron Light Research Institute",
+      "phone" : "+66 44 21 7040",
+      "country" : "Thailand",
+      "fax" : "+66 44 21 7047"
    },
    "ESRF" : {
-      "fullname" : "European Synchrotron Radiation Facility",
-      "phone" : "+33 (0)4 76 88 20 00",
-      "country" : "France",
-      "post" : "ESRF\n6 Rue Jules Horowitz\nBP 220\n38043 Grenoble Cedex 9\nFRANCE",
       "website" : "http://www.esrf.eu",
+      "post" : "ESRF\n6 Rue Jules Horowitz\nBP 220\n38043 Grenoble Cedex 9\nFRANCE",
+      "active" : true,
       "fax" : "+33 (0)4 76 88 20 20",
-      "email" : "communication@esrf.fr"
+      "country" : "France",
+      "email" : "communication@esrf.fr",
+      "phone" : "+33 (0)4 76 88 20 00",
+      "fullname" : "European Synchrotron Radiation Facility"
    },
-   "SLS" : {
-      "email" : "useroffice@psi.ch",
-      "fax" : "+41 (56) 310-3294",
-      "website" : "http://www.psi.ch/sls/",
-      "post" : "Paul Scherrer Institut User Office\nPSI West\nCH-5232 Villigen PSI\nSwitzerland",
-      "country" : "Switzerland",
-      "phone" : "+41 (56) 310-4666",
-      "fullname" : "Swiss Light Source"
+   "ISA" : {
+      "country" : "Denmark",
+      "fullname" : "Institute for Storage Ring Facilities",
+      "phone" : "+45 8942 3778",
+      "email" : "fyssp@phys.au.dk",
+      "fax" : "+45 8612 0740",
+      "post" : "ISA, University of Aarhus\nDK-8000 Aarhus C\nDenmark",
+      "active" : true,
+      "website" : "http://www.isa.au.dk/"
    },
-   "ELSA" : {
-      "email" : "klein@physik.uni-bonn.de",
-      "country" : "Germany",
-      "phone" : "+49-228-732340",
-      "fullname" : "ELSA - Electron Stretcher Accelerator",
-      "website" : "http://www-elsa.physik.uni-bonn.de/elsa-facility_en.html",
-      "fax" : "+49-228-733518",
-      "post" : "Physikalisches Institut der Universität Bonn Beschleunigeranlage ELSA\nNußallee 12\nD-53115 Bonn\nGermany"
+   "SSLS" : {
+      "country" : "Singapore",
+      "fullname" : "Singapore Synchrotron Light Source",
+      "phone" : "(65) 6874-6568",
+      "email" : "slshead@nus.edu.sg",
+      "fax" : "(65) 6773-6734",
+      "post" : "Singapore Synchrotron Light Source\nNational University of Singapore\n5 Research Link\nSingapore 117603\nSingapore",
+      "active" : true,
+      "website" : "http://ssls.nus.edu.sg/index.html"
    },
-   "ALS" : {
-      "fullname" : "Advanced Light Source",
-      "phone" : "+1 (510) 486-7745",
-      "country" : "USA",
-      "post" : "ALS User Services Office\nAdvanced Light Source\nLawrence Berkeley National Laboratory\nMS 6-2100\nBerkeley, CA 94720\nUSA",
-      "website" : "http://www-als.lbl.gov/",
-      "fax" : "+1 (510) 486-4773",
-      "email" : "alsuser@lbl.gov"
+   "KSRS" : {
+      "post" : "1\nAkademika Kurchatova pl\nMoscow 123182\nRussia",
+      "active" : true,
+      "website" : "http://www.nrcki.ru/e/engl.html",
+      "country" : "Russia",
+      "fullname" : "Kurchatov Synchrotron Radiation Source",
+      "phone" : "",
+      "email" : "",
+      "fax" : ""
    },
-   "Australian Synchrotron" : {
-      "email" : "info@synchrotron.org.au",
-      "post" : "800 Blackburn Road\nClayton, Vic 3168\nAustralia  ",
-      "website" : "http://www.synchrotron.org.au",
+   "CLS" : {
+      "active" : true,
+      "post" : "Canadian Light Source Inc.\nUniversity of Saskatchewan 101\nPerimeter Road Saskatoon, SK.\nCanada. S7N 0X4",
+      "website" : "http://www.lightsource.ca",
+      "email" : "",
+      "fullname" : "Canadian Light Source",
+      "phone" : "+1 (306) 657-3500",
+      "country" : "Canada",
+      "fax" : "+1 (306) 657-3535"
+   },
+   "SOLEIL" : {
+      "fax" : "+33 1 69 35 94 56",
+      "country" : "France",
+      "fullname" : "SOLEIL",
+      "phone" : "+33 169 35 90 06",
+      "email" : "Isabelle.quinkal@synchrotron-soleil.fr",
+      "website" : "http://www.synchrotron-soleil.fr/",
+      "post" : "Synchrotron SOLEIL\nL'Orme des Merisiers\nSaint-Aubin - BP 48 91192 GIF-sur-YVETTE CEDEX\nFRANCE",
+      "active" : true
+   },
+   "NSRL" : {
+      "fullname" : "National Synchrotron Radiation Laboratory",
+      "phone" : "(+86) 551 3602034",
+      "email" : "nsrl@ustc.edu.cn",
+      "country" : "China",
+      "fax" : "",
+      "active" : true,
+      "post" : "NSRL No. 42,\nHezuohua South Road,\nHefei,\nAnhui 230029,\nP. R. China.",
+      "website" : "http://www.nsrl.ustc.edu.cn/"
+   },
+   "SESAME" : {
+      "fax" : "(+962-5) 3511423",
+      "email" : "giorgio.paolucci@sesame.org.jo",
+      "phone" : "(+962-5) 3511348,ext. 204",
+      "fullname" : "Synchrotron-light for Experimental Science and Applications in the Middle East",
+      "country" : "Jordan",
+      "website" : "http://www.sesame.org.jo/sesame/",
+      "active" : true,
+      "post" : "P.O. Box 7\nAllan 19252\nJordan."
+   },
+   "MSRF" : {
+      "fax" : "",
+      "country" : "Japan",
+      "phone" : "+81-(0)43-251-2111",
+      "fullname" : "Medical Synchrotron Radiation Facility",
+      "email" : "kokusai@nirs.go.jp",
+      "website" : null,
+      "post" : "4-9-1,Anagawa\nInage-ku\nChiba-shi, 263-8555\nJapan",
+      "active" : true
+   },
+   "AS" : {
       "fax" : "+613 8540 4200",
+      "country" : "Australia",
+      "email" : "info@synchrotron.org.au",
       "fullname" : "Australian Synchrotron",
       "phone" : "+613 8540 4100",
-      "country" : "Australia"
+      "website" : "http://www.synchrotron.org.au",
+      "post" : "800 Blackburn Road\nClayton, Vic 3168\nAustralia  ",
+      "active" : true
    },
-   "APS" : {
-      "email" : "apsuser@aps.anl.gov",
-      "fullname" : "Advanced Photon Source",
+   "ILSF" : {
+      "post" : "Iranian Light Source Facility (ILSF)\nInstitute for Research in Fundamental Sciences (IPM)\nP.O. Box 19395-5746,\nTehran\nIran",
+      "active" : true,
+      "website" : "http://ilsf.ipm.ac.ir/",
+      "country" : "Iran",
+      "email" : "ILSF@ipm.ir",
+      "fullname" : "Iranian Light Source Facility",
+      "phone" : "+98 21 2281 3738",
+      "fax" : "+98 21 2281 3722"
+   },
+   "SAGALS" : {
+      "fax" : "+81-942-83-5196",
+      "email" : "info@saga-ls.jp",
+      "fullname" : "Saga Light Source",
+      "phone" : "+81-942-83-5017",
+      "country" : "Japan",
+      "website" : "http://www.saga-ls.jp/?page=206",
+      "active" : true,
+      "post" : "8-7 Yayoigaoka\nTosu\nSaga 841-0005\nJapan"
+   },
+   "SSRC" : {
+      "fax" : "+7(3832)34 21 63",
+      "country" : "Russia",
+      "fullname" : "Siberian Synchrotron Research Centre",
+      "phone" : "+7(3832)39 44 98Fax: +7(3832)34 21 63",
+      "email" : "G.N.Kulipanov@inp.nsk.su",
+      "website" : "http://ssrc.inp.nsk.su/",
+      "post" : "Lavrentyev av. 11\nBudker INP\nNovosibirsk 630090\nRussia",
+      "active" : true
+   },
+   "LNLS" : {
+      "website" : "http://www.lnls.br/",
+      "active" : true,
+      "post" : "Rua Giuseppe Máximo Scolfaro, 10000\nCaixa Postal 6192 - CEP 13083-970\nCampinas, SP - Brazil",
+      "fax" : "",
+      "email" : "",
+      "phone" : "+55 19 3512 1173",
+      "fullname" : "Laboratorio Nacional de Luz Sincrotron",
+      "country" : "Brazil"
+   },
+   "NSLS-II" : {
+      "fax" : "+1 631 344-7206",
+      "phone" : "+1 631 344-8737",
+      "fullname" : "National Synchrotron Light Source",
+      "email" : "nslsuser@bnl.gov",
       "country" : "USA",
-      "phone" : "+1 (630) 252 9090",
-      "post" : "Argonne National Laboratory\n9700 S. Cass Avenue, Bldg.401\nArgonne, IL 60439\nUSA",
-      "website" : "http://www.aps.anl.gov",
-      "fax" : ""
+      "website" : "http://www.bnl.gov/ps/",
+      "active" : false,
+      "post" : "User Administration Office\nBrookhaven National Laboratory\nP.O. Box 5000, Bldg. 725\nUpton, NY 11973-5000\nUSA"
+   },
+   "MAX IV" : {
+      "fax" : "+46 46 222 47 10",
+      "country" : "Sweden",
+      "phone" : "+46 46 222 98 72",
+      "fullname" : "MAX IV Laboratory",
+      "email" : "maxlab@maxlab.lu.se",
+      "website" : "http://www.maxlab.lu.se/",
+      "post" : "Box 118\n22100 Lund\nSweden",
+      "active" : true
+   },
+   "DORIS" : {
+      "email" : "photon-science@desy.de",
+      "fullname" : "PETRA III at DESY",
+      "phone" : "+49 40 / 8998-1541",
+      "country" : "Germany",
+      "fax" : "+49 40 / 8998-4475",
+      "active" : false,
+      "post" : "DESY Photon Science\nNotkestr. 85\n22607 HAMBURG\nGermany",
+      "website" : "http://photon-science.desy.de"
+   },
+   "PF" : {
+      "active" : true,
+      "post" : "KEK\n1-1 Oho, Tsukuba\nIbaraki 305-0801\nJapan",
+      "website" : "http://pfwww.kek.jp/",
+      "phone" : "+81 (0)-29-879-6009",
+      "fullname" : "Photon Factory",
+      "email" : "",
+      "country" : "Japan",
+      "fax" : "+81 (0)-29-864-4402"
+   },
+   "CHESS" : {
+      "website" : "http://www.chess.cornell.edu/",
+      "active" : true,
+      "post" : "Cornell High Energy Synchrotron Source\n200L Wilson Lab\nRt. 366 & Pine Tree Road\nIthaca, NY 14853\nUSA",
+      "fax" : "+1 (607) 255 9001",
+      "fullname" : "Cornell High Energy Synchrotron Source",
+      "phone" : "+1(607) 255 7163",
+      "email" : "kd73@cornell.edu",
+      "country" : "USA"
    },
    "DELTA" : {
       "email" : "shaukat.khan@tu-dortmund.de",
       "fullname" : "Dortmund Electron Storage Ring Facility",
       "phone" : "+49-(0)231-755-5376",
       "country" : "Germany",
-      "post" : "Zentrum fuer Synchrotronstrahlung\nTechnische Universitaet Dortmund\nMaria-Goeppert-Mayer-Str. 2\n44227 Dortmund\nGermany",
       "fax" : "+49-(0)231-755-5383",
+      "active" : true,
+      "post" : "Zentrum fuer Synchrotronstrahlung\nTechnische Universitaet Dortmund\nMaria-Goeppert-Mayer-Str. 2\n44227 Dortmund\nGermany",
       "website" : "http://www.delta.tu-dortmund.de/"
    },
-   "CHESS" : {
-      "fullname" : "Cornell High Energy Synchrotron Source",
-      "phone" : "+1(607) 255 7163",
-      "country" : "USA",
-      "post" : "Cornell High Energy Synchrotron Source\n200L Wilson Lab\nRt. 366 & Pine Tree Road\nIthaca, NY 14853\nUSA",
-      "fax" : "+1 (607) 255 9001",
-      "website" : "http://www.chess.cornell.edu/",
-      "email" : "kd73@cornell.edu"
+   "ALBA" : {
+      "active" : true,
+      "post" : "CELLS - ALBA\nCarretera BP 1413 de Cerdanyola a Sant Cugat\nKm 3,3\nE-08290 Cerdanyola del Vallès\nBarcelona\nSpain",
+      "website" : "http://www.cells.es/",
+      "phone" : "+34 93 592 44 19",
+      "fullname" : "ALBA",
+      "email" : "asanchez@cells.es",
+      "country" : "Spain",
+      "fax" : "+34 93 592 43 01"
    },
-   "TNK" : {
-      "email" : "info@ckp.su",
-      "fax" : "+7(095) 531-4656",
-      "website" : "http://www.niifp.ru/page/sinhrotron",
-      "post" : "103460\nMoscow\nZelenograd\nRussia.",
-      "country" : "Russia",
-      "phone" : "+7 (095) 531 1306",
-      "fullname" : "TNK"
-   },
-   "ASRC" : {
-      "fullname" : "Aichi Synchrotron Radiation Center",
-      "phone" : "+81 0561 76 8331",
-      "country" : "Japan",
-      "post" : "250-3, Minamiyamaguchi-cho\nSeto\nAichi 489-0965\nJapan",
-      "website" : "http://www.astf-kha.jp/synchrotron/en/",
-      "fax" : "+81 0561 21 1652",
-      "email" : "takeda@astf.or.jp"
-   },
-   "CANDLE" : {
-      "email" : "baghiryan@asls.candle.am",
-      "fullname" : "Center for the Advancement of Natural Discoveries using Light Emission",
-      "phone" : "",
-      "country" : "Armenia",
-      "post" : "Acharyan 31\n375040, Yerevan\nArmenia\n\nTel/Fax: +374-1-629806\nE-mail: baghiryan@asls.candle.am",
-      "website" : "http://www.candle.am/index.html",
-      "fax" : "+374-1-629806"
-   },
-   "SSRL" : {
-      "email" : "knotts@slac.stanford.edu",
-      "post" : "SLAC National Accelerator Laboratory\n2575 Sand Hill Road\nMenlo Park, CA 94025\nUSA",
-      "fax" : "+1 (650) 926-4100/3600",
-      "website" : "http://www-ssrl.slac.stanford.edu",
-      "fullname" : "Stanford Synchrotron Radiation Lightsource",
-      "phone" : "+1 (650) 926-3191",
-      "country" : "USA"
-   },
-   "NSRRC" : {
-      "website" : "http://www.nsrrc.org.tw/",
-      "fax" : "+886 03 579 0572",
-      "post" : "National Synchrotron Radiation Research Center\n101 Hsin-Ann Road\nHsinchu Science Park\nHsinchu 30076\nTaiwan, R.O.C.",
-      "phone" : "+886 3 578 0281",
-      "country" : "Taiwan",
-      "fullname" : "National Synchrotron Radiation Research Center",
-      "email" : "info@nsrrc.org.tw"
+   "DAFNE" : {
+      "website" : "http://web.infn.it/Dafne_Light/",
+      "active" : true,
+      "post" : "INFN-LNF, Via Enrico Fermi 40\n00044, FRASCATI (RM)\nITALIA\n\nFax: +39 06 94032208",
+      "fax" : "+39 06 94032208",
+      "email" : "antonella.balerna@lnf.infn.it",
+      "fullname" : "DAFNE",
+      "phone" : "+39 06 94032542",
+      "country" : "Italy"
    },
    "PLS" : {
-      "email" : "huang@postech.ac.kr",
-      "post" : "San-31 Hyoja-dong Pohang\nKyungbuk 790-784\nKorea",
       "fax" : "",
-      "website" : "http://paleng.postech.ac.kr",
-      "fullname" : "Pohang Light Source ",
       "country" : "Korea",
-      "phone" : "+82 10 2520 3078"
+      "email" : "huang@postech.ac.kr",
+      "phone" : "+82 10 2520 3078",
+      "fullname" : "Pohang Light Source ",
+      "website" : "http://paleng.postech.ac.kr",
+      "post" : "San-31 Hyoja-dong Pohang\nKyungbuk 790-784\nKorea",
+      "active" : true
+   },
+   "SLS" : {
+      "fax" : "+41 (56) 310-3294",
+      "country" : "Switzerland",
+      "email" : "useroffice@psi.ch",
+      "phone" : "+41 (56) 310-4666",
+      "fullname" : "Swiss Light Source",
+      "website" : "http://www.psi.ch/sls/",
+      "post" : "Paul Scherrer Institut User Office\nPSI West\nCH-5232 Villigen PSI\nSwitzerland",
+      "active" : true
+   },
+   "BSRF" : {
+      "fax" : "+86-10-88236229",
+      "country" : "China",
+      "email" : "yumj@ihep.ac.cn",
+      "fullname" : "Beijing Synchrotron Radiation Facility",
+      "phone" : "+86 10 88236229",
+      "website" : "http://bsrf.ihep.cas.cn/",
+      "post" : "Users Office of Beijing Synchrotron Radiation Facility\nInstitute of High Energy Physics, Chinese Academy of Sciences\n19B Yuquan Road, Shijingshan District, Beijing 100049\nP. R. China",
+      "active" : true
+   },
+   "MLS" : {
+      "post" : "Physikalisch-Technische Bundesanstalt\nWilly-Wien-Laboratorium\nMagnusstraße 9\n12489 Berlin\nGermany",
+      "active" : true,
+      "website" : "http://www.ptb.de/mls/",
+      "country" : "Germany",
+      "phone" : "+49 30 3481 7312",
+      "fullname" : "Metrology Light Source",
+      "email" : "Gerhard.Ulm@ptb.de",
+      "fax" : "+49 30 3481 7550"
+   },
+   "RRCAT" : {
+      "fax" : "91-731-248-8000",
+      "country" : "India",
+      "fullname" : "Centre for Advanced Technology",
+      "phone" : "+91-731-248-8003",
+      "email" : "rvn@cat.ernet.in",
+      "website" : "http://www.cat.ernet.in/technology/accel/indus/index.html",
+      "post" : "Centre for Advanced Technology Department of Atomic Energy Government of India\nP.O : CAT Indore\nM.P - 452 013\nIndia\n\nTel : +91-731-248-8003\nFax: 91-731-248-8000\nEmail: rvn@cat.ernet.in",
+      "active" : true
    },
    "SSRF" : {
-      "post" : "E-mail: ssrf@sinap.ac.cn",
-      "website" : "http://ssrf.sinap.ac.cn/english/",
       "fax" : "",
       "fullname" : "SSRF - Shanghai Synchrotron Radiation Facility",
       "phone" : "",
+      "email" : "ssrf@sinap.ac.cn",
       "country" : "China",
-      "email" : "ssrf@sinap.ac.cn"
+      "website" : "http://ssrf.sinap.ac.cn/english/",
+      "active" : true,
+      "post" : "E-mail: ssrf@sinap.ac.cn"
    },
-   "KSRS" : {
-      "email" : "",
-      "website" : "http://www.nrcki.ru/e/engl.html",
-      "fax" : "",
-      "post" : "1\nAkademika Kurchatova pl\nMoscow 123182\nRussia",
-      "country" : "Russia",
-      "phone" : "",
-      "fullname" : "Kurchatov Synchrotron Radiation Source"
-   },
-   "MLS" : {
-      "fullname" : "Metrology Light Source",
-      "phone" : "+49 30 3481 7312",
-      "country" : "Germany",
-      "post" : "Physikalisch-Technische Bundesanstalt\nWilly-Wien-Laboratorium\nMagnusstraße 9\n12489 Berlin\nGermany",
-      "website" : "http://www.ptb.de/mls/",
-      "fax" : "+49 30 3481 7550",
-      "email" : "Gerhard.Ulm@ptb.de"
-   },
-   "ISA" : {
-      "email" : "fyssp@phys.au.dk",
-      "fullname" : "Institute for Storage Ring Facilities",
-      "phone" : "+45 8942 3778",
-      "country" : "Denmark",
-      "post" : "ISA, University of Aarhus\nDK-8000 Aarhus C\nDenmark",
-      "fax" : "+45 8612 0740",
-      "website" : "http://www.isa.au.dk/"
-   },
-   "SSLS" : {
-      "email" : "slshead@nus.edu.sg",
-      "country" : "Singapore",
-      "phone" : "(65) 6874-6568",
-      "fullname" : "Singapore Synchrotron Light Source",
-      "website" : "http://ssls.nus.edu.sg/index.html",
-      "fax" : "(65) 6773-6734",
-      "post" : "Singapore Synchrotron Light Source\nNational University of Singapore\n5 Research Link\nSingapore 117603\nSingapore"
-   },
-   "SURF" : {
-      "email" : "inquiries@nist.gov",
-      "post" : "NIST\n100 Bureau Drive\nStop 1070\nGaithersburg\nMD 20899-1070.",
-      "fax" : "",
-      "website" : "http://physics.nist.gov/MajResFac/SURF/SURF/index.html",
-      "fullname" : "Synchrotron Ultraviolet Radiation Facility",
-      "country" : "USA",
-      "phone" : "+1 (301) 975 6478"
-   },
-   "SOLEIL" : {
-      "email" : "Isabelle.quinkal@synchrotron-soleil.fr",
-      "country" : "France",
-      "phone" : "+33 169 35 90 06",
-      "fullname" : "SOLEIL",
-      "fax" : "+33 1 69 35 94 56",
-      "website" : "http://www.synchrotron-soleil.fr/",
-      "post" : "Synchrotron SOLEIL\nL'Orme des Merisiers\nSaint-Aubin - BP 48 91192 GIF-sur-YVETTE CEDEX\nFRANCE"
-   },
-   "DAFNE" : {
-      "email" : "antonella.balerna@lnf.infn.it",
-      "fullname" : "DAFNE",
-      "country" : "Italy",
-      "phone" : "+39 06 94032542",
-      "post" : "INFN-LNF, Via Enrico Fermi 40\n00044, FRASCATI (RM)\nITALIA\n\nFax: +39 06 94032208",
-      "fax" : "+39 06 94032208",
-      "website" : "http://web.infn.it/Dafne_Light/"
-   },
-   "SPRING-8" : {
-      "fullname" : "SPring-8",
+   "UVSOR" : {
+      "active" : true,
+      "post" : "UVSOR Facility, Institute for Molecular Science\nMyodaiji\nOkazaki 444-8585\nJapan",
+      "website" : "http://www.uvsor.ims.ac.jp/defaultE.html",
+      "fullname" : "Ultraviolet Synchrotron Orbital Radiation Facility",
+      "phone" : "+81 564 55 7402",
+      "email" : "mkatoh@ims.ac.jp",
       "country" : "Japan",
-      "phone" : "+81-(0) 791-58-0961",
-      "post" : "1-1-1 Kouto, Sayo-cho, Sayo-gun\nHyogo 679-5198\nJapan",
-      "fax" : "+81-(0) 791-58-0965",
-      "website" : "http://www.spring8.or.jp/en/",
-      "email" : "sp8jasri@spring8.or.jp\".target=\"_blank"
-   },
-   "CAMD" : {
-      "fullname" : "Center for Advanced Microstructures and Devices",
-      "country" : "USA",
-      "phone" : "+1 (225) 578-8887",
-      "post" : "CAMD/LSU 6980 Jefferson Hwy.\nBaton Rouge, LA 70806\nUSA",
-      "fax" : "+1 (225) 578-6954",
-      "website" : "http://www.camd.lsu.edu/",
-      "email" : "scott@lsu.edu"
+      "fax" : "+81 564 54 7079"
    },
    "RitsSR" : {
-      "fullname" : "Ritsumeikan University SR Center",
-      "country" : "Japan",
-      "phone" : "+81 077 561 2806",
+      "website" : "http://www.ritsumei.ac.jp/acd/re/src/index.htm",
+      "active" : true,
       "post" : "Ritsumeikan University (RitS) SR Center\nBiwako-Kusatsu Campus\nNoji Higashi 1-chome\n1-1 Kusatsu\n525-8577 Shiga-ken\nJapan",
       "fax" : "+81 077 561 2859",
-      "website" : "http://www.ritsumei.ac.jp/acd/re/src/index.htm",
-      "email" : "d11-www-adm@se.ritsumei.ac.jp"
+      "email" : "d11-www-adm@se.ritsumei.ac.jp",
+      "phone" : "+81 077 561 2806",
+      "fullname" : "Ritsumeikan University SR Center",
+      "country" : "Japan"
    },
-   "SESAME" : {
-      "phone" : "(+962-5) 3511348,ext. 204",
-      "country" : "Jordan",
-      "fullname" : "Synchrotron-light for Experimental Science and Applications in the Middle East",
-      "fax" : "(+962-5) 3511423",
-      "website" : "http://www.sesame.org.jo/sesame/",
-      "post" : "P.O. Box 7\nAllan 19252\nJordan.",
-      "email" : "giorgio.paolucci@sesame.org.jo"
+   "ASRC" : {
+      "active" : true,
+      "post" : "250-3, Minamiyamaguchi-cho\nSeto\nAichi 489-0965\nJapan",
+      "website" : "http://www.astf-kha.jp/synchrotron/en/",
+      "fullname" : "Aichi Synchrotron Radiation Center",
+      "phone" : "+81 0561 76 8331",
+      "email" : "takeda@astf.or.jp",
+      "country" : "Japan",
+      "fax" : "+81 0561 21 1652"
    },
-   "NSLS-II" : {
+   "ALS" : {
+      "website" : "http://www-als.lbl.gov/",
+      "post" : "ALS User Services Office\nAdvanced Light Source\nLawrence Berkeley National Laboratory\nMS 6-2100\nBerkeley, CA 94720\nUSA",
+      "active" : true,
+      "fax" : "+1 (510) 486-4773",
+      "country" : "USA",
+      "fullname" : "Advanced Light Source",
+      "phone" : "+1 (510) 486-7745",
+      "email" : "alsuser@lbl.gov"
+   },
+   "TSRF" : {
+      "website" : "http://www.lns.tohoku.ac.jp/index.php",
+      "active" : true,
+      "post" : "",
+      "fax" : "+81 022 743 3401",
+      "fullname" : "Tohoku Synchrotron Radiation Facility",
+      "phone" : "+81 (022) 743 3400",
+      "email" : "koho@LNS.tohoku.ac.jp",
+      "country" : "Japan"
+   },
+   "SRS" : {
+      "country" : "United Kingdom",
+      "email" : "",
+      "fullname" : "Synchrotron Radiation Source",
+      "phone" : "",
+      "fax" : "+44 (0)1925 603124",
+      "post" : "CCLRC Daresbury Laboratory Warrington, Cheshire UK. WA4 4AD",
+      "active" : false,
+      "website" : "http://www.srs.ac.uk/srs/"
+   },
+   "NSRRC" : {
+      "post" : "National Synchrotron Radiation Research Center\n101 Hsin-Ann Road\nHsinchu Science Park\nHsinchu 30076\nTaiwan, R.O.C.",
+      "active" : true,
+      "website" : "http://www.nsrrc.org.tw/",
+      "country" : "Taiwan",
+      "email" : "info@nsrrc.org.tw",
+      "phone" : "+886 3 578 0281",
+      "fullname" : "National Synchrotron Radiation Research Center",
+      "fax" : "+886 03 579 0572"
+   },
+   "PETRA III" : {
+      "email" : "photon-science@desy.de",
+      "fullname" : "PETRA III at DESY",
+      "phone" : "+49 40 / 8998-1541",
+      "country" : "Germany",
+      "fax" : "+49 40 / 8998-4475",
+      "active" : false,
+      "post" : "DESY Photon Science\nNotkestr. 85\n22607 HAMBURG\nGermany",
+      "website" : "http://photon-science.desy.de"
+   },
+   "HISOR" : {
+      "website" : "http://www.hsrc.hiroshima-u.ac.jp/index.html",
+      "post" : "2-313 Kagamiyama\nHigashi-Hiroshima, 739-0046\nJapan",
+      "active" : true,
+      "fax" : "+81 82 424 6294",
+      "country" : "Japan",
+      "email" : "hisor@hiroshima-u.ac.jp",
+      "fullname" : "Hiroshima Synchrotron Radiation Center",
+      "phone" : "+81 82 424 6293"
+   },
+   "SRC" : {
+      "active" : false,
+      "post" : "Synchrotron Radiation Center\n3731 Schneider Dr.\nStoughton, WI 53589-3097\nUSA",
+      "website" : "http://www.src.wisc.edu",
+      "phone" : "+1 (608) 877-2000",
+      "fullname" : "Synchrotron Radiation Center",
+      "email" : "srcadmin@src.wisc.edu",
+      "country" : "USA",
+      "fax" : "+1 (608) 877-2001"
+   },
+   "SSRL" : {
+      "fax" : "+1 (650) 926-4100/3600",
+      "phone" : "+1 (650) 926-3191",
+      "fullname" : "Stanford Synchrotron Radiation Lightsource",
+      "email" : "knotts@slac.stanford.edu",
+      "country" : "USA",
+      "website" : "http://www-ssrl.slac.stanford.edu",
+      "active" : true,
+      "post" : "SLAC National Accelerator Laboratory\n2575 Sand Hill Road\nMenlo Park, CA 94025\nUSA"
+   },
+   "NSLS" : {
+      "fax" : "+1 631 344-7206",
+      "phone" : "+1 631 344-8737",
+      "fullname" : "National Synchrotron Light Source",
       "email" : "nslsuser@bnl.gov",
       "country" : "USA",
-      "phone" : "+1 631 344-8737",
-      "fullname" : "National Synchrotron Light Source II",
-      "fax" : "+1 631 344-7206",
       "website" : "http://www.bnl.gov/ps/",
+      "active" : false,
       "post" : "User Administration Office\nBrookhaven National Laboratory\nP.O. Box 5000, Bldg. 725\nUpton, NY 11973-5000\nUSA"
    },
-   "MAX IV" : {
-      "email" : "maxlab@maxlab.lu.se",
-      "website" : "http://www.maxlab.lu.se/",
-      "fax" : "+46 46 222 47 10",
-      "post" : "Box 118\n22100 Lund\nSweden",
-      "phone" : "+46 46 222 98 72",
-      "country" : "Sweden",
-      "fullname" : "MAX IV Laboratory"
-   },
-   "BSRF" : {
-      "email" : "yumj@ihep.ac.cn",
-      "country" : "China",
-      "phone" : "+86 10 88236229",
-      "fullname" : "Beijing Synchrotron Radiation Facility",
-      "website" : "http://bsrf.ihep.cas.cn/",
-      "fax" : "+86-10-88236229",
-      "post" : "Users Office of Beijing Synchrotron Radiation Facility\nInstitute of High Energy Physics, Chinese Academy of Sciences\n19B Yuquan Road, Shijingshan District, Beijing 100049\nP. R. China"
-   },
-   "ALBA" : {
-      "email" : "asanchez@cells.es",
-      "website" : "http://www.cells.es/",
-      "fax" : "+34 93 592 43 01",
-      "post" : "CELLS - ALBA\nCarretera BP 1413 de Cerdanyola a Sant Cugat\nKm 3,3\nE-08290 Cerdanyola del Vallès\nBarcelona\nSpain",
-      "phone" : "+34 93 592 44 19",
-      "country" : "Spain",
-      "fullname" : "ALBA"
-   },
-   "DELSY" : {
-      "website" : "http://wwwinfo.jinr.ru/delsy/",
-      "fax" : "+ 7 09621 65 891",
-      "post" : "141980 Moskow\nDubna\nRussia",
-      "country" : "Russia",
-      "phone" : "+ 7 09621 65 059",
-      "fullname" : "Dubna Electron Synchrotron",
-      "email" : "post@jinr.ru"
-   },
-   "PF" : {
-      "phone" : "+81 (0)-29-879-6009",
-      "country" : "Japan",
-      "fullname" : "Photon Factory",
-      "fax" : "+81 (0)-29-864-4402",
-      "website" : "http://pfwww.kek.jp/",
-      "post" : "KEK\n1-1 Oho, Tsukuba\nIbaraki 305-0801\nJapan",
-      "email" : ""
-   },
-   "NSRL" : {
-      "country" : "China",
-      "phone" : "(+86) 551 3602034",
-      "fullname" : "National Synchrotron Radiation Laboratory",
-      "fax" : "",
-      "website" : "http://www.nsrl.ustc.edu.cn/",
-      "post" : "NSRL No. 42,\nHezuohua South Road,\nHefei,\nAnhui 230029,\nP. R. China.",
-      "email" : "nsrl@ustc.edu.cn"
-   },
-   "ANKA" : {
-      "fullname" : "Angstromquelle Karlsruhe - ANKA",
-      "phone" : "+49) (0) 721 / 608 26071",
-      "country" : "Germany",
-      "post" : "Karlsruher Institute of Technology\nHermann-von-Helmholtz-Platz 1\n76344 Eggenstein-Leopoldshafen\nGermany",
-      "website" : "http://anka.kit.edu",
-      "fax" : "(+49) (0) 721 / 608 28677",
-      "email" : "margit.helma@kit.edu"
-   },
-   "SAGALS" : {
-      "email" : "info@saga-ls.jp",
-      "fax" : "+81-942-83-5196",
-      "website" : "http://www.saga-ls.jp/?page=206",
-      "post" : "8-7 Yayoigaoka\nTosu\nSaga 841-0005\nJapan",
-      "phone" : "+81-942-83-5017",
-      "country" : "Japan",
-      "fullname" : "Saga Light Source"
-   },
    "HZB" : {
+      "country" : "Germany",
+      "phone" : "+49 (0)30 8062-12999",
+      "fullname" : "BESSY II - Helmholtz-Zentrum Berlin",
       "email" : "%20info@helmholtz-berlin.de",
       "fax" : "+49 (0)30 8062-12990",
-      "website" : "http://www.helmholtz-berlin.de/",
       "post" : "Helmholtz-Zentrum Berlin für Materialien und Energie\nElektronenspeicherring BESSY II\nAlbert-Einstein-Str.15\n12489 Berlin\nGermany",
-      "phone" : "+49 (0)30 8062-12999",
+      "active" : true,
+      "website" : "http://www.helmholtz-berlin.de/"
+   },
+   "CANDLE" : {
+      "website" : "http://www.candle.am/index.html",
+      "post" : "Acharyan 31\n375040, Yerevan\nArmenia\n\nTel/Fax: +374-1-629806\nE-mail: baghiryan@asls.candle.am",
+      "active" : true,
+      "fax" : "+374-1-629806",
+      "country" : "Armenia",
+      "fullname" : "Center for the Advancement of Natural Discoveries using Light Emission",
+      "phone" : "",
+      "email" : "baghiryan@asls.candle.am"
+   },
+   "ELETTRA" : {
+      "website" : "http://www.elettra.eu",
+      "post" : "Elettra - Sincrotrone Trieste S.C.p.A.\nStrada Statale 14 - km 163,5 in AREA Science Park\n34012 Basovizza, Trieste\nItaly",
+      "active" : true,
+      "fax" : "+39 (040) 938-0902",
+      "country" : "Italy",
+      "email" : "info@elettra.eu",
+      "phone" : "+39 (040) 37581",
+      "fullname" : "Elettra Synchrotron Light Laboratory"
+   },
+   "APS" : {
+      "fax" : "",
+      "phone" : "+1 (630) 252 9090",
+      "fullname" : "Advanced Photon Source",
+      "email" : "apsuser@aps.anl.gov",
+      "country" : "USA",
+      "website" : "http://www.aps.anl.gov",
+      "active" : true,
+      "post" : "Argonne National Laboratory\n9700 S. Cass Avenue, Bldg.401\nArgonne, IL 60439\nUSA"
+   },
+   "ANKA" : {
+      "post" : "Karlsruher Institute of Technology\nHermann-von-Helmholtz-Platz 1\n76344 Eggenstein-Leopoldshafen\nGermany",
+      "active" : true,
+      "website" : "http://anka.kit.edu",
       "country" : "Germany",
-      "fullname" : "BESSY II - Helmholtz-Zentrum Berlin"
+      "phone" : "+49) (0) 721 / 608 26071",
+      "fullname" : "Angstromquelle Karlsruhe - ANKA",
+      "email" : "margit.helma@kit.edu",
+      "fax" : "(+49) (0) 721 / 608 28677"
+   },
+   "SPRING-8" : {
+      "website" : "http://www.spring8.or.jp/en/",
+      "active" : true,
+      "post" : "1-1-1 Kouto, Sayo-cho, Sayo-gun\nHyogo 679-5198\nJapan",
+      "fax" : "+81-(0) 791-58-0965",
+      "email" : "sp8jasri@spring8.or.jp",
+      "fullname" : "SPring-8",
+      "phone" : "+81-(0) 791-58-0961",
+      "country" : "Japan"
+   },
+   "CAMD" : {
+      "website" : "http://www.camd.lsu.edu/",
+      "post" : "CAMD/LSU 6980 Jefferson Hwy.\nBaton Rouge, LA 70806\nUSA",
+      "active" : true,
+      "fax" : "+1 (225) 578-6954",
+      "country" : "USA",
+      "email" : "scott@lsu.edu",
+      "fullname" : "Center for Advanced Microstructures and Devices",
+      "phone" : "+1 (225) 578-8887"
+   },
+   "SuperSOR" : {
+      "email" : "",
+      "fullname" : "SuperSOR - Synchrotron Radiation Facility",
+      "phone" : "",
+      "country" : "Japan",
+      "fax" : "+81(0471) 34-6083 (Main Bldg.)",
+      "active" : true,
+      "post" : "  SRL Experimental Hall (Super SOR Project Office) 5-1-5 KashiwanoHa Kashiwa-shi Chiba 277-8581 Japan Kashiwa Campus Univ. of Tokyo",
+      "website" : "http://www.issp.u-tokyo.ac.jp/labs/sor/project/MENU.html"
+   },
+   "KSR" : {
+      "website" : "http://sun.scl.kyoto-u.ac.jp/~sakabe/ARCBS-Home.html",
+      "active" : true,
+      "post" : "The Advanced Research Center for Beam Science\nThe Institute For Chemical Research\nGokasyo\nUji Kyoto\n611 - 0011\nJapan",
+      "fax" : "+81 774 38 3289",
+      "email" : "noda@kyticr.kuicr.kyoto-u.ac.jp",
+      "phone" : "+81 774 38 3290",
+      "fullname" : "KSR Accelerator Laboratory",
+      "country" : "Japan"
+   },
+   "TNK" : {
+      "fax" : "+7(095) 531-4656",
+      "country" : "Russia",
+      "email" : "info@ckp.su",
+      "phone" : "+7 (095) 531 1306",
+      "fullname" : "TNK",
+      "website" : "http://www.niifp.ru/page/sinhrotron",
+      "post" : "103460\nMoscow\nZelenograd\nRussia.",
+      "active" : true
+   },
+   "ELSA" : {
+      "fax" : "+49-228-733518",
+      "email" : "klein@physik.uni-bonn.de",
+      "phone" : "+49-228-732340",
+      "fullname" : "ELSA - Electron Stretcher Accelerator",
+      "country" : "Germany",
+      "website" : "http://www-elsa.physik.uni-bonn.de/elsa-facility_en.html",
+      "active" : true,
+      "post" : "Physikalisches Institut der Universität Bonn Beschleunigeranlage ELSA\nNußallee 12\nD-53115 Bonn\nGermany"
+   },
+   "Diamond" : {
+      "country" : "United Kingdom",
+      "phone" : "+44 (0)1235 778000",
+      "fullname" : "Diamond Light Source",
+      "email" : "dlsenquiries@diamond.ac.uk",
+      "fax" : "+44 (0)1235 778499",
+      "post" : "Diamond Light Source Ltd.\nDiamond House\nHarwell Science and Innovation Campus\nDidcot\nOfordshire\nOX11 0DE\nUK",
+      "active" : true,
+      "website" : "http://www.diamond.ac.uk/"
    }
 }

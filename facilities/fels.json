@@ -1,119 +1,182 @@
 {
-   "ITST" : {
-      "email" : "manager@itst.ucsb.edu",
-      "website" : "http://www.itst.ucsb.edu/",
-      "fax" : "+1 805 893 8170",
-      "post" : "ITST\nBldg 937\nMail Code 4170\nSanta Barbara, CA 93106-4170.",
-      "phone" : "+1 805 893 8576",
-      "country" : "USA",
-      "fullname" : "Institute for Terahertz Science and Technology"
-   },
-   "FELBE" : {
-      "email" : "contact@hzdr.de",
-      "phone" : "",
-      "country" : "Germany",
-      "fullname" : "Free Electron Laser at ELBE",
-      "fax" : "+49 351 269 0461",
-      "website" : "http://www.fzd.de/db/Cms?pNid=471",
-      "post" : "Bautzner Landstrasse 128\n01328 Dresden\nGermany\n\nTelephone Number: +49 351 260 0\nFax: +49 351 269 0461\nE-mail: contact@hzdr.de"
-   },
-   "SACLA" : {
-      "fullname" : "SPring-8 Angstrom Compact Free Electron Laser",
-      "phone" : "+81-(0) 791-58-0961",
-      "country" : "Japan",
-      "post" : "1-1-1 Kouto, Sayo-cho, Sayo-gun\nHyogo 679-5198\nJapan",
-      "website" : "http://xfel.riken.jp/eng/index.html",
-      "fax" : "+81-(0) 791-58-0965",
-      "email" : "sacla.jasri@spring8.or.jp\".target=\"_blank"
-   },
-   "XFEL.EU" : {
-      "email" : "contact@xfel.eu",
-      "country" : "Germany",
-      "phone" : "+49 (0)40 8998-6006",
-      "fullname" : "European XFEL",
-      "website" : "http://www.xfel.eu/",
-      "fax" : "+49 (0)40 8998-1905",
-      "post" : "European XFEL GmbH\nNotkestrasse 85\n22607 Hamburg\nGermany"
-   },
-   "JLab FEL" : {
-      "country" : "USA",
-      "phone" : "+1 757-269-7100",
-      "fullname" : "Jefferson Lab FEL",
-      "fax" : "",
-      "website" : "https://www.jlab.org/free-electron-laser",
-      "post" : "12000 Jefferson Avenue\nNewport News, Virginia 23606\nUSA",
-      "email" : "jlabinfo@jlab.org"
-   },
-   "FELIX" : {
-      "post" : "FELIX Facility, Radboud University Nijmegen\nToernooiveld 7\n6525 ED Nijmegen\nThe Netherlands P.O. Box 9010\n6500 GL Nijmegen\nThe Netherlands\n\nBritta Redlich",
-      "fax" : "",
-      "website" : "http://www.ru.nl/felix/",
-      "fullname" : "Free Electron Laser for Infrared eXperiments",
-      "country" : "The Netherlands",
-      "phone" : "+31-24-3653949",
-      "email" : "B.Redlich@rijnh.nl\".target=\"_blank"
-   },
-   "SwissFEL" : {
-      "fax" : "+41 (56) 310-3294",
-      "website" : "http://www.psi.ch/swissfel/swissfel",
-      "post" : "Paul Scherrer Institut User Office\nPSI West\nCH-5232 Villigen PSI\nSwitzerland",
-      "country" : "Switzerland",
-      "phone" : "",
-      "fullname" : "Swiss Free Electron Laser",
-      "email" : ""
-   },
-   "IRFEL" : {
-      "email" : "felsut@rs.noda.sut.ac.jp",
-      "country" : "Japan",
-      "phone" : "+81 4-7121-4290",
-      "fullname" : "IR FEL Research Center",
-      "website" : "http://www.rs.noda.tus.ac.jp/fel-tus/",
-      "fax" : "+81 4-7121-4298",
-      "post" : "IR FEL Research Center\nResearch Institutes for Science and Technology\nThe Tokyo University of Science\nYamazaki 2641\nNoda\nChiba 278-8510\nJapan"
-   },
    "FERMI" : {
       "country" : "Italy",
       "phone" : "+39 (040) 37581",
       "fullname" : "FERMI",
-      "website" : "http://www.elettra.eu/lightsources/fermi.html",
+      "email" : "info@elettra.eu",
       "fax" : "+39 (040) 938-0902",
       "post" : "Elettra - Sincrotrone Trieste S.C.p.A.\nStrada Statale 14 - km 163,5 in AREA Science Park\n34012 Basovizza, Trieste\nItaly",
-      "email" : "info@elettra.eu"
+      "active" : true,
+      "website" : "http://www.elettra.eu/lightsources/fermi.html"
    },
-   "TARLA" : {
-      "post" : "Ankara Üniversitesi\nHızlandırıcı Teknolojileri Enstitüsü\nGölbaşı Kampüsü 06830 Gölbaşı / Ankara Tel : +90 (312) 485 3745\nFax : +90 (312) 484 7456\nEmail:  hte@ankara.edu.tr",
-      "website" : "http://www.tarla.org.tr",
-      "fax" : "+90 (312) 484 7456",
-      "fullname" : "TARLA Infrared FEL and Bremsstrahlung Facility",
-      "phone" : "+90 (312) 485 3745",
-      "country" : "Turkey",
-      "email" : "hte@ankara.edu.tr"
+   "VUFEL" : {
+      "email" : "",
+      "fullname" : "Vanderbilt University Free Electron Laser",
+      "phone" : "",
+      "country" : "USA",
+      "fax" : "",
+      "active" : true,
+      "post" : "410 24th Avenue Nashville, TN 37212 Box 1816, Stn B Nashville, TN 37235 USA ",
+      "website" : "http://www.vanderbilt.edu/fel/"
+   },
+   "FELBE" : {
+      "post" : "Bautzner Landstrasse 128\n01328 Dresden\nGermany\n\nTelephone Number: +49 351 260 0\nFax: +49 351 269 0461\nE-mail: contact@hzdr.de",
+      "active" : true,
+      "website" : "http://www.fzd.de/db/Cms?pNid=471",
+      "country" : "Germany",
+      "email" : "contact@hzdr.de",
+      "phone" : "",
+      "fullname" : "Free Electron Laser at ELBE",
+      "fax" : "+49 351 269 0461"
+   },
+   "JLab FEL" : {
+      "fullname" : "Jefferson Lab FEL",
+      "phone" : "+1 757-269-7100",
+      "email" : "jlabinfo@jlab.org",
+      "country" : "USA",
+      "fax" : "",
+      "active" : true,
+      "post" : "12000 Jefferson Avenue\nNewport News, Virginia 23606\nUSA",
+      "website" : "https://www.jlab.org/free-electron-laser"
    },
    "FLASH" : {
-      "fullname" : "FLASH at DESY",
-      "country" : "Germany",
-      "phone" : "+49 40 / 8998-1541",
+      "active" : true,
       "post" : "DESY Photon Science\nNotkestr. 85\n22607 HAMBURG\nGermany",
       "website" : "http://photon-science.desy.de",
-      "fax" : "+49 40 / 8998-4475",
-      "email" : "photon-science@desy.de"
+      "fullname" : "FLASH at DESY",
+      "phone" : "+49 40 / 8998-1541",
+      "email" : "photon-science@desy.de",
+      "country" : "Germany",
+      "fax" : "+49 40 / 8998-4475"
    },
-   "CLIO" : {
-      "email" : "Jean-michel.Ortega@u-psud.fr",
-      "country" : "France",
-      "phone" : "+33 01 69 15 32 94",
-      "fullname" : "Centre Laser Infrarouge d'Orsay",
-      "website" : "http://clio.lcp.u-psud.fr/clio_eng/clio_eng.htm",
-      "fax" : "+33 01 69 15 32 28",
-      "post" : "CLIO/LCP\nBat. 201 - P2\nCampus Universitaire\n91405 ORSAY Cedex\nFrance"
+   "TARLA" : {
+      "website" : "http://www.tarla.org.tr",
+      "active" : true,
+      "post" : "Ankara Üniversitesi\nHızlandırıcı Teknolojileri Enstitüsü\nGölbaşı Kampüsü 06830 Gölbaşı / Ankara Tel : +90 (312) 485 3745\nFax : +90 (312) 484 7456\nEmail:  hte@ankara.edu.tr",
+      "fax" : "+90 (312) 484 7456",
+      "phone" : "+90 (312) 485 3745",
+      "fullname" : "TARLA Infrared FEL and Bremsstrahlung Facility",
+      "email" : "hte@ankara.edu.tr",
+      "country" : "Turkey"
+   },
+   "SuperB FEL" : {
+      "post" : "Cabibbo-Lab Press Office\nInfn Office for Communication\nPiazza dei Caprettari, 70 - 00186\nRome, Italy",
+      "active" : true,
+      "website" : "http://superb.infn.it/home",
+      "country" : "Italy",
+      "email" : "info@cabibbolab.it",
+      "fullname" : "SuperB FEL",
+      "phone" : "+39066868162",
+      "fax" : "+390668307944"
+   },
+   "DFELL" : {
+      "email" : "wu@fel.duke.edu",
+      "phone" : "+1 (919) 660-2666",
+      "fullname" : "Duke Free Electron Laser Laboratory",
+      "country" : "USA",
+      "fax" : "+1 (919) 660-2671",
+      "active" : true,
+      "post" : "Duke Free Electron Laser Laboratory\nPO Box 90319\nDuke University Durham\nNorth Carolina 27708-0319\nUSA",
+      "website" : "http://www.fel.duke.edu/"
+   },
+   "SwissFEL" : {
+      "fax" : "+41 (56) 310-3294",
+      "phone" : "",
+      "fullname" : "Swiss Free Electron Laser",
+      "email" : "",
+      "country" : "Switzerland",
+      "website" : "http://www.psi.ch/swissfel/swissfel",
+      "active" : true,
+      "post" : "Paul Scherrer Institut User Office\nPSI West\nCH-5232 Villigen PSI\nSwitzerland"
+   },
+   "IRFEL" : {
+      "email" : "felsut@rs.noda.sut.ac.jp",
+      "phone" : "+81 4-7121-4290",
+      "fullname" : "IR FEL Research Center",
+      "country" : "Japan",
+      "fax" : "+81 4-7121-4298",
+      "active" : true,
+      "post" : "IR FEL Research Center\nResearch Institutes for Science and Technology\nThe Tokyo University of Science\nYamazaki 2641\nNoda\nChiba 278-8510\nJapan",
+      "website" : "http://www.rs.noda.tus.ac.jp/fel-tus/"
+   },
+   "XFEL.EU" : {
+      "fax" : "+49 (0)40 8998-1905",
+      "fullname" : "European XFEL",
+      "phone" : "+49 (0)40 8998-6006",
+      "email" : "contact@xfel.eu",
+      "country" : "Germany",
+      "website" : "http://www.xfel.eu/",
+      "active" : true,
+      "post" : "European XFEL GmbH\nNotkestrasse 85\n22607 Hamburg\nGermany"
+   },
+   "ITST" : {
+      "country" : "USA",
+      "email" : "manager@itst.ucsb.edu",
+      "fullname" : "Institute for Terahertz Science and Technology",
+      "phone" : "+1 805 893 8576",
+      "fax" : "+1 805 893 8170",
+      "post" : "ITST\nBldg 937\nMail Code 4170\nSanta Barbara, CA 93106-4170.",
+      "active" : true,
+      "website" : "http://www.itst.ucsb.edu/"
    },
    "LCLS" : {
+      "fax" : "+1(650) 926-4100/3600",
+      "country" : "USA",
+      "email" : "knotts@slac.stanford.edu",
       "fullname" : "Linac Coherent Light Source",
       "phone" : "+1(650) 926-3191",
-      "country" : "USA",
-      "post" : "SLAC National Accelerator Laboratory\n2575 Sand Hill Road, MS 18\nMenlo Park, CA 94025\nUSA",
-      "fax" : "+1(650) 926-4100/3600",
       "website" : "http://lcls.slac.stanford.edu",
-      "email" : "knotts@slac.stanford.edu"
+      "post" : "SLAC National Accelerator Laboratory\n2575 Sand Hill Road, MS 18\nMenlo Park, CA 94025\nUSA",
+      "active" : true
+   },
+   "FELIX" : {
+      "post" : "FELIX Facility, Radboud University Nijmegen\nToernooiveld 7\n6525 ED Nijmegen\nThe Netherlands P.O. Box 9010\n6500 GL Nijmegen\nThe Netherlands\n\nBritta Redlich",
+      "active" : true,
+      "website" : "http://www.ru.nl/felix/",
+      "country" : "The Netherlands",
+      "phone" : "+31-24-3653949",
+      "fullname" : "Free Electron Laser for Infrared eXperiments",
+      "email" : "B.Redlich@rijnh.nl",
+      "fax" : ""
+   },
+   "CLIO" : {
+      "fax" : "+33 01 69 15 32 28",
+      "country" : "France",
+      "email" : "Jean-michel.Ortega@u-psud.fr",
+      "fullname" : "Centre Laser Infrarouge d'Orsay",
+      "phone" : "+33 01 69 15 32 94",
+      "website" : "http://clio.lcp.u-psud.fr/clio_eng/clio_eng.htm",
+      "post" : "CLIO/LCP\nBat. 201 - P2\nCampus Universitaire\n91405 ORSAY Cedex\nFrance",
+      "active" : true
+   },
+   "iFEL" : {
+      "fax" : "",
+      "country" : "Japan",
+      "phone" : "+81-(0)72-897-6410",
+      "fullname" : "iFEL",
+      "email" : "",
+      "website" : "http://www.fel.eng.osaka-u.ac.jp/index.html",
+      "post" : "Institute of Free Electron Laser\nGraduate School of Engineering, Osaka University\n2-9-5 Tsuda-Yamate\nHirakata\nOsaka 573-0128\nJapan",
+      "active" : true
+   },
+   "XFEL" : {
+      "active" : true,
+      "post" : "European XFEL GmbH Albert-Einstein-Ring 19 22761 Hamburg Germany",
+      "website" : "http://xfel.desy.de/",
+      "fullname" : "The European X-Ray Laser Project",
+      "phone" : "",
+      "email" : "contact@xfel.eu",
+      "country" : "Germany",
+      "fax" : "(+49) 40 8998 1905"
+   },
+   "SACLA" : {
+      "fax" : "+81-(0) 791-58-0965",
+      "country" : "Japan",
+      "email" : "sacla.jasri@spring8.or.jp",
+      "phone" : "+81-(0) 791-58-0961",
+      "fullname" : "SPring-8 Angstrom Compact Free Electron Laser",
+      "website" : "http://xfel.riken.jp/eng/index.html",
+      "post" : "1-1-1 Kouto, Sayo-cho, Sayo-gun\nHyogo 679-5198\nJapan",
+      "active" : true
    }
 }

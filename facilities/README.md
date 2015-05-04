@@ -10,35 +10,46 @@ goes into the big table at
 as well as the contact information for each facilitiy.
 
 Unfortunately, the contact information in that file is very messy --
-inconsistent content, inconsistent formatting -- so the quick-n-dirty
-perl script `munge_json.pl` was written to sanitize the content and
-rewrite it into JSON file with entries that look like this:
+inconsistent content and formatting -- so a quick-n-dirty perl script
+`munge_json.pl` was written to sanitize the content and rewrite it
+into JSON files with entries that look like this:
 
 ```json
-  "PETRA III": {
-    "phone": "+49 40 / 8998-1541",
-    "website": "http://photon-science.desy.de",
-    "email": "photon-science@desy.de",
-    "fullname": "PETRA III at DESY",
-    "country": "Germany",
-    "post": "DESY Photon Science\nNotkestr. 85\n22607 HAMBURG\nGermany",
-    "fax": "+49 40 / 8998-4475"
+  "ASRC": {
+    "country": "Japan",
+    "fullname": "Aichi Synchrotron Radiation Center",
+    "active": true,
+    "email": "takeda@astf.or.jp",
+    "website": "http://www.astf-kha.jp/synchrotron/en/",
+    "phone": "+81 0561 76 8331",
+    "fax": "+81 0561 21 1652",
+    "post": "250-3, Minamiyamaguchi-cho\nSeto\nAichi 489-0965\nJapan"
   }
 ```
 
-Two files were produced, `synchrotrons.json` contains metadata about
-the world's 47 synchrotrons and `fels.json` with metadata about the
-world's 13 free-electron lasers.
+Note that phone and fax number formatting remains inconsistent.
 
-There is data about other facilties in the file provided by
-lightsources.org and Xeno Media.  For example, data about United
-States Department of Energy nanomaterials user facilities is in the
-file.  As those are not places where XAS is measured
+Two files were produced, `synchrotrons.json` contains metadata about
+the world's 55 current and past synchrotrons and `fels.json` with
+metadata about the world's 18 free-electron lasers.
+
+There is data about other facilties in the file provided by the good
+folks at lightsources.org and Xeno Media.  For example, data about
+United States Department of Energy nanomaterials user facilities is in
+the file.  As those are not places where XAS is measured
 (well... OK... one can measure EELS on an electron microscope... but
 the [XDI](https://github.com/XraySpectroscopy/XAS-Data-Interchange)
 dictionary does not yet have definitions suitable for EELS
-mesaurements)those items have not been sanitized.
+mesaurements) those items have been skipped.
 
+Some of our dear, departed facilities have been included by hand in
+the sanitizing script, including NSLS-I and DORIS-III.  The reason for
+including decommissioned facilities is to capture appropriate metadata
+for the large volume of existing data from those facilities.
+
+Note that there are several facilities listed by
+[Wikipedia](http://en.wikipedia.org/wiki/List_of_synchrotron_radiation_facilities)
+that are not in this listing.
 
 ## Beamlines
 

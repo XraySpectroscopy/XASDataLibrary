@@ -13,7 +13,6 @@ my $json = JSON->new->allow_nonref;
 $json->pretty(1);
 
 my $data = $json->decode(read_file('lightsources.org.json'));
-#dd $data;
 
 my $hs = HTML::Strip -> new();
 
@@ -23,9 +22,19 @@ my %fels         = ();
 
 my $i = 0;
 foreach my $d (@$data) {
+
+  ## clean up some missing data in the file
+  $d->{field_abbreviation_value} = 'AS'      if ($d->{title} =~ m{Australian});
+  $d->{field_abbreviation_value} = 'ILSF'    if ($d->{title} =~ m{Iranian});
+  $d->{field_abbreviation_value} = 'FERMI'   if ($d->{title} eq 'FERMI');
+
+  $d->{field_category_value} = 'Synchrotron'         if ($d->{field_abbreviation_value} =~ m{TSRF|SuperSOR|MSRF|KSR|SRS|SRC|TSRF});
+  $d->{field_category_value} = 'Free-Electron Laser' if ($d->{field_abbreviation_value} =~ m{SuperB FEL|XFEL|VUFEL|iFEL|DFELL});
+
+  ## this skips over 3 US DoE nano centers
   next if not defined($d->{field_category_value});
-  my %hash;
-  my $key = $d->{field_abbreviation_value} || $d->{title};
+
+  my $key = $d->{title};
   my $address = $d->{field_address_value};
 
   my $phone = q{};
@@ -43,17 +52,11 @@ foreach my $d (@$data) {
   };
 
   my $email = q{};
-  #if ($address =~ m{e-?mail(?: Contact)?[.:]? (.*)(?=</?[bp])}i) {
   if ($address =~ m{href="(.*?)(?=">)}) {
     $email = $1;
     $email =~ s{mailto:}{};
-    # } else {
-    #   $email = $hs->parse($1);
-    #   $email =~ s{\A +}{};
-    #   $email =~ s{ +\z}{};
-    #   print $email, $/;
-    # };
     $email =~ s{ }{.}g;
+    $email =~ s{\"\.target=\"_blank}{};
   };
 
   my $post = q{};
@@ -63,7 +66,6 @@ foreach my $d (@$data) {
   } else {
     $post = $address;
   };
-  #$post =~ s{</?p>}{}g;
   $post =~ s{<br>}{\n}g;
   $post = $hs->parse($post);
   $post =~ s{\A\s+}{};
@@ -77,7 +79,8 @@ foreach my $d (@$data) {
 			   post => $post,
 			   phone => $phone,
 			   fax => $fax,
-			   email => $email};
+			   email => $email,
+			   active => JSON::true};
 
 
   } elsif ($d->{field_category_value} =~ m{free-electron}i) {
@@ -87,11 +90,25 @@ foreach my $d (@$data) {
 		   post => $post,
 		   phone => $phone,
 		   fax => $fax,
-		   email => $email};
+		   email => $email,
+		   active => JSON::true};
 
   };
   $hs->eof;
 };
+
+## the dear departed...
+
+$synchrotrons{NSLS} = $synchrotrons{'NSLS-II'};
+$synchrotrons{NSLS}->{fullname} =~ s{ II}{};
+$synchrotrons{NSLS}->{active} = JSON::false;
+
+$synchrotrons{DORIS} = $synchrotrons{'PETRA III'};
+$synchrotrons{DORIS}->{fullname} =~ 'Doppel-Ring-Speicher';
+$synchrotrons{DORIS}->{active} = JSON::false;
+
+$synchrotrons{SRS}->{active} = JSON::false;
+$synchrotrons{SRC}->{active} = JSON::false;
 
 
 open(my $S, '>:encoding(UTF-8)', 'synchrotrons.json');
