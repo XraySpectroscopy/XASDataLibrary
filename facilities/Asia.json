@@ -1,7 +1,19 @@
 {
-   "AichiSR" : {
+   "AS" : {
+      "XAS" : {
+         "facility" : "AS",
+         "flux" : "10^11 - 10^12",
+         "name" : "",
+         "purpose" : "General purpose XAFS",
+         "range" : "4 - 50",
+         "size" : "0.2 x 0.5",
+         "status" : "Operational",
+         "website" : "http://www.synchrotron.org.au/index.php/aussyncbeamlines/x-ray-absorption-spectroscopy/beamline-team"
+      }
+   },
+   "ASRC" : {
       "BL5S1" : {
-         "facility" : "AichiSR",
+         "facility" : "ASRC",
          "flux" : "10^11",
          "name" : "",
          "purpose" : "General Purpose XAFS",
@@ -11,7 +23,7 @@
          "website" : "http://www.astf-kha.jp/synchrotron/en/userguide/gaiyou/bl5s1i_xxafs.html"
       },
       "BL6N1" : {
-         "facility" : "AichiSR",
+         "facility" : "ASRC",
          "flux" : "7 X10^10",
          "name" : "",
          "purpose" : "soft x-ray XAFS, XPS",
@@ -21,7 +33,7 @@
          "website" : "http://www.astf-kha.jp/synchrotron/en/userguide/gaiyou/bl6n1_ii_xxafs.html"
       },
       "BL7U" : {
-         "facility" : "AichiSR",
+         "facility" : "ASRC",
          "flux" : "10^12",
          "name" : "",
          "purpose" : "VUV XAFS, PES",
@@ -29,60 +41,6 @@
          "size" : "0.04 X 0.1",
          "status" : "Operational",
          "website" : "http://www.astf-kha.jp/synchrotron/en/userguide/gaiyou/bl7u_ii_xxafs.html"
-      }
-   },
-   "Aurora" : {
-      "BL-10" : {
-         "facility" : "Aurora",
-         "flux" : "10^8 - 10^10",
-         "name" : "",
-         "purpose" : "XAFS",
-         "range" : "1 - 4",
-         "size" : "3 - 6",
-         "status" : "Operational",
-         "website" : "http://http://www.ritsumei.ac.jp/acd/re/src/beamline/bl10_201203_2.pdf"
-      },
-      "BL-2" : {
-         "facility" : "Aurora",
-         "flux" : ".",
-         "name" : "",
-         "purpose" : "XANES",
-         "range" : "0.04 - 0.65",
-         "size" : "0.2 x 0.5",
-         "status" : "Operational",
-         "website" : "http://www.ritsumei.ac.jp/acd/re/src/beamline/bl2_2010.pdf"
-      },
-      "BL-3" : {
-         "facility" : "Aurora",
-         "flux" : "",
-         "name" : "",
-         "purpose" : "XAFS",
-         "range" : "3.5 - 9.2",
-         "size" : "",
-         "status" : "Operational",
-         "website" : "http://www.ritsumei.ac.jp/acd/re/src/beamline/bl03.pdf"
-      },
-      "BL-4" : {
-         "facility" : "Aurora",
-         "flux" : "",
-         "name" : "",
-         "purpose" : "XAFS",
-         "range" : "1.8 - 10",
-         "size" : "",
-         "status" : "Operational",
-         "website" : "http://www.ritsumei.ac.jp/acd/re/src/beamline/bl04.pdf"
-      }
-   },
-   "Australian Synchrotron" : {
-      "XAS" : {
-         "facility" : "Australian Synchrotron",
-         "flux" : "10^11 - 10^12",
-         "name" : "",
-         "purpose" : "General purpose XAFS",
-         "range" : "4 - 50",
-         "size" : "0.2 x 0.5",
-         "status" : "Operational",
-         "website" : "http://www.synchrotron.org.au/index.php/aussyncbeamlines/x-ray-absorption-spectroscopy/beamline-team"
       }
    },
    "BSRF" : {
@@ -97,9 +55,9 @@
          "website" : "http://www.ihep.ac.cn/bsrf/english/facility/html/XAFS.htm"
       }
    },
-   "HiSOR" : {
+   "HISOR" : {
       "BL11" : {
-         "facility" : "HiSOR",
+         "facility" : "HISOR",
          "flux" : ".",
          "name" : "",
          "purpose" : "General purpose, XRD",
@@ -109,7 +67,7 @@
          "website" : "http://www.hsrc.hiroshima-u.ac.jp/english/bl11.htm"
       },
       "BL14" : {
-         "facility" : "HiSOR",
+         "facility" : "HISOR",
          "flux" : ".",
          "name" : "",
          "purpose" : "XMCD",
@@ -119,7 +77,7 @@
          "website" : "http://www.hsrc.hiroshima-u.ac.jp/english/bl14.htm"
       },
       "BL3" : {
-         "facility" : "HiSOR",
+         "facility" : "HISOR",
          "flux" : "10^10",
          "name" : "",
          "purpose" : "Surface XAFS",
@@ -129,31 +87,9 @@
          "website" : "http://www.hsrc.hiroshima-u.ac.jp/english/bl3.htm"
       }
    },
-   "INDUS-2" : {
-      "BL-8" : {
-         "facility" : "INDUS-2",
-         "flux" : "-",
-         "name" : "",
-         "purpose" : "Dispersive XAFS",
-         "range" : "5 -20",
-         "size" : "0.5 x 0.25",
-         "status" : "Operational",
-         "website" : "http://www.cat.ernet.in/technology/accel/srul/beamlines/exafs.html"
-      },
-      "BL-9" : {
-         "facility" : "INDUS-2",
-         "flux" : ".",
-         "name" : "",
-         "purpose" : "Scanning XAFS",
-         "range" : ".",
-         "size" : ".",
-         "status" : "Design & construction",
-         "website" : "http://www.cat.ernet.in/technology/accel/srul/beamlines/index.html"
-      }
-   },
-   "NSRF" : {
+   "NSRL" : {
       "U19" : {
-         "facility" : "NSRF",
+         "facility" : "NSRL",
          "flux" : "5 x 10^10",
          "name" : "",
          "purpose" : "Surface science, XMCD",
@@ -163,7 +99,7 @@
          "website" : "http://en.nsrl.ustc.edu.cn/Machine_Beamlines/Beamlines/201107/t20110701_114980.html"
       },
       "U7C" : {
-         "facility" : "NSRF",
+         "facility" : "NSRL",
          "flux" : "3 x 10^9",
          "name" : "",
          "purpose" : "General purpose XAFS",
@@ -215,81 +151,9 @@
          "website" : "http://140.110.203.42/EFD.php?num=233"
       }
    },
-   "PAL" : {
-      "10B" : {
-         "facility" : "PAL",
-         "flux" : "8 x 10^11",
-         "name" : "",
-         "purpose" : "General purpose XAFS",
-         "range" : "3.5 - 16",
-         "size" : "0.5 x 1",
-         "status" : "Operational",
-         "website" : "http://paleng.postech.ac.kr/home/paleng/beamlines/xrayseries/10B"
-      },
-      "2A" : {
-         "facility" : "PAL",
-         "flux" : "10^10 - 10^12",
-         "name" : "",
-         "purpose" : "XMCD, XANES, PES",
-         "range" : "0.1 - 1.5",
-         "size" : "0.2 x 1",
-         "status" : "Operational",
-         "website" : "http://paleng.postech.ac.kr/home/paleng/beamlines/VUVSoftX-ray/2A"
-      },
-      "3C1" : {
-         "facility" : "PAL",
-         "flux" : "10^10",
-         "name" : "",
-         "purpose" : "General purpose XAFS, GIXAFS",
-         "range" : "2.3 - 32",
-         "size" : "1 x 10",
-         "status" : "Operational",
-         "website" : "http://paleng.postech.ac.kr/home/paleng/beamlines/xrayseries/3C1"
-      },
-      "7C1" : {
-         "facility" : "PAL",
-         "flux" : ".",
-         "name" : "",
-         "purpose" : "General purpose XAFS",
-         "range" : "5 - 30",
-         "size" : "1 x 60 (max)",
-         "status" : "Operational",
-         "website" : "http://paleng.postech.ac.kr/home/paleng/beamlines/xrayseries/7C1"
-      },
-      "8A1" : {
-         "facility" : "PAL",
-         "flux" : "10^8 - 10^9",
-         "name" : "",
-         "purpose" : "XANES, microXAFS",
-         "range" : "0.1 - 1.6",
-         "size" : "0.5 mm spot",
-         "status" : "Operational",
-         "website" : "http://paleng.postech.ac.kr/home/paleng/beamlines/VUVSoftX-ray/8A1"
-      },
-      "8C1" : {
-         "facility" : "PAL",
-         "flux" : "10^12",
-         "name" : "",
-         "purpose" : "General purpose XAFS, quickXAFS, in-situ expts.",
-         "range" : "3 - 22",
-         "size" : "0.5 x 0.5 to\r 2 x 40",
-         "status" : "Operational",
-         "website" : "http://paleng.postech.ac.kr/home/paleng/beamlines/xrayseries/8C1"
-      },
-      "IB2" : {
-         "facility" : "PAL",
-         "flux" : ".",
-         "name" : "",
-         "purpose" : "MicroXAS",
-         "range" : ".",
-         "size" : ".",
-         "status" : "Operational",
-         "website" : "http://paleng.postech.ac.kr/home/paleng/beamlines/xrayseries/1B2"
-      }
-   },
-   "Photon Factory" : {
+   "PF" : {
       "AR-NW10A" : {
-         "facility" : "Photon Factory",
+         "facility" : "PF",
          "flux" : "6 x 10^10",
          "name" : "",
          "purpose" : "General purpose XAFS",
@@ -299,7 +163,7 @@
          "website" : "http://pfwww.kek.jp/users_info/station_spec/xafsbl/nw10a/nw10a_e.html"
       },
       "AR-NW14A" : {
-         "facility" : "Photon Factory",
+         "facility" : "PF",
          "flux" : "",
          "name" : "",
          "purpose" : "time resolved XAFS and XRD",
@@ -309,7 +173,7 @@
          "website" : "http://pfwww.kek.jp/adachis/NW14/NW14.htm"
       },
       "AR-NW2A" : {
-         "facility" : "Photon Factory",
+         "facility" : "PF",
          "flux" : "10^13",
          "name" : "",
          "purpose" : "dispersive XAFS, time resolved",
@@ -319,7 +183,7 @@
          "website" : "http://pfwww.kek.jp/users_info/station_spec/xafsbl/nw2a/nw2a.htm"
       },
       "BL-11A" : {
-         "facility" : "Photon Factory",
+         "facility" : "PF",
          "flux" : "10^12",
          "name" : "",
          "purpose" : "General purpose XAFS",
@@ -329,7 +193,7 @@
          "website" : "http://pfwww.kek.jp/sxspec/sx/bl11a_e.html"
       },
       "BL-11B" : {
-         "facility" : "Photon Factory",
+         "facility" : "PF",
          "flux" : "10^11",
          "name" : "",
          "purpose" : "General purpose XAFS",
@@ -339,7 +203,7 @@
          "website" : "http://pfwww.kek.jp/sxspec/sx/bl11b_e.html"
       },
       "BL-12C" : {
-         "facility" : "Photon Factory",
+         "facility" : "PF",
          "flux" : "10^11",
          "name" : "",
          "purpose" : "General purpose XAFS, dilute elements",
@@ -349,7 +213,7 @@
          "website" : "http://pfwww.kek.jp/users_info/station_spec/xafsbl/12c/bl12c_e.html"
       },
       "BL-27B" : {
-         "facility" : "Photon Factory",
+         "facility" : "PF",
          "flux" : "10^11",
          "name" : "",
          "purpose" : "General purpose XAFS, radiobiology",
@@ -359,7 +223,7 @@
          "website" : "http://pfwww.kek.jp/users_info/users_guide_e/station_spec_e/bl27b.pdf"
       },
       "BL-2A" : {
-         "facility" : "Photon Factory",
+         "facility" : "PF",
          "flux" : "2 x 10^11",
          "name" : "",
          "purpose" : "General purpose XAFS",
@@ -369,7 +233,7 @@
          "website" : "http://pfwww.kek.jp/sxspec/sx/bl2a_e.html"
       },
       "BL-2C" : {
-         "facility" : "Photon Factory",
+         "facility" : "PF",
          "flux" : "10^10",
          "name" : "",
          "purpose" : "XANES, XES",
@@ -379,7 +243,7 @@
          "website" : "http://pfwww.kek.jp/users_info/users_guide_e/station_spec_e/bl2c.pdf"
       },
       "BL-4A" : {
-         "facility" : "Photon Factory",
+         "facility" : "PF",
          "flux" : "10^8 - 10^10",
          "name" : "",
          "purpose" : "microXAFS, trace elements",
@@ -389,7 +253,7 @@
          "website" : "http://pfwww.kek.jp/users_info/users_guide_e/station_spec_e/bl04/bl4a.html"
       },
       "BL-7A" : {
-         "facility" : "Photon Factory",
+         "facility" : "PF",
          "flux" : "10^9 - 10^11",
          "name" : "",
          "purpose" : "XANES, XMCD, surface science",
@@ -399,7 +263,7 @@
          "website" : "http://pfwww.kek.jp/users_info/users_guide_e/station_spec_e/bl7a.pdf"
       },
       "BL-7C" : {
-         "facility" : "Photon Factory",
+         "facility" : "PF",
          "flux" : "10^11",
          "name" : "",
          "purpose" : "General purpose XAFS",
@@ -409,7 +273,7 @@
          "website" : "http://pfwww.kek.jp/users_info/station_spec/xafsbl/7c/bl7c_e.html"
       },
       "BL-9A" : {
-         "facility" : "Photon Factory",
+         "facility" : "PF",
          "flux" : "4 x 10^11",
          "name" : "",
          "purpose" : "General purpose XAFS",
@@ -419,7 +283,7 @@
          "website" : "http://pfwww.kek.jp/users_info/station_spec/xafsbl/9a/bl9a_e.html"
       },
       "BL-9C" : {
-         "facility" : "Photon Factory",
+         "facility" : "PF",
          "flux" : "10^10",
          "name" : "",
          "purpose" : "XAFS, versatile x-ray station",
@@ -429,9 +293,145 @@
          "website" : "http://pfwww.kek.jp/nomura/hx/9c/bl9c_e.html"
       }
    },
-   "SAGA" : {
+   "PLS" : {
+      "10B" : {
+         "facility" : "PLS",
+         "flux" : "8 x 10^11",
+         "name" : "",
+         "purpose" : "General purpose XAFS",
+         "range" : "3.5 - 16",
+         "size" : "0.5 x 1",
+         "status" : "Operational",
+         "website" : "http://paleng.postech.ac.kr/home/paleng/beamlines/xrayseries/10B"
+      },
+      "2A" : {
+         "facility" : "PLS",
+         "flux" : "10^10 - 10^12",
+         "name" : "",
+         "purpose" : "XMCD, XANES, PES",
+         "range" : "0.1 - 1.5",
+         "size" : "0.2 x 1",
+         "status" : "Operational",
+         "website" : "http://paleng.postech.ac.kr/home/paleng/beamlines/VUVSoftX-ray/2A"
+      },
+      "3C1" : {
+         "facility" : "PLS",
+         "flux" : "10^10",
+         "name" : "",
+         "purpose" : "General purpose XAFS, GIXAFS",
+         "range" : "2.3 - 32",
+         "size" : "1 x 10",
+         "status" : "Operational",
+         "website" : "http://paleng.postech.ac.kr/home/paleng/beamlines/xrayseries/3C1"
+      },
+      "7C1" : {
+         "facility" : "PLS",
+         "flux" : ".",
+         "name" : "",
+         "purpose" : "General purpose XAFS",
+         "range" : "5 - 30",
+         "size" : "1 x 60 (max)",
+         "status" : "Operational",
+         "website" : "http://paleng.postech.ac.kr/home/paleng/beamlines/xrayseries/7C1"
+      },
+      "8A1" : {
+         "facility" : "PLS",
+         "flux" : "10^8 - 10^9",
+         "name" : "",
+         "purpose" : "XANES, microXAFS",
+         "range" : "0.1 - 1.6",
+         "size" : "0.5 mm spot",
+         "status" : "Operational",
+         "website" : "http://paleng.postech.ac.kr/home/paleng/beamlines/VUVSoftX-ray/8A1"
+      },
+      "8C1" : {
+         "facility" : "PLS",
+         "flux" : "10^12",
+         "name" : "",
+         "purpose" : "General purpose XAFS, quickXAFS, in-situ expts.",
+         "range" : "3 - 22",
+         "size" : "0.5 x 0.5 to\r 2 x 40",
+         "status" : "Operational",
+         "website" : "http://paleng.postech.ac.kr/home/paleng/beamlines/xrayseries/8C1"
+      },
+      "IB2" : {
+         "facility" : "PLS",
+         "flux" : ".",
+         "name" : "",
+         "purpose" : "MicroXAS",
+         "range" : ".",
+         "size" : ".",
+         "status" : "Operational",
+         "website" : "http://paleng.postech.ac.kr/home/paleng/beamlines/xrayseries/1B2"
+      }
+   },
+   "RRCAT" : {
+      "BL-8" : {
+         "facility" : "RRCAT",
+         "flux" : "-",
+         "name" : "",
+         "purpose" : "Dispersive XAFS",
+         "range" : "5 -20",
+         "size" : "0.5 x 0.25",
+         "status" : "Operational",
+         "website" : "http://www.cat.ernet.in/technology/accel/srul/beamlines/exafs.html"
+      },
+      "BL-9" : {
+         "facility" : "RRCAT",
+         "flux" : ".",
+         "name" : "",
+         "purpose" : "Scanning XAFS",
+         "range" : ".",
+         "size" : ".",
+         "status" : "Design & construction",
+         "website" : "http://www.cat.ernet.in/technology/accel/srul/beamlines/index.html"
+      }
+   },
+   "RitsSR" : {
+      "BL-10" : {
+         "facility" : "RitsSR",
+         "flux" : "10^8 - 10^10",
+         "name" : "",
+         "purpose" : "XAFS",
+         "range" : "1 - 4",
+         "size" : "3 - 6",
+         "status" : "Operational",
+         "website" : "http://http://www.ritsumei.ac.jp/acd/re/src/beamline/bl10_201203_2.pdf"
+      },
+      "BL-2" : {
+         "facility" : "RitsSR",
+         "flux" : ".",
+         "name" : "",
+         "purpose" : "XANES",
+         "range" : "0.04 - 0.65",
+         "size" : "0.2 x 0.5",
+         "status" : "Operational",
+         "website" : "http://www.ritsumei.ac.jp/acd/re/src/beamline/bl2_2010.pdf"
+      },
+      "BL-3" : {
+         "facility" : "RitsSR",
+         "flux" : "",
+         "name" : "",
+         "purpose" : "XAFS",
+         "range" : "3.5 - 9.2",
+         "size" : "",
+         "status" : "Operational",
+         "website" : "http://www.ritsumei.ac.jp/acd/re/src/beamline/bl03.pdf"
+      },
+      "BL-4" : {
+         "facility" : "RitsSR",
+         "flux" : "",
+         "name" : "",
+         "purpose" : "XAFS",
+         "range" : "1.8 - 10",
+         "size" : "",
+         "status" : "Operational",
+         "website" : "http://www.ritsumei.ac.jp/acd/re/src/beamline/bl04.pdf"
+      }
+   },
+   "SAGALS" : {
       "BL07" : {
-         "facility" : "SAGA",
+         "facility" : "SAGALS",
          "flux" : "7 x 10^9",
          "name" : "",
          "purpose" : "",
@@ -441,7 +441,7 @@
          "website" : "http://www.saga-ls.jp/?page=467"
       },
       "BL11" : {
-         "facility" : "SAGA",
+         "facility" : "SAGALS",
          "flux" : "2 x 10^9",
          "name" : "",
          "purpose" : "General purpose XAFS",
@@ -451,7 +451,7 @@
          "website" : "http://www.hsrc.hiroshima-u.ac.jp/english/bl11.htm"
       },
       "BL12" : {
-         "facility" : "SAGA",
+         "facility" : "SAGALS",
          "flux" : "10^8 - 10^9",
          "name" : "",
          "purpose" : "XPS & soft x-ray XAFS",
@@ -461,7 +461,7 @@
          "website" : "http://www.saga-ls.jp/?page=246"
       },
       "BL15" : {
-         "facility" : "SAGA",
+         "facility" : "SAGALS",
          "flux" : "10^8 - 10^11",
          "name" : "",
          "purpose" : "General purpose XAFS",
@@ -505,9 +505,9 @@
          "website" : "http://www.slri.or.th/en/index.php?option=com_content&amp;view=article&amp;id=44&amp;Itemid=93"
       }
    },
-   "SPring-8" : {
+   "SPRING-8" : {
       "BL01B1" : {
-         "facility" : "SPring-8",
+         "facility" : "SPRING-8",
          "flux" : "10^9 - 10^11",
          "name" : "",
          "purpose" : "General purpose XAFS, dilute elements",
@@ -517,7 +517,7 @@
          "website" : "http://www.spring8.or.jp/wkg/BL01B1/instrument/lang-en/INS-0000000375/instrument_summary_view"
       },
       "BL14B2" : {
-         "facility" : "SPring-8",
+         "facility" : "SPRING-8",
          "flux" : "10^10",
          "name" : "",
          "purpose" : "General purpose XAFS, dilute elements, industrial applications",
@@ -527,7 +527,7 @@
          "website" : "http://www.spring8.or.jp/wkg/BL14B2/instrument/lang-en/INS-0000001470/instrument_summary_view"
       },
       "BL25SU" : {
-         "facility" : "SPring-8",
+         "facility" : "SPRING-8",
          "flux" : "5 x 10^11",
          "name" : "",
          "purpose" : "XMCD, PES, ARPES, PED,PEEM",
@@ -537,7 +537,7 @@
          "website" : "http://www.spring8.or.jp/wkg/BL25SU/instrument/lang-en/INS-0000000337/instrument_summary_view"
       },
       "BL27SU" : {
-         "facility" : "SPring-8",
+         "facility" : "SPRING-8",
          "flux" : "10^11",
          "name" : "",
          "purpose" : "XAS",
@@ -547,7 +547,7 @@
          "website" : "http://www.spring8.or.jp/wkg/BL27SU/instrument/lang-en/INS-0000000287/instrument_summary_view"
       },
       "BL28B2" : {
-         "facility" : "SPring-8",
+         "facility" : "SPRING-8",
          "flux" : "10^9 - 10^11",
          "name" : "",
          "purpose" : "Dispersive XAFS",
@@ -557,7 +557,7 @@
          "website" : "http://www.spring8.or.jp/wkg/BL28B2/instrument/lang-en/INS-0000000374/instrument_summary_view"
       },
       "BL37XU" : {
-         "facility" : "SPring-8",
+         "facility" : "SPRING-8",
          "flux" : "10^12- 10^13",
          "name" : "",
          "purpose" : "micro XAFS / XRF",
@@ -567,7 +567,7 @@
          "website" : "http://www.spring8.or.jp/wkg/BL37XU/instrument/lang-en/INS-0000000591/instrument_summary_view"
       },
       "BL39XU" : {
-         "facility" : "SPring-8",
+         "facility" : "SPRING-8",
          "flux" : "2 x 10^13",
          "name" : "",
          "purpose" : "XMCD, XES, microXAFS",
@@ -577,7 +577,7 @@
          "website" : "http://www.spring8.or.jp/wkg/BL39XU/instrument/lang-en/INS-0000000312/instrument_summary_view"
       },
       "BL40XU" : {
-         "facility" : "SPring-8",
+         "facility" : "SPRING-8",
          "flux" : "10^12- 10^13",
          "name" : "",
          "purpose" : "Time resolved XAFS",

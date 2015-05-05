@@ -65,7 +65,7 @@
       "10-BM-B" : {
          "facility" : "APS",
          "flux" : "",
-         "name" : "MRCAT",
+         "name" : "",
          "purpose" : "General purpose XAFS",
          "range" : "3 - 200",
          "size" : "3 × 50",

@@ -65,7 +65,7 @@ that are grouped by facility and which look like this:
 
 ```json
      "BL5S1" : {
-         "facility" : "AichiSR",
+         "facility" : "ASRC",
          "flux" : "10^11",
          "name" : "",
          "purpose" : "General Purpose XAFS",
@@ -79,13 +79,34 @@ that are grouped by facility and which look like this:
 The units of energy range are keV.  Unless otherwise stated, the units
 on beam size are mm.  The units on photon flux are photons/sec.
 
+When a beamline name and sector are both discernable from the tables
+at IUCr, the key is made from the sector and the name is specified as
+an attribute.  For example, ESRF BM8 uses "BM8" as the key and "GILDA"
+is the value of the name attribute.  In some cases, Bruce's knowledge
+is hard-wired into the script (e.g. for non-XSD APS beamlines).
+
+HTML entities and formatting has been replaced with simple ASCII in
+most places.
+
+## Facility names
+
+The `names.json` JSON file translates between the facility names used
+at the IUCr web pages and lightsources.org.  The JSON file contains
+two dictionaries, one called `iucr2lso` which translated the IUCr
+nomenclature to the lightsources.org nomenclature.  The other is
+called `lso2iucr` which translates the other way.  This is used to
+synchronize the facility nomenclature among all various facility and
+beamline JSON files.
+
+Preference is given to the lightsources.org nomenclature.
+
+Note that facility nomenclature is typically an acronym and that the
+`sycnhrtrons.json` file has a "fullname" attribute for each entry.
+
 ## To do
 
-* Need to sync facility nomenclature between `synchrotrons.json` and
-  the regional beamline json files.
-
-* Notes for Giuliana and Masao
-  + SLRI beamlines
-  + NSLS-II beamlines
+* Notes for Giuliana and Masao about IUCr pages:
+  + new SLRI beamlines
+  + NSLS-II beamlines (ISS/8ID, BMM/6BM, SST-1,2/7ID, QAS/7BM, TES/8BM, SRX/5ID, XFM/4BM)
   + More sloppy editing discoveries
   + Space after "HiSOR" in top table

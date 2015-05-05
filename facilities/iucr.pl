@@ -1,5 +1,21 @@
 #!/usr/bin/perl
 
+##########################################################################
+# This scripts scrapes the data from the tables at the IUCr compendium	 #
+# of the world's XAFS beamlines (see below for the URLs).  This is a	 #
+# quirky, tricky chore.  Those web pages are rather inconsistent and	 #
+# have some things that are simply incorrectly written HTML.  As a	 #
+# result, there are a lot of one-off, special cases in this script in an #
+# attempt to snarf as much of the data from those tables as possible.	 #
+# 									 #
+# Also, it is challenging to get beamline names (i.e. ESRF BM8 is also	 #
+# called GILDA) from the IUCr pages.  So there is a hard-coded hash of	 #
+# beamline names.							 #
+# 									 #
+# The results are written to JSON files called Americas.json, Asia.json, #
+# and Europe.json.							 #
+##########################################################################
+
 use strict;
 use warnings;
 use HTML::TableExtract;
@@ -38,27 +54,29 @@ my $json = JSON->new->allow_nonref;
 $json->pretty(1);
 $json->canonical(1);
 
+my $text = read_file('names.json');
+my $names = $json->decode($text);
 
 my $te = HTML::TableExtract->new( depth => 0, count => 1 );
 $te->parse_file($region.'.html');
 foreach my $ts ($te->tables) {
   foreach my $row ($ts->rows) {
     my @list = split(" ", sanitize($row->[0]));
-    next if $list[0] =~ m{DELSY|ISI|KIPT|KSRS|TNK|Operating}; # facilities in Russia, Ukraine are not tabulated, weird!
-    if ($list[0] eq 'Photon') {	# fix several naming and typography issues in the Asia webpage
-      push @facilities, 'Photon Factory'; # PF and AS have names with spaces, which my parsing does incorrectly
+    my $name = $list[0];
+    next if $name =~ m{DELSY|ISI|KIPT|KSRS|TNK|Operating}; # facilities in Russia, Ukraine are not tabulated, weird!
+    if ($name eq 'Photon') {	# fix several naming and typography issues in the Asia webpage
+      $name = 'Photon Factory'; # PF and AS have names with spaces, which my crude parsing retrieves incorrectly
     } elsif ($list[0] eq 'Australian') {
-      push @facilities, 'Australian Synchrotron';
+      $name = 'Australian Synchrotron';
     } elsif ($list[0] =~ m{hisor}i) {
-      push @facilities, 'HiSOR'; # missing space before open parens in top table
+      $name = 'HiSOR';          # missing space before open parens in top table
     } elsif ($list[0] =~ m{slri}i) {
-      push @facilities, 'SLRI';	# strip trailing comma, says "SLRI, Siam" in top table
-    } else {
-      push @facilities, $list[0]; # my crude way of parsing the top table misses the entry for SESAME
-      push(@facilities, 'SESAME') if ($list[0] eq 'SAGA');
+      $name = 'SLRI';           # strip trailing comma, it says "SLRI, Siam" in top table
     };
-  }
-}
+    push @facilities, $name;
+    push(@facilities, 'SESAME') if ($name eq 'SAGA'); # my crude way of parsing the top table misses the entry for SESAME
+  };
+};
 
 if ($region eq 'Europe') {	# Soleil and SLS are out of order
   @facilities[-2,-1] = @facilities[-1,-2];
@@ -92,7 +110,7 @@ foreach my $i (0 .. $#facilities) {
       $this{$key} -> {size}     = sanitize(shift @$row, 0);
       $this{$key} -> {purpose}  = sanitize(shift @$row, 0);
       $this{$key} -> {status}   = sanitize(shift @$row, 0);
-      $this{$key} -> {facility} = $facilities[$i];
+      $this{$key} -> {facility} = $names->{iucr2lso}->{$facilities[$i]}; # translate facility names to the names used at lightsources.org
       $this{$key} -> {name}     = $name; # use tabulated name if it exists...
       $this{$key} -> {name}     = $beamline_names{$facilities[$i]} -> {$key} if exists $beamline_names{$facilities[$i]} -> {$key};
       $this{$key} -> {website}  = q{};
@@ -103,30 +121,37 @@ foreach my $i (0 .. $#facilities) {
       };
     }
   }
-  $beamlines{$facilities[$i]} = \%this;
+  ## translate facility names to the names used at lightsources.org
+  $beamlines{$names->{iucr2lso}->{$facilities[$i]}} = \%this;
 
   ## the Elettra one is just too hard to suss out using the simple search above -- "xafs" is a common word!
   ## the BESSY one is a typo like the following
   if ($region eq 'Europe') {
-    $beamlines{ELETTRA}->{XAFS}->{website} = 'http://www.elettra.trieste.it/experiments/beamlines/xafs';
-    $beamlines{BESSY}->{BAMLine}->{website} = 'http://www.helmholtz-berlin.de/pubbin/igama_output?modus=einzel&sprache=en&gid=1658&typoid=37587';
+    my $elettra = $names->{iucr2lso}->{ELETTRA};
+    my $bessy   = $names->{iucr2lso}->{BESSY};
+    $beamlines{$elettra}->{XAFS}   ->{website} = 'http://www.elettra.trieste.it/experiments/beamlines/xafs';
+    $beamlines{$bessy}  ->{BAMLine}->{website} = 'http://www.helmholtz-berlin.de/pubbin/igama_output?modus=einzel&sprache=en&gid=1658&typoid=37587';
   };
 
   ## these from Asia and Americas seem to suffer from sloppy editing -- they all have a zero-width anchor just before the URL
   if ($region eq 'Asia') {
-    $beamlines{AichiSR}->{BL5S1} ->{website} = 'http://www.astf-kha.jp/synchrotron/en/userguide/gaiyou/bl5s1i_xxafs.html';
-    $beamlines{Aurora} ->{'BL-2'}->{website} = 'http://www.ritsumei.ac.jp/acd/re/src/beamline/bl2_2010.pdf';
-    $beamlines{UVSOR}  ->{'BL1A'}->{website} = 'http://www.uvsor.ims.ac.jp/inforuvsor/beamlines.pdf';
-    $beamlines{UVSOR}  ->{'BL3U'}->{website} = 'http://www.uvsor.ims.ac.jp/inforuvsor/beamlines.pdf';
+    my $asrc   = $names->{iucr2lso}->{AichiSR};
+    my $ritssr = $names->{iucr2lso}->{Aurora};
+    my $uvsor = $names->{iucr2lso}->{UVSOR};
+    $beamlines{$asrc}   ->{BL5S1} ->{website} = 'http://www.astf-kha.jp/synchrotron/en/userguide/gaiyou/bl5s1i_xxafs.html';
+    $beamlines{$ritssr} ->{'BL-2'}->{website} = 'http://www.ritsumei.ac.jp/acd/re/src/beamline/bl2_2010.pdf';
+    $beamlines{$uvsor}  ->{'BL1A'}->{website} = 'http://www.uvsor.ims.ac.jp/inforuvsor/beamlines.pdf';
+    $beamlines{$uvsor}  ->{'BL3U'}->{website} = 'http://www.uvsor.ims.ac.jp/inforuvsor/beamlines.pdf';
   };
 
   if ($region eq 'Americas') {
-    $beamlines{APS}->{'10-ID-B'} ->{website} = "https://beam.aps.anl.gov/pls/apsweb/beamline_display_pkg.display_beamline?p_beamline_num_c=14";
-    $beamlines{APS}->{'12-BM-B'} ->{website} = "https://beam.aps.anl.gov/pls/apsweb/beamline_display_pkg.display_beamline?p_beamline_num_c=18";
-    $beamlines{APS}->{'4-ID-C'}  ->{website} = "https://beam.aps.anl.gov/pls/apsweb/beamline_display_pkg.display_beamline?p_beamline_num_c=7";
-    $beamlines{APS}->{'4-ID-D'}  ->{website} = "https://beam.aps.anl.gov/pls/apsweb/beamline_display_pkg.display_beamline?p_beamline_num_c=31";
-    $beamlines{APS}->{'5-BM-D'}  ->{website} = "https://beam.aps.anl.gov/pls/apsweb/beamline_display_pkg.display_beamline?p_beamline_num_c=8";
-    $beamlines{APS}->{'9-BM-B,C'}->{website} = "https://beam.aps.anl.gov/pls/apsweb/beamline_display_pkg.display_beamline?p_beamline_num_c=82";
+    my $aps = $names->{iucr2lso}->{APS};
+    $beamlines{$aps}->{'10-ID-B'} ->{website} = "https://beam.aps.anl.gov/pls/apsweb/beamline_display_pkg.display_beamline?p_beamline_num_c=14";
+    $beamlines{$aps}->{'12-BM-B'} ->{website} = "https://beam.aps.anl.gov/pls/apsweb/beamline_display_pkg.display_beamline?p_beamline_num_c=18";
+    $beamlines{$aps}->{'4-ID-C'}  ->{website} = "https://beam.aps.anl.gov/pls/apsweb/beamline_display_pkg.display_beamline?p_beamline_num_c=7";
+    $beamlines{$aps}->{'4-ID-D'}  ->{website} = "https://beam.aps.anl.gov/pls/apsweb/beamline_display_pkg.display_beamline?p_beamline_num_c=31";
+    $beamlines{$aps}->{'5-BM-D'}  ->{website} = "https://beam.aps.anl.gov/pls/apsweb/beamline_display_pkg.display_beamline?p_beamline_num_c=8";
+    $beamlines{$aps}->{'9-BM-B,C'}->{website} = "https://beam.aps.anl.gov/pls/apsweb/beamline_display_pkg.display_beamline?p_beamline_num_c=82";
   };
 };
 

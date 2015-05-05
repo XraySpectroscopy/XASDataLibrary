@@ -43,78 +43,6 @@
          "website" : "http://www.anka.kit.edu/992.php"
       }
    },
-   "BESSY" : {
-      "BAMLine" : {
-         "facility" : "BESSY",
-         "flux" : "10^12",
-         "name" : "BAMLine",
-         "purpose" : "Materials science",
-         "range" : "5 - 10^0",
-         "size" : "0.15 x 0.25 minimum",
-         "status" : "Operational",
-         "website" : "http://www.helmholtz-berlin.de/pubbin/igama_output?modus=einzel&sprache=en&gid=1658&typoid=37587"
-      },
-      "KMC-2" : {
-         "facility" : "BESSY",
-         "flux" : "10^7 - 10^10",
-         "name" : "XANES",
-         "purpose" : "General purpose, microXAS",
-         "range" : "5 - 14",
-         "size" : "0.6 x 0.25 to 5 x 5µm2",
-         "status" : "Operational",
-         "website" : "http://www.bessy.de/bit/bit_show_object.html.php?i_bit_id_object=160"
-      },
-      "U41_PGM" : {
-         "facility" : "BESSY",
-         "flux" : "10^13",
-         "name" : "FLUORO",
-         "purpose" : "Fluorescence soft x-ray XAFS",
-         "range" : "0.17 - 1.8",
-         "size" : "12 x 23 µm2",
-         "status" : "Operational",
-         "website" : "http://www.bessy.de/bit/bit_show_object.html.php?i_bit_id_object=28"
-      },
-      "U49_PGM" : {
-         "facility" : "BESSY",
-         "flux" : "10^11 - 10^13",
-         "name" : "SMART",
-         "purpose" : "surface science, XANES",
-         "range" : "0.1 - 1.8",
-         "size" : ".",
-         "status" : "Operational",
-         "website" : "http://www.bessy.de/bit/bit_show_object.html.php?i_bit_id_object=152"
-      },
-      "UE46_PGM-1" : {
-         "facility" : "BESSY",
-         "flux" : "10^12",
-         "name" : "7-Tesla High field",
-         "purpose" : "XMCD",
-         "range" : "0.121 - 1.7",
-         "size" : "16 x 64 µm2 to 1.7 x 1.2 mm2",
-         "status" : "Operational",
-         "website" : "http://www.bessy.de/bit/bit_show_object.html.php?i_bit_id_object=24"
-      },
-      "UE56-1_PGM-A" : {
-         "facility" : "BESSY",
-         "flux" : "2.5 X10^11",
-         "name" : "Femto-s-Pump-Probe",
-         "purpose" : "XMCD, time-resolved studies",
-         "range" : "0.06 - 1.3",
-         "size" : ".",
-         "status" : "Operational",
-         "website" : "http://www.bessy.de/bit/bit_show_object.html.php?i_bit_id_object=26"
-      },
-      "mySpot" : {
-         "facility" : "BESSY",
-         "flux" : "10^12 - 10^13",
-         "name" : "mySpot",
-         "purpose" : "microXAS",
-         "range" : "2 - 30",
-         "size" : "15 to 300 µm diameter",
-         "status" : "Operational",
-         "website" : "http://www.bessy.de/bit/bit_show_object.html.php?i_bit_id_object=204"
-      }
-   },
    "DAFNE" : {
       "DXR-1" : {
          "facility" : "DAFNE",
@@ -383,26 +311,76 @@
          "website" : "http://www.esrf.fr/UsersAndScience/Experiments/HRRS/ID26/"
       }
    },
-   "HASYLAB" : {
-      "P04" : {
-         "facility" : "HASYLAB",
+   "HZB" : {
+      "BAMLine" : {
+         "facility" : "HZB",
          "flux" : "10^12",
-         "name" : "Variable polarization XUV",
-         "purpose" : "XMCD",
-         "range" : "0.25 - 3",
-         "size" : "10 µm x 10 µm",
+         "name" : "BAMLine",
+         "purpose" : "Materials science",
+         "range" : "5 - 10^0",
+         "size" : "0.15 x 0.25 minimum",
          "status" : "Operational",
-         "website" : "http://hasylab.desy.de/facilities/petra_iii/beamlines/p04_xuv_beamline/index_eng.html"
+         "website" : "http://www.helmholtz-berlin.de/pubbin/igama_output?modus=einzel&sprache=en&gid=1658&typoid=37587"
       },
-      "P06" : {
-         "facility" : "HASYLAB",
-         "flux" : "10^7- 10^11",
-         "name" : "Hard X-ray micro-nano probe",
-         "purpose" : "micro - nano XAFS",
-         "range" : "2.4 - 50",
-         "size" : "80 nm - 250 nm",
+      "KMC-2" : {
+         "facility" : "HZB",
+         "flux" : "10^7 - 10^10",
+         "name" : "XANES",
+         "purpose" : "General purpose, microXAS",
+         "range" : "5 - 14",
+         "size" : "0.6 x 0.25 to 5 x 5µm2",
          "status" : "Operational",
-         "website" : "http://hasylab.desy.de/facilities/petra_iii/beamlines/p06_hard_x_ray_micro_probe/index_eng.html"
+         "website" : "http://www.bessy.de/bit/bit_show_object.html.php?i_bit_id_object=160"
+      },
+      "U41_PGM" : {
+         "facility" : "HZB",
+         "flux" : "10^13",
+         "name" : "FLUORO",
+         "purpose" : "Fluorescence soft x-ray XAFS",
+         "range" : "0.17 - 1.8",
+         "size" : "12 x 23 µm2",
+         "status" : "Operational",
+         "website" : "http://www.bessy.de/bit/bit_show_object.html.php?i_bit_id_object=28"
+      },
+      "U49_PGM" : {
+         "facility" : "HZB",
+         "flux" : "10^11 - 10^13",
+         "name" : "SMART",
+         "purpose" : "surface science, XANES",
+         "range" : "0.1 - 1.8",
+         "size" : ".",
+         "status" : "Operational",
+         "website" : "http://www.bessy.de/bit/bit_show_object.html.php?i_bit_id_object=152"
+      },
+      "UE46_PGM-1" : {
+         "facility" : "HZB",
+         "flux" : "10^12",
+         "name" : "7-Tesla High field",
+         "purpose" : "XMCD",
+         "range" : "0.121 - 1.7",
+         "size" : "16 x 64 µm2 to 1.7 x 1.2 mm2",
+         "status" : "Operational",
+         "website" : "http://www.bessy.de/bit/bit_show_object.html.php?i_bit_id_object=24"
+      },
+      "UE56-1_PGM-A" : {
+         "facility" : "HZB",
+         "flux" : "2.5 X10^11",
+         "name" : "Femto-s-Pump-Probe",
+         "purpose" : "XMCD, time-resolved studies",
+         "range" : "0.06 - 1.3",
+         "size" : ".",
+         "status" : "Operational",
+         "website" : "http://www.bessy.de/bit/bit_show_object.html.php?i_bit_id_object=26"
+      },
+      "mySpot" : {
+         "facility" : "HZB",
+         "flux" : "10^12 - 10^13",
+         "name" : "mySpot",
+         "purpose" : "microXAS",
+         "range" : "2 - 30",
+         "size" : "15 to 300 µm diameter",
+         "status" : "Operational",
+         "website" : "http://www.bessy.de/bit/bit_show_object.html.php?i_bit_id_object=204"
       }
    },
    "ISA" : {
@@ -417,9 +395,9 @@
          "website" : "http://www.isa.au.dk/facilities/astrid/beamlines/sx700/sx700.asp"
       }
    },
-   "MAXLAB" : {
+   "MAX IV" : {
       "D1011" : {
-         "facility" : "MAXLAB",
+         "facility" : "MAX IV",
          "flux" : "10^10 - 10^11",
          "name" : "",
          "purpose" : "Surface science, XMCD, PES,",
@@ -429,7 +407,7 @@
          "website" : "http://www.maxlab.lu.se/beamline/max-ii/d1011/d1011.html"
       },
       "I1011" : {
-         "facility" : "MAXLAB",
+         "facility" : "MAX IV",
          "flux" : "10^12",
          "name" : "",
          "purpose" : "Surface science, XMCD",
@@ -439,7 +417,7 @@
          "website" : "http://www.maxlab.lu.se/beamline/max-ii/i1011/i1011.html"
       },
       "I311" : {
-         "facility" : "MAXLAB",
+         "facility" : "MAX IV",
          "flux" : "10^11 - 10^13",
          "name" : "",
          "purpose" : "Surface science, PES",
@@ -449,7 +427,7 @@
          "website" : "http://www.maxlab.lu.se/beamline/max-ii/i311/i311.html"
       },
       "I411" : {
-         "facility" : "MAXLAB",
+         "facility" : "MAX IV",
          "flux" : "10^11 - 10^13",
          "name" : "",
          "purpose" : "Surface science, PES, liquid and gaseous samples",
@@ -459,7 +437,7 @@
          "website" : "http://www.maxlab.lu.se/beamline/max-ii/i411/i411.html"
       },
       "I511" : {
-         "facility" : "MAXLAB",
+         "facility" : "MAX IV",
          "flux" : "10^11 - 10^13\r (1220 l/mm grating)",
          "name" : "",
          "purpose" : "Surface science, PES, XES, liquid and gaseous samples",
@@ -469,7 +447,7 @@
          "website" : "http://www.maxlab.lu.se/beamline/max-ii/i511/i511.html"
       },
       "I811" : {
-         "facility" : "MAXLAB",
+         "facility" : "MAX IV",
          "flux" : "10^11 - 10^12",
          "name" : "",
          "purpose" : "General purpose XAFS",
@@ -477,6 +455,28 @@
          "size" : "0.5 x 0.5",
          "status" : "Operational",
          "website" : "http://www.maxlab.lu.se/beamline/max-ii/i811/i811.html"
+      }
+   },
+   "PETRA III" : {
+      "P04" : {
+         "facility" : "PETRA III",
+         "flux" : "10^12",
+         "name" : "Variable polarization XUV",
+         "purpose" : "XMCD",
+         "range" : "0.25 - 3",
+         "size" : "10 µm x 10 µm",
+         "status" : "Operational",
+         "website" : "http://hasylab.desy.de/facilities/petra_iii/beamlines/p04_xuv_beamline/index_eng.html"
+      },
+      "P06" : {
+         "facility" : "PETRA III",
+         "flux" : "10^7- 10^11",
+         "name" : "Hard X-ray micro-nano probe",
+         "purpose" : "micro - nano XAFS",
+         "range" : "2.4 - 50",
+         "size" : "80 nm - 250 nm",
+         "status" : "Operational",
+         "website" : "http://hasylab.desy.de/facilities/petra_iii/beamlines/p06_hard_x_ray_micro_probe/index_eng.html"
       }
    },
    "SLS" : {
