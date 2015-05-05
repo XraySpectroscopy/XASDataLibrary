@@ -65,7 +65,7 @@
       "10-BM-B" : {
          "facility" : "APS",
          "flux" : "",
-         "name" : "",
+         "name" : "MRCAT",
          "purpose" : "General purpose XAFS",
          "range" : "3 - 200",
          "size" : "3 × 50",
@@ -75,7 +75,7 @@
       "10-ID-B" : {
          "facility" : "APS",
          "flux" : "10^11 - 10^13",
-         "name" : "",
+         "name" : "MRCAT",
          "purpose" : "General purpose XAFS, dilute elements, DAFS, XAFS microscopy in materials science",
          "range" : "4.3- 90",
          "size" : "2 μm ×2 μm minimum",
@@ -105,7 +105,7 @@
       "13-BM-D" : {
          "facility" : "APS",
          "flux" : "10^9",
-         "name" : "",
+         "name" : "GSECARS",
          "purpose" : "General purpose XAFS, high pressure, geoscience",
          "range" : "4.5 - 70",
          "size" : "0.01 x 0.03",
@@ -115,7 +115,7 @@
       "13-ID-C,D" : {
          "facility" : "APS",
          "flux" : "10^11 - 10^13",
-         "name" : "",
+         "name" : "GSECARS",
          "purpose" : "General purpose XAFS, high pressure, geoscience",
          "range" : "4 - 45",
          "size" : "0.06 x 0.02 to\r 0.002 x 0.002",
@@ -135,7 +135,7 @@
       "18-ID-D" : {
          "facility" : "APS",
          "flux" : "2 x 10^13",
-         "name" : "",
+         "name" : "BIOCAT",
          "purpose" : "General purpose, microXAS in the life sciences",
          "range" : "3.5 - 35",
          "size" : "0.05 x 0.5",
@@ -195,7 +195,7 @@
       "5-BM-D" : {
          "facility" : "APS",
          "flux" : "5 ×10^11",
-         "name" : "",
+         "name" : "DNDCAT",
          "purpose" : "General purpose XAFS, in polymer and materials science",
          "range" : "4.5 - 80",
          "size" : "0.5 x 30",

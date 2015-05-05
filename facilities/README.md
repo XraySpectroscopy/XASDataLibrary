@@ -84,6 +84,8 @@ on beam size are mm.  The units on photon flux are photons/sec.
 * Need to sync facility nomenclature between `synchrotrons.json` and
   the regional beamline json files.
 
-* Need to snarf alternate names, where possible for beamlines,
-  e.g. "Gilda" for ESRF BM8, "GSECARS" for APS 13-BM-D, or the
-  additional column for BESSY in the Europe html page.
+* Notes for Giuliana and Masao
+  + SLRI beamlines
+  + NSLS-II beamlines
+  + More sloppy editing discoveries
+  + Space after "HiSOR" in top table

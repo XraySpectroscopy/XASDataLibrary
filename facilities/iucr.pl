@@ -17,8 +17,15 @@ my %pages = (Asia => 'http://www.iucr.org/resources/commissions/xafs/beamlines-i
 	     Americas => 'http://www.iucr.org/resources/commissions/xafs/beamlines-in-the-americas',
 	     Europe => 'http://www.iucr.org/resources/commissions/xafs/beamlines-in-europe');
 
+my %beamline_names = (ESRF => {BM2   => 'D2AM',   BM8   => 'GILDA', BM20 => 'ROBL', BM25A => 'SPLINE',
+			       BM26A => 'DUBBLE', BM30B => 'FAME'},
+		      APS => {'5-BM-D'    => 'DNDCAT',  '10-ID-B' => 'MRCAT',   '10-BM-D' => 'MRCAT',
+			      '13-ID-C,D' => 'GSECARS', '13-BM-D' => 'GSECARS', '16-BM-B' => 'HPCAT',
+			      '18-ID-D'   => 'BIOCAT',}
+		     );
+
 my $content = q{};
-if ($ARGV[1]) {
+if ($ARGV[1]) {			# skip downloading html file
   $content = read_file($region.'.html');
 } else {
   $content = get($pages{$region});
@@ -38,7 +45,18 @@ foreach my $ts ($te->tables) {
   foreach my $row ($ts->rows) {
     my @list = split(" ", sanitize($row->[0]));
     next if $list[0] =~ m{DELSY|ISI|KIPT|KSRS|TNK|Operating};         # facilities in Russia, Ukraine are not tabulated, weird!
-    push @facilities, $list[0];
+    if ($list[0] eq 'Photon') {	# fix several naming and typography issues in the Asia webpage
+      push @facilities, 'Photon Factory'; # PF and AS have names with spaces, which my parsing does incorrectly
+    } elsif ($list[0] eq 'Australian') {
+      push @facilities, 'Australian Synchrotron';
+    } elsif ($list[0] =~ m{hisor}i) {
+      push @facilities, 'HiSOR';
+    } elsif ($list[0] =~ m{slri}i) {
+      push @facilities, 'SLRI';	# strip trailing comma, says "SLRI, Siam" in top table
+    } else {
+      push @facilities, $list[0];
+      push(@facilities, 'SESAME') if ($list[0] eq 'SAGA');
+    };
   }
 }
 
@@ -52,17 +70,31 @@ foreach my $i (0 .. $#facilities) {
   $te->parse_file($region.'.html');
   foreach my $ts ($te->tables) {
     foreach my $row ($ts->rows) {
-      my $key = sanitize(shift @$row, 1);
+      my $key;
+      my $name = q{};
+      if ($facilities[$i] =~ m{BESSY}) { # handle BESSY's additional column
+	$name = sanitize(shift @$row, 0);
+	$key  = sanitize(shift @$row, 1);
+      } elsif ($facilities[$i] =~ m{Diamond|HASYLAB}) {
+	my $word = sanitize(shift @$row, 0);
+	next if $word eq 'Beamline';
+	$word =~ m{([IBP]D?\d\d)\s+(.*)};
+	$name = $2;
+	$key = $1;
+	$key = 'I10' if ($key eq 'ID10'); # this is a typo on the webpage
+      } else {
+	$key  = sanitize(shift @$row, 1);
+      };
       next if $key eq 'Beamline';
-      next if $key eq 'Experimental station';               # BESSY's table has one additional column, grrrr!
-      shift @$row if $facilities[$i] =~ m{BESSY};
+      next if $key eq 'Associated beamline'; # BESSY's table has one additional column, grrrr!
       $this{$key} -> {range}    = sanitize(shift @$row, 0);
       $this{$key} -> {flux}     = sanitize(shift @$row, 0);
       $this{$key} -> {size}     = sanitize(shift @$row, 0);
       $this{$key} -> {purpose}  = sanitize(shift @$row, 0);
       $this{$key} -> {status}   = sanitize(shift @$row, 0);
       $this{$key} -> {facility} = $facilities[$i];
-      $this{$key} -> {name}     = q{};
+      $this{$key} -> {name}     = $name; # use tabulated name if it exists...
+      $this{$key} -> {name}     = $beamline_names{$facilities[$i]} -> {$key} if exists $beamline_names{$facilities[$i]} -> {$key};
       $this{$key} -> {website}  = q{};
       if ($content =~ m{<a href="(.*?)">(?:<u>)?$key}) {
 	$this{$key} -> {website}  = $1;
@@ -73,15 +105,21 @@ foreach my $i (0 .. $#facilities) {
   }
   $beamlines{$facilities[$i]} = \%this;
 
-  ## these are just too hard to suss out using the simple search above -- "xafs" is a common word!
+  ## the Elettra one is just too hard to suss out using the simple search above -- "xafs" is a common word!
+  ## the BESSY one is a typo like the following
   if ($region eq 'Europe') {
     $beamlines{ELETTRA}->{XAFS}->{website} = 'http://www.elettra.trieste.it/experiments/beamlines/xafs';
+    $beamlines{BESSY}->{BAMLine}->{website} = 'http://www.helmholtz-berlin.de/pubbin/igama_output?modus=einzel&sprache=en&gid=1658&typoid=37587';
   };
+
   ## these from Asia and Americas seem to suffer from sloppy editing -- they all have a zero-width anchor just before the URL
   if ($region eq 'Asia') {
-    $beamlines{AichiSR}->{BL5S1}->{website} = 'http://www.astf-kha.jp/synchrotron/en/userguide/gaiyou/bl5s1i_xxafs.html';
-    $beamlines{Aurora}->{'BL-2'}->{website} = 'http://www.ritsumei.ac.jp/acd/re/src/beamline/bl2_2010.pdf';
+    $beamlines{AichiSR}->{BL5S1} ->{website} = 'http://www.astf-kha.jp/synchrotron/en/userguide/gaiyou/bl5s1i_xxafs.html';
+    $beamlines{Aurora} ->{'BL-2'}->{website} = 'http://www.ritsumei.ac.jp/acd/re/src/beamline/bl2_2010.pdf';
+    $beamlines{UVSOR}  ->{'BL1A'}->{website} = 'http://www.uvsor.ims.ac.jp/inforuvsor/beamlines.pdf';
+    $beamlines{UVSOR}  ->{'BL3U'}->{website} = 'http://www.uvsor.ims.ac.jp/inforuvsor/beamlines.pdf';
   };
+
   if ($region eq 'Americas') {
     $beamlines{APS}->{'10-ID-B'} ->{website} = "https://beam.aps.anl.gov/pls/apsweb/beamline_display_pkg.display_beamline?p_beamline_num_c=14";
     $beamlines{APS}->{'12-BM-B'} ->{website} = "https://beam.aps.anl.gov/pls/apsweb/beamline_display_pkg.display_beamline?p_beamline_num_c=18";
@@ -109,7 +147,7 @@ sub sanitize {
   $string =~ s{\xC3\x97}{ x }g;			   # remove \times
 
   if ($key) {
-    $string =~ s{\(.*\)}{};
+    $string =~ s{(\(.*\))}{};
     $string =~ s{\r}{};
   };
 
