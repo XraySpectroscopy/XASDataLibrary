@@ -330,11 +330,11 @@
       "website" : "http://www.nsrrc.org.tw/"
    },
    "PETRA III" : {
-      "active" : false,
+      "active" : true,
       "country" : "Germany",
       "email" : "photon-science@desy.de",
       "fax" : "+49 40 / 8998-4475",
-      "fullname" : "Doppel-Ring-Speicher",
+      "fullname" : "PETRA III at DESY",
       "phone" : "+49 40 / 8998-1541",
       "post" : "DESY Photon Science\nNotkestr. 85\n22607 HAMBURG\nGermany",
       "website" : "http://photon-science.desy.de"

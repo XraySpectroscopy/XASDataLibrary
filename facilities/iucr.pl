@@ -13,9 +13,9 @@ my @facilities = ();
 
 my $region = $ARGV[0] || 'Americas';
 
-my %pages = (Asia => 'http://www.iucr.org/resources/commissions/xafs/beamlines-in-asia-and-oceania',
+my %pages = (Asia     => 'http://www.iucr.org/resources/commissions/xafs/beamlines-in-asia-and-oceania',
 	     Americas => 'http://www.iucr.org/resources/commissions/xafs/beamlines-in-the-americas',
-	     Europe => 'http://www.iucr.org/resources/commissions/xafs/beamlines-in-europe');
+	     Europe   => 'http://www.iucr.org/resources/commissions/xafs/beamlines-in-europe');
 
 my %beamline_names = (ESRF => {BM2   => 'D2AM',   BM8   => 'GILDA', BM20 => 'ROBL', BM25A => 'SPLINE',
 			       BM26A => 'DUBBLE', BM30B => 'FAME'},
@@ -44,17 +44,17 @@ $te->parse_file($region.'.html');
 foreach my $ts ($te->tables) {
   foreach my $row ($ts->rows) {
     my @list = split(" ", sanitize($row->[0]));
-    next if $list[0] =~ m{DELSY|ISI|KIPT|KSRS|TNK|Operating};         # facilities in Russia, Ukraine are not tabulated, weird!
+    next if $list[0] =~ m{DELSY|ISI|KIPT|KSRS|TNK|Operating}; # facilities in Russia, Ukraine are not tabulated, weird!
     if ($list[0] eq 'Photon') {	# fix several naming and typography issues in the Asia webpage
       push @facilities, 'Photon Factory'; # PF and AS have names with spaces, which my parsing does incorrectly
     } elsif ($list[0] eq 'Australian') {
       push @facilities, 'Australian Synchrotron';
     } elsif ($list[0] =~ m{hisor}i) {
-      push @facilities, 'HiSOR';
+      push @facilities, 'HiSOR'; # missing space before open parens in top table
     } elsif ($list[0] =~ m{slri}i) {
       push @facilities, 'SLRI';	# strip trailing comma, says "SLRI, Siam" in top table
     } else {
-      push @facilities, $list[0];
+      push @facilities, $list[0]; # my crude way of parsing the top table misses the entry for SESAME
       push(@facilities, 'SESAME') if ($list[0] eq 'SAGA');
     };
   }
@@ -75,8 +75,8 @@ foreach my $i (0 .. $#facilities) {
       if ($facilities[$i] =~ m{BESSY}) { # handle BESSY's additional column
 	$name = sanitize(shift @$row, 0);
 	$key  = sanitize(shift @$row, 1);
-      } elsif ($facilities[$i] =~ m{Diamond|HASYLAB}) {
-	my $word = sanitize(shift @$row, 0);
+      } elsif ($facilities[$i] =~ m{Diamond|HASYLAB}) { # these two facilities have names and sectors
+	my $word = sanitize(shift @$row, 0);		# in the beamline column of their tables
 	next if $word eq 'Beamline';
 	$word =~ m{([IBP]D?\d\d)\s+(.*)};
 	$name = $2;

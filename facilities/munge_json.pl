@@ -100,12 +100,11 @@ foreach my $d (@$data) {
 
 ## the dear departed...
 
-$synchrotrons{NSLS} = {};
 %{$synchrotrons{NSLS}} = %{$synchrotrons{'NSLS-II'}};
 $synchrotrons{NSLS}->{fullname} =~ s{ II}{};
 $synchrotrons{NSLS}->{active} = JSON::false;
 
-$synchrotrons{DORIS} = $synchrotrons{'PETRA III'};
+%{$synchrotrons{DORIS}} = %{$synchrotrons{'PETRA III'}};
 $synchrotrons{DORIS}->{fullname} = 'Doppel-Ring-Speicher';
 $synchrotrons{DORIS}->{active} = JSON::false;
 
