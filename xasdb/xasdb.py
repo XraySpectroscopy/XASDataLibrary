@@ -160,7 +160,7 @@ class Person(_BaseTable):
 class Spectrum_Ligand(_BaseTable):
     "spectrum ligand"
     ligand, spectrum = None, None
-    
+
 class Spectrum_Rating(_BaseTable):
     "spectra rating"
     def __repr__(self):
@@ -196,7 +196,7 @@ class Spectrum(_BaseTable):
 
 
 class XASDataLibrary(object):
-    """"full interface to XAS Spectral Library"""
+    """full interface to XAS Spectral Library"""
     def __init__(self, dbname=None, server= 'sqlite', user='',
                  password='',  host='', port=5432, logfile=None):
         self.engine = None
@@ -206,7 +206,7 @@ class XASDataLibrary(object):
         if dbname is not None:
             self.connect(dbname, server=server, user=user,
                          password=password, port=port, host=host)
-            
+
     def create_newdb(self, dbname,  server='sqlite', user='',
                      password='', port=5432, host='', connect=True):
         "create a new, empty database"
@@ -229,7 +229,7 @@ class XASDataLibrary(object):
             conn_str= 'postgresql://%s:%s@%s:%i/%s'
             engine = create_engine(conn_str % (user, password, host,
                                                port, dbname))
-            
+
         self.metadata =  MetaData(self.engine)
 
         self.metadata.reflect()
@@ -365,10 +365,10 @@ class XASDataLibrary(object):
         Parameters
         ----------
          table : a valid table class, as mapped by mapper.
-         value : value in row of foreign table 
-         name  : column name to use for looking up value.  The default 
-                 is 'name', meaning that the value passed in should be 
-                 the row name 
+         value : value in row of foreign table
+         name  : column name to use for looking up value.  The default
+                 is 'name', meaning that the value passed in should be
+                 the row name
          keyid : name of column to use for returned id (default is 'id')
 
         Returns
@@ -510,7 +510,7 @@ class XASDataLibrary(object):
         return self.addrow(Ligand, ('name',), (name,), **kws)
 
     def add_person(self, name, email,
-                   affiliation='', attributes='', **kws):
+                   affiliation='', attributes='',password='', **kws):
         """add person: arguments are
         name, email  with
         affiliation and attributes optional
@@ -575,48 +575,51 @@ Optional:
         kws['person_id'] = self.foreign_keyid(Person, person,
                                                    name='email')
         kws['spectrum_id'] = self.foreign_keyid(Spectrum, specctra)
-        kws['datetime'] = datetime.now()        
+        kws['datetime'] = datetime.now()
         if comments is not None:
             kws['comments'] = comments
         score = valid_score(score)
         self.addrow(Spectrum_Rating, ('score',), (score,), **kws)
 
-    def add_spectrum(self, name, notes='', attributes='', file_link='',
-                    energy=None, i0=None, itrans=None,
-                    ifluor=None, irefer=None, k=None, chi=None,
-                    mutrans=None, mufluor=None, murefer=None,  dspacing=0.0,
-                    notes_i0='', notes_itrans='', notes_ifluor='',
-                    notes_irefer='', temperature='', submission_date=None,
-                    collection_date=None, reference_used='',
-                    energy_units=None, person=None,
-                    edge=None, element=None, sample=None, beamline=None,
-                    data_format=None, citation=None, reference=None, **kws):
+    def add_spectrum(self, name, notes='', attributes='',
+                     d_spacing=-1, notes_i0='', notes_itrans='',
+                     notes_ifluor='', notes_irefer='', temperature='',
+                     submission_date=None, collection_date=None,
+                     reference_used='',
+                     energy=None, i0=None, itrans=None, ifluor=None,
+                     irefer=None, i0_stderr=None, itrans_stderr=None,
+                     ifluor_stderr=None, irefer_stderr=None,
+                     mutrans=None, mufluor=None, murefer=None,
+                     energy_units=None, person=None,
+                     edge=None, element=None, sample=None, beamline=None,
+                     data_format=None, citation=None, reference=None,
+                     **kws):
 
         """add spectrum: name required
         returns Spectrum instance"""
 
-        spectrum_names = self.query('name'
-                                   ).from_statement('select name from spectrum').all()
+        stab = self.tables['spectrum']
+        spectrum_names = [s.name for s in stab.select().execute()]
 
-        if len(spectrum_names) > 1:
-            if any([entry[0] == name for entry in spectrum_names]):
-                raise XASDBException("A spectrum named '%s' already exists" % name)
+        if name in spectrum_names:
+            raise XASDBException("A spectrum named '%s' already exists" % name)
 
-        # eif  name in spectrum_names:
-        # return
+        # simple values
+        for attr in ('notes', 'attributes', 'notes_i0', 'notes_itrans'
+                     'notes_ifluor', 'notes_irefer', 'temperature',
+                     'd_spacing', 'reference_used'):
+            kws[attr] = locals[attr]
 
-        kws['notes'] = notes
-        kws['attributes'] = attributes
+        # arrays
+        for attr in ('energy', 'i0', 'itrans', 'ifluor', 'irefer',
+                     'i0_stderr', 'itrans_stderr', 'ifluor_stderr',
+                     'irefer', 'mutrans', 'mufluor', 'murefer'):
+            val = ''
+            if locals['attr'] is not None:
+                val = json_encode(locals['attr'])
+            kws[attr] = val
 
-        kws['file_link'] = file_link
-
-        for attr, val in (('energy', energy), ('i0', i0), ('k', k),
-                          ('chi',  chi), ('itrans', itrans),
-                          ('ifluor', ifluor),  ('irefer', irefer),
-                          ('mutrans', mutrans), ('mufluor', mufluor),
-                          ('murefer', murefer)):
-            kws[attr] = json_encode(val)
-
+        # dates
         if submission_date is None:
             submission_date = datetime.now()
         for attr, val in (('submission_date', submission_date),
@@ -630,14 +633,7 @@ Optional:
                 val = datetime(1,1,1)
             kws[attr] = val
 
-        kws['notes_i0'] = notes_i0
-        kws['notes_itrans'] = notes_itrans
-        kws['notes_ifluor'] = notes_ifluor
-        kws['notes_irefer'] = notes_irefer
-        kws['temperature'] = temperature
-        kws['dspacing'] = dspacing
-
-        kws['reference_used'] = reference_used
+        # foreign keys, pointers to other tables
         kws['beamline_id'] = self.foreign_keyid(Beamline, beamline)
         kws['person_id'] = self.foreign_keyid(Person, person,
                                               name='email')
@@ -655,7 +651,7 @@ Optional:
         except:
             return None
 
-    def get_beamline(self, facility=None):
+    def get_beamlines(self, facility=None):
         """get all beamlines for a facility
         Parameters
         ----------
@@ -683,20 +679,20 @@ Optional:
             query = tab.select()
         return query.execute().fetchall()
 
-    
+
     def get_suite_ratings(self, spectrum):
         "get all ratings for a suite"
         raise NotImplementedError
-    
+
     def get_spectrum_ratings(self, spectrum):
         "get all ratings for a spectrum"
         raise NotImplementedError
 
     def get_spectra(self, edge=None, element=None, suite=None, beamline=None,
                     facility=None, person=None, mode=None, sample=None,
-                    citation=None, ligand=None): 
+                    citation=None, ligand=None):
         """get all spectra matching some set of criteria
-        
+
         Parameters
         ----------
         edge
@@ -711,5 +707,5 @@ Optional:
         ligand
         """
         q = self.tables['spectrum']
-        
+
         raise NotImplementedError
