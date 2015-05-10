@@ -14,13 +14,18 @@ import logging
 import numpy as np
 from datetime import datetime
 
-from .creator import make_newdb, backup_versions
+from base64 import b64encode
+from hashlib import pbkdf2_hmac
 
+from .creator import make_newdb, backup_versions
 
 from sqlalchemy import MetaData, create_engine
 from sqlalchemy.orm import sessionmaker,  mapper, relationship, backref
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm.exc import  NoResultFound
+
+PW_ALGORITHM = 'sha512'
+PW_NROUNDS   = 120000
 
 def isXASDataLibrary(dbname):
     """test if a file is a valid XAS Data Library file:
@@ -510,15 +515,40 @@ class XASDataLibrary(object):
         return self.addrow(Ligand, ('name',), (name,), **kws)
 
     def add_person(self, name, email,
-                   affiliation='', attributes='',password='', **kws):
+                   affiliation='', attributes='',password=None, **kws):
         """add person: arguments are
         name, email  with
-        affiliation and attributes optional
+        affiliation, attributes, and password optional
         returns Person instance"""
         kws['affiliation'] = affiliation
         kws['attributes'] = attributes
-        return self.addrow(Person, ('email', 'name'),
+        person = self.addrow(Person, ('email', 'name'),
                              (email, name), **kws)
+        if password is not None:
+            self.set_person_password(email, password)
+
+    def set_person_password(self, email, password):
+        """ set secure password for person"""
+        salt   = b64encode(os.urandom(24))
+        niter  = PW_NROUNDS
+        algo   = PW_ALGORITHM
+        result = b64encode(pbkdf2_hmac(algo, password, salt, niter))
+        hash   = '%s$%i$%s$%s' % (algo, niter, salt, result)
+
+        table = self.tables['person']
+        table.update(whereclause="email='%s'" % email).execute(password=hash)
+
+    def test_person_password(self, email, password):
+        """test password for person, returns True if valid"""
+
+        table = self.tables['person']
+        row  = table.select(table.c.email==email).execute().fetchone()
+        try:
+            algo, niter, salt, hash = row.password.split('$')
+            niter = int(niter)
+        except:
+            return False
+        return hash == b64encode(pbkdf2_hmac(algo, password, salt, niter))
 
     def add_sample(self, name, notes='', attributes='',
                    formula=None, material_source=None,
