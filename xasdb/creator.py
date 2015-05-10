@@ -51,26 +51,22 @@ class InitialData:
                ["degrees","angle in degrees for Bragg monochromator.  Needs mono d_spacing"] ]
 
     modes = [["transmission", "transmission intensity through sample"],
-             ["fluorescence, total yield", "total x-ray fluorescence, no energy analysis"],
+             ["fluorescence, total yield", "X-ray fluorescence, no energy analysis"],
              ["fluorescence, energy analyzed",
-              "x-ray fluorescence with an energy dispersive (solid-state) detector"],
+              "X-ray fluorescence with an energy dispersive detector"],
              ["xeol", "visible or uv light emission"],
              ["electron emission", "emitted electrons from sample"]]
 
-    facilities = [['SSRL','Stanford Synchrotron Radiation Laboratory, Palo Alto, CA, USA'],
-                  ['SRS','Synchrotron Radiation Source, Daresbury Lab, Cheshire, UK'],
-                  ['NSLS','National Synchrotron Light Source, BNL, Upton, IL, USA'],
-                  ['Photon Factory','Photon Factory, KEK, Tsukuba, Japan'],
-                  ['ESRF','European Synchrotron Radiation Facility, Grenoble, France'],
-                  ['APS','Advanced Photon Source, ANL, Argonne, IL, USA'],
-                  ['ALS','Advanced Light Source, LBNL, Berkeley, CA, USA'],
-                  ['DLS','Diamond Light Source, Didcot, Oxfordshire, Great Britian'],
-                  ['SOLEIL','Synchrotron SOLEIL, GIF-sur-YVETTE, France'],
-                  ['SPring-8','SPring-8 Synchrotron,  Hyogo, Japan'],
-                  ['DESY','DESY Synchrotron, Hamburg, Germany'],
-                  ['ANKA','Karlsruhe, KIT, Germany'],
-                  ['Elettra','Elettra, Trieste, Italy'],
-                  ['AS','Australian Synchrotron, Melbourne, Victoria, Australia']]
+    facilities = [['SSRL', 'US', 'Palo Alto', 'CA', 'Stanford Synchrotron Radiation Laboratory', 'SLAC'],
+                  ['SRS',  'UK',  'Cheshire', '',    'Synchrotron Radiation Source', 'Daresbury Laboratory'],
+                  ['NSLS', 'US', 'Upton', 'NY',     'National Synchrotron Light Source', 'BNL'],
+                  ['PF',   'Japan', 'Tsukuba', '', 'Photon Factory', 'KEK'],
+                  ['ESRF', 'France', 'Grenoble', '', 'European Synchrotron Radiation Facility', ''],
+                  ['APS',  'US', 'Argonne', 'IL', 'Advanced Photon Source', 'ANL'],
+                  ['ALS',  'US', 'Berkeley', 'CA', 'Advanced Light Source', 'LBNL'],
+                  ['DLS',  'UK', 'Didcot', '', 'Diamond Light Source', ''],
+                  ['SOLEIL', 'France',  'GIF-sur-YVETTE', '',  'Synchrotron SOLEIL', '' ],
+                  ]
 
     beamlines = [['13ID',  'GSECARS 13-ID',   'APS Undulator A',     6],
                  ['13BM',  'GSECARS 13-BM',   'APS bending magnet',  6],
@@ -79,8 +75,8 @@ class InitialData:
                  ['20ID',  'PNC/XOR 20-ID',   'APS Undulator A',     6],
                  ['20BM',  'PNC/XOR 20-BM',   'APS Bending Magnet',  6],
                  ['X11A',  'NSLS X11-A',      'NSLS bending magnet', 3],
-                 ['4-3',   'SSRL, 4-3',       'SSRL',                1],
-                 ['4-1',   'SSRL, 4-1',       'SSRL',                1]]
+                 ['4-3',   'SSRL, 4-3',       '',                    1],
+                 ['4-1',   'SSRL, 4-1',       '',                    1]]
 
     edges = [["K", "1s"], ["L3", "2p3/2"],
              ["L2", "2p1/2"], ["L1", "2s"], ["M4,5", "3d3/2,5/2"]]
@@ -176,7 +172,13 @@ def  make_newdb(dbname, server= 'sqlite', user='',
 
     ligand  = NamedTable('ligand', metadata)
     mode    = NamedTable('mode', metadata)
-    facility = NamedTable('facility', metadata)
+
+    facility = NamedTable('facility', metadata,
+                          cols=[StrCol('fullname'),
+                                StrCol('laboratory'),
+                                StrCol('city'),
+                                StrCol('region'),
+                                StrCol('country', nullable=False)])
 
     element = NamedTable('element', metadata, keyid='z',
                          notes=False, attributes=False,
@@ -304,8 +306,10 @@ def  make_newdb(dbname, server= 'sqlite', user='',
     for name, notes in InitialData.modes:
         mode.insert().execute(name=name, notes=notes)
 
-    for name, notes in InitialData.facilities:
-        facility.insert().execute(name=name, notes=notes)
+    for name, country, city, region, fullname, lab in InitialData.facilities:
+        facility.insert().execute(name=name, country=country, city=city,
+                                  region=region, fullname=fullname,
+                                  laboratory=lab)
 
     for name, notes, xray_source, fac_id in InitialData.beamlines:
         beamline.insert().execute(name=name, notes=notes,
