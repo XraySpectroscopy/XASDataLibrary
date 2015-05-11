@@ -17,8 +17,6 @@ from datetime import datetime
 from base64 import b64encode
 from hashlib import pbkdf2_hmac
 
-from .creator import make_newdb, backup_versions
-
 from sqlalchemy import MetaData, create_engine
 from sqlalchemy.orm import sessionmaker,  mapper, relationship, backref
 from sqlalchemy.exc import IntegrityError
@@ -212,17 +210,6 @@ class XASDataLibrary(object):
             self.connect(dbname, server=server, user=user,
                          password=password, port=port, host=host)
 
-    def create_newdb(self, dbname,  server='sqlite', user='',
-                     password='', port=5432, host='', connect=True):
-        "create a new, empty database"
-        if server.startswith('sqlit') and os.path.exists(dbname):
-            backup_versions(dbname)
-        make_newdb(dbname, server=server, user=user,
-                   password=password, port=port, host=host)
-        if connect:
-            self.connect(dbname, server=server, user=user,
-                   password=password, port=port, host=host)
-
     def connect(self, dbname, server='sqlite', user='',
                 password='', port=5432, host=''):
         "connect to an existing database"
@@ -236,8 +223,11 @@ class XASDataLibrary(object):
                                                port, dbname))
 
         self.metadata =  MetaData(self.engine)
+        try:
+            self.metadata.reflect()
+        except:
+            raise XASDBException('%s is not a valid database' % dbname)
 
-        self.metadata.reflect()
         tables = self.tables = self.metadata.tables
 
         self.session = sessionmaker(bind=self.engine)()
