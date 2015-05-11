@@ -611,19 +611,17 @@ Optional:
         score = valid_score(score)
         self.addrow(Spectrum_Rating, ('score',), (score,), **kws)
 
-    def add_spectrum(self, name, notes='', attributes='',
-                     d_spacing=-1, notes_i0='', notes_itrans='',
-                     notes_ifluor='', notes_irefer='', temperature='',
-                     submission_date=None, collection_date=None,
-                     reference_used='',
-                     energy=None, i0=None, itrans=None, ifluor=None,
-                     irefer=None, i0_stderr=None, itrans_stderr=None,
-                     ifluor_stderr=None, irefer_stderr=None,
-                     mutrans=None, mufluor=None, murefer=None,
-                     energy_units=None, person=None,
+    def add_spectrum(self, name, notes='', attributes='', d_spacing=-1,
+                     notes_i0='', notes_itrans='', notes_ifluor='',
+                     notes_irefer='', submission_date=None,
+                     collection_date=None, temperature='', energy=None,
+                     i0=None, itrans=None, ifluor=None, irefer=None,
+                     energy_stderr=None, i0_stderr=None,
+                     itrans_stderr=None, ifluor_stderr=None,
+                     irefer_stderr=None, energy_units=None, person=None,
                      edge=None, element=None, sample=None, beamline=None,
-                     data_format=None, citation=None, reference=None,
-                     **kws):
+                     data_format=None, citation=None, reference_used=False,
+                     reference_mode=None, reference_sample=None, **kws):
 
         """add spectrum: name required
         returns Spectrum instance"""
@@ -642,8 +640,8 @@ Optional:
 
         # arrays
         for attr in ('energy', 'i0', 'itrans', 'ifluor', 'irefer',
-                     'i0_stderr', 'itrans_stderr', 'ifluor_stderr',
-                     'irefer', 'mutrans', 'mufluor', 'murefer'):
+                     'energy_stderr', 'i0_stderr', 'itrans_stderr',
+                     'ifluor_stderr', 'irefer_stderr'):
             val = ''
             if locals['attr'] is not None:
                 val = json_encode(locals['attr'])
@@ -672,7 +670,8 @@ Optional:
                                               keyid='z', name='symbol')
         kws['sample_id'] = self.foreign_keyid(Sample, sample)
         kws['citation_id'] = self.foreign_keyid(Citation, citation)
-        kws['reference_id'] = self.foreign_keyid(Sample, reference)
+        kws['reference_id'] = self.foreign_keyid(Sample, reference_sample)
+        kws['reference_mode_id'] = self.foreign_keyid(Mode, reference_mode)
         kws['energy_units_id'] = self.foreign_keyid(EnergyUnits,
                                                     energy_units,
                                                     name='units')
