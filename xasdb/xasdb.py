@@ -622,19 +622,20 @@ Optional:
         if name in spectrum_names:
             raise XASDBException("A spectrum named '%s' already exists" % name)
 
+        dlocal = locals()
         # simple values
         for attr in ('notes', 'attributes', 'notes_i0', 'notes_itrans'
                      'notes_ifluor', 'notes_irefer', 'temperature',
                      'd_spacing', 'reference_used'):
-            kws[attr] = locals[attr]
+            kws[attr] = dlocal.get(attr, '')
 
         # arrays
         for attr in ('energy', 'i0', 'itrans', 'ifluor', 'irefer',
                      'energy_stderr', 'i0_stderr', 'itrans_stderr',
                      'ifluor_stderr', 'irefer_stderr'):
             val = ''
-            if locals['attr'] is not None:
-                val = json_encode(locals['attr'])
+            if dlocal[attr] is not None:
+                val = json_encode(dlocal.get(attr, ''))
             kws[attr] = val
 
         # dates
