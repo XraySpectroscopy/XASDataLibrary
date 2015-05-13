@@ -22,6 +22,13 @@ from sqlalchemy.orm import sessionmaker,  mapper, relationship, backref
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm.exc import  NoResultFound
 
+try:
+    import xdfifile
+    HAS_XDI = True
+except ImportError:
+    HAS_XDI = False
+
+
 PW_ALGORITHM = 'sha512'
 PW_NROUNDS   = 120000
 
@@ -739,3 +746,25 @@ Optional:
         q = self.tables['spectrum']
 
         raise NotImplementedError
+
+    def add_xdifile(self, fname, spectrum_name, **kws):
+        if not HAS_XDI:
+            raise XASDBException('No XDI library found')
+
+        xfile = xdifile.XDIFile(fname)
+
+        c_date    = xfile.attrs['scan']['start_time']
+        sample    = xfile.attrs['sample']['name']
+        beamline  = xfile.attrs['beamline']['name']
+
+        d_spacing = xfile.dspacing
+        edge      = xfile.edge
+        element   = xfile.element
+        energy    = xfile.energy
+        i0        = xfile.i0
+        itrans    = i0 * np.exp(-xfile.mutrans)
+
+        db.add_spectrum(spectrum_name, d_spacing=d_spacing,
+                collection_date=c_date, energy=energy, i0=i0,
+                itrans=itrans, edge=edge, element=element,
+                sample=sample, beamline=beamline)
