@@ -517,6 +517,16 @@ class XASDataLibrary(object):
         if password is not None:
             self.set_person_password(email, password)
 
+    def get_person(self, email=None, name=None):
+        """get person"""
+        tab = self.tables['person']
+        q = tab.select()
+        if email is not None:
+            q = tab.select(tab.c.email==email)
+        elif name is not None:
+            q = tab.select(tab.c.name==name)
+        return q.execute().fetchone()
+
     def set_person_password(self, email, password):
         """ set secure password for person"""
         salt   = b64encode(os.urandom(24))
