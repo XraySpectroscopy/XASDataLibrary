@@ -23,11 +23,10 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm.exc import  NoResultFound
 
 try:
-    import xdfifile
+    import xdifile
     HAS_XDI = True
 except ImportError:
     HAS_XDI = False
-
 
 PW_ALGORITHM = 'sha512'
 PW_NROUNDS   = 120000
@@ -204,6 +203,14 @@ class Spectrum(_BaseTable):
     "spectra table"
     pass
 
+class Spectrum_Mode(_BaseTable):
+    "spectra table"
+    pass
+
+class Spectrum_Ligand(_BaseTable):
+    "spectra table"
+    pass
+
 
 class XASDataLibrary(object):
     """full interface to XAS Spectral Library"""
@@ -290,8 +297,9 @@ class XASDataLibrary(object):
 
         mapper(Sample,  tables['sample'])
         mapper(Spectrum, tables['spectrum'])
+        mapper(Spectrum_Mode,     tables['spectrum_mode'])
+        mapper(Spectrum_Ligand,   tables['spectrum_ligand'])
         mapper(Spectrum_Rating,   tables['spectrum_rating'])
-        # mapper(Spectrum_Ligand,   tables['spectrum_ligand'])
         mapper(Suite_Rating,   tables['suite_rating'])
         mapper(Info,     tables['info'])
 
@@ -725,6 +733,14 @@ Optional:
         "get all ratings for a spectrum"
         raise NotImplementedError
 
+
+    def set_spectrum_mode(self, spectrum, mode):
+        """set a mode for a spectrum"""
+        _spectrum = self.foreign_keyid(Spectrum, spectrum)
+        _mode     = self.foreign_keyid(Mode, mode)
+        self.addrow(Spectrum_Mode, ('spectrum_id', 'mode_id'), (_spectrum, _mode))
+    
+
     def get_spectra(self, edge=None, element=None, suite=None, beamline=None,
                     facility=None, person=None, mode=None, sample=None,
                     citation=None, ligand=None):
@@ -760,11 +776,32 @@ Optional:
         d_spacing = xfile.dspacing
         edge      = xfile.edge
         element   = xfile.element
+        
         energy    = xfile.energy
-        i0        = xfile.i0
-        itrans    = i0 * np.exp(-xfile.mutrans)
 
-        db.add_spectrum(spectrum_name, d_spacing=d_spacing,
-                collection_date=c_date, energy=energy, i0=i0,
-                itrans=itrans, edge=edge, element=element,
-                sample=sample, beamline=beamline)
+        i0 = xfile.i0
+        modes = []
+        ifluor = itrans = irefer = None
+        if hasattr(xfile, 'itrans'):
+            itrans = xfile.itrans
+            modes.append('transmission')
+        if hasattr(xfile, 'ifluor'):
+            ifluor= xfile.ifluor
+            modes.append('fluorescence')
+            
+        refer_used = 0
+        if hasattr(xfile, 'irefer'):
+            refer_used = 1
+            irefer= xfile.irefer
+
+        self.add_spectrum(spectrum_name, d_spacing=d_spacing,
+                          collection_date=c_date, energy=energy, i0=i0,
+                          itrans=itrans, ifluor=ifluor, irefer=irefer,
+                          edge=edge, element=element,
+                          reference_used=refer_used, sample=sample,
+                          beamline=beamline)
+        
+        
+        for mode in modes:
+            self.set_spectrum_mode(spectrum_name, mode)
+            
