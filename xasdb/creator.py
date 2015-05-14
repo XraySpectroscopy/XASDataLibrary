@@ -51,6 +51,7 @@ class InitialData:
                ["degrees","angle in degrees for Bragg monochromator.  Needs mono d_spacing"] ]
 
     modes = [["transmission", "transmission intensity through sample"],
+             ["fluorescence", "X-ray fluorescence, no further details"],
              ["fluorescence, total yield", "X-ray fluorescence, no energy analysis"],
              ["fluorescence, energy analyzed",
               "X-ray fluorescence with an energy dispersive detector"],
