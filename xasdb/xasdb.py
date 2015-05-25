@@ -85,6 +85,17 @@ def isotime2datetime(isotime):
 
     return datetime(syear, smon, sday, shour, smin, ssec, susec)
 
+def None_or_one(val, msg='Expected 1 or None result'):
+    """expect result (as from query.all() to return
+    either None or exactly one result"""
+    if len(val) == 1:
+        return val[0]
+    elif len(val) == 0:
+        return None
+    else:
+        raise XASDBException(msg)
+
+
 class XASDBException(Exception):
     """XAS DB Access Exception: General Errors"""
     def __init__(self, msg):
@@ -226,8 +237,8 @@ class XASDataLibrary(object):
             self.engine = create_engine('sqlite:///%s' % self.dbname)
         else:
             conn_str= 'postgresql://%s:%s@%s:%i/%s'
-            engine = create_engine(conn_str % (user, password, host,
-                                               port, dbname))
+            self.engine = create_engine(conn_str % (user, password, host,
+                                                    port, dbname))
 
         self.metadata =  MetaData(self.engine)
         try:
@@ -236,90 +247,73 @@ class XASDataLibrary(object):
             raise XASDBException('%s is not a valid database' % dbname)
 
         tables = self.tables = self.metadata.tables
-
         self.session = sessionmaker(bind=self.engine)()
+        self.query   = self.session.query
+
+
+        mapper(Info,             tables['info'])
+        mapper(Sample,           tables['sample'])
+        mapper(Spectrum_Rating,  tables['spectrum_rating'])
+        mapper(Spectrum_Ligand,  tables['spectrum_ligand'])
+        mapper(Suite_Rating,     tables['suite_rating'])
+        mapper(EnergyUnits,      tables['energy_units'])
+
+        mapper(Spectrum,         tables['spectrum'])
+
+        relate = relationship
 
         mapper(Mode, tables['mode'],
-               properties={'spectrum':
-                           relationship(Spectrum, backref='mode',
+               properties={'spectrum': relate(Spectrum, backref='mode',
                                         secondary=tables['spectrum_mode'])})
 
         mapper(Edge, tables['edge'],
-               properties={'spectrum':
-                           relationship(Spectrum, backref='edge')})
+               properties={'spectrum': relate(Spectrum, backref='edge')})
 
         mapper(Element, tables['element'],
-               properties={'spectrum':
-                           relationship(Spectrum, backref='element')})
+               properties={'spectrum': relate(Spectrum, backref='element')})
 
         mapper(Beamline, tables['beamline'],
-               properties={'spectrum':
-                           relationship(Spectrum, backref='beamline')})
+               properties={'spectrum': relate(Spectrum, backref='beamline')})
 
         mapper(Citation, tables['citation'],
-               properties={'spectrum':
-                           relationship(Spectrum, backref='citation')})
+               properties={'spectrum': relate(Spectrum, backref='citation')})
 
         mapper(Ligand,   tables['ligand'],
-               properties={'spectrum':
-                           relationship(Spectrum, backref='ligand',
-                                        secondary=tables['spectrum_ligand'])})
+               properties={'spectrum': relate(Spectrum, backref='ligand',
+                                              secondary=tables['spectrum_ligand'])})
 
         mapper(Crystal_Structure,   tables['crystal_structure'],
-               properties={'samples':
-                           relationship(Sample, backref='structure')})
+               properties={'samples': relate(Sample, backref='structure')})
 
         mapper(Facility, tables['facility'],
-               properties={'beamlines':
-                           relationship(Beamline, backref='facility')})
+               properties={'beamlines': relate(Beamline, backref='facility')})
 
         mapper(Person,   tables['person'],
-               properties={'suites':
-                           relationship(Suite, backref='person'),
-                           'samples':
-                           relationship(Sample, backref='person'),
-                           'spectrum':
-                           relationship(Spectrum, backref='person')})
-
-        mapper(EnergyUnits,   tables['energy_units'])
+               properties={'suites': relate(Suite, backref='person'),
+                           'samples': relate(Sample, backref='person'),
+                           'spectrum': relate(Spectrum, backref='person')})
 
         mapper(Suite,   tables['suite'],
-               properties={'spectrum':
-                           relationship(Spectrum, backref='suite',
-                                        secondary=tables['spectrum_suite'])})
-
-        mapper(Sample,  tables['sample'])
-        mapper(Spectrum, tables['spectrum'])
-        mapper(Spectrum_Rating,   tables['spectrum_rating'])
-        # mapper(Spectrum_Ligand,   tables['spectrum_ligand'])
-        mapper(Suite_Rating,   tables['suite_rating'])
-        mapper(Info,     tables['info'])
+               properties={'spectrum': relate(Spectrum, backref='suite',
+                                              secondary=tables['spectrum_suite'])})
 
         self.update_mod_time =  None
 
-        if self.logfile is None:
-            self.logfile = self.dbname
-            if self.logfile.endswith('.xdl'):
-                self.logfile = self.logfile[:-4]
-        logfile = "%s.log" % self.logfile
+        if self.logfile is None and server.startswith('sqlit'):
+            lfile = self.dbname
+            if lfile.endswith('.xdl'):
+                lfile = self.logfile[:-4]
+            self.logfile = "%s.log" % lfile
+            logging.basicConfig()
+            logger = logging.getLogger('sqlalchemy.engine')
+            logger.addHandler(logging.FileHandler(self.logfile))
 
-        logging.basicConfig()
-        logger = logging.getLogger('sqlalchemy.engine')
-        logger.addHandler(logging.FileHandler(logfile))
-
-    def commit(self):
-        "commit session state"
-        return self.session.commit()
 
     def close(self):
         "close session"
         self.session.commit()
         self.session.flush()
         self.session.close()
-
-    def query(self, *args, **kws):
-        "generic query"
-        return self.session.query(*args, **kws)
 
     def set_info(self, key, value):
         """set key / value in the info table"""
@@ -340,23 +334,20 @@ class XASDataLibrary(object):
 
     def addrow(self, table, argnames, argvals, **kws):
         """add generic row"""
-        me = table() #
+        row  = table() #
         arg0 = argnames[0]
         val0 = argvals[0]
         for name, val in zip(argnames, argvals):
-            setattr(me, name, val)
+            setattr(row, name, val)
         for key, val in kws.items():
-            if key == 'attributes':
-                val = json_encode(val)
-            setattr(me, key, val)
+            setattr(row, key, val)
         try:
-            self.session.add(me)
+            self.session.add(row)
             self.set_mod_time()
             self.session.commit()
         except IntegrityError, msg:
             self.session.rollback()
-            print msg
-            raise Warning('Could not add data to table %s' % table)
+            raise Warning('Could not add data to table %s:\n  %s' % (table, msg))
         return self.query(table).filter(getattr(table, arg0)==val0).one()
 
 
@@ -431,32 +422,24 @@ class XASDataLibrary(object):
         return self.filtered_query('edge', **kws)
 
 
-    def add_energy_units(self, units, notes=None, attributes=None, **kws):
+    def add_energy_units(self, units, notes=None, **kws):
         """add Energy Units: units required
-        notes and attributes optional
+        notes  optional
         returns EnergyUnits instance"""
         kws['notes'] = notes
-        kws['attributes'] = attributes
-
         return self.addrow(EnergyUnits, ('units',), (units,), **kws)
 
-    def add_mode(self, name, notes='', attributes='', **kws):
+    def add_mode(self, name, notes='', **kws):
         """add collection mode: name required
-        notes and attributes optional
         returns Mode instance"""
         kws['notes'] = notes
-        kws['attributes'] = attributes
-
         return self.addrow(Mode, ('name',), (name,), **kws)
 
     def add_crystal_structure(self, name, notes='',
-                              attributes='', format=None,
-                              data=None, **kws):
+                              format=None, data=None, **kws):
         """add data format: name required
-        notes and attributes optional
         returns Format instance"""
         kws['notes'] = notes
-        kws['attributes'] = attributes
         kws['format'] = format
         kws['data'] = data
 
@@ -467,35 +450,29 @@ class XASDataLibrary(object):
         returns Edge instance"""
         return self.addrow(Edge, ('name', 'level'), (name, level))
 
-    def add_facility(self, name, notes='', attributes='', **kws):
+    def add_facility(self, name, notes='', **kws):
         """add facilty by name, return Facility instance"""
         kws['notes'] = notes
-        kws['attributes'] = attributes
         return self.addrow(Facility, ('name',), (name,), **kws)
 
     def add_beamline(self, name, facility=None,
-                     xray_source=None,  notes='',
-                     attributes='', **kws):
+                     xray_source=None,  notes='', **kws):
         """add beamline by name, with facility:
                facility= Facility instance or id
                returns Beamline instance"""
 
         kws['notes'] = notes
-        kws['attributes'] = attributes
         kws['xray_source'] = xray_source
         kws['facility_id'] = self.foreign_keyid(Facility, facility)
 
         return self.addrow(Beamline, ('name',), (name,), **kws)
 
-    def add_citation(self, name, notes='', attributes='',
-                     journal='',  authors='',  title='',
-                     volume='', pages='',  year='',
-                     doi='',  **kws):
+    def add_citation(self, name, notes='', journal='', authors='',
+                     title='', volume='', pages='', year='', doi='',
+                     **kws):
         """add literature citation: name required
-        notes and attributes optional
         returns Citation instance"""
         kws['notes'] = notes
-        kws['attributes'] = attributes
         kws['journal'] = journal
         kws['authors'] = authors
         kws['title'] = title
@@ -509,23 +486,18 @@ class XASDataLibrary(object):
         """add Info key value pair -- returns Info instance"""
         return self.addrow(Info, ('key', 'value'), (key, value))
 
-    def add_ligand(self, name, notes='', attributes='', **kws):
+    def add_ligand(self, name, notes='', **kws):
         """add ligand: name required
-        notes and attributes optional
         returns Ligand instance"""
         kws['notes'] = notes
-        kws['attributes'] = attributes
-
         return self.addrow(Ligand, ('name',), (name,), **kws)
 
     def add_person(self, name, email,
-                   affiliation='', attributes='',password=None, **kws):
+                   affiliation='', password=None, **kws):
         """add person: arguments are
-        name, email  with
-        affiliation, attributes, and password optional
+        name, email with affiliation and password optional
         returns Person instance"""
         kws['affiliation'] = affiliation
-        kws['attributes'] = attributes
         person = self.addrow(Person, ('email', 'name'),
                              (email, name), **kws)
         if password is not None:
@@ -534,8 +506,8 @@ class XASDataLibrary(object):
     def get_person(self, **kws):
         """return list of peopls optinally filtering by name, email, affiliation, etc
         """
-        return self.filtered_query('person', **kws)
-
+        return None_or_one(self.filtered_query('person', **kws),
+                           "expected 1 or None person")
 
     def set_person_password(self, email, password):
         """ set secure password for person"""
@@ -560,14 +532,12 @@ class XASDataLibrary(object):
             return False
         return hash == b64encode(pbkdf2_hmac(algo, password, salt, niter))
 
-    def add_sample(self, name, notes='', attributes='',
-                   formula=None, material_source=None,
-                   person=None, crystal_structure=None, **kws):
+    def add_sample(self, name, notes='', formula=None,
+                   material_source=None, person=None,
+                   crystal_structure=None, **kws):
         """add sample: name required
         returns Sample instance"""
-
         kws['notes'] = notes
-        kws['attributes'] = attributes
         kws['formula'] = formula
         kws['material_source'] = material_source
         kws['person_id'] = self.foreign_keyid(Person, person)
@@ -576,12 +546,10 @@ class XASDataLibrary(object):
         return self.addrow(Sample, ('name',), (name,), **kws)
 
 
-    def add_suite(self, name, notes='', attributes='',
-                  person=None, **kws):
+    def add_suite(self, name, notes='',  person=None, **kws):
         """add suite: name required
         returns Suite instance"""
         kws['notes'] = notes
-        kws['attributes'] = attributes
         kws['person_id'] = self.foreign_keyid(Person, person,
                                                    name='email')
 
@@ -621,7 +589,7 @@ Optional:
         score = valid_score(score)
         self.addrow(Spectrum_Rating, ('score',), (score,), **kws)
 
-    def add_spectrum(self, name, notes='', attributes='', d_spacing=-1,
+    def add_spectrum(self, name, notes='', d_spacing=-1,
                      notes_i0='', notes_itrans='', notes_ifluor='',
                      notes_irefer='', submission_date=None,
                      collection_date=None, temperature='', energy=None,
@@ -644,7 +612,7 @@ Optional:
 
         dlocal = locals()
         # simple values
-        for attr in ('notes', 'attributes', 'notes_i0', 'notes_itrans'
+        for attr in ('notes', 'notes_i0', 'notes_itrans'
                      'notes_ifluor', 'notes_irefer', 'temperature',
                      'd_spacing', 'reference_used'):
             kws[attr] = dlocal.get(attr, '')
@@ -778,7 +746,8 @@ Optional:
 
         if isinstance(person, Person):
             person_id = person.id
-        person_id = self.get_person(person, name='email')[0].id
+        else:
+            person_id = self.get_person(email=person).id
 
         sample = None
         if create_sample:

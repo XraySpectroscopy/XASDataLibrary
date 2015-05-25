@@ -27,16 +27,22 @@ def StrCol(name, size=None, **kws):
     else:
         return Column(name, String(size), **kws)
 
+def IntCol(name, **kws):
+    "integer column"
+    return Column(name, Integer, **kws)
+
+def DateCol(name, timezone=True, **kws):
+    "datetime column"
+    return Column(name, DateTime(timezone=timezone), **kws)
+
 def NamedTable(tablename, metadata, keyid='id', nameid='name',
-               name=True, notes=True, attributes=True, cols=None):
-    """create table with name, id, and several common attributes"""
-    args  = [Column(keyid, Integer, primary_key=True)]
+               name=True, notes=True, cols=None):
+    """create table with name, id, and optional notes colums"""
+    args  = [IntCol(keyid, primary_key=True)]
     if name:
         args.append(StrCol(nameid, nullable=False, unique=True))
     if notes:
         args.append(StrCol('notes'))
-    if attributes:
-        args.append(StrCol('attributes'))
     if cols is not None:
         args.extend(cols)
     return Table(tablename, metadata, *args)
@@ -170,6 +176,11 @@ def  make_newdb(dbname, server= 'sqlite', user='',
 
     metadata =  MetaData(engine)
 
+
+    info = Table('info', metadata,
+                 StrCol('key', primary_key=True, unique=True),
+                 StrCol('value'))
+
     ligand  = NamedTable('ligand', metadata)
     mode    = NamedTable('mode', metadata)
 
@@ -180,14 +191,12 @@ def  make_newdb(dbname, server= 'sqlite', user='',
                                 StrCol('region'),
                                 StrCol('country', nullable=False)])
 
-    element = NamedTable('element', metadata, keyid='z',
-                         notes=False, attributes=False,
+    element = NamedTable('element', metadata, keyid='z', notes=False,
                          cols=[StrCol('symbol', size=2,
                                       unique=True,
                                       nullable=False)])
 
-    edge = NamedTable('edge', metadata,
-                      notes=False, attributes=False,
+    edge = NamedTable('edge', metadata, notes=False,
                       cols=[StrCol('level', size=32,
                                    unique=True, nullable=False)])
 
@@ -217,36 +226,37 @@ def  make_newdb(dbname, server= 'sqlite', user='',
                               PointerCol('person'),
                               PointerCol('crystal_structure')])
 
-    scols = [StrCol('energy'),
-             StrCol('i0'),
-             StrCol('itrans'),
-             StrCol('ifluor'),
-             StrCol('irefer'),
-             StrCol('energy_stderr'),
-             StrCol('i0_stderr'),
-             StrCol('itrans_stderr'),
-             StrCol('ifluor_stderr'),
-             StrCol('irefer_stderr'),
-             StrCol('notes_i0'),
-             StrCol('notes_trans'),
-             StrCol('notes_fluor'),
-             StrCol('notes_refer'),
-             StrCol('temperature'),
-             Column('d_spacing', Float),
-             Column('submission_date', DateTime(timezone=True)),
-             Column('collection_date', DateTime(timezone=True)),
-             Column('reference_used', Integer),
-             PointerCol('energy_units'),
-             PointerCol('person'),
-             PointerCol('edge'),
-             PointerCol('element', keyid='z'),
-             PointerCol('sample'),
-             PointerCol('beamline'),
-             PointerCol('citation'),
-             PointerCol('reference_mode', 'mode'),
-             PointerCol('reference', 'sample')]
+    spectrum = NamedTable('spectrum', metadata,
+                          cols=[StrCol('energy'),
+                                StrCol('i0'),
+                                StrCol('itrans'),
+                                StrCol('ifluor'),
+                                StrCol('irefer'),
+                                StrCol('energy_stderr'),
+                                StrCol('i0_stderr'),
+                                StrCol('itrans_stderr'),
+                                StrCol('ifluor_stderr'),
+                                StrCol('irefer_stderr'),
+                                StrCol('notes_i0'),
+                                StrCol('notes_trans'),
+                                StrCol('notes_fluor'),
+                                StrCol('notes_refer'),
+                                StrCol('temperature'),
+                                Column('d_spacing', Float),
+                                DateCol('submission_date'),
+                                DateCol('collection_date'),
+                                IntCol('reference_used'),
+                                PointerCol('energy_units'),
+                                PointerCol('person'),
+                                PointerCol('edge'),
+                                PointerCol('element', keyid='z'),
+                                PointerCol('sample'),
+                                PointerCol('beamline'),
+                                PointerCol('citation'),
+                                PointerCol('reference_mode', 'mode'),
+                                PointerCol('reference', 'sample')])
 
-    spectrum = NamedTable('spectrum', metadata, cols=scols)
+
 
     suite = NamedTable('suite', metadata,
                        cols=[PointerCol('person')])
@@ -256,39 +266,35 @@ def  make_newdb(dbname, server= 'sqlite', user='',
                                 PointerCol('facility')] )
 
     spectrum_rating = Table('spectrum_rating', metadata,
-                           Column('id', Integer, primary_key=True),
-                           Column('score', Integer),
-                           Column('datetime', DateTime(timezone=True)),
-                           StrCol('comments'),
-                           PointerCol('person') ,
-                           PointerCol('spectrum'))
+                            IntCol('id',  primary_key=True),
+                            IntCol('score'),
+                            DateCol('datetime'),
+                            StrCol('comments'),
+                            PointerCol('person') ,
+                            PointerCol('spectrum'))
 
     suite_rating = Table('suite_rating', metadata,
-                           Column('id', Integer, primary_key=True),
-                           Column('score', Integer),
-                           Column('datetime', DateTime(timezone=True)),
-                           StrCol('comments'),
-                           PointerCol('person') ,
-                           PointerCol('suite'))
+                         IntCol('id',  primary_key=True),
+                         IntCol('score'),
+                         DateCol('datetime'),
+                         StrCol('comments'),
+                         PointerCol('person') ,
+                         PointerCol('suite'))
 
     spectrum_suite = Table('spectrum_suite', metadata,
-                          Column('id', Integer, primary_key=True),
-                          PointerCol('suite') ,
-                          PointerCol('spectrum'))
-
-    spectrum_mode = Table('spectrum_mode', metadata,
-                         Column('id', Integer, primary_key=True),
-                         PointerCol('mode') ,
-                         PointerCol('spectrum'))
-
-    spectrum_ligand = Table('spectrum_ligand', metadata,
-                           Column('id', Integer, primary_key=True),
-                           PointerCol('ligand'),
+                           IntCol('id', primary_key=True),
+                           PointerCol('suite') ,
                            PointerCol('spectrum'))
 
-    info = Table('info', metadata,
-                 Column('key', Text, primary_key=True, unique=True),
-                 StrCol('value'))
+    spectrum_mode = Table('spectrum_mode', metadata,
+                          IntCol('id', primary_key=True),
+                          PointerCol('mode') ,
+                          PointerCol('spectrum'))
+
+    spectrum_ligand = Table('spectrum_ligand', metadata,
+                           IntCol('id', primary_key=True),
+                           PointerCol('ligand'),
+                           PointerCol('spectrum'))
 
     metadata.create_all()
     session = sessionmaker(bind=engine)()
