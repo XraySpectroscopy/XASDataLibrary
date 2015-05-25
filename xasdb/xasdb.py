@@ -23,7 +23,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm.exc import  NoResultFound
 
 try:
-    import xdfifile
+    import xdifile
     HAS_XDI = True
 except ImportError:
     HAS_XDI = False
@@ -357,7 +357,6 @@ class XASDataLibrary(object):
             self.session.rollback()
             print msg
             raise Warning('Could not add data to table %s' % table)
-
         return self.query(table).filter(getattr(table, arg0)==val0).one()
 
 
@@ -395,33 +394,41 @@ class XASDataLibrary(object):
 
         return default
 
-    def get_elements(self, show_all=True):
-        """return list of elements,
-        Arguments
-        ---------
-        show_all : bool
-            show all elements (default) or only those with data in the database
+    def filtered_query(self, tablename, **kws):
         """
-        if show_all:
-            out = []
-            for f in self.query(Element):
-                out.append((f.name, f.symbol, f.z))
-            return out
-        else:
-            return [(f.name, f.symbol, f.z) for f in self.query(Element)]
+        return query of table with any equality filter on columns
 
-    def get_edges(self, show_all=True):
-        """return list of edges,
-        Arguments
-        ---------
-        show_all : bool
-             show all edges (default) or only those with data in the database
+        examples:
+
+        >>> db.filtered_query('element', z=30)
+
+        >>> db.filtered_query('spectrum', person_id=3)
+
+        will return all rows from table
+
         """
-        if show_all:
-            return [f.name for f in self.query(Edge)]
-        else:
-            print 'limit!'
-            return [f.name for f in self.query(Edge)]
+        table = self.tables[tablename]
+        query = self.query(table)
+
+        for key, val in kws.items():
+            if key in table.c and val is not None:
+                query = query.filter(getattr(table.c, key)==val)
+        return query.all()
+
+    def get_facility(self, **kws):
+        """return list of elements, optionally filtering by z, name, symbol
+        """
+        return self.filtered_query('facility', **kws)
+
+    def get_element(self, **kws):
+        """return list of elements, optionally filtering by z, name, symbol
+        """
+        return self.filtered_query('element', **kws)
+
+    def get_edge(self, **kws):
+        """return list of edges, optinally filtering by name
+        """
+        return self.filtered_query('edge', **kws)
 
 
     def add_energy_units(self, units, notes=None, attributes=None, **kws):
@@ -524,15 +531,11 @@ class XASDataLibrary(object):
         if password is not None:
             self.set_person_password(email, password)
 
-    def get_person(self, email=None, name=None):
-        """get person"""
-        tab = self.tables['person']
-        q = tab.select()
-        if email is not None:
-            q = tab.select(tab.c.email==email)
-        elif name is not None:
-            q = tab.select(tab.c.name==name)
-        return q.execute().fetchone()
+    def get_person(self, **kws):
+        """return list of peopls optinally filtering by name, email, affiliation, etc
+        """
+        return self.filtered_query('person', **kws)
+
 
     def set_person_password(self, email, password):
         """ set secure password for person"""
@@ -676,22 +679,23 @@ Optional:
         kws['edge_id'] = self.foreign_keyid(Edge, edge)
         kws['element_z'] = self.foreign_keyid(Element, element,
                                               keyid='z', name='symbol')
+        print 'SAMPLE ', sample
+        print ' -- > ', self.foreign_keyid(Sample, sample)
         kws['sample_id'] = self.foreign_keyid(Sample, sample)
+
+
         kws['citation_id'] = self.foreign_keyid(Citation, citation)
         kws['reference_id'] = self.foreign_keyid(Sample, reference_sample)
         kws['reference_mode_id'] = self.foreign_keyid(Mode, reference_mode)
         kws['energy_units_id'] = self.foreign_keyid(EnergyUnits,
                                                     energy_units,
                                                     name='units')
-        try:
-            return self.addrow(Spectrum, ('name',), (name,), **kws)
-        except:
-            return None
+        return self.addrow(Spectrum, ('name',), (name,), **kws)
 
     def get_beamlines(self, facility=None):
         """get all beamlines for a facility
         Parameters
-        ----------
+        --------
         facility  id, name, or Facility instance for facility
 
         Returns
@@ -747,16 +751,16 @@ Optional:
 
         raise NotImplementedError
 
-    def add_xdifile(self, fname, spectrum_name, **kws):
+    def add_xdifile(self, fname, person=None,
+                    create_sample=True, **kws):
+
         if not HAS_XDI:
             raise XASDBException('No XDI library found')
 
         xfile = xdifile.XDIFile(fname)
+        spectrum_name = "spectrum from '%s'" % fname
 
         c_date    = xfile.attrs['scan']['start_time']
-        sample    = xfile.attrs['sample']['name']
-        beamline  = xfile.attrs['beamline']['name']
-
         d_spacing = xfile.dspacing
         edge      = xfile.edge
         element   = xfile.element
@@ -764,7 +768,30 @@ Optional:
         i0        = xfile.i0
         itrans    = i0 * np.exp(-xfile.mutrans)
 
-        db.add_spectrum(spectrum_name, d_spacing=d_spacing,
-                collection_date=c_date, energy=energy, i0=i0,
-                itrans=itrans, edge=edge, element=element,
-                sample=sample, beamline=beamline)
+        en_units = 'eV'
+        for index, value in xfile.attrs['column'].items():
+            words = value.split()
+            if len(words) > 1:
+                if (value.lower().startswith('energy') or
+                    value.lower().startswith('angle') ):
+                    en_units = words[1]
+
+        if isinstance(person, Person):
+            person_id = person.id
+        person_id = self.get_person(person, name='email')[0].id
+
+        sample = None
+        if create_sample:
+            notes  = json_encode( xfile.attrs['sample'])
+            sample = self.add_sample(name="sample for file '%s'" % fname,
+                                   notes=notes, person=person).id
+
+        beamline = None
+        beamline_name  = xfile.attrs['beamline']['name']
+
+        self.add_spectrum(spectrum_name, d_spacing=d_spacing,
+                          collection_date=c_date, edge=edge,
+                          element=element, energy=energy, i0=i0,
+                          itrans=itrans, energy_units=en_units,
+                          person=person_id, sample=sample,
+                          beamline=beamline)
