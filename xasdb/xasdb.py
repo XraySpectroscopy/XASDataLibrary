@@ -258,6 +258,7 @@ class XASDataLibrary(object):
         mapper(Sample,           tables['sample'])
         mapper(Spectrum_Rating,  tables['spectrum_rating'])
         mapper(Spectrum_Ligand,  tables['spectrum_ligand'])
+        mapper(Spectrum_Mode,    tables['spectrum_mode'])
         mapper(Suite_Rating,     tables['suite_rating'])
         mapper(EnergyUnits,      tables['energy_units'])
         mapper(Spectrum,         tables['spectrum'])
