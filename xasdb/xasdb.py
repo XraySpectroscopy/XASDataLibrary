@@ -410,20 +410,37 @@ class XASDataLibrary(object):
                 query = query.filter(getattr(table.c, key)==val)
         return query.all()
 
-    def get_facility(self, **kws):
-        """return list of elements, optionally filtering by z, name, symbol
-        """
-        return self.filtered_query('facility', **kws)
+    def get_facility(self, just_one=False, **kws):
+        """return facility or list of facilities"""
 
-    def get_element(self, **kws):
-        """return list of elements, optionally filtering by z, name, symbol
-        """
-        return self.filtered_query('element', **kws)
+        out = self.filtered_query('facility', **kws)
+        if len(out) > 1:
+            return out
 
-    def get_edge(self, **kws):
-        """return list of edges, optinally filtering by name
-        """
-        return self.filtered_query('edge', **kws)
+        return None_or_one(out)
+
+    def get_element(self, val):
+        """return element z, name, symbol from one of z, name, symbol"""
+        key = 'symbol'
+        if isinstance(val, int):
+            key = 'z'
+        elif len(val) > 2:
+            key = 'name'
+        args = {}
+        args[key] = val
+        return None_or_one(self.filtered_query('element', **args))
+
+    def get_elements(self):
+        """return list of elements z, name, symbol"""
+        return self.filtered_query('element')
+
+    def get_edge(self, name):
+        """return edge by name"""
+        return None_or_one(self.filtered_query('edge', name=name))
+
+    def get_edges(self):
+        """return list of edges"""
+        return self.filtered_query('edge')
 
 
     def add_energy_units(self, units, notes=None, **kws):
@@ -651,8 +668,7 @@ Optional:
         kws['edge_id'] = self.foreign_keyid(Edge, edge)
         kws['element_z'] = self.foreign_keyid(Element, element,
                                               keyid='z', name='symbol')
-        print 'SAMPLE ', sample
-        print ' -- > ', self.foreign_keyid(Sample, sample)
+        print 'SAMPLE ', sample, self.foreign_keyid(Sample, sample)
         kws['sample_id'] = self.foreign_keyid(Sample, sample)
 
 
@@ -709,27 +725,62 @@ Optional:
         self.addrow(Spectrum_Mode, ('spectrum_id', 'mode_id'), (_spectrum, _mode))
 
 
-    def get_spectra(self, edge=None, element=None, suite=None, beamline=None,
-                    facility=None, person=None, mode=None, sample=None,
-                    citation=None, ligand=None):
+    def get_spectra(self, edge=None, element=None, beamline=None,
+                    person=None, mode=None, sample=None, facility=None,
+                    suite=None, citation=None, ligand=None):
         """get all spectra matching some set of criteria
 
         Parameters
         ----------
-        edge
-        element
-        suite
-        beamline
+        edge       by Name
+        element    by Z, Symbol, or Name
+        person     by email
+        beamline   by name
         facility
-        person
         mode
         sample
         citation
         ligand
+        suite
         """
-        q = self.tables['spectrum']
+        edge_id, element_z, person_id, beamline_id = None, None, None, None
 
-        raise NotImplementedError
+        tab = self.tables['spectrum']
+        query = tab.select()
+
+        # edge
+        if isinstance(edge, Edge):
+            edge_id = edge.id
+        elif edge is not None:
+            edge_id = self.get_edge(name=edge).id
+        if edge_id is not None:
+            query = query.where(tab.c.edge_id==edge_id)
+
+        # element
+        if isinstance(element, Element):
+            element_z = element.z
+        elif element is not None:
+            element_z = self.get_element(element).z
+        if element_z is not None:
+            query = query.where(tab.c.element_z==element_z)
+
+        # beamline
+        if isinstance(beamline, Beamline):
+            beamline_id = beamline.id
+        elif beamline is not None:
+            beamline_id = self.get_beamline(name=beamline).id
+        if beamline_id is not None:
+            query = query.where(tab.c.beamline_id==beamline_id)
+
+        # person
+        if isinstance(person, Person):
+            person_id = person.id
+        elif person is not None:
+            person_id = self.get_person(email=person).id
+        if person_id is not None:
+            query = query.where(tab.c.person_id==person_id)
+
+        return query.execute().fetchall()
 
     def add_xdifile(self, fname, person=None,
                     create_sample=True, **kws):
