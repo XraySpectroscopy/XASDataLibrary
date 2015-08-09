@@ -1,6 +1,7 @@
 {% extends "layout.html" %}
 {% block body %}
   {% if error %}<p class=error><strong>Error:</strong> {{ error }}{% endif %}
+<p>
 <form action="action"  method="post">
 <table id="ptable" cellpadding=0 cellspacing=0 border=0><tr>
 <th id="elem" width=35><a href="./H ">H </a></th>
@@ -124,18 +125,18 @@
 </form>
 <hr>
 
-{% if session.nspectra == 0 %}
-   {% if session.elem is not none %}
-      No spectra found for {{ session.elem }}
+{% if nspectra == 0 %}
+   {% if elem is not none %}
+      No spectra found for {{ elem }}
    {% endif %}
 {% else %}
-   {% if session.nspectra == 1 %}
-      {{ session.nspectra }} spectrum for {{ session.elem }}:
+   {% if nspectra == 1 %}
+      {{ nspectra }} spectrum for {{ elem }}:
    {% else %}
-      {{ session.nspectra }} spectra for {{ session.elem }}:
+      {{ nspectra }} spectra for {{ elem }}:
    {% endif %}
    <table cellspacing=5 cellpadding=2>
-   {% for spec in session.spectra %}
+   {% for spec in spectra %}
        <tr><td>
            <a href="../spectrum/{{ spec.id }}"> {{ spec.name }}</a>
         </td><td> {{ spec.edge }} edge </td></tr>
