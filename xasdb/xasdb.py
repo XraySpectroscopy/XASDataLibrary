@@ -396,7 +396,6 @@ class XASDataLibrary(object):
         examples:
 
         >>> db.filtered_query('element', z=30)
-
         >>> db.filtered_query('spectrum', person_id=3)
 
         will return all rows from table
@@ -524,19 +523,20 @@ class XASDataLibrary(object):
         if password is not None:
             self.set_person_password(email, password)
 
-    def get_person(self, **kws):
-        """return list of peopls optinally filtering by name, email, affiliation, etc
-        """
-        return None_or_one(self.filtered_query('person', **kws),
+    def get_person(self, email):
+        """get person by email"""
+        return None_or_one(self.filtered_query('person', email=email),
                            "expected 1 or None person")
+
+    def get_persons(self, **kws):
+        """return list of people"""
+        return self.filtered_query('person')
 
     def set_person_password(self, email, password):
         """ set secure password for person"""
         salt   = b64encode(os.urandom(24))
-        niter  = PW_NROUNDS
-        algo   = PW_ALGORITHM
-        result = b64encode(pbkdf2_hmac(algo, password, salt, niter))
-        hash   = '%s$%i$%s$%s' % (algo, niter, salt, result)
+        result = b64encode(pbkdf2_hmac(PW_ALGORITHM, password, salt, PW_NROUNDS))
+        hash   = '%s$%i$%s$%s' % (PW_ALGORITHM, PW_NROUNDS, salt, result)
 
         table = self.tables['person']
         table.update(whereclause="email='%s'" % email).execute(password=hash)
@@ -668,7 +668,6 @@ Optional:
         kws['edge_id'] = self.foreign_keyid(Edge, edge)
         kws['element_z'] = self.foreign_keyid(Element, element,
                                               keyid='z', name='symbol')
-        print 'SAMPLE ', sample, self.foreign_keyid(Sample, sample)
         kws['sample_id'] = self.foreign_keyid(Sample, sample)
 
 
@@ -717,13 +716,17 @@ Optional:
         "get all ratings for a spectrum"
         raise NotImplementedError
 
-
     def set_spectrum_mode(self, spectrum, mode):
         """set a mode for a spectrum"""
         _spectrum = self.foreign_keyid(Spectrum, spectrum)
         _mode     = self.foreign_keyid(Mode, mode)
         self.addrow(Spectrum_Mode, ('spectrum_id', 'mode_id'), (_spectrum, _mode))
 
+
+    def get_spectrum(self, id):
+        """ get spectrum by id"""
+        tab = self.tables['spectrum']
+        return tab.select().where(tab.c.id == id).execute().fetchone()
 
     def get_spectra(self, edge=None, element=None, beamline=None,
                     person=None, mode=None, sample=None, facility=None,
@@ -788,15 +791,28 @@ Optional:
         if not HAS_XDI:
             raise XASDBException('No XDI library found')
 
+        try:
+            fh  = open(fname, 'r')
+            filetext  = fh.read()
+        except:
+            filetext = ''
+        finally:
+            fh.close()
+
         xfile = xdifile.XDIFile(fname)
-        spectrum_name = "spectrum from '%s'" % fname
+        path, fname = os.path.split(fname)
+
+        spectrum_name = fname
+        if spectrum_name.endswith('.xdi'):
+            spectrum_name = spectrum_name[:-4]
 
         c_date    = xfile.attrs['scan']['start_time']
         d_spacing = xfile.dspacing
         edge      = xfile.edge
         element   = xfile.element
         energy    = xfile.energy
-        i0        = xfile.i0
+        if hasattr(xfile, 'i0'):
+            i0 = xfile.i0
 
         modes = []
         ifluor = itrans = irefer = None
@@ -806,6 +822,16 @@ Optional:
         if hasattr(xfile, 'ifluor'):
             ifluor= xfile.ifluor
             modes.append('fluorescence')
+
+        # special case: mutrans given,
+        # itrans not available,
+        # and maybe i0 not available
+        if (hasattr(xfile, 'mutrans') and
+            not hasattr(xfile, 'itrans')):
+            if not hasattr(xfile, 'i0'):
+                i0 = np.ones(len(xfile.mutrans))*1.0
+                itrans = -np.exp(xfile.mutrans)
+            modes.append('transmission')
 
         refer_used = 0
         if hasattr(xfile, 'irefer'):
@@ -827,19 +853,24 @@ Optional:
 
         sample = None
         if create_sample:
-            notes  = json_encode( xfile.attrs['sample'])
-            sample = self.add_sample(name="sample for file '%s'" % fname,
-                                   notes=notes, person=person).id
+            attrs  = xfile.attrs['sample']
+            formula = None
+            if 'name' in attrs:
+                formula = attrs.pop('name')
+            notes  = json_encode(xfile.attrs['sample'])
+            sample = self.add_sample(name="sample for '%s'" % fname,
+                                     formula=formula,
+                                     notes=notes, person=person_id).id
 
         beamline = None
         beamline_name  = xfile.attrs['beamline']['name']
-
+        notes = json_encode(xfile.attrs)
         self.add_spectrum(spectrum_name, d_spacing=d_spacing,
                           collection_date=c_date, person=person_id,
                           beamline=beamline, edge=edge, element=element,
                           energy=energy, energy_units=en_units, i0=i0,
                           itrans=itrans, ifluor=ifluor, irefer=irefer,
-                          sample=sample)
+                          sample=sample, notes=notes, filetext=filetext)
 
         for mode in modes:
             self.set_spectrum_mode(spectrum_name, mode)
