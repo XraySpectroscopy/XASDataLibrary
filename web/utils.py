@@ -8,7 +8,7 @@ def make_secret_key():
     f.write("session_key = '%s'\n" % base64.b64encode(os.urandom(36)))
     f.close()
 
-def get_session_key():
+def get_session_key_DISK():
     try:
         from secret import session_key
     except ImportError:
@@ -16,3 +16,6 @@ def get_session_key():
         time.sleep(0.5)
         from secret import session_key
     return session_key
+
+def get_session_key():
+    return base64.b64encode(os.urandom(36))
