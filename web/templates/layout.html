@@ -1,0 +1,20 @@
+<!doctype html>
+<title>XAS Spectra Library</title>
+<link rel=stylesheet type=text/css
+      href="{{ url_for('static', filename='style.css') }}">
+<div class=page>
+  <table cellpadding=1 width=100%>
+     <tr><td width=35% padding=5 align=left>
+            <font size=+1>XAFS Spectra Library</font></td>
+          <td width=65% align=right>
+  {% if session.username == none %}
+     Guest <a href="{{ url_for('login') }}">log in</a>
+  {% else %}
+     {{ session.username }} <a href="{{ url_for('logout') }}">log out</a>
+  {% endif %}
+    </td></tr></table>
+  {% for message in get_flashed_messages() %}
+    <div class=flash>{{ message }}</div>
+  {% endfor %}
+  {% block body %}{% endblock %}
+</div>

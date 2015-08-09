@@ -1,0 +1,52 @@
+
+body            { font-family: sans-serif; background: #eee; }
+a, h1, h2       { color: #377ba8; }
+h1, h2          { font-family: 'Georgia', serif; margin: 0; }
+h1              { border-bottom: 2px solid #eee; }
+h2              { font-size: 1.2em; }
+
+.page           { margin: 0.5em auto; border: 0 solid #eec;
+                 padding: 1em; background: white; }
+.entries        { list-style: none; margin: 0; padding: 0; }
+.entries li     { margin: 0.8em 1.2em; }
+.entries li h2  { margin-left: -1em; }
+.add-entry      { font-size: 0.9em; border-bottom: 1px solid #ccc; }
+.add-entry dl   { font-weight: bold; }
+.metanav        { text-align: right; font-size: 0.8em; padding: 0.3em;
+                  margin-bottom: 1em; background: #fafafa; }
+.flash          { background: #cee5F5; padding: 0.5em;
+                  border: 1px solid #aacbe2; }
+.error          { background: #f0d6d6; padding: 0.5em; }
+
+
+pre {text-indent: 20px}
+h5 {font:bold 14px verdana,arial,sans-serif;color:#042264;}
+h4 {font:bold 18px verdana,arial,sans-serif;color:#042264;}
+h3 {font:bold 18px verdana,arial,sans-serif;color:#A42424;font-weight:bold;font-style:italic;}
+h2 {font:bold 22px verdana,arial,sans-serif;color:#044484;font-weight:bold;}
+.h5font {font:bold 14px verdana,arial,sans-serif;color:#042264;}
+.h4font {font:bold 18px verdana,arial,sans-serif;color:#042264;}
+.h3font {font:bold 18px verdana,arial,sans-serif;color:#A42424;font-weight:bold;font-style:italic;}
+
+#ptable {background:#FEFDFD;}
+#elem {font-family: monospace;
+       font-size: 14pt;
+       font-weight:bold;
+       background:#FAFAF0;
+       text-align:justify;}
+#elem a, a.active {color: #4444AA; solid #880000; text-decoration: none; }
+#elem a:hover {color: #CC0000;}
+#grayentry {color:#B0B0B0;}
+
+.xx {font-size: 3pt;}
+body {margin:10px; padding:0px;background:#FCFCFC; font:bold 14px verdana, arial, sans-serif;}
+#content {text-align:justify;  background:#FCFCFC; padding: 0px;border:4px solid #88000;
+          border-top: none;  z-index: 2; }
+#tabmenu {font: bold 11px verdana, arial, sans-serif;
+          border-bottom: 2px solid #880000; margin: 1px; padding: 0px 0px 4px 0px; padding-left: 20px;}
+#tabmenu li {display: inline;overflow: hidden;margin: 1px;list-style-type: none; }
+#tabmenu a, a.active {color: #4444AA;background: #EEDD88;border: 2px solid #880000;
+             padding: 3px 3px 4px 3px;margin: 0px ;text-decoration: none; }
+#tabmenu a.active {color: #CC0000;background: #FCFCEA;border-bottom: 2px solid #FCFCEA;}
+#tabmenu a:hover {color: #CC0000; background: #F9F9E0;}
+#time {font: bold 12px verdana, arial, sans-serif; border: 2px; color: #4444AA; margin: 1px;}
