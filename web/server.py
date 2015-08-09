@@ -1,9 +1,24 @@
 
-from flask import Flask, request, session, g, redirect, url_for, \
-     abort, render_template, flash
+from flask import (Flask, request, session, redirect, url_for,
+                   abort, render_template, flash, Response)
+import sys
+import os
+import time
+import json
+import base64
+import io
+import numpy as np
+import matplotlib
+matplotlib.use('agg')
+import matplotlib.pyplot as plt
+from matplotlib.font_manager import FontProperties
+from matplotlib import rcParams
+
+from random import randrange
+from string import printable
 
 import xasdb
-
+import larch
 from utils import get_session_key
 
 # configuration
@@ -12,12 +27,36 @@ PORT     = 7112
 DEBUG    = True
 SECRET_KEY = get_session_key()
 
-# PTABLE     = make_ptable()
+mpl_lfont = FontProperties()
+mpl_lfont.set_size(9)
+rcParams['xtick.labelsize'] =  rcParams['ytick.labelsize'] = 9
 
 app = Flask(__name__)
 app.config.from_object(__name__)
 
 db = xasdb.connect_xasdb(DATABASE)
+_larch = larch.Interpreter()
+
+def random_string(n):
+    """  random_string(n)
+    generates a random string of length n, that will match
+       [a-z](n)
+    """
+    return ''.join([printable[randrange(10,36)] for i in range(n)])
+
+def make_xafs_plot(x, y, title, xlabel='Energy (eV)', ylabel='mu', with_e0=False):
+    fig  = plt.figure(figsize=(4.8, 3.0), dpi=100)
+    axes = fig.add_axes([0.13, 0.13, 0.75, 0.75], axisbg='#FEFEFE')
+
+    axes.set_xlabel(xlabel, fontproperties=mpl_lfont)
+    axes.set_ylabel(ylabel, fontproperties=mpl_lfont)
+    axes.set_title(title)
+    axes.plot(x, y)
+    axes.set_xlim((min(x), max(x)), emit=True)
+    figdata = io.BytesIO()
+    plt.savefig(figdata, format='png', facecolor='#FDFDFD')
+    figdata.seek(0)
+    return base64.b64encode(figdata.getvalue())
 
 def session_init():
     if 'username' not in session:
@@ -39,11 +78,17 @@ def session_init():
     if 'spectrum' not in session:
         session['spectrum'] = None
 
-@app.route("/")
-def hello():
-    session_init()
-    return render_template('layout.html')
+def get_persons():
+    persons = {}
+    for p in db.get_persons():
+        persons[p.id]  = (p.email, p.name)
+    return persons
 
+
+@app.route('/')
+def index():
+    session_init()
+    return redirect(url_for('search'))
 
 @app.route('/login/')
 @app.route('/login', methods=['GET', 'POST'])
@@ -51,15 +96,20 @@ def login():
     session_init()
     error = None
     if session['username'] is not None:
-        return redirect(url_for('hello'))
+        return redirect(url_for('search'))
     elif request.method == 'POST':
-        if request.form['username'] != 'joe':   # app.config['USERNAME']:
+        email = request.form['username']
+        password = request.form['password']
+        if db.get_person(email) is None:
             error = 'Invalid username'
-        elif request.form['password'] != 'who': # app.config['PASSWORD']:
-            error = 'Invalid password'
         else:
-            session['username'] = request.form['username']
-            return redirect(url_for('ptable'))
+            if not db.test_person_password(email, password):
+                error = 'Invalid password'
+            else:
+                session['username'] = request.form['username']
+                session['logged_in'] = True
+                return redirect(url_for('search'))
+
     return render_template('login.html', error=error)
 
 @app.route('/logout')
@@ -67,7 +117,7 @@ def logout():
     session_init()
     session.pop('username', None)
     flash('You have been logged out')
-    return redirect(url_for('ptable'))
+    return redirect(url_for('search'))
 
 @app.route('/user/')
 def user_profile():
@@ -78,28 +128,19 @@ def user_profile():
 
     return 'User %s' % session['username']
 
-@app.route('/ptable/')
-@app.route('/ptable/<elem>')
-def ptable(elem=None):
+@app.route('/search/')
+@app.route('/search/<elem>')
+def search(elem=None):
     session_init()
-    # out = ['XAS Data Library']
-    # out.append('Username = %s' % session.get('username', 'not logged in'))
-    # out.append(PTABLE)
     dbspectra = []
     if elem is not None:
         try:
             dbspectra = db.get_spectra(element=elem)
         except:
             pass
+
+    persons = get_persons()
     out = []
-
-    persons = {}
-    for p in db.get_persons():
-        persons[p.id]  = (p.email, p.name)
-
-    session['nspectra'] = len(dbspectra)
-    session['elem'] = elem
-
     for s in dbspectra:
         edge = session['edges']["%i" % s.edge_id]
         elem_sym, elem_name = session['elements']["%i" % s.element_z]
@@ -113,46 +154,85 @@ def ptable(elem=None):
                     'person_name': person_name,
                     'elem_sym': elem_sym})
 
-    session['spectra'] = out
-    return render_template('ptable.html')
+    return render_template('ptable.html', nspectra=len(dbspectra),
+                           elem=elem, spectra=out)
 
-@app.route('/spectrum/<int:id>')
-def spectrum(id=None):
+@app.route('/spectrum/<int:sid>')
+def spectrum(sid=None):
     session_init()
-    persons = {}
-    for p in db.get_persons():
-        persons[p.id]  = (p.email, p.name)
 
-    s  = db.get_spectrum(id)
+    s  = db.get_spectrum(sid)
+    if s is None:
+        error = 'Could not find Spectrum #%i' % sid
+        return render_template('search', error=error)
+
     edge = session['edges']["%i" % s.edge_id]
     elem_sym, elem_name = session['elements']["%i" % s.element_z]
+
+    persons = get_persons()
     person_email, person_name = persons[s.person_id]
 
-    session['spectrum'] = {'id': s.id,
-                           'name': s.name,
-                           'element': elem_name,
-                           'edge': edge,
-                           'person_email': person_email,
-                           'person_name': person_name,
-                           'elem_sym': elem_sym}
-    return render_template('spectrum.html')
 
-@app.route('/rawfile/<int:id>/<fname>')
-def rawfile(id, fname):
+    opts = {'spectrum_id': s.id,
+            'spectrum_name': s.name,
+            'element': elem_name,
+            'edge': edge,
+            'person_email': person_email,
+            'person_name': person_name,
+            'elem_sym': elem_sym,
+            'upload_date': s.submission_date.strftime('%Y-%m-%d %H:%M:%S'),
+            'collection_date': s.collection_date.strftime('%Y-%m-%d %H:%M:%S'),
+            'fullfig': None, 'xanesfig': None,
+            }
+
+    try:
+        energy = np.array(json.loads(s.energy))
+        i0     = np.array(json.loads(s.i0))
+        itrans = np.array(json.loads(s.itrans))
+        mutrans = -np.log(itrans/i0)
+    except:
+        error = 'Could not extract data from spectrum'
+        return render_template('spectrum.html', **opts)
+
+    opts['fullfig'] = make_xafs_plot(energy, mutrans, s.name, ylabel='XAFS')
+
+    cmd = "ne0 = xray_edge(%i, '%s')[0]" % (s.element_z, str(edge))
+    _larch.run(cmd)
+    e0 = _larch.symtable.ne0
+
+    group = larch.Group(energy=energy, mu=mutrans)
+    gname = 'data_%s' % random_string(6)
+    _larch.symtable.set_symbol(gname, group)
+    _larch.run("pre_edge(%s)" % gname)
+
+    i1 = max(np.where(group.energy<=e0 - 30)[0])
+    i2 = max(np.where(group.energy<=e0 + 70)[0])
+    xanes_en = group.energy[i1:i2] - e0
+    xanes_mu = group.norm[i1:i2]
+    opts['e0'] = "%f" % e0
+
+    opts['xanesfig'] = make_xafs_plot(xanes_en, xanes_mu, s.name,
+                                      xlabel='Energy-%.1f (eV)' % e0,
+                                      ylabel='XANES', with_e0=True)
+
+    return render_template('spectrum.html', **opts)
+
+@app.route('/rawfile/<int:sid>/<fname>')
+def rawfile(sid, fname):
     session_init()
-    return 'show %i /  %s ' % (id, fname)
-
-@app.route('/showplot/<int:id>/<fname>')
-def showplot(id, fname):
-    session_init()
-    return 'show plot %i /  %s ' % (id, fname)
-
+    s  = db.get_spectrum(sid)
+    if s is None:
+        error = 'Could not find Spectrum #%i' % sid
+        return render_template('search', error=error)
+    return Response(s.filetext, mimetype='text/plain')
 
 @app.route('/about')
+@app.route('/about/')
 def about():
     session_init()
-    return 'The about page'
+    return render_template('about.html')
 
 if __name__ == "__main__":
     app.jinja_env.cache = {}
+    print 'Ready ', app
     app.run(port=7112)
