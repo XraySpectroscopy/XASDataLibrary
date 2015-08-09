@@ -830,7 +830,7 @@ Optional:
             not hasattr(xfile, 'itrans')):
             if not hasattr(xfile, 'i0'):
                 i0 = np.ones(len(xfile.mutrans))*1.0
-                itrans = -np.exp(xfile.mutrans)
+                itrans = np.exp(-xfile.mutrans)
             modes.append('transmission')
 
         refer_used = 0
