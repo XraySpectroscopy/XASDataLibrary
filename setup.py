@@ -17,15 +17,9 @@ try:
 *******************************************************
 """
 
-try:
-    import sqlalchemy
-    major, minor, release = [int(i) for i in  sqlalchemy.__version__.split('.')]
-    assert minor > 6
-    
-except:
-    print no_sqlalchemy
-    sys.exit()
-    
+
+import sqlalchemy
+
 setup(name = 'xasdb',
       version = xasdb.__version__,
       author = 'Matthew Newville',
@@ -36,5 +30,3 @@ setup(name = 'xasdb',
       package_dir = {'xasdb': 'xasdb'},
       packages = ['xasdb','xasdb.wx']
 )
-
-
