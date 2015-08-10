@@ -860,7 +860,6 @@ Optional:
         if create_sample:
             sattrs  = xfile.attrs['sample']
             formula, prep = '', ''
-            print 'SAMPLE ', sattrs
             if 'name' in sattrs:
                 formula = sattrs.pop('name')
             if 'prep' in sattrs:
