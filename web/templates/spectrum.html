@@ -6,18 +6,35 @@
 <h4>Spectrum  {{ spectrum_name }}</h4>
 
 <table>
-<tr><td> Raw Data File: </td>
-    <td> <a href="../rawfile/{{ spectrum_id }}/{{ spectrum_name }}.xdi"> {{ spectrum_name }}.xdi </a>
+<tr><td width=20%> Raw Data File: </td>
+    <td> <a href="../rawfile/{{ spectrum_id }}/{{ spectrum_name }}.xdi"> 
+             {{ spectrum_name }}.xdi </a>
     </td></tr>
 <tr><td> Absorption Edge: </td>
     <td> {{ elem_sym }} {{ edge }} edge
     </td></tr>
 <tr><td> Uploaded: </td>
     <td>  {{upload_date}}, {{ person_name }} ({{ person_email }})
-</td></tr>
+    </td></tr>
 <tr><td> Measured: </td>
-    <td>  {{collection_date}}
-</td></tr>
+    <td>  {{collection_date}}     </td></tr>
+<tr><td> Beamline: </td>
+    <td>  {{beamline}}     </td></tr>
+<tr><td> Energy Units: </td>
+    <td>  {{energy_units}}  </td></tr>
+<tr><td> Mono d-spacing: </td>
+    <td>   {{dspace}} &Acirc;  ({{mononame}})   </td></tr>
+<tr><td> Sample Name: </td>
+    <td>  {{sample_name}}        </td></tr>
+<tr><td> Sample Formula: </td>
+    <td>  {{sample_formula}}     </td></tr>
+
+{% for x in misc %}
+   <tr><td> {{x.key}}: </td>
+       <td> {{x.val}} </td></tr>
+
+{% endfor %}
+
 
 </table>
 
