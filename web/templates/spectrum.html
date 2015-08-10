@@ -1,0 +1,28 @@
+{% extends "layout.html" %}
+{% block body %}
+  {% if error %}<p class=error><strong>Error:</strong> {{ error }}{% endif %}
+<form action="action"  method="post">
+
+<h4>Spectrum  {{ spectrum_name }}</h4>
+
+<table>
+<tr><td> Raw Data File: </td>
+    <td> <a href="../rawfile/{{ spectrum_id }}/{{ spectrum_name }}.xdi"> {{ spectrum_name }}.xdi </a>
+    </td></tr>
+<tr><td> Absorption Edge: </td>
+    <td> {{ elem_sym }} {{ edge }} edge
+    </td></tr>
+<tr><td> Uploaded: </td>
+    <td>  {{upload_date}}, {{ person_name }} ({{ person_email }})
+</td></tr>
+<tr><td> Measured: </td>
+    <td>  {{collection_date}}
+</td></tr>
+
+</table>
+
+<table> <tr><td><img src="data:image/png;base64,{{ fullfig|safe }}"></td>
+<td> <img src="data:image/png;base64,{{ xanesfig|safe }}"><br></td></tr></table>
+
+</form>
+{% endblock %}
