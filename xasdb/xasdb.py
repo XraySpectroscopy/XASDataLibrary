@@ -451,7 +451,7 @@ class XASDataLibrary(object):
 
     def get_sample(self, sid):
         """return sample by id"""
-        return None_or_one(self.filtered_query('sample', id=sid)
+        return None_or_one(self.filtered_query('sample', id=sid))
 
     def add_mode(self, name, notes='', **kws):
         """add collection mode: name required
@@ -557,14 +557,11 @@ class XASDataLibrary(object):
             return False
         return hash == b64encode(pbkdf2_hmac(algo, password, salt, niter))
 
-    def add_sample(self, name, notes='', formula=None,
-                   material_source=None, person=None,
+    def add_sample(self, name, notes='', person=None,
                    crystal_structure=None, **kws):
         """add sample: name required
         returns Sample instance"""
         kws['notes'] = notes
-        kws['formula'] = formula
-        kws['material_source'] = material_source
         kws['person_id'] = self.foreign_keyid(Person, person)
         kws['crystal_structure_id'] = self.foreign_keyid(Crystal_Structure,
                                                          crystal_structure)
@@ -862,12 +859,16 @@ Optional:
         sample = None
         if create_sample:
             sattrs  = xfile.attrs['sample']
-            formula = ''
+            formula, prep = '', ''
+            print 'SAMPLE ', sattrs
             if 'name' in sattrs:
                 formula = sattrs.pop('name')
+            if 'prep' in sattrs:
+                prep = sattrs.pop('prep')
+
             notes  = json_encode(sattrs)
             sample = self.add_sample(name="sample for '%s'" % fname,
-                                     formula=formula,
+                                     formula=formula, preparation=prep,
                                      notes=notes, person=person_id).id
 
         beamline = None

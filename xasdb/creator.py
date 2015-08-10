@@ -224,6 +224,7 @@ def  make_newdb(dbname, server= 'sqlite', user='',
     sample = NamedTable('sample', metadata,
                         cols=[StrCol('formula'),
                               StrCol('material_source'),
+                              StrCol('preparation'),
                               PointerCol('person'),
                               PointerCol('crystal_structure')])
 
