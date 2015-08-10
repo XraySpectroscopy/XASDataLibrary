@@ -449,6 +449,10 @@ class XASDataLibrary(object):
         kws['notes'] = notes
         return self.addrow(EnergyUnits, ('units',), (units,), **kws)
 
+    def get_sample(self, sid):
+        """return sample by id"""
+        return None_or_one(self.filtered_query('sample', id=sid)
+
     def add_mode(self, name, notes='', **kws):
         """add collection mode: name required
         returns Mode instance"""
@@ -811,6 +815,10 @@ Optional:
         edge      = xfile.edge
         element   = xfile.element
         energy    = xfile.energy
+        comments  = ''
+        if hasattr(xfile, 'comments'):
+            comments = xfile.comments
+
         if hasattr(xfile, 'i0'):
             i0 = xfile.i0
 
@@ -853,11 +861,11 @@ Optional:
 
         sample = None
         if create_sample:
-            attrs  = xfile.attrs['sample']
-            formula = None
-            if 'name' in attrs:
-                formula = attrs.pop('name')
-            notes  = json_encode(xfile.attrs['sample'])
+            sattrs  = xfile.attrs['sample']
+            formula = ''
+            if 'name' in sattrs:
+                formula = sattrs.pop('name')
+            notes  = json_encode(sattrs)
             sample = self.add_sample(name="sample for '%s'" % fname,
                                      formula=formula,
                                      notes=notes, person=person_id).id
@@ -870,7 +878,8 @@ Optional:
                           beamline=beamline, edge=edge, element=element,
                           energy=energy, energy_units=en_units, i0=i0,
                           itrans=itrans, ifluor=ifluor, irefer=irefer,
-                          sample=sample, notes=notes, filetext=filetext)
+                          sample=sample, comments=comments,
+                          notes=notes, filetext=filetext)
 
         for mode in modes:
             self.set_spectrum_mode(spectrum_name, mode)
