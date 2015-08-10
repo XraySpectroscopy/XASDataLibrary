@@ -3,7 +3,12 @@
   {% if error %}<p class=error><strong>Error:</strong> {{ error }}{% endif %}
 <form action="action"  method="post">
 
-<h4>Spectrum  {{ spectrum_name }}</h4>
+<p> <div class=subfont>Spectrum  {{ spectrum_name }}
+{% if session.username is not none %} 
+  &nbsp;   &nbsp; 
+  <a href="../editspectrum/{{ spectrum_id }}/"> [edit this spectrum] </a>
+ {% endif %}
+</div> <p>
 
 <table>
 <tr><td width=20%> Raw Data File: </td>
@@ -13,27 +18,28 @@
 <tr><td> Absorption Edge: </td>
     <td> {{ elem_sym }} {{ edge }} edge
     </td></tr>
-<tr><td> Uploaded: </td>
-    <td>  {{upload_date}}, {{ person_name }} ({{ person_email }})
-    </td></tr>
-<tr><td> Measured: </td>
-    <td>  {{collection_date}}     </td></tr>
+<tr><td> Sample Name: </td>
+    <td>  {{sample_form}}   </td></tr>
+<tr><td> Sample Preparaion: </td>
+    <td>  {{sample_prep}}     </td></tr>
 <tr><td> Beamline: </td>
     <td>  {{beamline}}     </td></tr>
 <tr><td> Energy Units: </td>
     <td>  {{energy_units}}  </td></tr>
 <tr><td> Mono d-spacing: </td>
     <td>   {{dspace}} &Acirc;  ({{mononame}})   </td></tr>
-<tr><td> Sample Name: </td>
-    <td>  {{sample_name}}        </td></tr>
-<tr><td> Sample Formula: </td>
-    <td>  {{sample_formula}}     </td></tr>
+<tr><td> Measured: </td>
+    <td>  {{collection_date}}     </td></tr>
+<tr><td> Uploaded: </td>
+    <td>  {{upload_date}}, {{ person_name }} ({{ person_email }})
+    </td></tr>
+<tr><td colspan=2> <hr> </td></tr>
 
 {% for x in misc %}
-   <tr><td> {{x.key}}: </td>
-       <td> {{x.val}} </td></tr>
-
+   <tr><td> {{x.key}}: </td><td> {{x.val}} </td></tr>
 {% endfor %}
+
+<tr><td colspan=2> <hr> </td></tr>
 
 
 </table>
