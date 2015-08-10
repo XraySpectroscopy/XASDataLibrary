@@ -130,13 +130,15 @@ def spectrum(sid=None):
             if 'name' in beamline:
                 beamline = beamline['name']
             
-    try:
-        sample = session['sample']['%i'% s.sample_id]
+    try:        
+        sample = session['samples']['%i'% s.sample_id]
         sample_name = sample[0]
-        sample_formula = sample[1]
+        sample_form = sample[1]
+        sample_prep = sample[2]
     except:
         sample_name = 'unknown'
-        sample_formula = 'unknown'
+        sample_form = 'unknown'
+        sample_prep = 'unknown'
         if 'sample' in notes:
             sample_name = notes['sample']
             if isinstance(sample_name, dict):
@@ -153,9 +155,11 @@ def spectrum(sid=None):
 
     misc = []
     for key, val in notes.items():
+        
         if isinstance(val, dict):
-            val = dict_repr(val)
-        misc.append({'key': "# %s" % key.title(), 'val': val})
+            val = dict_repr(val).strip()
+        if len(val) > 1:
+            misc.append({'key': "# %s" % key.title(), 'val': val})
    
 
     opts = {'spectrum_id': s.id,
@@ -169,7 +173,8 @@ def spectrum(sid=None):
             'dspace': dspace,
             'misc': misc,
             'sample_name':  sample_name,
-            'sample_formula':  sample_formula,
+            'sample_form':  sample_form,
+            'sample_prep':  sample_prep,
             'person_email': person[0],
             'person_name': person[1],
             'upload_date': s.submission_date.strftime('%Y-%m-%d %H:%M:%S'),

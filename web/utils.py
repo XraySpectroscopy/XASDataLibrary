@@ -74,8 +74,8 @@ def session_init(session, db):
     if 'samples' not in session:
         session['samples'] = d = {}
         for r in db.filtered_query('sample'):
-            d['%i'%r.id] = (r.name, r.formula, r.notes,
-                            r.material_source, '%i'%r.person_id)
+            d['%i'%r.id] = (r.name, r.formula, r.preparation, 
+                            r.material_source, r.notes, '%i'%r.person_id)
 
     if 'people' not in session:
         session['people'] = d = {}
