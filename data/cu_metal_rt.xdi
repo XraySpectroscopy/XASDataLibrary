@@ -3,8 +3,8 @@
 # Column.2: i0
 # Column.3: itrans
 # Column.4: mutrans
-# Scan.edge: K
-# Scan.element: Cu
+# Element.edge: K
+# Element.symbol: Cu
 # Scan.edge_energy: 8980.0
 # Mono.name: Si 111
 # Mono.d_spacing: 3.13553
