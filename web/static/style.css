@@ -1,5 +1,5 @@
 
-body            { font-family: sans-serif; background: #eee; }
+body            { font-family: sans-serif; background: #FEFEFC; }
 a, h1, h2       { color: #377ba8; text-decoration: none; }
 h1, h2          { font-family: 'Georgia', serif; margin: 0; }
 h1              { border-bottom: 2px solid #eee; }
@@ -30,6 +30,9 @@ h4 {font:bold 18px verdana,arial,sans-serif;color:#A42424;}
 h3 {font:bold 18px verdana,arial,sans-serif;color:#A42424;
     font-weight:bold;font-style:italic;}
 h2 {font:bold 22px verdana,arial,sans-serif;color:#044484;font-weight:bold;}
+
+.subfont {font:bold 18px verdana,arial,sans-serif;color:#A42424;}
+
 .h5font {font:bold 14px verdana,arial,sans-serif;color:#042264;}
 .h4font {font:bold 18px verdana,arial,sans-serif;color:#042264;}
 .h3font {font:bold 18px verdana,arial,sans-serif;color:#A42424;font-weight:bold;font-style:italic;}
