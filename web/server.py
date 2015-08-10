@@ -29,7 +29,9 @@ SECRET_KEY = get_session_key()
 
 mpl_lfont = FontProperties()
 mpl_lfont.set_size(9)
-rcParams['xtick.labelsize'] =  rcParams['ytick.labelsize'] = 9
+mpl_sfont = FontProperties()
+mpl_sfont.set_size(7)
+rcParams['xtick.labelsize'] =  rcParams['ytick.labelsize'] = 7
 
 app = Flask(__name__)
 app.config.from_object(__name__)
@@ -44,17 +46,24 @@ def random_string(n):
     """
     return ''.join([printable[randrange(10,36)] for i in range(n)])
 
-def make_xafs_plot(x, y, title, xlabel='Energy (eV)', ylabel='mu', with_e0=False):
-    fig  = plt.figure(figsize=(4.8, 3.0), dpi=100)
-    axes = fig.add_axes([0.13, 0.13, 0.75, 0.75], axisbg='#FEFEFE')
+def make_xafs_plot(x, y, title, xlabel='Energy (eV)', ylabel='mu', x0=None):
+    fig  = plt.figure(figsize=(4.0, 2.5), dpi=100)
+    axes = fig.add_axes([0.16, 0.16, 0.75, 0.75], axisbg='#FEFEFE')
 
     axes.set_xlabel(xlabel, fontproperties=mpl_lfont)
     axes.set_ylabel(ylabel, fontproperties=mpl_lfont)
-    axes.set_title(title)
-    axes.plot(x, y)
+    axes.set_title(title, fontproperties=mpl_lfont)
+    axes.plot(x, y, linewidth=2)
+    if x0 is not None:
+        axes.axvline(0, ymin=min(y), ymax=max(y),
+                     linewidth=1, color='#CCBBDD', zorder=-20)
+        # ymax = (0.7*max(y) + 0.3 * min(y))
+        # axes.text(-25.0, ymax, "%.1f eV" % x0, fontproperties=mpl_lfont)
+
     axes.set_xlim((min(x), max(x)), emit=True)
+
     figdata = io.BytesIO()
-    plt.savefig(figdata, format='png', facecolor='#FDFDFD')
+    plt.savefig(figdata, format='png', facecolor='#F9F9F9')
     figdata.seek(0)
     return base64.b64encode(figdata.getvalue())
 
@@ -194,7 +203,7 @@ def spectrum(sid=None):
         error = 'Could not extract data from spectrum'
         return render_template('spectrum.html', **opts)
 
-    opts['fullfig'] = make_xafs_plot(energy, mutrans, s.name, ylabel='XAFS')
+    opts['fullfig'] = make_xafs_plot(energy, mutrans, s.name, ylabel='Raw XAFS')
 
     cmd = "ne0 = xray_edge(%i, '%s')[0]" % (s.element_z, str(edge))
     _larch.run(cmd)
@@ -206,14 +215,13 @@ def spectrum(sid=None):
     _larch.run("pre_edge(%s)" % gname)
 
     i1 = max(np.where(group.energy<=e0 - 30)[0])
-    i2 = max(np.where(group.energy<=e0 + 70)[0])
+    i2 = max(np.where(group.energy<=e0 + 70)[0]) + 1
     xanes_en = group.energy[i1:i2] - e0
     xanes_mu = group.norm[i1:i2]
     opts['e0'] = "%f" % e0
-
     opts['xanesfig'] = make_xafs_plot(xanes_en, xanes_mu, s.name,
                                       xlabel='Energy-%.1f (eV)' % e0,
-                                      ylabel='XANES', with_e0=True)
+                                      ylabel='Normalized XANES', x0=e0)
 
     return render_template('spectrum.html', **opts)
 
