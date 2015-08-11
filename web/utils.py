@@ -41,6 +41,8 @@ def random_string(n):
 def session_init(session, db):
     if 'username' not in session:
         session['username'] = None
+    if 'person_id' not in session:
+        session['person_id'] = "-1"
 
     if 'logged_in' not in session:
         session['logged_in'] = False
@@ -78,10 +80,44 @@ def session_init(session, db):
             d['%i'%r.id] = (r.name, r.formula, r.preparation,
                             r.material_source, r.notes, '%i'%r.person_id)
 
+    if 'suites' not in session:
+        session['suites'] = d = {}
+        for r in db.filtered_query('suite'):
+            d['%i'%r.id] = (r.name, r.notes, '%i'%r.person_id)
+
     if 'people' not in session:
         session['people'] = d = {}
         for r in db.get_persons():
             d['%i'%r.id] = (r.email, r.name, r.affiliation)
+
+def spectrum_ratings(db, sid):
+    """list of score, comments, time, person) for spectrum ratings"""
+    d = []
+    for r in db.filtered_query('spectrum_rating', spectrum_id=sid):
+        d.append((r.score, r.comments, r.datetime, "%i" % r.person_id))
+    return d
+
+def suite_ratings(db, sid):
+    """list of score, comments, time, person) for suite ratings"""
+    d = []
+    for r in db.filtered_query('suite_rating', suite_id=sid):
+        d.append((r.score, r.comments, r.datetime, "%i" % r.person_id))
+    return d
+
+def get_suite_spectra(db, sid):
+    'spectra in suite'
+    d = []
+    for r in db.filtered_query('spectrum_suite', suite_id=sid):
+        d.append(r.spectrum_id)
+    return d
+
+def get_spectrum_suites(db, sid):
+    'suites that a spectrum is in'
+    d = []
+    for r in db.filtered_query('spectrum_suite', spectrum_id=sid):
+        d.append(r.suite_id)
+    return d
+
 
 def parse_spectrum(s, session):
     edge = session['edges']['%i' % s.edge_id]
