@@ -13,7 +13,7 @@ import numpy as np
 import xasdb
 import larch
 from utils import (get_session_key, random_string,
-                   session_init, parse_spectrum)
+                   session_init, parse_spectrum, spectrum_ratings)
 from plot import make_xafs_plot
 
 # configuration
@@ -44,12 +44,15 @@ def login():
     elif request.method == 'POST':
         email = request.form['username']
         password = request.form['password']
-        if db.get_person(email) is None:
+        person = db.get_person(email)
+        session['person_id'] = "-1"
+        if person is None:
             error = 'Invalid username'
         else:
             if not db.test_person_password(email, password):
                 error = 'Invalid password'
             else:
+                session['person_id'] = "%i" % person.id
                 session['username'] = request.form['username']
                 session['logged_in'] = True
                 return redirect(url_for('search'))
@@ -109,6 +112,15 @@ def spectrum(sid=None):
         return render_template('search', error=error)
 
     opts = parse_spectrum(s, session)
+    opts['spectrum_owner'] = (session['person_id'] == "%i" % s.person_id)
+
+    ratings = spectrum_ratings(db, sid)
+    opts['rating'] = 'No ratings'
+    if len(ratings) > 0:
+        sum = 0.0
+        for rate in ratings: sum = sum + rate[0]
+        rating = sum*1.0/len(ratings)
+        opts['rating'] = 'Average rating %.1f (%i ratings)' % (rating, len(ratings))
 
     try:
         energy = np.array(json.loads(s.energy))
@@ -134,6 +146,7 @@ def spectrum(sid=None):
     _larch.run('pre_edge(%s)' % gname)
 
     opts['e0'] = e0 = group.e0
+
     try:
         cmd = "tmp_e0 = xray_edge(%i, '%s')[0]" % (s.element_z, str(opts['edge']))
         _larch.run(cmd)
@@ -149,8 +162,19 @@ def spectrum(sid=None):
     opts['xanesfig'] = make_xafs_plot(xanes_en, xanes_mu, s.name,
                                       xlabel='Energy-%.1f (eV)' % e0,
                                       ylabel='Normalized XANES', x0=e0)
-
     return render_template('spectrum.html', **opts)
+
+@app.route('/showspectrum_rating/<int:sid>')
+def showspectrum_rating(sid=None):
+    session_init(session, db)
+    s  = db.get_spectrum(sid)
+    if s is None:
+        error = 'Could not find Spectrum #%i' % sid
+        return render_template('search', error=error)
+
+    opts = parse_spectrum(s, session)
+    ratings = spectrum_ratings(db, sid)
+    return render_template('editspectrum.html', error=error, **opts)
 
 @app.route('/editspectrum/<int:sid>')
 def editspectrum(sid=None):
@@ -168,6 +192,30 @@ def editspectrum(sid=None):
     opts = parse_spectrum(s, session)
     return render_template('editspectrum.html', error=error, **opts)
 
+@app.route('/ratespectrum/<int:sid>')
+@app.route('/ratespectrum/<int:sid>/', methods=['GET', 'POST'])
+def ratespectrum(sid=None):
+    session_init(session, db)
+    error=None
+    if not session['logged_in']:
+        error='must be logged in to rate spectrum'
+        return render_template('search', error=error)
+
+    s  = db.get_spectrum(sid)
+    if s is None:
+        error = 'Could not find Spectrum #%i' % sid
+        return render_template('search', error=error)
+
+    opts = parse_spectrum(s, session)
+
+    if request.method == 'POST':
+        score = request.form['score']
+        comment = request.form['comment']
+        print ' Should set Score ', score, comment
+
+    return render_template('ratespectrum.html', error=error, id=s.id,
+                           person_id=session['person_id'], **opts)
+
 @app.route('/rawfile/<int:sid>/<fname>')
 def rawfile(sid, fname):
     session_init(session, db)
@@ -176,6 +224,7 @@ def rawfile(sid, fname):
         error = 'Could not find Spectrum #%i' % sid
         return render_template('search', error=error)
     return Response(s.filetext, mimetype='text/plain')
+
 
 @app.route('/about')
 @app.route('/about/')
@@ -188,7 +237,8 @@ def about():
 @app.route('/suites/<int:sid>')
 def suites():
     session_init(session, db)
-    return render_template('about.html')
+
+    return render_template('suites.html')
 
 @app.route('/beamlines')
 @app.route('/beamlines/<int:sid>')
