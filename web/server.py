@@ -17,17 +17,22 @@ from utils import (get_session_key, random_string,
 from plot import make_xafs_plot
 
 # configuration
+NAME = 'XASDB'
 DATABASE = 'example.db'
 PORT     = 7112
 DEBUG    = True
 SECRET_KEY = get_session_key()
 
+print 'Imports done'
+t0 = time.time()
+
 app = Flask(__name__)
 app.config.from_object(__name__)
-
+print 'Flask App created ', time.time()-t0
 db = xasdb.connect_xasdb(DATABASE)
+print 'XASDB connected ', time.time()-t0
 _larch = larch.Interpreter()
-
+print 'Larch initialized ', time.time()-t0
 
 @app.route('/')
 def index():
@@ -192,29 +197,65 @@ def editspectrum(sid=None):
     opts = parse_spectrum(s, session)
     return render_template('editspectrum.html', error=error, **opts)
 
-@app.route('/ratespectrum/<int:sid>')
-@app.route('/ratespectrum/<int:sid>/', methods=['GET', 'POST'])
-def ratespectrum(sid=None):
+@app.route('/submit_spectrum_rating', methods=['GET', 'POST'])
+def submit_spectrum_rating(sid=None):
+    session_init(session, db)
+    error=None
+
+    if not session['logged_in']:
+        error='must be logged in to rate spectrum'
+        return redirect(url_for('spectrum', sid=sid, error=error))
+
+    if request.method == 'POST':
+        score = request.form['score']
+        review = request.form['review']
+        spectrum_id = request.form['spectrum']
+        spectrum_name = request.form['spectrum_name']
+        person_id = request.form['person']
+        message = 'Review saved!'
+        print ' Should set Score ', score, review, spectrum_id, person_id
+        # return redirect(url_for('spectrum', sid=spectrum_id))
+
+        return redirect(url_for('spectrum', sid=spectrum_id))
+
+    return render_template('ratespectrum.html', error=error,
+                           spectrum_id=spectrum_id,
+                           spectrum_name=spectrum_name,
+                           person_id=session['person_id'],
+                           score=score, review=review)
+
+
+@app.route('/rate_spectrum/')
+@app.route('/rate_spectrum/<int:sid>')
+def rate_spectrum(sid=None):
     session_init(session, db)
     error=None
     if not session['logged_in']:
         error='must be logged in to rate spectrum'
-        return render_template('search', error=error)
+        return redirect(url_for('spectrum', sid=sid, error=error))
 
     s  = db.get_spectrum(sid)
     if s is None:
         error = 'Could not find Spectrum #%i' % sid
-        return render_template('search', error=error)
+        return render_template('ptable', error=error)
 
     opts = parse_spectrum(s, session)
+    score = 1
+    review = '<review>'
+    for _s, _r, _d, _p in spectrum_ratings(db, sid):
+        if _p == session['person_id']:
+            score = _s
+            review =  _r
+    spectrum_id = s.id
+    spectrum_name = s.name
 
-    if request.method == 'POST':
-        score = request.form['score']
-        comment = request.form['comment']
-        print ' Should set Score ', score, comment
+    return render_template('ratespectrum.html', error=error,
+                           spectrum_id=spectrum_id,
+                           spectrum_name=spectrum_name,
+                           person_id=session['person_id'],
+                           score=score, review=review)
 
-    return render_template('ratespectrum.html', error=error, id=s.id,
-                           person_id=session['person_id'], **opts)
+
 
 @app.route('/rawfile/<int:sid>/<fname>')
 def rawfile(sid, fname):
@@ -253,6 +294,6 @@ def upload():
     return render_template('about.html', error='upload')
 
 if __name__ == "__main__":
-    app.jinja_env.cache = {}
-    print 'Ready ', app, time.ctime()
+    # app.jinja_env.cache = {}
+    print 'Server Ready ', app, time.ctime()
     app.run(port=7112)
