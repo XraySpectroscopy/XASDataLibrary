@@ -1,15 +1,22 @@
 {% extends "layout.html" %}
 {% block body %}
-  {% if error %}<p class=error><strong>Error:</strong> {{ error }}{% endif %}
-<p>
-<table><tr><td>
-
-Words about Selections here <br>
-
-{% if session.logged_in %}
-    add features
+  {% if error %}<p class=error><strong>Error:</strong> {{ error }}
 {% endif %}
-</td><td>
+
+
+<div id='tab'>
+<ul id='tabmenu'>
+  <li> <a href="{{ url_for('suites') }}">Browse Suites</a> </li>
+  <li> <a href="{{ url_for('beamlines') }}">Browse Beamlines</a> </li>
+
+  {% if session.logged_in %}
+  <li> <a href="{{ url_for('upload') }}">Upload Data</a></li>
+  <li> <a href="{{ url_for('user') }}">Edit Profile</a></li>
+  {% endif %}
+</ul>
+</div>
+
+<p>
 
 <form action="action"  method="post">
 <table id="ptable" cellpadding=0 cellspacing=0 border=0><tr>
@@ -133,9 +140,9 @@ Words about Selections here <br>
 </table>
 </form>
 
-</td></tr></table>
-<hr>
 
+<div id='spectra'>
+<hr>
 {% if nspectra == 0 %}
    {% if elem is not none %}
       No spectra found for {{ elem }}
@@ -148,11 +155,12 @@ Words about Selections here <br>
    {% endif %}
    <table cellspacing=5 cellpadding=2>
    {% for spec in spectra %}
-       <tr><td>
+       <tr><td id='spectra'>
            <a href="../spectrum/{{ spec.id }}"> {{ spec.name }}</a>
         </td><td> {{ spec.edge }} edge </td></tr>
    {% endfor %}
    </table>
 {% endif %}
-</ul>
+
+</div>
 {% endblock %}
