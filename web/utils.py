@@ -26,6 +26,10 @@ def get_session_key_DISK():
 def get_session_key():
     return base64.b64encode(os.urandom(36))
 
+def valid_score(score, smin=0, smax=5):
+    """ensure that the input score is an integr
+    in the range [smin, smax]  (inclusive)"""
+    return max(smin, min(smax, int(score)))
 
 def dict_repr(d):
     return ', '.join(["%s: %s" % (u) for u in d.items()])
@@ -118,6 +122,8 @@ def get_spectrum_suites(db, sid):
         d.append(r.suite_id)
     return d
 
+def fmttime(dtime):
+    return dtime.strftime('%Y-%m-%d %H:%M:%S')
 
 def parse_spectrum(s, session):
     edge = session['edges']['%i' % s.edge_id]
@@ -185,7 +191,7 @@ def parse_spectrum(s, session):
             'sample_prep':  sample_prep,
             'person_email': person[0],
             'person_name': person[1],
-            'upload_date': s.submission_date.strftime('%Y-%m-%d %H:%M:%S'),
-            'collection_date': s.collection_date.strftime('%Y-%m-%d %H:%M:%S'),
+            'upload_date': fmttime(s.submission_date),
+            'collection_date': fmttime(s.collection_date),
             'fullfig': None,
             'xanesfig': None}
