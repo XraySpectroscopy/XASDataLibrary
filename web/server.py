@@ -9,15 +9,11 @@ import base64
 import io
 
 import numpy as np
-import matplotlib
-matplotlib.use('agg')
-import matplotlib.pyplot as plt
-from matplotlib.font_manager import FontProperties
-from matplotlib import rcParams
 
 import xasdb
 import larch
-from utils import get_session_key, random_string, session_init, dict_repr
+from utils import (get_session_key, random_string,
+                   session_init, parse_spectrum)
 from plot import make_xafs_plot
 
 # configuration
@@ -68,7 +64,7 @@ def logout():
     return redirect(url_for('search'))
 
 @app.route('/user/')
-def user_profile():
+def user():
     # show the user profile for that user
     session_init(session, db)
     if 'username' not in session:
@@ -87,13 +83,13 @@ def search(elem=None):
         except:
             pass
 
-    out = []
+    spectra = []
     for s in dbspectra:
         edge     = session['edges']['%i' % s.edge_id]
         elem_sym = session['elements']['%i' % s.element_z][0]
         person   = session['people']['%i' % s.person_id]
 
-        out.append({'id': s.id,
+        spectra.append({'id': s.id,
                     'name': s.name,
                     'element': elem,
                     'edge': edge,
@@ -102,7 +98,7 @@ def search(elem=None):
                     'elem_sym': elem_sym})
 
     return render_template('ptable.html', nspectra=len(dbspectra),
-                           elem=elem, spectra=out)
+                           elem=elem, spectra=spectra)
 
 @app.route('/spectrum/<int:sid>')
 def spectrum(sid=None):
@@ -112,75 +108,7 @@ def spectrum(sid=None):
         error = 'Could not find Spectrum #%i' % sid
         return render_template('search', error=error)
 
-    edge = session['edges']['%i' % s.edge_id]
-    elem = session['elements']['%i' % s.element_z]
-    person = session['people']['%i' % s.person_id]
-
-    eunits = session['energy_units']['%i'% s.energy_units_id]
-    dspace = '%f'% s.d_spacing
-    
-    notes =  json.loads(s.notes)
-
-    try:
-        beamline = session['beamlines']['%i'% s.beamline_id]
-    except:
-        beamline = 'unknown -- check notes'
-        if 'beamline' in notes:
-            beamline = notes['beamline']
-            if 'name' in beamline:
-                beamline = beamline['name']
-            
-    try:        
-        sample = session['samples']['%i'% s.sample_id]
-        sample_name = sample[0]
-        sample_form = sample[1]
-        sample_prep = sample[2]
-    except:
-        sample_name = 'unknown'
-        sample_form = 'unknown'
-        sample_prep = 'unknown'
-        if 'sample' in notes:
-            sample_name = notes['sample']
-            if isinstance(sample_name, dict):
-                sample_name = dict_repr(sample_name)
-
-    mononame = 'unknown'
-    if 'mono' in notes:
-        if 'name' in notes['mono']:
-            mononame = notes['mono']['name']
-
-    notes.pop('column')
-    notes.pop('scan')
-    notes.pop('element')
-
-    misc = []
-    for key, val in notes.items():
-        
-        if isinstance(val, dict):
-            val = dict_repr(val).strip()
-        if len(val) > 1:
-            misc.append({'key': "# %s" % key.title(), 'val': val})
-   
-
-    opts = {'spectrum_id': s.id,
-            'spectrum_name': s.name,
-            'elem_sym': elem[0],
-            'elem_name': elem[1],
-            'edge': edge,
-            'energy_units': eunits,
-            'beamline': beamline,
-            'mononame': mononame, 
-            'dspace': dspace,
-            'misc': misc,
-            'sample_name':  sample_name,
-            'sample_form':  sample_form,
-            'sample_prep':  sample_prep,
-            'person_email': person[0],
-            'person_name': person[1],
-            'upload_date': s.submission_date.strftime('%Y-%m-%d %H:%M:%S'),
-            'collection_date': s.collection_date.strftime('%Y-%m-%d %H:%M:%S'),
-            'fullfig': None, 'xanesfig': None,
-            }
+    opts = parse_spectrum(s, session)
 
     try:
         energy = np.array(json.loads(s.energy))
@@ -193,26 +121,25 @@ def spectrum(sid=None):
 
     opts['fullfig'] = make_xafs_plot(energy, mutrans, s.name, ylabel='Raw XAFS')
 
-
+    eunits = opts['energy_units']
     if eunits.startswith('keV'):
         energy = energy /1000.0
     elif eunits.startswith('deg'):
         print 'Need to convert angle to energy'
-        
+
     group = larch.Group(energy=energy, mu=mutrans)
     gname = 'data_%s' % random_string(6)
 
     _larch.symtable.set_symbol(gname, group)
     _larch.run('pre_edge(%s)' % gname)
 
+    opts['e0'] = e0 = group.e0
     try:
-        cmd = "ne0 = xray_edge(%i, '%s')[0]" % (s.element_z, str(edge))
+        cmd = "tmp_e0 = xray_edge(%i, '%s')[0]" % (s.element_z, str(opts['edge']))
         _larch.run(cmd)
-        e0 = _larch.symtable.ne0
+        e0 = _larch.symtable.tmp_e0
     except:
-        e0 = group.e0
-
-    opts['e0'] = group.e0
+        pass
 
     i1 = max(np.where(group.energy<=e0 - 30)[0])
     i2 = max(np.where(group.energy<=e0 + 70)[0]) + 1
@@ -224,6 +151,22 @@ def spectrum(sid=None):
                                       ylabel='Normalized XANES', x0=e0)
 
     return render_template('spectrum.html', **opts)
+
+@app.route('/editspectrum/<int:sid>')
+def editspectrum(sid=None):
+    session_init(session, db)
+    error=None
+    if not session['logged_in']:
+        error='must be logged in to edit spectrum'
+        return render_template('search', error=error)
+
+    s  = db.get_spectrum(sid)
+    if s is None:
+        error = 'Could not find Spectrum #%i' % sid
+        return render_template('search', error=error)
+
+    opts = parse_spectrum(s, session)
+    return render_template('editspectrum.html', error=error, **opts)
 
 @app.route('/rawfile/<int:sid>/<fname>')
 def rawfile(sid, fname):
@@ -239,6 +182,25 @@ def rawfile(sid, fname):
 def about():
     session_init(session, db)
     return render_template('about.html')
+
+
+@app.route('/suites')
+@app.route('/suites/<int:sid>')
+def suites():
+    session_init(session, db)
+    return render_template('about.html')
+
+@app.route('/beamlines')
+@app.route('/beamlines/<int:sid>')
+def beamlines():
+    session_init(session, db)
+    return render_template('about.html')
+
+@app.route('/upload')
+@app.route('/upload/')
+def upload():
+    session_init(session, db)
+    return render_template('about.html', error='upload')
 
 if __name__ == "__main__":
     app.jinja_env.cache = {}
