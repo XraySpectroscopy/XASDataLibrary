@@ -1,6 +1,9 @@
 
 from flask import (Flask, request, session, redirect, url_for,
                    abort, render_template, flash, Response)
+
+from werkzeug import secure_filename
+
 import sys
 import os
 import time
@@ -13,10 +16,15 @@ import numpy as np
 import xasdb
 import larch
 from utils import (get_session_key, random_string,
-                   session_init, parse_spectrum, spectrum_ratings)
+                   fmttime, 
+                   session_init, parse_spectrum,
+                   spectrum_ratings)
 from plot import make_xafs_plot
 
 # configuration
+UPLOAD_FOLDER = 'C:\\tmp\\uploads'
+ALLOWED_EXTENSIONS = set(['txt', 'xdi'])
+
 NAME = 'XASDB'
 DATABASE = 'example.db'
 PORT     = 7112
@@ -28,11 +36,19 @@ t0 = time.time()
 
 app = Flask(__name__)
 app.config.from_object(__name__)
+app.config['MAX_CONTENT_LENGTH'] = 32 * 1024 * 1024
+
 print 'Flask App created ', time.time()-t0
-db = xasdb.connect_xasdb(DATABASE)
+db = xasdb.XASDataLibrary(DATABASE, server='sqlite')
+
 print 'XASDB connected ', time.time()-t0
+
 _larch = larch.Interpreter()
 print 'Larch initialized ', time.time()-t0
+
+def allowed_file(filename):
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1] in ALLOWED_EXTENSIONS
 
 @app.route('/')
 def index():
@@ -68,6 +84,7 @@ def login():
 def logout():
     session_init(session, db)
     session.pop('username', None)
+    session['person_id'] = None
     flash('You have been logged out')
     return redirect(url_for('search'))
 
@@ -178,8 +195,20 @@ def showspectrum_rating(sid=None):
         return render_template('search', error=error)
 
     opts = parse_spectrum(s, session)
-    ratings = spectrum_ratings(db, sid)
-    return render_template('editspectrum.html', error=error, **opts)
+    ratings = []
+    for score, review, dtime, pid in spectrum_ratings(db, sid):
+
+        person = session['people'][pid]
+        ratings.append({'score': score, 'review': review,
+                        'date': fmttime(dtime),
+                        'person_email': person[0],
+                        'person_name': person[1],
+                        'person_affil': person[2]})
+    print 'Ratings ! ', ratings
+        
+    return render_template('show_spectrum_ratings.html',
+                           ratings=ratings,
+                           spectrum_name=opts['spectrum_name'])
 
 @app.route('/editspectrum/<int:sid>')
 def editspectrum(sid=None):
@@ -213,8 +242,9 @@ def submit_spectrum_rating(sid=None):
         spectrum_name = request.form['spectrum_name']
         person_id = request.form['person']
         message = 'Review saved!'
-        print ' Should set Score ', score, review, spectrum_id, person_id
-        # return redirect(url_for('spectrum', sid=spectrum_id))
+        db.set_spectrum_rating(int(person_id),
+                               int(spectrum_id),
+                               int(score), comments=review)
 
         return redirect(url_for('spectrum', sid=spectrum_id))
 
@@ -291,7 +321,58 @@ def beamlines():
 @app.route('/upload/')
 def upload():
     session_init(session, db)
-    return render_template('about.html', error='upload')
+    if not session['logged_in']:
+        error='must be logged in to submit a spectrum'
+        return redirect(url_for('spectrum', sid=sid, error=error))
+    return render_template('upload.html',
+                           person_id=session['person_id'])
+
+@app.route('/submit_upload', methods=['GET', 'POST'])
+def submit_upload():
+    session_init(session, db)
+    error=None
+    if not session['logged_in']:
+        error='must be logged in to submit a spectrum'
+        return redirect(url_for('spectrum', sid=sid, error=error))
+
+    if request.method == 'POST':
+        print 'Submit ', request.form
+        person_id = request.form['person']
+        person_email = session['people'][person_id][0]
+        
+        file = request.files['file']
+        if file and allowed_file(file.filename):
+            fname = secure_filename(file.filename)
+            fullpath = os.path.abspath(os.path.join(
+                app.config['UPLOAD_FOLDER'], fname))
+
+            print 'FULLPATH ', fullpath
+            
+            try:
+                file.save(fullpath)
+            except IOError:
+                print 'Could not save file ', fullpath
+
+            time.sleep(1.0)
+            print 'Person:  ', person_email, type(person_email)
+
+            db.add_xdifile(fullpath, person=person_email,
+                           create_sample=True)
+            time.sleep(1.0)
+
+            session.pop('samples')
+            session_int(session, db)
+                        
+        s  = db.get_spectra()[-1]
+        sid = s.id
+        if s is None:
+            error = 'Could not find Spectrum #%i' % sid
+            return render_template('search', error=error)
+        
+        opts = parse_spectrum(s, session)
+        return render_template('editspectrum.html', error=error, **opts)
+
+    return render_template('upload.html', error='upload error')
 
 if __name__ == "__main__":
     # app.jinja_env.cache = {}
