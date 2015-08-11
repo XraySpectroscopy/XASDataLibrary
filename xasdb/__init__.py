@@ -23,7 +23,7 @@ __version__ = '0.1.1'
 
 from .xasdb import (isXASDataLibrary, XASDataLibrary, XASDBException,
                     Info, Mode, Facility, Beamline, EnergyUnits, Edge,
-                    Element, Ligand, Crystal_Structure, Citation,
+                    Element, Ligand, Citation,
                     Person, Spectrum_Rating, Suite_Rating, Suite,
                     Sample, Spectrum)
 

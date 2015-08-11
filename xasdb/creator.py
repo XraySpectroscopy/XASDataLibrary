@@ -203,9 +203,9 @@ def  make_newdb(dbname, server= 'sqlite', user='',
 
     energy_units = NamedTable('energy_units', metadata, nameid='units')
 
-    crystal_structure = NamedTable('crystal_structure', metadata,
-                         cols=[StrCol('format'),
-                               StrCol('data')])
+#     crystal_structure = NamedTable('crystal_structure', metadata,
+#                          cols=[StrCol('format'),
+#                                StrCol('data')])
 
     person = NamedTable('person', metadata, nameid='email',
                         cols=[StrCol('name', nullable=False),
@@ -226,7 +226,8 @@ def  make_newdb(dbname, server= 'sqlite', user='',
                               StrCol('material_source'),
                               StrCol('preparation'),
                               PointerCol('person'),
-                              PointerCol('crystal_structure')])
+                              # PointerCol('crystal_structure')
+                              ])
 
     spectrum = NamedTable('spectrum', metadata,
                           cols=[StrCol('energy'),
