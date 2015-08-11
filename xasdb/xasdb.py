@@ -623,7 +623,7 @@ class XASDataLibrary(object):
         # foreign keys, pointers to other tables
         kws['beamline_id'] = beamline
         kws['person_id'] = person
-        kws['edge_id'] = edg
+        kws['edge_id'] = edge
         kws['element_z'] = element
         kws['sample_id'] = sample
 
@@ -631,10 +631,11 @@ class XASDataLibrary(object):
         kws['reference_id'] = reference_sample
         kws['reference_mode_id'] = reference_mode
         kws['energy_units_id'] = energy_units
-
-        self.addrow('spectrum', name=name, **kws)
-        table = self.tables['spectrum']
-        return self.query(table).filter(table.c.name == name).one()
+        print 'ADD SPECTRUM ', beamline, person, edge, element, sample, citation, reference_sample, reference_mode, energy_units
+        
+        #self.addrow('spectrum', name=name, **kws)
+        #table = self.tables['spectrum']
+        #return self.query(table).filter(table.c.name == name).one()
 
 
     def get_beamlines(self, facility=None):
