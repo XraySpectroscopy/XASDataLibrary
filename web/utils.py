@@ -1,4 +1,5 @@
 import os
+import json
 import time
 import base64
 from collections import namedtuple
@@ -70,11 +71,11 @@ def session_init(session, db):
             facid = '%i' % r.facility_id
             d['%i'%r.id] = (r.name, r.notes, r.xray_source, facid)
 
-            
+
     if 'samples' not in session:
         session['samples'] = d = {}
         for r in db.filtered_query('sample'):
-            d['%i'%r.id] = (r.name, r.formula, r.preparation, 
+            d['%i'%r.id] = (r.name, r.formula, r.preparation,
                             r.material_source, r.notes, '%i'%r.person_id)
 
     if 'people' not in session:
@@ -82,3 +83,73 @@ def session_init(session, db):
         for r in db.get_persons():
             d['%i'%r.id] = (r.email, r.name, r.affiliation)
 
+def parse_spectrum(s, session):
+    edge = session['edges']['%i' % s.edge_id]
+    elem = session['elements']['%i' % s.element_z]
+    person = session['people']['%i' % s.person_id]
+
+    eunits = session['energy_units']['%i'% s.energy_units_id]
+    dspace = '%f'% s.d_spacing
+
+    notes =  json.loads(s.notes)
+
+    try:
+        beamline = session['beamlines']['%i'% s.beamline_id]
+    except:
+        beamline = 'unknown -- check notes'
+        if 'beamline' in notes:
+            beamline = notes['beamline']
+            if 'name' in beamline:
+                beamline = beamline['name']
+
+    try:
+        sample = session['samples']['%i'% s.sample_id]
+        sample_name = sample[0]
+        sample_form = sample[1]
+        sample_prep = sample[2]
+    except:
+        sample_name = 'unknown'
+        sample_form = 'unknown'
+        sample_prep = 'unknown'
+        if 'sample' in notes:
+            sample_name = notes['sample']
+            if isinstance(sample_name, dict):
+                sample_name = dict_repr(sample_name)
+
+    mononame = 'unknown'
+    if 'mono' in notes:
+        if 'name' in notes['mono']:
+            mononame = notes['mono']['name']
+
+    notes.pop('column')
+    notes.pop('scan')
+    notes.pop('element')
+
+    misc = []
+    for key, val in notes.items():
+
+        if isinstance(val, dict):
+            val = dict_repr(val).strip()
+        if len(val) > 1:
+            misc.append({'key': "# %s" % key.title(), 'val': val})
+
+
+    return {'spectrum_id': s.id,
+            'spectrum_name': s.name,
+            'elem_sym': elem[0],
+            'elem_name': elem[1],
+            'edge': edge,
+            'energy_units': eunits,
+            'beamline': beamline,
+            'mononame': mononame,
+            'dspace': dspace,
+            'misc': misc,
+            'sample_name':  sample_name,
+            'sample_form':  sample_form,
+            'sample_prep':  sample_prep,
+            'person_email': person[0],
+            'person_name': person[1],
+            'upload_date': s.submission_date.strftime('%Y-%m-%d %H:%M:%S'),
+            'collection_date': s.collection_date.strftime('%Y-%m-%d %H:%M:%S'),
+            'fullfig': None,
+            'xanesfig': None}
