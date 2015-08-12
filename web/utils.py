@@ -73,6 +73,10 @@ def session_init(session, db):
             facid = '%i' % r.facility_id
             d['%i'%r.id] = (r.name, r.notes, r.xray_source, facid)
 
+    if 'spectra' not in session:
+        session['spectra'] = d = {}
+        for r in db.get_spectra():
+            d['%i'%r.id] = (r.name, r.element_z, r.edge_id, r.person_id)
 
     if 'samples' not in session:
         session['samples'] = d = {}
@@ -175,6 +179,7 @@ def parse_spectrum(s, session):
             'edge': edge,
             'energy_units': eunits,
             'comments': '<p>%s</p>' % (s.comments.replace('\n', '<br>')),
+            'beamline_id': s.beamline_id,
             'beamline': beamline,
             'mononame': mononame,
             'dspace': dspace,
