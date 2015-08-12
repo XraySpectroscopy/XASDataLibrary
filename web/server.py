@@ -313,6 +313,53 @@ def rate_spectrum(sid=None):
                            score=score, review=review)
 
 
+@app.route('/add_spectrum_to_suite/<int:sid>')
+def add_spectrum_to_suite(sid=None):
+    session_init(session, db)
+    error=None
+    if not session['logged_in']:
+        error='must be logged in to add spectrum to suite'
+        return redirect(url_for('spectrum', sid=sid, error=error))
+
+    s  = db.get_spectrum(sid)
+    if s is None:
+        error = 'Could not find Spectrum #%i' % sid
+        return render_template('ptable', error=error)
+    
+    suites = []
+    for key, val in session['suites'].items():
+        suites.append({'id': key, 'name': val[0]})
+        
+    return render_template('add_spectrum_to_suite.html', error=error,
+                           spectrum_id=sid,
+                           spectrum_name=s.name,
+                           person_id=session['person_id'],
+                           suites=suites)
+
+@app.route('/submit_spectrum_to_suite', methods=['GET', 'POST'])
+def submit_spectrum_to_suite():
+    session_init(session, db)
+    error=None
+    if not session['logged_in']:
+        error='must be logged in to add spectrum to a suite'
+        return redirect(url_for('suites', error=error))
+
+    if request.method == 'POST':
+        print request.form
+        print request.form.keys()
+        
+        spectrum_id  = int(request.form['spectrum_id'])
+        suite_id     = int(request.form['suite_id'])
+        person_id    = request.form['person']
+
+        found = False
+        for r in db.filtered_query('spectrum_suite', suite_id=suite_id):
+            found = found or (r.spectrum_id == spectrum_id)
+        if not found:
+            print ' add spectra to suite ', spectrum_id, suite_id, person_id
+
+    return redirect(url_for('suites', error=error))
+    
 
 @app.route('/rawfile/<int:sid>/<fname>')
 def rawfile(sid, fname):
