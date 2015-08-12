@@ -22,8 +22,8 @@ from sqlalchemy.orm import sessionmaker,  mapper, relationship, backref
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm.exc import  NoResultFound
 
-import larch
-from larch_plugins.io.xdi import XDIFile
+from xdifile import XDIFile
+
 
 PW_ALGORITHM = 'sha512'
 PW_NROUNDS   = 120000
@@ -80,6 +80,12 @@ def isotime2datetime(isotime):
     susec = int(1e6*float('.%s' % sfrac))
 
     return datetime(syear, smon, sday, shour, smin, ssec, susec)
+
+def fmttime(dtime=None):
+    if dtime is None:
+        dtime = datetime.now()
+    return dtime.strftime('%Y-%m-%d %H:%M:%S')
+
 
 def None_or_one(val, msg='Expected 1 or None result'):
     """expect result (as from query.all() to return
@@ -161,7 +167,7 @@ class Ligand(_BaseTable):
 #class Crystal_Structure(_BaseTable):
 #     "crystal structure table"
 #     pass
- 
+
 class Citation(_BaseTable):
     "literature citation table"
     pass
@@ -309,8 +315,6 @@ class XASDataLibrary(object):
             logger = logging.getLogger('sqlalchemy.engine')
             logger.addHandler(logging.FileHandler(self.logfile))
 
-        print 'MAPPED ', Sample
-        
 
     def close(self):
         "close session"
@@ -333,25 +337,7 @@ class XASDataLibrary(object):
         if self.update_mod_time is None:
             self.update_mod_time = self.tables['info'].update(
                 whereclause="key='modify_date'")
-        self.update_mod_time.execute(value=datetime.isoformat(datetime.now()))
-
-    def addrow_OLD(self, table, argnames, argvals, **kws):
-        """add generic row"""
-        row  = table() #
-        arg0 = argnames[0]
-        val0 = argvals[0]
-        for name, val in zip(argnames, argvals):
-            setattr(row, name, val)
-        for key, val in kws.items():
-            setattr(row, key, val)
-        try:
-            self.session.add(row)
-            self.set_mod_time()
-            self.session.commit()
-        except IntegrityError, msg:
-            self.session.rollback()
-            raise Warning('Could not add data to table %s:\n  %s' % (table, msg))
-        return self.query(table).filter(getattr(table, arg0)==val0).one()
+        self.update_mod_time.execute(value=fmttime())
 
     def addrow(self, tablename, **kws):
         """add generic row"""
@@ -417,7 +403,7 @@ class XASDataLibrary(object):
         notes  optional
         returns EnergyUnits instance"""
         self.addrow('energy_units', units=units, notes=notes, **kws)
-        
+
     def get_sample(self, sid):
         """return sample by id"""
         return None_or_one(self.filtered_query('sample', id=sid))
@@ -426,7 +412,7 @@ class XASDataLibrary(object):
         """add collection mode: name required
         returns Mode instance"""
         return self.addrow('mode', name=name, notes=notes, **kws)
-    
+
 #     def add_crystal_structure(self, name, notes='',
 #                                format=None, data=None, **kws):
 #          """add data format: name required
@@ -444,7 +430,7 @@ class XASDataLibrary(object):
     def add_facility(self, name, notes='', **kws):
         """add facilty by name, return Facility instance"""
         return self.addrow('facility', name=name, notes=notes, **kws)
-    
+
     def add_beamline(self, name, facility_id=None,
                      xray_source=None,  notes='', **kws):
         """add beamline by name, with facility:
@@ -461,7 +447,7 @@ class XASDataLibrary(object):
     def add_info(self, key, value):
         """add Info key value pair -- returns Info instance"""
         return self.addrow('info', key=key, value=value)
-    
+
     def add_ligand(self, name, **kws):
         """add ligand: name required
         returns Ligand instance"""
@@ -511,7 +497,7 @@ class XASDataLibrary(object):
     def add_sample(self, name, person_id, notes='', **kws):
         """add sample: name required
         returns Sample instance"""
-        
+
         kws['name'] = name
         kws['person_id'] = person_id
         kws['notes'] = notes
@@ -525,7 +511,7 @@ class XASDataLibrary(object):
         returns Suite instance"""
         return self.addrow('suite', name=name, notes=notes,
                             person_id=person_id, **kws)
-    
+
 
     def add_suite_rating(self, person_id, suite_id, score, comments=None):
         """add a score to a suite:"""
@@ -623,19 +609,18 @@ class XASDataLibrary(object):
         # foreign keys, pointers to other tables
         kws['beamline_id'] = beamline
         kws['person_id'] = person
-        kws['edge_id'] = edge
-        kws['element_z'] = element
-        kws['sample_id'] = sample
+        kws['edge_id'] = self.get_edge(edge).id
+        kws['element_z'] = self.get_element(element).z
+        kws['energy_units_id'] = self.filtered_query('energy_units', name=energy_units)[0].id
 
+        kws['sample_id'] = sample
         kws['citation_id'] = citation
         kws['reference_id'] = reference_sample
         kws['reference_mode_id'] = reference_mode
-        kws['energy_units_id'] = energy_units
-        print 'ADD SPECTRUM ', beamline, person, edge, element, sample, citation, reference_sample, reference_mode, energy_units
-        
-        #self.addrow('spectrum', name=name, **kws)
-        #table = self.tables['spectrum']
-        #return self.query(table).filter(table.c.name == name).one()
+
+        self.addrow('spectrum', name=name, **kws)
+        table = self.tables['spectrum']
+        return self.query(table).filter(table.c.name == name).one()
 
 
     def get_beamlines(self, facility=None):
@@ -743,8 +728,7 @@ class XASDataLibrary(object):
 
         return query.execute().fetchall()
 
-    def add_xdifile(self, fname, person=None,
-                    create_sample=True, **kws):
+    def add_xdifile(self, fname, person=None, create_sample=True, **kws):
 
         try:
             fh  = open(fname, 'r')
@@ -757,9 +741,16 @@ class XASDataLibrary(object):
         xfile = XDIFile(fname)
         path, fname = os.path.split(fname)
 
+        now = fmttime()
+
         spectrum_name = fname
         if spectrum_name.endswith('.xdi'):
             spectrum_name = spectrum_name[:-4]
+
+
+        stab = self.tables['spectrum']
+        if spectrum_name in [s.name for s in stab.select().execute()]:
+            spectrum_name = "%s, uploaded %s" % (spectrum_name, now)
 
         c_date    = xfile.attrs['scan']['start_time']
         d_spacing = xfile.dspacing
@@ -809,8 +800,8 @@ class XASDataLibrary(object):
             person_id = person.id
         else:
             person_id = self.get_person(email=person).id
-        
-        sample = None
+
+        sample_id = None
         if create_sample:
             sattrs  = xfile.attrs['sample']
             formula, prep, notes = '', '', ''
@@ -820,24 +811,27 @@ class XASDataLibrary(object):
                 prep = sattrs.pop('prep')
             if len(sattrs) > 0:
                 notes  = json_encode(sattrs)
-            sname = "sample for '%s', uploaded %s"
-            sname = sname % (fname, datetime.now().isoformat(' '))
+            sname = "sample for '%s', uploaded %s" % (fname, now)
             self.add_sample(sname, person_id, formula=formula,
                             preparation=prep, notes=notes)
             stab = self.tables['sample']
             sample = self.query(stab).filter(stab.c.name==sname).one()
-
+            sample_id = sample.id
 
         beamline = None
         beamline_name  = xfile.attrs['beamline']['name']
         notes = json_encode(xfile.attrs)
+        print 'ADD Spectrum -> ', spectrum_name
         self.add_spectrum(spectrum_name, d_spacing=d_spacing,
                           collection_date=c_date, person=person_id,
                           beamline=beamline, edge=edge, element=element,
-                          energy=energy, energy_units=en_units, i0=i0,
-                          itrans=itrans, ifluor=ifluor, irefer=irefer,
-                          sample=sample, comments=comments,
-                          notes=notes, filetext=filetext)
+                          energy=energy, energy_units=en_units,
+                          i0=i0,itrans=itrans, ifluor=ifluor, irefer=irefer,
+                          sample=sample_id,
+                          comments=comments,
+                          notes=notes,
+                          filetext=filetext,
+                          )
 
         for mode in modes:
             self.set_spectrum_mode(spectrum_name, mode)
