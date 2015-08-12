@@ -1,0 +1,18 @@
+{% extends "layout.html" %}
+{% block body %}
+
+<div class=subfont> Upload XDI Spectra</div>
+
+
+  See  <a href="{{ url_for('about') }}"> About XDI  </a> for file guidelines.
+
+ <p>
+
+<form action="{{ url_for('submit_upload') }}" 
+    method=post enctype=multipart/form-data>
+    <input type=hidden name=person value={{person_id}}>
+    <input type=file name=file> <br>
+    <input type=submit value=upload>
+</form>
+
+{% endblock %}
