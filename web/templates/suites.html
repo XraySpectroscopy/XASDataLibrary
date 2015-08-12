@@ -1,0 +1,29 @@
+{% extends "layout.html" %}
+{% block body %}
+  {% if error %}<p class=error><strong>Error:</strong> {{ error }}
+{% endif %}
+
+<p> <div class=subfont> Suites of Spectra
+
+{% if session.username is not none %}
+  &nbsp;   &nbsp;
+  <a href="../add_suite"> [add a suite] </a>
+{% endif %}
+</div>
+
+<div id='spectra'>
+<hr>
+{% if nsuites == 0 %}
+      No suites defined.
+{% else %}
+   <table cellspacing=5 cellpadding=2>
+   {% for s in suites %}
+       <tr><td id='spectra'>
+           <a href="../suites/{{ s.id }}"> {{ s.name }}</a>
+        </td><td> {{ s.nspectra }} spectra:   {{ s.notes }} </td></tr>
+   {% endfor %}
+   </table>
+{% endif %}
+
+</div>
+{% endblock %}

@@ -1,9 +1,16 @@
 {% extends "layout.html" %}
 {% block body %}
 
-  Welcome to the XAFS Spectral Library.      <a href="{{ url_for('search') }}"> Browse the collection</a>
-
    <p>
+
+  Welcome to the XAFS Spectral Library.
+
+   <ul>
+     <li> <a href="{{ url_for('search') }}"> Browse the collection</a> </li>
+     <li> </li>
+   </ul>
+
+<hr>
 
     Documentation goes here....
 {% endblock %}
