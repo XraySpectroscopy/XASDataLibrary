@@ -14,8 +14,13 @@
  {% endif %}
 </div> <p>
 
+<table> <tr><td><img src="data:image/png;base64,{{ fullfig|safe }}"></td>
+<td> <img src="data:image/png;base64,{{ xanesfig|safe }}"><br></td></tr></table>
+
 <table>
-<tr><td width=20%> Original Data File: </td>
+<tr>
+<tr><td colspan=2> <hr> </td></tr>
+<td width=20%> Original Data File: </td>
     <td> <a href="../rawfile/{{ spectrum_id }}/{{ spectrum_name }}.xdi">
              {{ spectrum_name }}.xdi </a>
     </td>
@@ -35,6 +40,8 @@
     <td>  {{energy_units}}  </td></tr>
 <tr><td> Mono d-spacing: </td>
     <td>   {{dspace}} &#197; ({{mononame}})   </td></tr>
+<tr><td> User Comments: </td>
+    <td>   {{ comments|safe }} </td></tr>
 <tr><td> Measured: </td>
     <td>  {{collection_date}}     </td></tr>
 <tr><td> Uploaded: </td>
@@ -44,16 +51,10 @@
 <tr><td colspan=2> &nbsp;&nbsp;&nbsp; <i>unsorted file headers:</i> </td></tr>
 
 {% for x in misc %}
-   <tr><td> {{x.key}}: </td><td> {{x.val}} </td></tr>
+   <tr><td> {{x.key}}: </td><td> {{x.val|safe}} </td></tr>
 {% endfor %}
-
-<tr><td colspan=2> <hr> </td></tr>
 
 
 </table>
 
-<table> <tr><td><img src="data:image/png;base64,{{ fullfig|safe }}"></td>
-<td> <img src="data:image/png;base64,{{ xanesfig|safe }}"><br></td></tr></table>
-
-</form>
 {% endblock %}
