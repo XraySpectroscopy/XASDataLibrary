@@ -10,18 +10,20 @@ import time
 import json
 import base64
 import io
-
 import numpy as np
 
-from xasdb import XASDataLibrary, fmttime, valid_score
+from xasdb import XASDataLibrary, fmttime, valid_score, unique_name
 import larch
 from utils import (get_session_key, random_string,
                    session_init, parse_spectrum,
                    spectrum_ratings)
+
 from plot import make_xafs_plot
 
 # configuration
 UPLOAD_FOLDER = '/tmp/'
+if os.name =='nt':
+    UPLOAD_FOLDER = 'C:/tmp/'
 ALLOWED_EXTENSIONS = set(['txt', 'xdi'])
 
 NAME = 'XASDB'
@@ -191,6 +193,14 @@ def spectrum(sid=None):
     opts['xanesfig'] = make_xafs_plot(xanes_en, xanes_mu, s.name,
                                       xlabel='Energy-%.1f (eV)' % e0,
                                       ylabel='Normalized XANES', x0=e0)
+
+    suites = []
+    for r in db.filtered_query('spectrum_suite', spectrum_id=s.id):
+        suites.append({'id': r.suite_id,
+                       'name': session['suites']["%i" % (r.suite_id)][0]})
+    opts['nsuites'] = len(suites)
+    opts['suites'] = suites
+
     return render_template('spectrum.html', **opts)
 
 @app.route('/showspectrum_rating/<int:sid>')
@@ -323,44 +333,91 @@ def about():
 
 @app.route('/suites')
 @app.route('/suites/<int:sid>')
-def suites():
+def suites(sid=None):
     session_init(session, db)
     suites = []
-    for sid, val in session['suites'].items():
-        name, notes, person_id = val
-        person_email = session['people'][person_id][0]
+    suite_id = sid
+    if suite_id is None:
+        for suite_id, val in session['suites'].items():
+            name, notes, person_id = val
+            person_email = session['people'][person_id][0]
+            spectra = []
+            for r in db.filtered_query('spectrum_suite', suite_id=suite_id):
+                _spec_ = session['spectra']["%i" % (r.spectrum_id)]
+                spectra.append({'spectrum_id': r.spectrum_id,
+                                'name':    _spec_[0],
+                                'element': session['elements']["%i" % _spec_[1]],
+                                'edge':    session['edges']["%i" % _spec_[2]]})
+
+            suites.append({'id': suite_id,
+                           'name': name,
+                           'notes': notes,
+                           'person_email': person_email,
+                           'nspectra': len(spectra),
+                           'spectra': spectra})
+                
+    else:
+        for sid, val in session['suites'].items():
+            if sid == "%i" % suite_id :
+                name, notes, person_id = val
+        person_email = session['people'][person_id][0]                
         spectra = []
-        for r in db.filtered_query('spectrum_suite', spectrum_id=sid):
-            spectra.append(r.spectrum_id)
-        suites.append({'id': sid,
+        for r in db.filtered_query('spectrum_suite', suite_id=suite_id):
+            _name, el_z, edge, pid = session['spectra']["%i" % (r.spectrum_id)]
+            elem_sym, elem_name = session['elements']["%i" % el_z]
+            edge =  session['edges']["%i" % edge]
+            spectra.append({'spectrum_id': r.spectrum_id,
+                            'name':    _name,
+                            'elem_sym': elem_sym,
+                            'edge':    edge,
+                            'person_id': pid})
+
+        suites.append({'id': suite_id,
                        'name': name,
                        'notes': notes,
                        'person_email': person_email,
-                       'nspectra': len(spectra)})
+                       'nspectra': len(spectra),
+                       'spectra': spectra})
 
     return render_template('suites.html',
                            nsuites=len(suites),
                            suites=suites)
 
 @app.route('/add_suite')
-@app.route('/add_suite', methods=['GET', 'POST'])
 def add_suite():
     session_init(session, db)
-    suites = []
-    for sid, val in session['suites'].items():
-        name, notes, person_id = val
-        person_email = session['people'][person_id][0]
-        spectra = []
-        for r in db.filtered_query('spectrum_suite', spectrum_id=sid):
-            spectra.append(r.spectrum_id)
-        suites.append({'id': sid,
-                       'name': name,
-                       'notes': notes,
-                       'person_email': person_email,
-                       'nspectra': len(spectra)})
+    error=None
+    if not session['logged_in']:
+        error='must be logged in to add a suite'
+        return redirect(url_for('suites', error=error))
+    return render_template('add_suite.html', error=error,
+                           person_id=session['person_id'])
 
-    return render_template('suites.html', nsuites=len(suites),
-                           suites=suites)
+@app.route('/submit_suite', methods=['GET', 'POST'])
+def submit_suite():
+    session_init(session, db)
+    error=None
+    if not session['logged_in']:
+        error='must be logged in to add a suite'
+        return redirect(url_for('suites', error=error))
+
+    if request.method == 'POST':
+        suite_name = request.form['suite_name']
+        person_id = request.form['person']
+        notes = request.form['notes']
+        
+        _sname = [s[0] for s in session['suites'].keys()]
+        try:
+            suite_name = unique_name(suite_name, _sname,  msg='suite')
+        except:
+            error = 'a suite named %s exists'
+
+        db.add_suite(suite_name, notes=notes, person_id=int(person_id))
+        time.sleep(1)
+        session.pop('suites')
+
+    return redirect(url_for('suites', error=error))
+    
 
 @app.route('/beamlines')
 @app.route('/beamlines/<int:sid>')
