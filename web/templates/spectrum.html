@@ -3,7 +3,7 @@
   {% if error %}<p class=error><strong>Error:</strong> {{ error }}{% endif %}
 <form action="action"  method="post">
 
-<p> <div class=subfont> Spectrum  {{ spectrum_name }}
+<p> <div class=subfont> Spectrum:  {{ spectrum_name }}
 {% if session.username is not none %}
   &nbsp;   &nbsp;
   <a href="../rate_spectrum/{{ spectrum_id }}"> [rate this spectrum] </a>
@@ -34,7 +34,7 @@
 <tr><td> Energy Units: </td>
     <td>  {{energy_units}}  </td></tr>
 <tr><td> Mono d-spacing: </td>
-    <td>   {{dspace}} &Acirc;  ({{mononame}})   </td></tr>
+    <td>   {{dspace}} &#197; ({{mononame}})   </td></tr>
 <tr><td> Measured: </td>
     <td>  {{collection_date}}     </td></tr>
 <tr><td> Uploaded: </td>
