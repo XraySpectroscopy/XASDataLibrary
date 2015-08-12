@@ -13,16 +13,15 @@ import io
 
 import numpy as np
 
-import xasdb
+from xasdb import XASDataLibrary, fmttime
 import larch
 from utils import (get_session_key, random_string,
-                   fmttime, 
                    session_init, parse_spectrum,
                    spectrum_ratings)
 from plot import make_xafs_plot
 
 # configuration
-UPLOAD_FOLDER = 'C:\\tmp\\uploads'
+UPLOAD_FOLDER = '/tmp/'
 ALLOWED_EXTENSIONS = set(['txt', 'xdi'])
 
 NAME = 'XASDB'
@@ -31,7 +30,6 @@ PORT     = 7112
 DEBUG    = True
 SECRET_KEY = get_session_key()
 
-print 'Imports done'
 t0 = time.time()
 
 app = Flask(__name__)
@@ -39,7 +37,7 @@ app.config.from_object(__name__)
 app.config['MAX_CONTENT_LENGTH'] = 32 * 1024 * 1024
 
 print 'Flask App created ', time.time()-t0
-db = xasdb.XASDataLibrary(DATABASE, server='sqlite')
+db = XASDataLibrary(DATABASE, server='sqlite')
 
 print 'XASDB connected ', time.time()-t0
 
@@ -138,18 +136,19 @@ def spectrum(sid=None):
 
     ratings = spectrum_ratings(db, sid)
     opts['rating'] = 'No ratings'
+
     if len(ratings) > 0:
         sum = 0.0
         for rate in ratings: sum = sum + rate[0]
         rating = sum*1.0/len(ratings)
         opts['rating'] = 'Average rating %.1f (%i ratings)' % (rating, len(ratings))
 
-    try:
+    if True: # try:
         energy = np.array(json.loads(s.energy))
         i0     = np.array(json.loads(s.i0))
         itrans = np.array(json.loads(s.itrans))
         mutrans = -np.log(itrans/i0)
-    except:
+    else: # except:
         error = 'Could not extract data from spectrum'
         return render_template('spectrum.html', **opts)
 
@@ -204,8 +203,7 @@ def showspectrum_rating(sid=None):
                         'person_email': person[0],
                         'person_name': person[1],
                         'person_affil': person[2]})
-    print 'Ratings ! ', ratings
-        
+
     return render_template('show_spectrum_ratings.html',
                            ratings=ratings,
                            spectrum_name=opts['spectrum_name'])
@@ -336,39 +334,38 @@ def submit_upload():
         return redirect(url_for('spectrum', sid=sid, error=error))
 
     if request.method == 'POST':
-        print 'Submit ', request.form
         person_id = request.form['person']
         person_email = session['people'][person_id][0]
-        
         file = request.files['file']
+
+        file_ok = False
+
         if file and allowed_file(file.filename):
             fname = secure_filename(file.filename)
             fullpath = os.path.abspath(os.path.join(
                 app.config['UPLOAD_FOLDER'], fname))
 
-            print 'FULLPATH ', fullpath
-            
             try:
                 file.save(fullpath)
+                file_ok = True
             except IOError:
                 print 'Could not save file ', fullpath
 
-            time.sleep(1.0)
-            print 'Person:  ', person_email, type(person_email)
+            if file_ok:
+                time.sleep(0.5)
+                db.add_xdifile(fullpath, person=person_email,
+                               create_sample=True)
+                time.sleep(0.5)
 
-            db.add_xdifile(fullpath, person=person_email,
-                           create_sample=True)
-            time.sleep(1.0)
+                session.pop('samples')
+                session_init(session, db)
 
-            session.pop('samples')
-            session_int(session, db)
-                        
-        s  = db.get_spectra()[-1]
-        sid = s.id
-        if s is None:
-            error = 'Could not find Spectrum #%i' % sid
-            return render_template('search', error=error)
-        
+            s  = db.get_spectra()[-1]
+            sid = s.id
+            if s is None:
+                error = 'Could not find Spectrum #%i' % sid
+                return render_template('search', error=error)
+
         opts = parse_spectrum(s, session)
         return render_template('editspectrum.html', error=error, **opts)
 
