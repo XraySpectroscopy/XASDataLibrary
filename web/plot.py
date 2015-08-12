@@ -14,7 +14,7 @@ mpl_lfont.set_size(9)
 rcParams['xtick.labelsize'] =  rcParams['ytick.labelsize'] = 9
 
 def make_xafs_plot(x, y, title, xlabel='Energy (eV)', ylabel='mu', x0=None):
-    fig  = plt.figure(figsize=(4.5, 2.75), dpi=100)
+    fig  = plt.figure(figsize=(4.25, 2.5), dpi=100)
     axes = fig.add_axes([0.16, 0.16, 0.75, 0.75], axisbg='#FFFFFF')
 
     axes.set_xlabel(xlabel, fontproperties=mpl_lfont)
@@ -29,7 +29,7 @@ def make_xafs_plot(x, y, title, xlabel='Energy (eV)', ylabel='mu', x0=None):
 
     xrange = max(x)-min(x)
     yrange = max(y)-min(y)
-    
+
     axes.set_xlim((min(x)-xrange*0.05, max(x)+xrange*0.05), emit=True)
     axes.set_ylim((min(y)-yrange*0.05, max(y)+yrange*0.05), emit=True)
 
