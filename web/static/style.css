@@ -39,7 +39,7 @@ h2 {font:bold 22px verdana,arial,sans-serif;color:#044484;font-weight:bold;}
 
 #ptable {background:#FEFEFC;}
 #elem {font: bold 12pt verdana,arial,san-serif; font-family: monospace; font-size: 12pt; font-weight:bold;
-       background:#FAFAF8; text-align:justify;}
+       background:#FFFFFD; text-align:justify;}
 #elem a, a.active {color: #4444AA; solid #880000 ; text-decoration: none; }
 #elem a.active {color: #CC0000;  background: #FAFAE0;}
 #elem a:hover {color: #CC0000;  background: #FAFAE0;}
