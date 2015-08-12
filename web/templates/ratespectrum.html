@@ -1,9 +1,9 @@
 {% extends "layout.html" %}
 {% block body %}
-  <h4>Rate Spectrum {{ spectrum_name }} </h4>
-  {% if error %}<p class=error><strong>Error:</strong> {{ error }}{% endif %}
+  <h4>Rate Spectrum: {{ spectrum_name }} </h4>
+  {% if error %}<p class=error><strong>Error:</strong> {{ error }}</p>{% endif %}
 
-Enter Rating (score 1 to 5):
+Enter Rating (0 to 5:  0=worst, 5=best):
 
 <form action="{{ url_for('submit_spectrum_rating') }}" method=post>
     <input type=hidden name=person value={{person_id}}>
