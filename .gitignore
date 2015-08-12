@@ -1,6 +1,7 @@
 *.pyc
 *~
 *#
+*.db
 doc/_build
 doc/*.pdf
 tests/.coverage*
@@ -8,4 +9,5 @@ build
 xdi_data
 dist
 junk
+sandbox
 
