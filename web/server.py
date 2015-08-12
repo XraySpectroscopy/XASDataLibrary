@@ -306,8 +306,42 @@ def about():
 @app.route('/suites/<int:sid>')
 def suites():
     session_init(session, db)
+    suites = []
+    for sid, val in session['suites'].items():
+        name, notes, person_id = val
+        person_email = session['people'][person_id][0]
+        spectra = []
+        for r in db.filtered_query('spectrum_suite', spectrum_id=sid):
+            spectra.append(r.spectrum_id)
+        suites.append({'id': sid,
+                       'name': name,
+                       'notes': notes,
+                       'person_email': person_email,
+                       'nspectra': len(spectra)})
 
-    return render_template('suites.html')
+    return render_template('suites.html',
+                           nsuites=len(suites),
+                           suites=suites)
+
+@app.route('/add_suite')
+@app.route('/add_suite', methods=['GET', 'POST'])
+def add_suite():
+    session_init(session, db)
+    suites = []
+    for sid, val in session['suites'].items():
+        name, notes, person_id = val
+        person_email = session['people'][person_id][0]
+        spectra = []
+        for r in db.filtered_query('spectrum_suite', spectrum_id=sid):
+            spectra.append(r.spectrum_id)
+        suites.append({'id': sid,
+                       'name': name,
+                       'notes': notes,
+                       'person_email': person_email,
+                       'nspectra': len(spectra)})
+
+    return render_template('suites.html', nsuites=len(suites),
+                           suites=suites)
 
 @app.route('/beamlines')
 @app.route('/beamlines/<int:sid>')
