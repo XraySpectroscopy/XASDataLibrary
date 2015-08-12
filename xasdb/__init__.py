@@ -1,9 +1,6 @@
 """
    x-ray absorption spectra database
-   Matthew Newville <newville@cars.uchicago.edu>
-   CARS, University of Chicago
 
-   last update:  2015-April-24
 
 == License:
    To the extent possible, the authors have waived all rights
@@ -13,19 +10,25 @@
    for historical reasons, this work is hereby placed in the
    Public Domain.  This work is published from: United States.
 
+== Authors:
+   Though copyright is waived, the authors of this code are:
+      Matthew Newville <newville@cars.uchicago.edu>
+           CARS, University of Chicago
+
+   last update:  2015-August-11
+
 == Overview:
    The xasdb module provides a python interface to the XAFS Database,
    an SQLite tool for organizing XAS spectra.
 
 """
-
-__version__ = '0.1.1'
+__version__ = '0.1.2'
 
 from .xasdb import (isXASDataLibrary, XASDataLibrary, XASDBException,
                     Info, Mode, Facility, Beamline, EnergyUnits, Edge,
                     Element, Ligand, Citation,
                     Person, Spectrum_Rating, Suite_Rating, Suite,
-                    Sample, Spectrum)
+                    Sample, Spectrum, fmttime, valid_score)
 
 from .creator import make_newdb
 
