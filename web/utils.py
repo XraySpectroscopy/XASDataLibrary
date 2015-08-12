@@ -95,6 +95,7 @@ def spectrum_ratings(db, sid):
     d = []
     for r in db.filtered_query('spectrum_rating', spectrum_id=sid):
         d.append((r.score, r.comments, r.datetime, "%i" % r.person_id))
+
     return d
 
 def suite_ratings(db, sid):
@@ -132,11 +133,10 @@ def parse_spectrum(s, session):
     try:
         beamline = session['beamlines']['%i'% s.beamline_id]
     except:
-        beamline = 'unknown -- check notes'
-        if 'beamline' in notes:
-            beamline = notes['beamline']
-            if 'name' in beamline:
-                beamline = beamline['name']
+        beamline = 'unknown (check unsorted headers)'
+        tname = notes.get('beamline', {}).get('name', None)
+        if tname is not None:
+            beamline = "%s may be '%s'" % (beamline, tname)
 
     try:
         sample = session['samples']['%i'% s.sample_id]
@@ -163,12 +163,10 @@ def parse_spectrum(s, session):
 
     misc = []
     for key, val in notes.items():
-
         if isinstance(val, dict):
             val = dict_repr(val).strip()
         if len(val) > 1:
             misc.append({'key': "# %s" % key.title(), 'val': val})
-
 
     return {'spectrum_id': s.id,
             'spectrum_name': s.name,
@@ -176,6 +174,7 @@ def parse_spectrum(s, session):
             'elem_name': elem[1],
             'edge': edge,
             'energy_units': eunits,
+            'comments': '<p>%s</p>' % (s.comments.replace('\n', '<br>')),
             'beamline': beamline,
             'mononame': mononame,
             'dspace': dspace,
