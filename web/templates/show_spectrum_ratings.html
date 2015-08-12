@@ -1,0 +1,23 @@
+{% extends "layout.html" %}
+{% block body %}
+  {% if error %}<p class=error><strong>Error:</strong> {{ error }}
+{% endif %}
+
+<p> <div class=subfont> Ratings for Spectrum  {{ spectrum_name }}</div>
+
+<div> 
+<hr>
+
+  {% for r in ratings %}
+<p> 
+  Score: {{r.score}}  <p>
+  &nbsp;&nbsp;  {{r.person_name}} ({{r.person_email}}) 
+  &nbsp;&nbsp; {{r.date}} <p>
+
+    {{r.review}}
+<hr>
+{% endfor %}
+
+
+</div>
+{% endblock %}
