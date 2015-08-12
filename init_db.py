@@ -16,27 +16,30 @@ import glob
 import xasdb
 
 dbname = 'example.db'
-os.unlink(dbname)
+if os.path.exists(dbname):
+    os.unlink(dbname)
 
 xasdb.create_xasdb(dbname)
 db = xasdb.connect_xasdb(dbname)
 db.add_person('Matt Newville',
               'newville@cars.uchicago.edu',
               affiliation='CARS, UChicago')
-db.add_person('Bruce Ravel', 'bravel@bnl.gov',  affiliation='NIST')
+db.add_person('Bruce Ravel',
+              'bravel@bnl.gov',
+              affiliation='NIST')
 
 me = db.set_person_password('newville@cars.uchicago.edu', 'xafsdb')
 me = db.get_person(email='newville@cars.uchicago.edu')
 
-print 'Created !' 
 datadir = 'data'
 n = 0
 files = glob.glob("%s/*.xdi"  % datadir)
-for f in glob.glob("%s/*.xdi"  % datadir):
-    if 'nonxafs' in f:
+files.sort()
+for f in files:
+    if 'nonxafs' in f or 'upload' in f:
         continue
     print 'Addfile ', f, me.email
     n = n + 1
     db.add_xdifile(f, person=me.email)
-    if n > 6:
+    if n > 12:
         break
