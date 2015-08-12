@@ -836,7 +836,6 @@ class XASDataLibrary(object):
         beamline = None
         beamline_name  = xfile.attrs['beamline']['name']
         notes = json_encode(xfile.attrs)
-        print 'ADD Spectrum -> ', spectrum_name
         self.add_spectrum(spectrum_name, d_spacing=d_spacing,
                           collection_date=c_date, person=person_id,
                           beamline=beamline, edge=edge, element=element,
