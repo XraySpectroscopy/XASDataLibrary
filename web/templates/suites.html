@@ -20,9 +20,22 @@
    {% for s in suites %}
        <tr><td id='spectra'>
            <a href="../suites/{{ s.id }}"> {{ s.name }}</a>
-        </td><td> {{ s.nspectra }} spectra:   {{ s.notes }} </td></tr>
+        </td><td> {{ s.nspectra }} spectra:   {{ s.notes|safe }} </td></tr>
    {% endfor %}
    </table>
+   {% if nsuites == 1 %}
+    Spectra: 
+    <table>
+      {% for suite in suites %}
+       
+          {% for spec in suite.spectra %}
+           <tr><td id='spectra'>
+               <a href="../spectrum/{{ spec.spectrum_id }}"> {{ spec.name }}</a>
+           </td><td> &nbsp; {{ spec.elem_sym }} {{spec.edge}} edge </td></tr>
+          {% endfor %}
+      {% endfor %}
+    </table>
+   {% endif %}
 {% endif %}
 
 </div>
