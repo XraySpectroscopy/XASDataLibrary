@@ -6,11 +6,13 @@
 <p> <div class=subfont> Spectrum:  {{ spectrum_name }}
 {% if session.username is not none %}
   &nbsp;   &nbsp;
-  <a href="../rate_spectrum/{{ spectrum_id }}"> [rate this spectrum] </a>
+  <a href="../rate_spectrum/{{ spectrum_id }}"> [rate spectrum] </a>
+  &nbsp;   &nbsp;
+  <a href="../add_spectrum_to_suite/{{ spectrum_id }}"> [add spectrum to suite] </a>
 {% endif %}
 {% if spectrum_owner %}
 &nbsp;   &nbsp;
-  <a href="../editspectrum/{{ spectrum_id }}"> [edit this spectrum] </a>
+  <a href="../editspectrum/{{ spectrum_id }}"> [edit spectrum] </a>
  {% endif %}
 </div> <p>
 
