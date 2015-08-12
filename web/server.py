@@ -13,7 +13,7 @@ import io
 
 import numpy as np
 
-from xasdb import XASDataLibrary, fmttime
+from xasdb import XASDataLibrary, fmttime, valid_score
 import larch
 from utils import (get_session_key, random_string,
                    session_init, parse_spectrum,
@@ -43,6 +43,9 @@ print 'XASDB connected ', time.time()-t0
 
 _larch = larch.Interpreter()
 print 'Larch initialized ', time.time()-t0
+
+###
+###
 
 def allowed_file(filename):
     return '.' in filename and \
@@ -122,6 +125,11 @@ def search(elem=None):
 
     return render_template('ptable.html', nspectra=len(dbspectra),
                            elem=elem, spectra=spectra)
+
+
+###########
+
+
 
 @app.route('/spectrum/<int:sid>')
 def spectrum(sid=None):
@@ -234,23 +242,34 @@ def submit_spectrum_rating(sid=None):
         return redirect(url_for('spectrum', sid=sid, error=error))
 
     if request.method == 'POST':
-        score = request.form['score']
+        score_is_valid = False
+        try:
+            score = float(request.form['score'])
+            vscore = valid_score(score)
+            score_is_valid = (int(score) == vscore)
+            score_is_valid = ((int(score) == vscore) and (abs(score-int(score)) < 1.e-3))
+        except:
+            pass
+
         review = request.form['review']
         spectrum_id = request.form['spectrum']
         spectrum_name = request.form['spectrum_name']
         person_id = request.form['person']
-        message = 'Review saved!'
-        db.set_spectrum_rating(int(person_id),
-                               int(spectrum_id),
-                               int(score), comments=review)
 
-        return redirect(url_for('spectrum', sid=spectrum_id))
+        if not score_is_valid:
+            error='score must be an integer:  0, 1, 2, 3, 4, or 5'
 
-    return render_template('ratespectrum.html', error=error,
-                           spectrum_id=spectrum_id,
-                           spectrum_name=spectrum_name,
-                           person_id=session['person_id'],
-                           score=score, review=review)
+            return render_template('ratespectrum.html', error=error,
+                                   spectrum_id=spectrum_id,
+                                   spectrum_name=spectrum_name,
+                                   person_id=session['person_id'],
+                                   score=score, review=review)
+        else:
+            db.set_spectrum_rating(int(person_id),
+                                   int(spectrum_id),
+                                   int(score), comments=review)
+
+            return redirect(url_for('spectrum', sid=spectrum_id))
 
 
 @app.route('/rate_spectrum/')
