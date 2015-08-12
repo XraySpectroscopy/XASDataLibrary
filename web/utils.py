@@ -3,16 +3,17 @@ import json
 import time
 import base64
 from collections import namedtuple
+from datetime import datetime
 from random import randrange
 from string import printable
 
+from xasdb import fmttime
 
 def make_secret_key():
     "make a secret key for web app"
     f = open('secret.py', 'w')
     f.write("session_key = '%s'\n" % base64.b64encode(os.urandom(36)))
     f.close()
-
 
 def get_session_key_DISK():
     try:
@@ -25,11 +26,6 @@ def get_session_key_DISK():
 
 def get_session_key():
     return base64.b64encode(os.urandom(36))
-
-def valid_score(score, smin=0, smax=5):
-    """ensure that the input score is an integr
-    in the range [smin, smax]  (inclusive)"""
-    return max(smin, min(smax, int(score)))
 
 def dict_repr(d):
     return ', '.join(["%s: %s" % (u) for u in d.items()])
@@ -122,8 +118,6 @@ def get_spectrum_suites(db, sid):
         d.append(r.suite_id)
     return d
 
-def fmttime(dtime):
-    return dtime.strftime('%Y-%m-%d %H:%M:%S')
 
 def parse_spectrum(s, session):
     edge = session['edges']['%i' % s.edge_id]
