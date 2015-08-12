@@ -28,7 +28,7 @@ from .xasdb import (isXASDataLibrary, XASDataLibrary, XASDBException,
                     Info, Mode, Facility, Beamline, EnergyUnits, Edge,
                     Element, Ligand, Citation,
                     Person, Spectrum_Rating, Suite_Rating, Suite,
-                    Sample, Spectrum, fmttime, valid_score)
+                    Sample, Spectrum, fmttime, valid_score, unique_name)
 
 from .creator import make_newdb
 

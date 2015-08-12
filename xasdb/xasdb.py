@@ -69,6 +69,20 @@ def valid_score(score, smin=0, smax=5):
     in the range [smin, smax]  (inclusive)"""
     return max(smin, min(smax, int(score)))
 
+def unique_name(name, namelist, maxcount=100, msg='spectrum'):
+    """
+    find a name that is not in namelist by making
+       name (1),  name (2), etc
+    up to maxcount, at which point an exception is raised.
+    """
+    basename, count = name, 0
+    while name in namelist:
+        count += 1
+        if count > maxcount:
+            msg = "a %s named '%s' already exists"  % (msg, name)
+            raise XASDBException(msg)
+        name = "%s (%i)" % (basename, count)
+    return name
 
 def isotime2datetime(isotime):
     sdate, stime = isotime.replace('T', ' ').split(' ')
@@ -749,8 +763,9 @@ class XASDataLibrary(object):
 
 
         stab = self.tables['spectrum']
-        if spectrum_name in [s.name for s in stab.select().execute()]:
-            spectrum_name = "%s, uploaded %s" % (spectrum_name, now)
+        
+        _s_names = [s.name for s in stab.select().execute()]
+        spectrum_name = unique_name(spectrum_name, _s_names)
 
         c_date    = xfile.attrs['scan']['start_time']
         d_spacing = xfile.dspacing
