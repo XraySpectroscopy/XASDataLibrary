@@ -1,18 +1,29 @@
 {% extends "layout.html" %}
 {% block body %}
 
-<div class=subfont> Upload XDI Spectra</div>
+<p><div class=subfont> Upload XDI Spectra</div>
+{% if error %}<p class=error><strong>Error:</strong> {{ error }}{% endif %}
+
+Note: The uploaded file must
+be a valid
+XAS-Data-Interchange (XDI) file, 
+and have an extension of '.xdi'.
+
+<p>
+For a detailed description, see <a href='https://github.com/XraySpectroscopy/XAS-Data-Interchange/blob/master/specification/spec.md'>
+  XAS Data Interchange Specification</a>. <br>
+
+For example files, see
+<a href='https://github.com/XraySpectroscopy/XAS-Data-Interchange/tree/master/data'>
+  Example XDI data</a>  and the files available from this library.
 
 
-  See  <a href="{{ url_for('about') }}"> About XDI  </a> for file guidelines.
-
- <p>
+</p>
 
 <form action="{{ url_for('submit_upload') }}" 
     method=post enctype=multipart/form-data>
     <input type=hidden name=person value={{person_id}}>
-    <input type=file name=file> <br>
-    <input type=submit value=upload>
+    <input type=file name=file> <br> <input type=submit value=upload>
 </form>
 
 {% endblock %}
