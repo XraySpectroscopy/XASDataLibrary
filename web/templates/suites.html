@@ -1,9 +1,7 @@
 {% extends "layout.html" %}
 {% block body %}
-  {% if error %}<p class=error><strong>Error:</strong> {{ error }}
-{% endif %}
-
-<p> <div class=subfont> Suites of Spectra
+<p> <div class=subfont> Suites of Spectra</div>
+{% if error %}<p class=error><strong>Error:</strong> {{ error }}{% endif %}
 
 {% if session.username is not none %}
   &nbsp;   &nbsp;
@@ -19,15 +17,20 @@
    <table cellspacing=5 cellpadding=2>
    {% for s in suites %}
        <tr><td id='spectra'>
-           <a href="../suites/{{ s.id }}"> {{ s.name }}</a>
-        </td><td> {{ s.nspectra }} spectra:   {{ s.notes|safe }} </td></tr>
+           <a href="../suites/{{ s.id }}"> {{ s.name }}</a></td>
+        <td> {{ s.nspectra }} spectra:   {{ s.notes|safe }} </td>
+        {% if session.username is not none %}
+           <td>  &nbsp;   &nbsp;
+             <a href="../del_suite/{{s.id}}/ask=1"> [delete this suite] </a></td>
+        {% endif %}
+        </tr>
    {% endfor %}
    </table>
    {% if nsuites == 1 %}
-    Spectra: 
+    Spectra:
     <table>
       {% for suite in suites %}
-       
+
           {% for spec in suite.spectra %}
            <tr><td id='spectra'>
                <a href="../spectrum/{{ spec.spectrum_id }}"> {{ spec.name }}</a>

@@ -1,0 +1,36 @@
+{% extends "layout.html" %}
+{% block body %}
+
+<p><div class=subfont> Add a Beamline </div>
+{% if error %}<p class=error><strong>Error:</strong> {{ error }}</p>{% endif %}
+
+{% if session.username is not none %}
+  &nbsp;   &nbsp;
+  <a href="../add_facility"> [add a facility] </a>
+{% endif %}
+
+<p> A Beamline is a place where spectra have been collectd.  A beamline has
+an X-ray source, and must be associated with a Facility. Check for existing
+beamlines to avoid duplication.<p>
+
+{% if session.username is not none %}
+
+<form action="{{ url_for('add_beamline') }}"   method=post>
+    <table>
+      <tr><td>Name:</td>
+          <td><input size=40 type=text name=beamline_name></td></tr>
+      <tr><td>X-ray Source:</td>
+           <td><input size=40 type=text name=xray_source></td></tr>
+      <tr><td>Facility:</td>
+          <td> <select id='fac_id' name='fac_id'>
+          {% for fac in facilities %}
+            <option value={{fac.id}}> {{fac.name}}</option>
+          {% endfor %}
+              </select> </td></tr>
+      <tr><td><input type=submit value=submit></td><td></td></tr>
+    </table>
+</form>
+{% else %}
+You must be logged in to add a beamline
+{% endif %}
+{% endblock %}

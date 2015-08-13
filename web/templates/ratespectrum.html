@@ -1,7 +1,9 @@
 {% extends "layout.html" %}
 {% block body %}
-  <h4>Rate Spectrum: {{ spectrum_name }} </h4>
+  <div class=subfont> Spectrumm: {{spectrum_name}} </div>
   {% if error %}<p class=error><strong>Error:</strong> {{ error }}</p>{% endif %}
+
+{% if session.username is not none %}
 
 Enter Rating (0 to 5:  0=worst, 5=best):
 
@@ -15,6 +17,10 @@ Enter Rating (0 to 5:  0=worst, 5=best):
                               </textarea></td></tr>
       <tr><td><input type=submit value=submit></td><td></td></tr>
     </table>
-  </form>
+</form>
+{% else %}
+You must be logged in to rate a spectrum.
+{% endif %}
+
 
 {% endblock %}

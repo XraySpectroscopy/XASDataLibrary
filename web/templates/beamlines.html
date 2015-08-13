@@ -1,0 +1,42 @@
+{% extends "layout.html" %}
+{% block body %}
+  {% if error %}<p class=error><strong>Error:</strong> {{ error }}
+{% endif %}
+
+<p> <div class=subfont> Beamlines
+
+{% if session.username is not none %}
+  &nbsp;   &nbsp;
+  <a href="../add_beamline"> [add a beamline] </a>
+{% endif %}
+</div>
+
+<div id='spectra'>
+<hr>
+{% if nbeamlines == 0 %}
+      No beamlines defined.
+{% else %}
+   <table cellspacing=5 cellpadding=2>
+   {% for bl in beamlines %}
+       <tr><td id='spectra'>
+           <a href="../beamlines/{{ bl.id }}"> {{bl.name}} at {{bl.fac_name}} </a>
+        </td><td> {{ bl.nspectra }} spectra  &nbsp; &nbsp;
+        </td><td> {{ bl.fac_desc}}</td></tr>
+   {% endfor %}
+   </table>
+   {% if nbeamlines == 1 %}
+    Spectra:
+    <table>
+      {% for bl in beamlines %}
+          {% for spec in bl.spectra %}
+           <tr><td id='spectra'>
+               <a href="../spectrum/{{ spec.spectrum_id }}"> {{ spec.name }}</a>
+           </td><td> &nbsp; {{ spec.elem_sym }} {{spec.edge}} edge </td></tr>
+          {% endfor %}
+      {% endfor %}
+    </table>
+   {% endif %}
+{% endif %}
+
+</div>
+{% endblock %}

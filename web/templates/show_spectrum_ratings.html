@@ -5,16 +5,16 @@
 
 <p> <div class=subfont> Ratings for Spectrum  {{ spectrum_name }}</div>
 
-<div> 
+<div>
 <hr>
 
   {% for r in ratings %}
-<p> 
+<p>
   Score: {{r.score}}  <p>
-  &nbsp;&nbsp;  {{r.person_name}} ({{r.person_email}}) 
-  &nbsp;&nbsp; {{r.date}} <p>
+  &nbsp;&nbsp;  <i> {{r.person_name}} ({{r.person_email}})
+  &nbsp;&nbsp; {{r.date}} </i> <p>
 
-    {{r.review}}
+    {{r.review|safe}}
 <hr>
 {% endfor %}
 
