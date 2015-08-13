@@ -8,18 +8,34 @@
   <div class=topbar>
   <table cellpadding=1 width=100%>
      <tr><td width=35% padding=5 align=left>
-          <a href="{{ url_for('index') }}"><font size=+1>XAFS Spectra Library</font></td></a>
+         <font size=+1>XAFS Spectra Library</font></td>
           <td width=65% align=right>
   {% if session.username == none %}
      Guest <a href="{{ url_for('login') }}">log in</a>
   {% else %}
      {{ session.username }} <a href="{{ url_for('logout') }}">log out</a>
   {% endif %}
-    </td></tr></table></div>
+    </td></tr></table>
+</div>
 
+<div id='tab'>
+<ul id='tabmenu'>
+  <li> <a href="{{ url_for('about') }}"> About </a> </li>
+  <li> <a href="{{ url_for('search') }}"> Browse Elements </a> </li>
+  <li> <a href="{{ url_for('suites') }}"> Browse Suites </a> </li>
+  <li> <a href="{{ url_for('beamlines') }}"> Browse Beamlines </a> </li>
+
+  {% if session.logged_in %}
+  <li> <a href="{{ url_for('upload') }}"> Upload Data</a></li>
+  <li> <a href="{{ url_for('user') }}"> User Profile</a></li>
+  {% endif %}
+</ul>
+</div>
+
+{% if error %}<p class=error><strong>Error:</strong> {{ error }}{% endif %}
 {% for message in get_flashed_messages() %}
     <div class=flash>{{ message }}</div>
-  {% endfor %}
+{% endfor %}
 
 {% block body %}{% endblock %}
 </div>
