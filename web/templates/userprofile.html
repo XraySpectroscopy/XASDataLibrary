@@ -1,0 +1,19 @@
+{% extends "layout.html" %}
+{% block body %}
+
+{% if session.username is not none %}
+
+<p> <div class=subfont> User Profile:</div>
+
+
+<table>
+<tr>
+<tr><td colspan=2> <hr> </td></tr>
+<tr><td width="25%"> Email</td> <td> {{email}} </td></tr>
+<tr><td> Name: </td> <td> {{name}} </td></tr>
+<tr><td> Affiliation: </td> <td> {{affiliation}} </td></tr>
+<tr><td colspan=2> <hr> </td></tr>
+</table>
+{% endif %}
+
+{% endblock %}
