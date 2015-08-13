@@ -23,7 +23,7 @@
 <table>
 <tr>
 <tr><td colspan=2> <hr> </td></tr>
-<td width=20%> Original Data File: </td>
+<td width=25%> Original Data File: </td>
     <td> <a href="../rawfile/{{ spectrum_id }}/{{ spectrum_name }}.xdi">
              {{ spectrum_name }}.xdi </a>
     </td>
@@ -47,11 +47,10 @@
 <tr><td> Beamline:        </td>  <td>  {{beamline}}     </td></tr>
 <tr><td> Energy Units:    </td>  <td>  {{energy_units}}  </td></tr>
 <tr><td> Mono d-spacing:  </td>  <td>   {{dspace}} &#197; ({{mononame}})   </td></tr>
-<tr><td> User Comments:   </td>  <td>   {{ comments|safe }} </td></tr>
-<tr><td> Measured:        </td>  <td>  {{collection_date}}     </td></tr>
-<tr><td> Uploaded:       </td>
+<tr><td> Date Measured:   </td>  <td>  {{collection_date}}     </td></tr>
+<tr><td> Date Uploaded:   </td>
           <td>  {{upload_date}}, {{ person_name }} ({{ person_email }})    </td></tr>
-
+<tr><td> User Comments:   </td>  <td>   {{ comments|safe }} </td></tr>
 <tr><td colspan=2> <hr> </td></tr>
 <tr><td colspan=2> &nbsp;&nbsp;&nbsp; <i>unsorted file headers:</i> </td></tr>
 
