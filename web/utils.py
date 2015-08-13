@@ -15,7 +15,7 @@ def make_secret_key():
     f.write("session_key = '%s'\n" % base64.b64encode(os.urandom(36)))
     f.close()
 
-def get_session_key_DISK():
+def get_session_key():
     try:
         from secret import session_key
     except ImportError:
@@ -24,8 +24,8 @@ def get_session_key_DISK():
         from secret import session_key
     return session_key
 
-def get_session_key():
-    return base64.b64encode(os.urandom(36))
+# def get_session_key():
+#     return base64.b64encode(os.urandom(36))
 
 def dict_repr(d):
     return ', '.join(["%s: %s" % (u) for u in d.items()])
@@ -37,10 +37,27 @@ def random_string(n):
     """
     return ''.join([printable[randrange(10,36)] for i in range(n)])
 
+def multiline_text(s):
+    if '\n' in s:
+        return '<p>%s</p>' % (s.replace('\n', '<br>'))
+
+def session_clear(session):
+    for s in ('elements', 'edges', 'energy_units', 'facilities',
+              'beamlines', 'spectra', 'samples', 'suites', 'people'):
+        if s in session:
+            session.pop(s)
 
 def session_init(session, db):
+    if 'last_refresh' not in session:
+        session['last_refresh'] = 0.0
+
+    if time.time() - session.get('last_refresh', time.time()) > 1800.0:
+        session_clear(session)
+        session['last_refresh'] = time.time()
+
     if 'username' not in session:
         session['username'] = None
+
     if 'person_id' not in session:
         session['person_id'] = "-1"
 
@@ -65,7 +82,8 @@ def session_init(session, db):
     if 'facilities' not in session:
         session['facilities'] = d = {}
         for r in db.get_facility():
-            d['%i'%r.id] = (r.name, r.fullname, r.country)
+            d['%i'%r.id] = (r.name, r.fullname,
+                            r.laboratory, r.city,  r.region, r.country)
 
     if 'beamlines' not in session:
         session['beamlines'] = d = {}
@@ -123,6 +141,29 @@ def get_spectrum_suites(db, sid):
         d.append(r.suite_id)
     return d
 
+def spectra_for_beamline(db, session, blid):
+    spectra = []
+    for r in db.get_spectra():
+        if r.beamline_id is None or int(r.beamline_id) !=int(blid):
+            continue
+        _nam, _z, _edge, _pid = session['spectra']["%i" % (r.spectrum_id)]
+        elem_sym, elem_name = session['elements']["%i" % _z]
+        edge =  session['edges']["%i" % _edge]
+        spectra.append({'spectrum_id': r.spectrum_id,
+                        'name':    r.spectrum_name,
+                        'elem_sym': elem_sym, 'edge': edge})
+    return spectra
+
+def spectra_for_suite(db, session, stid):
+    spectra = []
+    for r in db.filtered_query('spectrum_suite', suite_id=int(stid)):
+        _nam, _z, _edge, _pid = session['spectra']["%i" % (r.spectrum_id)]
+        elem_sym, elem_name = session['elements']["%i" % _z]
+        edge =  session['edges']["%i" % _edge]
+        spectra.append({'spectrum_id': r.spectrum_id,
+                        'name': _nam, 'elem_sym': elem_sym, 'edge': edge})
+    return spectra
+
 
 def parse_spectrum(s, session):
     edge = session['edges']['%i' % s.edge_id]
@@ -178,7 +219,7 @@ def parse_spectrum(s, session):
             'elem_name': elem[1],
             'edge': edge,
             'energy_units': eunits,
-            'comments': '<p>%s</p>' % (s.comments.replace('\n', '<br>')),
+            'comments': multiline_text(s.comments),
             'beamline_id': s.beamline_id,
             'beamline': beamline,
             'mononame': mononame,
