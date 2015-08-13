@@ -538,10 +538,8 @@ class XASDataLibrary(object):
         self.session.commit()
 
 
-
-    def add_suite_rating(self, person_id, suite_id, score, comments=None):
+    def set_suite_rating(self, person_id, suite_id, score, comments=None):
         """add a score to a suite:"""
-
         kws = {'score': valid_score(score),
                'person_id': person_id, 'suite_id': suite_id,
                'datetime': datetime.now(), 'comments': ''}
@@ -580,6 +578,17 @@ class XASDataLibrary(object):
         else:
             tab.update(whereclause="id='%i'" % rowid).execute(**kws)
 
+    def update(self, tablename, where, use_id=True, **kws):
+        """update a row (by id) in a table (by name) using keyword args
+        db.update('spectrum', 5, **kws)
+       
+        """
+        table = self.tables[tablename]
+        if use_id:
+            where ="id='%i'" % where
+        table.update(whereclause=where).execute(**kws)
+        self.set_mod_time()
+        self.session.commit()
 
     def add_spectrum(self, name, notes='', d_spacing=-1,
                      notes_i0='', notes_itrans='', notes_ifluor='',
