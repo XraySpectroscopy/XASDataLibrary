@@ -21,6 +21,8 @@
         <td> {{ s.nspectra }} spectra:   {{ s.notes|safe }} </td>
         {% if session.username is not none %}
            <td>  &nbsp;   &nbsp;
+             <a href="../rate_suite/{{s.id}}"> [rate this suite] </a></td>
+           <td>  &nbsp;   &nbsp;
              <a href="../del_suite/{{s.id}}/ask=1"> [delete this suite] </a></td>
         {% endif %}
         </tr>
@@ -30,9 +32,9 @@
     Spectra:
     <table>
       {% for suite in suites %}
-
           {% for spec in suite.spectra %}
            <tr><td id='spectra'>
+              &nbsp;   &nbsp;
                <a href="../spectrum/{{ spec.spectrum_id }}"> {{ spec.name }}</a>
            </td><td> &nbsp; {{ spec.elem_sym }} {{spec.edge}} edge </td></tr>
           {% endfor %}
