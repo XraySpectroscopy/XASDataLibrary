@@ -1,27 +1,30 @@
 {% extends "layout.html" %}
 {% block body %}
-  {% if error %}<p class=error><strong>Error:</strong> {{ error }}
-{% endif %}
 
-<p> <div class=subfont> Beamlines
+<p> <div class=subfont> Beamlines</div>
+{% if error %}<p class=error><strong>Error:</strong> {{ error }}{% endif %}
+
 
 {% if session.username is not none %}
   &nbsp;   &nbsp;
-  <a href="../add_beamline"> [add a beamline] </a>
+  <a href="../add_beamline"> [add a beamline or facility] </a>
 {% endif %}
-</div>
 
 <div id='spectra'>
 <hr>
 {% if nbeamlines == 0 %}
       No beamlines defined.
 {% else %}
-   <table cellspacing=5 cellpadding=2>
+   <table cellspacing=2 cellpadding=3>
+    <tr><th>Abbreviation</th>
+<th> # Spectra</ht><th>Name</th><th> X-ray Source</th><th>Facility Location</th></tr>
    {% for bl in beamlines %}
        <tr><td id='spectra'>
-           <a href="../beamlines/{{ bl.id }}"> {{bl.name}} at {{bl.fac_name}} </a>
-        </td><td> {{ bl.nspectra }} spectra  &nbsp; &nbsp;
-        </td><td> {{ bl.fac_desc}}</td></tr>
+           <a href="../beamlines/{{ bl.id }}"> {{bl.name}} at {{bl.fac_name}} </a></td>
+        <td>  &nbsp; {{ bl.nspectra }}  &nbsp;</td>
+	<td>  &nbsp; {{bl.notes}}  &nbsp; </td>  
+	<td>  &nbsp; {{bl.source}}  &nbsp; </td>  
+        <td>  &nbsp; {{bl.fac_loc}}</td></tr>
    {% endfor %}
    </table>
    {% if nbeamlines == 1 %}
