@@ -14,9 +14,11 @@ import numpy as np
 
 from xasdb import XASDataLibrary, fmttime, valid_score, unique_name
 import larch
-from utils import (get_session_key, random_string,
-                   session_init, parse_spectrum,
-                   spectrum_ratings)
+
+from utils import (get_session_key, random_string, multiline_text,
+                   session_init, session_clear,
+                   parse_spectrum, spectrum_ratings,
+                   spectra_for_suite, spectra_for_beamline)
 
 from plot import make_xafs_plot
 
@@ -38,16 +40,11 @@ app = Flask(__name__)
 app.config.from_object(__name__)
 app.config['MAX_CONTENT_LENGTH'] = 32 * 1024 * 1024
 
-print 'Flask App created ', time.time()-t0
 db = XASDataLibrary(DATABASE, server='sqlite')
-
 print 'XASDB connected ', time.time()-t0
 
 _larch = larch.Interpreter()
-print 'Larch initialized ', time.time()-t0
 
-###
-###
 
 def allowed_file(filename):
     return '.' in filename and \
@@ -56,6 +53,12 @@ def allowed_file(filename):
 @app.route('/')
 def index():
     session_init(session, db)
+    return redirect(url_for('search'))
+
+@app.route('/clear')
+def clear():
+    session_init(session, db)
+    session_clear(session)
     return redirect(url_for('search'))
 
 @app.route('/login/')
@@ -88,6 +91,7 @@ def logout():
     session_init(session, db)
     session.pop('username', None)
     session['person_id'] = None
+    session['logged_in'] = False
     flash('You have been logged out')
     return redirect(url_for('search'))
 
@@ -129,22 +133,18 @@ def search(elem=None):
                            elem=elem, spectra=spectra)
 
 
-###########
-
-
-
-@app.route('/spectrum/<int:sid>')
-def spectrum(sid=None):
+@app.route('/spectrum/<int:spid>')
+def spectrum(spid=None):
     session_init(session, db)
-    s  = db.get_spectrum(sid)
+    s  = db.get_spectrum(spid)
     if s is None:
-        error = 'Could not find Spectrum #%i' % sid
+        error = 'Could not find Spectrum #%i' % spid
         return render_template('search', error=error)
 
     opts = parse_spectrum(s, session)
     opts['spectrum_owner'] = (session['person_id'] == "%i" % s.person_id)
 
-    ratings = spectrum_ratings(db, sid)
+    ratings = spectrum_ratings(db, spid)
     opts['rating'] = 'No ratings'
 
     if len(ratings) > 0:
@@ -203,20 +203,19 @@ def spectrum(sid=None):
 
     return render_template('spectrum.html', **opts)
 
-@app.route('/showspectrum_rating/<int:sid>')
-def showspectrum_rating(sid=None):
+@app.route('/showspectrum_rating/<int:spid>')
+def showspectrum_rating(spid=None):
     session_init(session, db)
-    s  = db.get_spectrum(sid)
+    s  = db.get_spectrum(spid)
     if s is None:
-        error = 'Could not find Spectrum #%i' % sid
+        error = 'Could not find Spectrum #%i' % spid
         return render_template('search', error=error)
 
     opts = parse_spectrum(s, session)
     ratings = []
-    for score, review, dtime, pid in spectrum_ratings(db, sid):
-
+    for score, review, dtime, pid in spectrum_ratings(db, spid):
         person = session['people'][pid]
-        ratings.append({'score': score, 'review': review,
+        ratings.append({'score': score, 'review': multiline_text(review),
                         'date': fmttime(dtime),
                         'person_email': person[0],
                         'person_name': person[1],
@@ -226,115 +225,106 @@ def showspectrum_rating(sid=None):
                            ratings=ratings,
                            spectrum_name=opts['spectrum_name'])
 
-@app.route('/editspectrum/<int:sid>')
-def editspectrum(sid=None):
+@app.route('/editspectrum/<int:spid>')
+def editspectrum(spid=None):
     session_init(session, db)
     error=None
     if not session['logged_in']:
         error='must be logged in to edit spectrum'
         return render_template('search', error=error)
 
-    s  = db.get_spectrum(sid)
+    s  = db.get_spectrum(spid)
     if s is None:
-        error = 'Could not find Spectrum #%i' % sid
+        error = 'Could not find Spectrum #%i' % spid
         return render_template('search', error=error)
 
     opts = parse_spectrum(s, session)
     return render_template('editspectrum.html', error=error, **opts)
 
 @app.route('/submit_spectrum_rating', methods=['GET', 'POST'])
-def submit_spectrum_rating(sid=None):
+def submit_spectrum_rating(spid=None):
     session_init(session, db)
     error=None
 
     if not session['logged_in']:
         error='must be logged in to rate spectrum'
-        return redirect(url_for('spectrum', sid=sid, error=error))
+        return redirect(url_for('spectrum', spid=spid, error=error))
 
     if request.method == 'POST':
         score_is_valid = False
         try:
             score = float(request.form['score'])
             vscore = valid_score(score)
-            score_is_valid = (int(score) == vscore)
-            score_is_valid = ((int(score) == vscore) and (abs(score-int(score)) < 1.e-3))
+            score_is_valid = ((int(score) == vscore) and
+                              (abs(score-int(score)) < 1.e-3))
         except:
             pass
 
         review = request.form['review']
-        spectrum_id = request.form['spectrum']
-        spectrum_name = request.form['spectrum_name']
-        person_id = request.form['person']
+        sname  = request.form['spectrum_name']
+        spid   = int(request.form['spectrum'])
+        pid    = int(request.form['person'])
 
-        if not score_is_valid:
-            error='score must be an integer:  0, 1, 2, 3, 4, or 5'
-
-            return render_template('ratespectrum.html', error=error,
-                                   spectrum_id=spectrum_id,
-                                   spectrum_name=spectrum_name,
-                                   person_id=session['person_id'],
-                                   score=score, review=review)
+        if score_is_valid:
+            db.set_spectrum_rating(pid, spid, vscore, comments=review)
+            return redirect(url_for('spectrum', spid=spid))
         else:
-            db.set_spectrum_rating(int(person_id),
-                                   int(spectrum_id),
-                                   int(score), comments=review)
-
-            return redirect(url_for('spectrum', sid=spectrum_id))
-
+            error='score must be an integer:  0, 1, 2, 3, 4, or 5'
+            return render_template('ratespectrum.html', error=error,
+                                   spectrum_id=spid, spectrum_name=sname,
+                                   person_id=pid, score=score,
+                                   review=multilne_text(review))
 
 @app.route('/rate_spectrum/')
-@app.route('/rate_spectrum/<int:sid>')
-def rate_spectrum(sid=None):
+@app.route('/rate_spectrum/<int:spid>')
+def rate_spectrum(spid=None):
     session_init(session, db)
     error=None
     if not session['logged_in']:
         error='must be logged in to rate spectrum'
-        return redirect(url_for('spectrum', sid=sid, error=error))
+        return redirect(url_for('spectrum', spid=spid, error=error))
 
-    s  = db.get_spectrum(sid)
+    pid = session['person_id']
+    s  = db.get_spectrum(spid)
     if s is None:
-        error = 'Could not find Spectrum #%i' % sid
+        error = 'Could not find Spectrum #%i' % spid
         return render_template('ptable', error=error)
 
     opts = parse_spectrum(s, session)
-    score = 1
+    score = 3
     review = '<review>'
-    for _s, _r, _d, _p in spectrum_ratings(db, sid):
-        if _p == session['person_id']:
+    for _s, _r, _d, _p in spectrum_ratings(db, spid):
+        if _p == pid:
             score = _s
             review =  _r
-    spectrum_id = s.id
-    spectrum_name = s.name
+    spid = s.id
+    spname = s.name
 
     return render_template('ratespectrum.html', error=error,
-                           spectrum_id=spectrum_id,
-                           spectrum_name=spectrum_name,
-                           person_id=session['person_id'],
-                           score=score, review=review)
+                           spectrum_id=spid, spectrum_name=spname,
+                           person_id=pid, score=score, review=review)
 
 
-@app.route('/add_spectrum_to_suite/<int:sid>')
-def add_spectrum_to_suite(sid=None):
+@app.route('/add_spectrum_to_suite/<int:spid>')
+def add_spectrum_to_suite(spid=None):
     session_init(session, db)
     error=None
     if not session['logged_in']:
         error='must be logged in to add spectrum to suite'
-        return redirect(url_for('spectrum', sid=sid, error=error))
+        return redirect(url_for('spectrum', spid=spid, error=error))
 
-    s  = db.get_spectrum(sid)
+    s  = db.get_spectrum(spid)
     if s is None:
-        error = 'Could not find Spectrum #%i' % sid
+        error = 'Could not find Spectrum #%i' % spid
         return render_template('ptable', error=error)
-    
+
     suites = []
     for key, val in session['suites'].items():
         suites.append({'id': key, 'name': val[0]})
-        
+
     return render_template('add_spectrum_to_suite.html', error=error,
-                           spectrum_id=sid,
-                           spectrum_name=s.name,
-                           person_id=session['person_id'],
-                           suites=suites)
+                           spectrum_id=spid, spectrum_name=s.name,
+                           person_id=session['person_id'], suites=suites)
 
 @app.route('/submit_spectrum_to_suite', methods=['GET', 'POST'])
 def submit_spectrum_to_suite():
@@ -345,28 +335,31 @@ def submit_spectrum_to_suite():
         return redirect(url_for('suites', error=error))
 
     if request.method == 'POST':
-        print request.form
-        print request.form.keys()
-        
-        spectrum_id  = int(request.form['spectrum_id'])
-        suite_id     = int(request.form['suite_id'])
-        person_id    = request.form['person']
+        spid  = int(request.form['spectrum_id'])
+        stid  = int(request.form['suite_id'])
+        pid   = request.form['person']
 
         found = False
-        for r in db.filtered_query('spectrum_suite', suite_id=suite_id):
-            found = found or (r.spectrum_id == spectrum_id)
+        for r in db.filtered_query('spectrum_suite', suite_id=stid):
+            found = found or (r.spectrum_id == spid)
         if not found:
-            print ' add spectra to suite ', spectrum_id, suite_id, person_id
+            db.addrow('spectrum_suite', suite_id=stid, spectrum_id=spid)
+            time.sleep(0.25)
+            session.pop('suites')
+        else:
+            stname = session['suites']['%i' % stid][0]
+            spname = session['spectra']['%i' % spid][0]
+            error = "Spectrum '%s' is already in Suite '%s'" % (spname, stname)
 
     return redirect(url_for('suites', error=error))
-    
 
-@app.route('/rawfile/<int:sid>/<fname>')
-def rawfile(sid, fname):
+
+@app.route('/rawfile/<int:spid>/<fname>')
+def rawfile(spid, fname):
     session_init(session, db)
-    s  = db.get_spectrum(sid)
+    s  = db.get_spectrum(spid)
     if s is None:
-        error = 'Could not find Spectrum #%i' % sid
+        error = 'Could not find Spectrum #%i' % spid
         return render_template('search', error=error)
     return Response(s.filetext, mimetype='text/plain')
 
@@ -377,71 +370,37 @@ def about():
     session_init(session, db)
     return render_template('about.html')
 
-
 @app.route('/suites')
-@app.route('/suites/<int:sid>')
-def suites(sid=None):
+@app.route('/suites/<int:stid>')
+def suites(stid=None):
     session_init(session, db)
     suites = []
-    suite_id = sid
-    if suite_id is None:
-        for suite_id, val in session['suites'].items():
+    if stid is None:
+        for stid, val in session['suites'].items():
             name, notes, person_id = val
             person_email = session['people'][person_id][0]
-            spectra = []
-            for r in db.filtered_query('spectrum_suite', suite_id=suite_id):
-                _spec_ = session['spectra']["%i" % (r.spectrum_id)]
-                spectra.append({'spectrum_id': r.spectrum_id,
-                                'name':    _spec_[0],
-                                'element': session['elements']["%i" % _spec_[1]],
-                                'edge':    session['edges']["%i" % _spec_[2]]})
+            spectra = spectra_for_suite(db, session, stid)
 
-            suites.append({'id': suite_id,
-                           'name': name,
-                           'notes': notes,
+            spectra = spectra_for_suite(db, session ,stid)
+            suites.append({'id': stid, 'name': name, 'notes': notes,
                            'person_email': person_email,
-                           'nspectra': len(spectra),
-                           'spectra': spectra})
-                
+                           'nspectra': len(spectra), 'spectra': spectra})
+
     else:
-        for sid, val in session['suites'].items():
-            if sid == "%i" % suite_id :
+        for _id, val in session['suites'].items():
+            if _id == "%i" % stid:
                 name, notes, person_id = val
-        person_email = session['people'][person_id][0]                
-        spectra = []
-        for r in db.filtered_query('spectrum_suite', suite_id=suite_id):
-            _name, el_z, edge, pid = session['spectra']["%i" % (r.spectrum_id)]
-            elem_sym, elem_name = session['elements']["%i" % el_z]
-            edge =  session['edges']["%i" % edge]
-            spectra.append({'spectrum_id': r.spectrum_id,
-                            'name':    _name,
-                            'elem_sym': elem_sym,
-                            'edge':    edge,
-                            'person_id': pid})
-
-        suites.append({'id': suite_id,
-                       'name': name,
-                       'notes': notes,
+        person_email = session['people'][person_id][0]
+        spectra = spectra_for_suite(db, session, stid)
+        suites.append({'id': stid, 'name': name, 'notes': notes,
                        'person_email': person_email,
-                       'nspectra': len(spectra),
-                       'spectra': spectra})
+                       'nspectra': len(spectra), 'spectra': spectra})
 
-    return render_template('suites.html',
-                           nsuites=len(suites),
-                           suites=suites)
+    return render_template('suites.html', nsuites=len(suites), suites=suites)
 
 @app.route('/add_suite')
+@app.route('/add_suite', methods=['GET', 'POST'])
 def add_suite():
-    session_init(session, db)
-    error=None
-    if not session['logged_in']:
-        error='must be logged in to add a suite'
-        return redirect(url_for('suites', error=error))
-    return render_template('add_suite.html', error=error,
-                           person_id=session['person_id'])
-
-@app.route('/submit_suite', methods=['GET', 'POST'])
-def submit_suite():
     session_init(session, db)
     error=None
     if not session['logged_in']:
@@ -452,25 +411,99 @@ def submit_suite():
         suite_name = request.form['suite_name']
         person_id = request.form['person']
         notes = request.form['notes']
-        
         _sname = [s[0] for s in session['suites'].keys()]
         try:
             suite_name = unique_name(suite_name, _sname,  msg='suite')
         except:
             error = 'a suite named %s exists'
-
         db.add_suite(suite_name, notes=notes, person_id=int(person_id))
         time.sleep(1)
         session.pop('suites')
+        return redirect(url_for('suites', error=error))
+    else:
 
+        return render_template('add_suite.html', error=error,
+                               person_id=session['person_id'])
+
+@app.route('/del_suite/<int:stid>/ask=<int:ask>')
+def del_suite(stid, ask=1):
+    session_init(session, db)
+    error=None
+    if not session['logged_in']:
+        error='must be logged in to delete a suite'
+        return redirect(url_for('suites', error=error))
+
+    if ask != 0:
+        suite_name = session['suites']['%i' % stid][0]
+        return render_template('confirm_del_suite.html', stid=stid,
+                               suite_name=suite_name)
+
+    else:
+        db.del_suite(stid)
+        time.sleep(1)
+        session.pop('suites')
     return redirect(url_for('suites', error=error))
-    
+
+
 
 @app.route('/beamlines')
-@app.route('/beamlines/<int:sid>')
-def beamlines():
+@app.route('/beamlines/<int:blid>')
+def beamlines(blid=None):
     session_init(session, db)
-    return render_template('about.html')
+    beamlines = []
+    if blid is None:
+        for blid, val in session['beamlines'].items():
+            name, notes, source, facid = val
+            # (r.name, r.fullname, r.laboratory, r.city,  r.region, r.country)
+            facdata = session['facilities'][facid]
+            spectra = spectra_for_beamline(db, session, blid)
+            beamlines.append({'id': blid, 'name': name, 'source': source,
+                              'fac_name': facdata[0],
+                              'fac_desc': "%s. %s" % (facdata[3], facdata[5]),
+                              'nspectra': len(spectra), 'spectra': spectra})
+
+    else:
+        for _blid, val in session['beamlines'].items():
+            if _blid == "%i" % blid:
+                name, notes, source, facid = val
+                facdata = session['facilities'][facid]
+        spectra = spectra_for_beamline(db, session, blid)
+        beamlines.append({'id': blid, 'name': name, 'source': source,
+                          'fac_name': facdata[0],
+                          'fac_desc': "%s. %s" % (facdata[3], facdata[5]),
+                          'nspectra': len(spectra), 'spectra': spectra})
+
+    return render_template('beamlines.html',
+                           nbeamlines=len(beamlines), beamlines=beamlines)
+
+@app.route('/add_beamline')
+@app.route('/add_beamline', methods=['GET', 'POST'])
+def add_beamline():
+    session_init(session, db)
+    error=None
+    if not session['logged_in']:
+        error='must be logged in to add a beamline'
+        return redirect(url_for('beamlines', error=error))
+
+    if request.method == 'POST':
+        bl_name = request.form['beamline_name']
+        _blnames = [s[0] for s in session['beamlines'].keys()]
+        try:
+            bl_name = unique_name(bl_name, _blnames,  msg='beamline')
+        except:
+            error = 'a beamline named %s exists'
+        db.add_beamline(bl_name)
+        time.sleep(1)
+        session.pop('beamines')
+        return redirect(url_for('beamlines', error=error))
+    else:
+        facilities = []
+        for key, fac in session['facilities'].items():
+            facilities.append({'id': key, 'name': fac[0]})
+        return render_template('add_beamline.html', error=error,
+                               facilities=facilities)
+
+
 
 @app.route('/upload')
 @app.route('/upload/')
@@ -478,7 +511,7 @@ def upload():
     session_init(session, db)
     if not session['logged_in']:
         error='must be logged in to submit a spectrum'
-        return redirect(url_for('spectrum', sid=sid, error=error))
+        return redirect(url_for('search', error=error))
     return render_template('upload.html',
                            person_id=session['person_id'])
 
@@ -488,44 +521,38 @@ def submit_upload():
     error=None
     if not session['logged_in']:
         error='must be logged in to submit a spectrum'
-        return redirect(url_for('spectrum', sid=sid, error=error))
+        return redirect(url_for('search', error=error))
 
     if request.method == 'POST':
-        person_id = request.form['person']
-        person_email = session['people'][person_id][0]
+        pid    = request.form['person']
+        pemail = session['people'][pid][0]
         file = request.files['file']
 
         file_ok = False
-
         if file and allowed_file(file.filename):
             fname = secure_filename(file.filename)
             fullpath = os.path.abspath(os.path.join(
                 app.config['UPLOAD_FOLDER'], fname))
-
             try:
                 file.save(fullpath)
                 file_ok = True
             except IOError:
-                print 'Could not save file ', fullpath
+                pass
 
             if file_ok:
                 time.sleep(0.5)
-                db.add_xdifile(fullpath, person=person_email,
-                               create_sample=True)
+                db.add_xdifile(fullpath, person=peemail, create_sample=True)
                 time.sleep(0.5)
-
                 session.pop('samples')
                 session_init(session, db)
 
             s  = db.get_spectra()[-1]
-            sid = s.id
             if s is None:
-                error = 'Could not find Spectrum #%i' % sid
+                error = 'Could not find Spectrum #%i' % s.id
                 return render_template('search', error=error)
 
         opts = parse_spectrum(s, session)
         return render_template('editspectrum.html', error=error, **opts)
-
     return render_template('upload.html', error='upload error')
 
 if __name__ == "__main__":
