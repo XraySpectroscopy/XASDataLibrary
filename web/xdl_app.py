@@ -22,7 +22,7 @@ from xasdb import XASDataLibrary, fmttime, valid_score, unique_name
 
 from utils import (get_session_key, random_string, multiline_text,
                    session_init, session_clear,
-                   parse_spectrum, spectrum_ratings,
+                   parse_spectrum, spectrum_ratings, suite_ratings,
                    spectra_for_suite, spectra_for_beamline)
 
 from plot import make_xafs_plot
@@ -201,12 +201,12 @@ def spectrum(spid=None):
         rating = sum*1.0/len(ratings)
         opts['rating'] = 'Average rating %.1f (%i ratings)' % (rating, len(ratings))
 
-    if True: # try:
+    try:
         energy = np.array(json.loads(s.energy))
         i0     = np.array(json.loads(s.i0))
         itrans = np.array(json.loads(s.itrans))
         mutrans = -np.log(itrans/i0)
-    else: # except:
+    except:
         error = 'Could not extract data from spectrum'
         return render_template('spectrum.html', **opts)
 
@@ -248,7 +248,6 @@ def spectrum(spid=None):
                        'name': session['suites']["%i" % (r.suite_id)][0]})
     opts['nsuites'] = len(suites)
     opts['suites'] = suites
-
     return render_template('spectrum.html', **opts)
 
 @app.route('/showspectrum_rating/<int:spid>')
@@ -273,6 +272,29 @@ def showspectrum_rating(spid=None):
                            ratings=ratings,
                            spectrum_name=opts['spectrum_name'])
 
+
+@app.route('/submit_spectrum_edits', methods=['GET', 'POST'])
+def submit_spectrum_edits():
+    session_init(session, db)
+    error=None
+    if not session['logged_in']:
+        error='must be logged in to edit spectrum'
+        return render_template('search', error=error)
+    if request.method == 'POST':
+        spid  = int(request.form['spectrum'])
+        db.update('spectrum', int(spid),
+                  name=request.form['name'],
+                  comments=request.form['comments'],
+                  d_spacing=float(request.form['d_spacing']),
+                  edge_id= int(request.form['edge']),
+                  beamline_id= int(request.form['beamline']),
+                  sample_id= int(request.form['sample']),
+                  energy_units_id=int(request.form['energy_units']))
+                  
+        time.sleep(0.25)
+        
+    return redirect(url_for('spectrum', spid=spid, error=error))        
+
 @app.route('/editspectrum/<int:spid>')
 def editspectrum(spid=None):
     session_init(session, db)
@@ -287,7 +309,19 @@ def editspectrum(spid=None):
         return render_template('search', error=error)
 
     opts = parse_spectrum(s, session)
-    return render_template('editspectrum.html', error=error, **opts)
+
+    for s in session['sample_list']:
+        x = '     ' 
+        if s['id'] == opts['sample_id']: x = ' Bingo!'
+        # print x, s['id'], s['name']
+        
+    return render_template('editspectrum.html', error=error,
+                           elems=session['element_list'],
+                           eunits=session['energy_units_list'],
+                           edges=session['edge_list'],
+                           beamlines=session['beamline_list'],
+                           samples=session['sample_list'],
+                           **opts)
 
 @app.route('/submit_spectrum_rating', methods=['GET', 'POST'])
 def submit_spectrum_rating(spid=None):
@@ -351,6 +385,92 @@ def rate_spectrum(spid=None):
     return render_template('ratespectrum.html', error=error,
                            spectrum_id=spid, spectrum_name=spname,
                            person_id=pid, score=score, review=review)
+
+
+@app.route('/submit_suite_rating', methods=['GET', 'POST'])
+def submit_suite_rating(spid=None):
+    session_init(session, db)
+    error=None
+
+    if not session['logged_in']:
+        error='must be logged in to rate suite'
+        return redirect(url_for('suite', spid=spid, error=error))
+
+    if request.method == 'POST':
+        score_is_valid = False
+        try:
+            score = float(request.form['score'])
+            vscore = valid_score(score)
+            score_is_valid = ((int(score) == vscore) and
+                              (abs(score-int(score)) < 1.e-3))
+        except:
+            pass
+
+        review = request.form['review']
+        stname = request.form['suite_name']
+        stid   = int(request.form['suite'])
+        pid    = int(request.form['person'])
+
+        if score_is_valid:
+            db.set_suite_rating(pid, stid, vscore, comments=review)
+            return redirect(url_for('suites', spid=spid))
+        else:
+            error='score must be an integer:  0, 1, 2, 3, 4, or 5'
+            return render_template('ratesuite.html', error=error,
+                                   suite_id=stid, suite_name=stname,
+                                   person_id=pid, score=score,
+                                   review=multilne_text(review))
+
+@app.route('/rate_suite/')
+@app.route('/rate_suite/<int:stid>')
+def rate_suite(stid=None):
+    session_init(session, db)
+    error=None
+    if not session['logged_in']:
+        error='must be logged in to rate suite'
+        return redirect(url_for('suites', stid=stid, error=error))
+
+    pid = session['person_id']
+    for _id, val in session['suites'].items():
+        if _id == "%i" % stid:
+            spname, notes, person_id = val
+
+    score = 3
+    review = '<review>'
+    for _s, _r, _d, _p in suite_ratings(db, stid):
+        if _p == pid:
+            score = _s
+            review =  _r
+    
+    return render_template('ratesuite.html', error=error,
+                           suite_id=stid, suite_name=spname,
+                           person_id=pid, score=score, review=review)
+
+
+@app.route('/showsuite_rating/<int:stid>')
+def showsuite_rating(stid=None):
+    session_init(session, db)
+
+
+    for _id, val in session['suites'].items():
+        if _id == "%i" % stid:
+            stname, notes, _pid = val
+    if stname is None:
+        error = 'Could not find Suite #%i' % stid
+        return render_template('search', error=error)
+
+    ratings = []
+    for score, review, dtime, pid in suite_ratings(db, stid):
+        person = session['people'][pid]
+        ratings.append({'score': score, 'review': multiline_text(review),
+                        'date': fmttime(dtime),
+                        'person_email': person[0],
+                        'person_name': person[1],
+                        'person_affil': person[2]})
+
+    return render_template('show_suite_ratings.html',
+                           ratings=ratings, suite_notes=notes,
+                           suite_name=stname)
 
 @app.route('/add_spectrum_to_suite/<int:spid>')
 def add_spectrum_to_suite(spid=None):
@@ -429,8 +549,18 @@ def suites(stid=None):
             spectra = spectra_for_suite(db, session, stid)
 
             spectra = spectra_for_suite(db, session ,stid)
+
+            ratings = suite_ratings(db, stid)
+            rating  = 'No ratings'
+
+            if len(ratings) > 0:
+                sum = 0.0
+                for rate in ratings: sum = sum + rate[0]
+                rating = sum*1.0/len(ratings)
+            rating = 'Average rating %.1f (%i ratings)' % (rating, len(ratings))
             suites.append({'id': stid, 'name': name, 'notes': notes,
                            'person_email': person_email,
+                           'rating': rating,
                            'nspectra': len(spectra), 'spectra': spectra})
 
     else:
@@ -439,8 +569,16 @@ def suites(stid=None):
                 name, notes, person_id = val
         person_email = session['people'][person_id][0]
         spectra = spectra_for_suite(db, session, stid)
+        ratings = suite_ratings(db, stid)
+        rating  = 'No ratings'
+        if len(ratings) > 0:
+            sum = 0.0
+            for rate in ratings: sum = sum + rate[0]
+            rating = sum*1.0/len(ratings)
+        rating = 'Average rating %.1f (%i ratings)' % (rating, len(ratings))
+            
         suites.append({'id': stid, 'name': name, 'notes': notes,
-                       'person_email': person_email,
+                       'person_email': person_email, 'rating': rating, 
                        'nspectra': len(spectra), 'spectra': spectra})
 
     return render_template('suites.html', nsuites=len(suites), suites=suites)
@@ -499,29 +637,22 @@ def beamlines(blid=None):
     session_init(session, db)
     beamlines = []
     if blid is None:
-        for blid, val in session['beamlines'].items():
-            name, notes, source, facid = val
-            print 'VAL ', blid, val
-            # (r.name, r.fullname, r.laboratory, r.city,  r.region, r.country)
-            facdata = session['facilities'][facid]
+        for bldat in session['beamline_list']:
+            blid = bldat['id']
             spectra = spectra_for_beamline(db, session, blid)
-            beamlines.append({'id': blid, 'name': name, 'notes': notes,
-                              'source': source,
-                              'fac_name': facdata[0],
-                              'fac_loc': "%s. %s" % (facdata[3], facdata[5]),
-                              'nspectra': len(spectra), 'spectra': spectra})
-
+            opts = {'nspectra': len(spectra), 'spectra': spectra}
+            opts.update(bldat)
+            beamlines.append(opts)
     else:
-        for _blid, val in session['beamlines'].items():
-            if _blid == "%i" % blid:
-                name, notes, source, facid = val
-                facdata = session['facilities'][facid]
+        for _bldat in session['beamline_list']:
+            if _bldat['id'] == "%i" % blid:
+                bldat = _bldat
+                break
+
         spectra = spectra_for_beamline(db, session, blid)
-        beamlines.append({'id': blid, 'name': name, 'notes': notes,
-                          'source': source,
-                          'fac_name': facdata[0],
-                          'fac_loc': "%s. %s" % (facdata[3], facdata[5]),
-                          'nspectra': len(spectra), 'spectra': spectra})
+        opts = {'nspectra': len(spectra), 'spectra': spectra}
+        opts.update(bldat)
+        beamlines.append(opts)
 
     return render_template('beamlines.html',
                            nbeamlines=len(beamlines), beamlines=beamlines)
