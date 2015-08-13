@@ -31,7 +31,7 @@ from plot import make_xafs_plot
 UPLOAD_FOLDER = '/tmp/'
 if os.name =='nt':
     UPLOAD_FOLDER = 'C:/tmp/'
-ALLOWED_EXTENSIONS = set(['txt', 'xdi'])
+ALLOWED_EXTENSIONS = set(['XDI', 'xdi'])
 
 NAME = 'XASDB'
 DATABASE = 'example.db'
@@ -56,6 +56,10 @@ def allowed_file(filename):
     return '.' in filename and \
            filename.rsplit('.', 1)[1] in ALLOWED_EXTENSIONS
 
+@app.errorhandler(404)
+def page_not_found(error):
+    return render_template('notfound.html')
+    
 @app.route('/')
 def index():
     session_init(session, db)
@@ -67,29 +71,59 @@ def clear():
     session_clear(session)
     return redirect(url_for('search'))
 
+@app.route('/create_account/')
+@app.route('/create_account', methods=['GET', 'POST'])
+def create_account():
+    session_init(session, db)
+    error = None
+    if request.method == 'POST':
+        email = request.form['email']
+        name  = request.form['name']
+        affiliation = request.form['affiliation']
+        password = request.form['password']
+        password2 = request.form['password2']
+        person = db.get_person(email)
+        # log in existing
+        if person is not None:
+            error = "Account with email '%s' exists" % email
+        else:
+            if len(name) < 6:
+                error = 'Must give a valid name (at least 5 characters)'
+            elif '@' not in email or '.' not in email or len(email) < 10:
+                error = 'Must give a valid email address'
+            elif len(password)<5:
+                error = 'password must be at least 5 characters long'
+            elif password != password2:
+                error = 'passwords must match.'
+            else:    
+                db.add_person(name, email, password=password,
+                              affiliation=affiliation)
+                flash('Account created for %s' % email)                    
+                return render_template('login.html', error=error)
+            
+    return render_template('create_account.html', error=error)
+
 @app.route('/login/')
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     session_init(session, db)
     error = None
-    if session['username'] is not None:
-        return redirect(url_for('search'))
-    elif request.method == 'POST':
-        email = request.form['username']
+    if request.method == 'POST':
+        email = request.form['email']
         password = request.form['password']
         person = db.get_person(email)
         session['person_id'] = "-1"
         if person is None:
-            error = 'Invalid username'
+            error = 'Invalid email'
         else:
             if not db.test_person_password(email, password):
                 error = 'Invalid password'
             else:
                 session['person_id'] = "%i" % person.id
-                session['username'] = request.form['username']
+                session['username'] = request.form['email']
                 session['logged_in'] = True
+                session.pop('people')
                 return redirect(url_for('search'))
-
     return render_template('login.html', error=error)
 
 @app.route('/logout')
@@ -105,10 +139,18 @@ def logout():
 def user():
     # show the user profile for that user
     session_init(session, db)
-    if 'username' not in session:
-        return 'Not logged in'
-
-    return 'User %s' % session['username']
+    error = None
+    if 'username' not in session or not session['logged_in']:
+        error = 'Not logged in'
+        email, name, affiliation = '', '', ''
+    else:
+        email = session['username']
+        person = db.get_person(email)
+        name = person.name
+        affiliation = person.affiliation
+    
+    return render_template('userprofile.html', error=error, email=email,
+                           name=name, affiliation=affiliation)
 
 @app.route('/search/')
 @app.route('/search/<elem>')
@@ -459,12 +501,14 @@ def beamlines(blid=None):
     if blid is None:
         for blid, val in session['beamlines'].items():
             name, notes, source, facid = val
+            print 'VAL ', blid, val
             # (r.name, r.fullname, r.laboratory, r.city,  r.region, r.country)
             facdata = session['facilities'][facid]
             spectra = spectra_for_beamline(db, session, blid)
-            beamlines.append({'id': blid, 'name': name, 'source': source,
+            beamlines.append({'id': blid, 'name': name, 'notes': notes,
+                              'source': source,
                               'fac_name': facdata[0],
-                              'fac_desc': "%s. %s" % (facdata[3], facdata[5]),
+                              'fac_loc': "%s. %s" % (facdata[3], facdata[5]),
                               'nspectra': len(spectra), 'spectra': spectra})
 
     else:
@@ -473,9 +517,10 @@ def beamlines(blid=None):
                 name, notes, source, facid = val
                 facdata = session['facilities'][facid]
         spectra = spectra_for_beamline(db, session, blid)
-        beamlines.append({'id': blid, 'name': name, 'source': source,
+        beamlines.append({'id': blid, 'name': name, 'notes': notes,
+                          'source': source,
                           'fac_name': facdata[0],
-                          'fac_desc': "%s. %s" % (facdata[3], facdata[5]),
+                          'fac_loc': "%s. %s" % (facdata[3], facdata[5]),
                           'nspectra': len(spectra), 'spectra': spectra})
 
     return render_template('beamlines.html',
