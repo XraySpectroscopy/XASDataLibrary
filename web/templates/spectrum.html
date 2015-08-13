@@ -41,13 +41,17 @@
 </td></tr>
 
 
-<tr><td> Absorption Edge: </td>  <td> {{ elem_sym }} {{ edge }} edge   </td></tr>
-<tr><td> Sample Name:     </td>  <td>  {{sample_name}}   </td></tr>
-<tr><td> Sample Prep:     </td> <td>  {{sample_prep}}     </td></tr>
-<tr><td> Beamline:        </td>  <td>  {{beamline}}     </td></tr>
-<tr><td> Energy Units:    </td>  <td>  {{energy_units}}  </td></tr>
-<tr><td> Mono d-spacing:  </td>  <td>   {{dspace}} &#197; ({{mononame}})   </td></tr>
-<tr><td> Date Measured:   </td>  <td>  {{collection_date}}     </td></tr>
+<tr><td> Absorption Edge: </td> <td> {{ elem_sym }} {{ edge }} edge   </td></tr>
+<tr><td> Sample Name:     </td> <td>  {{sample_name}}   </td></tr>
+<tr><td> Sample Prep:     </td> <td>  {{sample_prep}}   </td></tr>
+<tr><td> Beamline:        </td> <td>  
+    {% if  beamline_id != '-1' %} 
+        <a href="../beamlines/{{ beamline_id }}"> {{ beamline_desc }}</a> &nbsp; &nbsp;
+    {% else %} {{ beamline_desc }} &nbsp; &nbsp;
+    {% endif %} </td></tr>
+<tr><td> Energy Units:    </td> <td>  {{energy_units}}  </td></tr>
+<tr><td> Mono d-spacing:  </td> <td>  {{d_spacing}} &#197; ({{mononame}})   </td></tr>
+<tr><td> Date Measured:   </td> <td>  {{collection_date}}     </td></tr>
 <tr><td> Date Uploaded:   </td>
           <td>  {{upload_date}}, {{ person_name }} ({{ person_email }})    </td></tr>
 <tr><td> User Comments:   </td>  <td>   {{ comments|safe }} </td></tr>

@@ -1,45 +1,68 @@
 {% extends "layout.html" %}
 {% block body %}
-  {% if error %}<p class=error><strong>Error:</strong> {{ error }}{% endif %}
-<form action="action"  method="post">
 
-<p> <div class=subfont>Edit Spectrum  {{ spectrum_name }}
-</div> <p>
+<p> <div class=subfont>Edit Spectrum:  {{ spectrum_name }}</div> <p>
 
-<table>
-<tr><td width=20%> Raw Data File: </td>
-    <td> <a href="../rawfile/{{ spectrum_id }}/{{ spectrum_name }}.xdi">
-             {{ spectrum_name }}.xdi </a>
+<form action="{{ url_for('submit_spectrum_edits') }}" method=post>
+  <input type=hidden name=person value={{person_id}}>
+  <input type=hidden name=spectrum value={{spectrum_id}}>
+  <table>
+    <tr><td colspan=2> <hr> </td></tr>
+    <tr><td>Name:</td><td>
+	<input size=60 type=text name=name value={{spectrum_name}}></td></tr>
+    <tr><td> Mono d-spacing: </td><td>
+	<input size=10 type=text name=d_spacing value={{d_spacing}}> &#197; </td></tr>
+    <tr><td> Element: </td><td>
+	<select name='elem' style="width: 100px;">  
+	  {% for el in elems %} 
+             <option value={{el.z}} 
+              {% if el.symbol == elem_sym %} selected=1 {% endif %} >
+            {{ el.symbol }}</option>
+          {% endfor %}
+	  </select>
     </td></tr>
-<tr><td> Absorption Edge: </td>
-    <td> {{ elem_sym }} {{ edge }} edge
-    </td></tr>
-<tr><td> Sample Name: </td>
-    <td>  {{sample_form}}   </td></tr>
-<tr><td> Sample Preparaion: </td>
-    <td>  {{sample_prep}}     </td></tr>
-<tr><td> Beamline: </td>
-    <td>  {{beamline}}     </td></tr>
-<tr><td> Energy Units: </td>
-    <td>  {{energy_units}}  </td></tr>
-<tr><td> Mono d-spacing: </td>
-    <td>   {{dspace}} &Acirc;  ({{mononame}})   </td></tr>
-<tr><td> Measured: </td>
-    <td>  {{collection_date}}     </td></tr>
-<tr><td> Uploaded: </td>
-    <td>  {{upload_date}}, {{ person_name }} ({{ person_email }})
-    </td></tr>
-<tr><td colspan=2> <hr> </td></tr>
+    <tr><td> Edge:  </td><td>
+	<select  name='edge' style="width: 100px;">  
+	  {% for e in edges %} 
+           <option value={{e.id}}         
+            {% if e.name == edge %} selected=1 {% endif %} > 
+           {{ e.name }}</option>
+          {% endfor %}
+	  </select>
+        </td></tr>
+    <tr><td> Energy Units:  </td><td>
+	<select  name='energy_units' style="width: 100px;">  
+	  {% for e in eunits %} 
+            <option value={{e.id}} 
+              {% if e.name == energy_units %} selected=1 {% endif %} >
+            {{ e.units }}</option>
+          {% endfor %}
+	  </select>
+        </td></tr>
 
-{% for x in misc %}
-   <tr><td> {{x.key}}: </td><td> {{x.val}} </td></tr>
-{% endfor %}
+    <tr><td> Beamline: </td><td>
+	<select  name='beamline' style="width: 350px;">  
+	  {% for bl in beamlines %} 
+            <option value={{bl.id}} s
+              {% if bl.id == beamline_id  %} selected=1 {% endif %} >
+              {{ bl.name }} @ {{bl.fac_name}} </option>
+          {% endfor %}
+	  </select>
+        </td></tr>
+    <tr><td> Sample: </td><td>
+	<select  name='sample' style="width: 350px;">  
+	  {% for sm in samples %} 
+           <option value={{sm.id}}
+              {% if sm.id == sample_id  %} selected=1 {% endif %} > 
+          {{ sm.name }} </option>
+          {% endfor %}
+	  </select>
 
-<tr><td colspan=2> <hr> </td></tr>
-
-
-</table>
-
-
+    <tr><td> User Comment: </td><td>
+	<textarea cols=45  rows=10 type=text name=comments>{{raw_comments}}</textarea></td></tr>
+  <tr><td colspan=2> <hr> </td></tr>
+     <tr><td><input type=submit value=submit></td><td></td></tr>
+    </table>
 </form>
+
 {% endblock %}
