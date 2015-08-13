@@ -526,6 +526,18 @@ class XASDataLibrary(object):
         return self.addrow('suite', name=name, notes=notes,
                             person_id=person_id, **kws)
 
+    def del_suite(self, suite_id):
+        table = self.tables['suite']
+        table.delete().where(table.c.id==suite_id).execute()
+        table = self.tables['spectrum_suite']
+        table.delete().where(table.c.suite_id==suite_id).execute()
+        table = self.tables['suite_rating']
+        table.delete().where(table.c.id==suite_id).execute()
+
+        self.set_mod_time()
+        self.session.commit()
+
+
 
     def add_suite_rating(self, person_id, suite_id, score, comments=None):
         """add a score to a suite:"""
@@ -763,7 +775,7 @@ class XASDataLibrary(object):
 
 
         stab = self.tables['spectrum']
-        
+
         _s_names = [s.name for s in stab.select().execute()]
         spectrum_name = unique_name(spectrum_name, _s_names)
 
