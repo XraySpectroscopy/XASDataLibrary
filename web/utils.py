@@ -39,7 +39,7 @@ def random_string(n):
 
 def multiline_text(s):
     if '\n' in s:
-        return '<p>%s</p>' % (s.replace('\n', '<br>'))
+        return '%s' % (s.replace('\n', '<br>'))
 
 def session_clear(session):
     for s in ('elements', 'edges', 'energy_units', 'facilities',
