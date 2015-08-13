@@ -1,19 +1,24 @@
+#!/usr/bin/env python
+
+import sys
+import os
+import time
+
+t0 = time.time()
+
+import json
+import base64
+import numpy as np
 
 from flask import (Flask, request, session, redirect, url_for,
                    abort, render_template, flash, Response)
 
 from werkzeug import secure_filename
 
-import sys
-import os
-import time
-import json
-import base64
-import io
-import numpy as np
+import larch
 
 from xasdb import XASDataLibrary, fmttime, valid_score, unique_name
-import larch
+
 
 from utils import (get_session_key, random_string, multiline_text,
                    session_init, session_clear,
@@ -34,17 +39,18 @@ PORT     = 7112
 DEBUG    = True
 SECRET_KEY = get_session_key()
 
-t0 = time.time()
+print 'Imports done %.1f sec ' % (time.time()-t0)
 
 app = Flask(__name__)
 app.config.from_object(__name__)
 app.config['MAX_CONTENT_LENGTH'] = 32 * 1024 * 1024
 
+print 'Flask app created %.1f sec ' % (time.time()-t0)
 db = XASDataLibrary(DATABASE, server='sqlite')
-print 'XASDB connected ', time.time()-t0
+print 'XASDB connected %.1f sec ' % (time.time()-t0)
 
 _larch = larch.Interpreter()
-
+print 'Larch Interpreter connected %.1f sec ' % (time.time()-t0)
 
 def allowed_file(filename):
     return '.' in filename and \
@@ -304,7 +310,6 @@ def rate_spectrum(spid=None):
                            spectrum_id=spid, spectrum_name=spname,
                            person_id=pid, score=score, review=review)
 
-
 @app.route('/add_spectrum_to_suite/<int:spid>')
 def add_spectrum_to_suite(spid=None):
     session_init(session, db)
@@ -489,7 +494,7 @@ def add_beamline():
         bl_name = request.form['beamline_name']
         _blnames = [s[0] for s in session['beamlines'].keys()]
         try:
-            bl_name = unique_name(bl_name, _blnames,  msg='beamline')
+            bl_name = unique_name(bl_name, _blnames,  msg='beamline', maxcount=5)
         except:
             error = 'a beamline named %s exists'
         db.add_beamline(bl_name)
@@ -503,6 +508,33 @@ def add_beamline():
         return render_template('add_beamline.html', error=error,
                                facilities=facilities)
 
+
+@app.route('/add_facility')
+@app.route('/add_facility', methods=['GET', 'POST'])
+def add_facility():
+    session_init(session, db)
+    error=None
+    if not session['logged_in']:
+        error='must be logged in to add a facility'
+        return redirect(url_for('beamlines', error=error))
+
+    if request.method == 'POST':
+        fac_name = request.form['facility_name']
+        _facnames = [s[0] for s in session['facilities'].keys()]
+        try:
+            fac_name = unique_name(fac_name, _facnames,  msg='facility', maxcoutn=5)
+        except:
+            error = 'a facility named %s exists'
+        db.add_beamline(fac_name)
+        time.sleep(1)
+        session.pop('facilities')
+        return redirect(url_for('facilities', error=error))
+    else:
+        facilities = []
+        for key, fac in session['facilities'].items():
+            facilities.append({'id': key, 'name': fac[0]})
+        return render_template('add_facility.html', error=error,
+                               facilities=facilities)
 
 
 @app.route('/upload')
@@ -557,5 +589,5 @@ def submit_upload():
 
 if __name__ == "__main__":
     # app.jinja_env.cache = {}
-    print 'Server Ready ', app, time.ctime()
+    print 'Server Ready %s ' % time.ctime()
     app.run(port=7112)
