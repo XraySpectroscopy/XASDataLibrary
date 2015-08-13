@@ -1,21 +1,5 @@
 {% extends "layout.html" %}
 {% block body %}
-  {% if error %}<p class=error><strong>Error:</strong> {{ error }}
-{% endif %}
-
-
-<div id='tab'>
-<ul id='tabmenu'>
-  <li> <a href="{{ url_for('about') }}"> Get Help</a> </li>
-  <li> <a href="{{ url_for('suites') }}">Browse Suites</a> </li>
-  <li> <a href="{{ url_for('beamlines') }}">Browse Beamlines</a> </li>
-
-  {% if session.logged_in %}
-  <li> <a href="{{ url_for('upload') }}">Upload Data</a></li>
-  <li> <a href="{{ url_for('user') }}">Edit Profile</a></li>
-  {% endif %}
-</ul>
-</div>
 
 <p>
 
