@@ -58,15 +58,19 @@ def allowed_file(filename):
     return '.' in filename and \
            filename.rsplit('.', 1)[1] in ALLOWED_EXTENSIONS
 
-## @app.errorhandler(404)
-## def page_not_found(error):
-##     return render_template('notfound.html')
+@app.errorhandler(404)
+def page_not_found(error):
+    return render_template('notfound.html')
 
 
 @app.route('/clear')
 def clear():
     session_init(session, db)
     session_clear(session)
+    return redirect(url_for('search'))
+
+@app.route('/')
+def index():
     return redirect(url_for('search'))
 
 @app.route('/create_account/')
@@ -153,7 +157,6 @@ def user():
     return render_template('userprofile.html', error=error, email=email,
                            name=name, affiliation=affiliation)
 
-@app.route('/')
 @app.route('/search')
 @app.route('/search/')
 @app.route('/search/<elem>')
