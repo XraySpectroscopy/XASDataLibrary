@@ -94,15 +94,35 @@ def spectrum_ratings(db, sid):
     """list of score, comments, time, person) for spectrum ratings"""
     d = []
     for r in db.filtered_query('spectrum_rating', spectrum_id=sid):
-        d.append((r.score, r.comments, r.datetime, "%i" % r.person_id))
+        d.append((r.score, r.comments, r.datetime, r.person_id))
     return d
+
+def spectrum_ratings_summary(db, sid):
+    """summary of spectrum ratings"""
+    sum, n, rating = 0.0, 0, 'No ratings'
+    for r in db.filtered_query('spectrum_rating', spectrum_id=sid):
+        sum += 1.0*r.score
+        n  += 1
+    if n > 0:
+        rating = ' %.1f (%i ratings)' % (sum/n, n)
+    return rating
 
 def suite_ratings(db, sid):
     """list of score, comments, time, person) for suite ratings"""
     d = []
     for r in db.filtered_query('suite_rating', suite_id=sid):
-        d.append((r.score, r.comments, r.datetime, "%i" % r.person_id))
+        d.append((r.score, r.comments, r.datetime, r.person_id))
     return d
+
+def suite_ratings_summary(db, sid):
+    """summary of suite ratings"""
+    sum, n, rating = 0.0, 0, 'No ratings'
+    for r in db.filtered_query('suite_rating', suite_id=sid):
+        sum += 1.0*r.score
+        n  += 1
+    if n > 0:
+        rating = ' %.1f (%i ratings)' % (sum/n, n)
+    return rating
 
 def get_suite_spectra(db, sid):
     'spectra in suite'
@@ -118,6 +138,22 @@ def get_spectrum_suites(db, sid):
         d.append(r.suite_id)
     return d
 
+def beamline_for_spectrum(db, s, notes=None):
+    "return id, desc for beamline of a spectrum"
+    id  = -1
+    desc = 'unknown'
+    if s.beamline_id is not None:
+        id  = s.beamline_id
+        bl  = db.filtered_query('beamline', id=s.beamline_id)[0]
+        fac  = db.filtered_query('facility', id=bl.facility_id)[0]
+        desc = '%s @ %s ' % (bl.name, fac.name)
+    if (id is None or id < 0) and (notes is not None):
+        id = -1
+        tname = notes.get('beamline', {}).get('name', None)
+        if tname is not None:
+            desc = "%s -- may be '%s'" % (desc, tname)
+    return '%i' % id, desc
+    
 def spectra_for_beamline(db, blid):
     spectra = []
     for r in db.get_spectra():
@@ -150,17 +186,7 @@ def parse_spectrum(s, db):
 
     notes =  json.loads(s.notes)
 
-    beamline_desc = 'unknown '
-    beamline = None
-    beamline_id  = '-1'
-    tname = notes.get('beamline', {}).get('name', None)
-    if tname is not None:
-        beamline_desc = "%s -- may be '%s'" % (beamline_desc, tname)
-    if s.beamline_id is not None:
-        beamline_id  = '%i' % s.beamline_id
-        beamline   = db.filtered_query('beamline', id=s.beamline_id)[0]
-        facility   = db.filtered_query('facility', id=beamline.facility_id)[0]
-        beamline_desc = '%s @ %s ' % (beamline.name, facility.name)
+    beamline_id, beamline_desc = beamline_for_spectrum(db, s, notes)
 
     try:
         sample = db.filtered_query('sample', id=s.sample_id)[0]
@@ -204,7 +230,6 @@ def parse_spectrum(s, db):
             'comments': multiline_text(s.comments),
             'beamline_id': beamline_id,
             'beamline_desc': beamline_desc,
-            'beamline': beamline,
             'mononame': mononame,
             'd_spacing': d_spacing,
             'misc': misc,
