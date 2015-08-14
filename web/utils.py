@@ -42,111 +42,53 @@ def multiline_text(s):
         return '%s' % (s.replace('\n', '<br>'))
 
 def session_clear(session):
-    for s in ('elements', 'edges', 'energy_units', 'facilities',
-              'beamlines', 'spectra', 'samples', 'suites', 'people'):
-        if s in session:
-            session.pop(s)
-    print 'Cleared Session'
+    pass
 
 def session_init(session, db):
-    if 'last_refresh' not in session:
-        session['last_refresh'] = 0.0
+    if 'username' not in session:    session['username'] = None
+    if 'person_id' not in session:   session['person_id'] = "-1"
 
-    if time.time() - session.get('last_refresh', time.time()) > 1800.0:
-        session['last_refresh'] = time.time()
+def get_element_list(db):
+    l = []
+    for r in db.get_elements():
+        l.append({'z': '%i' % r.z, 'symbol': r.symbol, 'name': r.name})
+    return l
 
-    if 'username' not in session:
-        print 'Null username'
-        session['username'] = None
+def get_energy_units_list(db):
+    l = []
+    for r in db.filtered_query('energy_units'):
+        l.append({'id': '%i' % r.id, 'units': r.units})
+    return l
 
-    if 'person_id' not in session:
-       print 'Null person_id'
-       session['person_id'] = "-1"
+def get_edge_list(db):
+    l = []
+    for r in db.get_edges():
+        l.append({'id': '%i' % r.id, 'name': r.name})
+    return l
 
-    if 'logged_in' not in session:
-        session['logged_in'] = False
+def get_beamline_list(db):
+    l = []
+    for r in db.get_beamlines():
+        facid = '%i' % r.facility_id
+        fac  = db.filtered_query('facility', id=r.facility_id)[0]
+        l.append({'id': '%i' % r.id,
+                  'name': r.name,
+                  'notes': r.notes,
+                  'xray_source': r.xray_source,
+                  'fac_id': facid,
+                  'fac_name': fac.name,
+                  'fac_loc': "%s, %s" % (fac.city, fac.country)})
+    return l
 
-    if 'elements' not in session:
-        session['elements'] = d = {}
-        session['element_list'] = l = []
-        for r in db.get_elements():
-            d['%i'%r.z]  = (r.symbol, r.name)
-            l.append({'z': '%i' % r.z, 'symbol': r.symbol,
-                      'name': r.name})
-
-    if 'edges' not in session:
-        session['edges'] = d = {}
-        session['edge_list'] = l = []
-        for r in db.get_edges():
-            d['%i'%r.id]  = r.name
-            l.append({'id': '%i' % r.id, 'name': r.name})
-
-    if 'energy_units' not in session:
-        session['energy_units'] = d = {}
-        session['energy_units_list'] = l = []
-        for r in db.filtered_query('energy_units'):
-            d['%i'%r.id] = r.units
-            l.append({'id': '%i' % r.id, 'units': r.units})
-
-    if 'facilities' not in session:
-        session['facilities'] = d = {}
-        for r in db.get_facility():
-            d['%i'%r.id] = (r.name, r.fullname,
-                            r.laboratory, r.city,  r.region, r.country)
-
-    if 'beamlines' not in session:
-        session['beamlines'] = d = {}
-        session['beamline_list'] = l = []
-        for r in db.get_beamlines():
-            facid = '%i' % r.facility_id
-            facdat = session['facilities'][facid]
-            d['%i'%r.id] = (r.name, r.notes, r.xray_source, facid, facdat[0])
-            l.append({'id': '%i' % r.id,
-                      'name': r.name,
-                      'notes': r.notes,
-                      'xray_source': r.xray_source,
-                      'fac_id': facid,
-                      'fac_name': facdat[0],
-                      'fac_loc': "%s, %s" % (facdat[3], facdat[5])})
-
-
-    if 'spectra' not in session:
-        session['spectra'] = d = {}
-        for r in db.get_spectra():
-            d['%i'%r.id] = (r.name, r.element_z, r.edge_id, r.person_id)
-
-    if 'samples' not in session:
-        session['samples'] = d = {}
-        session['sample_list'] = l = []
-        for r in db.filtered_query('sample'):
-            d['%i'%r.id] = (r.name, r.formula, r.preparation,
-                            r.material_source, r.notes, '%i'%r.person_id)
-            l.append({'id': '%i' % r.id, 'name': r.name,
-                      'formula': r.formula, 'notes': r.notes,
-                      'preparation': r.preparation,
-                      'person_id': r.person_id,
-                      'material_source': r.material_source})
-
-    if 'suites' not in session:
-        session['suites'] = d = {}
-        session['suite_list'] = l = []
-        for r in db.filtered_query('suite'):
-            d['%i'%r.id] = (r.name, r.notes, '%i'%r.person_id)
-            l.append({'id': '%i' % r.id, 'name': r.name,
-                       'notes': r.notes, 'person_id': r.person_id})
-
-    if 'people' not in session:
-        session['people'] = d = {}
-        session['people_list'] = l = []
-        for r in db.get_persons():
-            d['%i'%r.id] = (r.email, r.name, r.affiliation)
-            l.append({'id': '%i' % r.id, 'email': r.email, 'name': r.name,
-                      'affiliation': r.affiliation})
-
-    print( 'End session init: ' , session['username'],
-           session['person_id'], time.ctime())
-    return session
-
+def get_sample_list(db):
+    l = []
+    for r in db.filtered_query('sample'):
+        l.append({'id': '%i' % r.id, 'name': r.name,
+                  'formula': r.formula, 'notes': r.notes,
+                  'preparation': r.preparation,
+                  'person_id': r.person_id,
+                  'material_source': r.material_source})
+    return l
 
 def spectrum_ratings(db, sid):
     """list of score, comments, time, person) for spectrum ratings"""
@@ -176,58 +118,56 @@ def get_spectrum_suites(db, sid):
         d.append(r.suite_id)
     return d
 
-def spectra_for_beamline(db, session, blid):
+def spectra_for_beamline(db, blid):
     spectra = []
     for r in db.get_spectra():
-        if r.beamline_id is None or int(r.beamline_id) !=int(blid):
+        if r.beamline_id !=int(blid):
             continue
-        _nam, _z, _edge, _pid = session['spectra']["%i" % (r.id)]
-        elem_sym, elem_name = session['elements']["%i" % _z]
-        edge =  session['edges']["%i" % _edge]
-        spectra.append({'spectrum_id': r.id,
-                        'name':    r.name,
-                        'elem_sym': elem_sym, 'edge': edge})
+        elem = db.get_element(r.element_z)
+        edge = db.get_edge(r.edge_id)
+        spectra.append({'spectrum_id': r.id, 'name':    r.name,
+                        'elem_sym': elem.symbol, 'edge': edge.name})
     return spectra
 
-def spectra_for_suite(db, session, stid):
+def spectra_for_suite(db, stid):
     spectra = []
-    for r in db.filtered_query('spectrum_suite', suite_id=int(stid)):
-        _nam, _z, _edge, _pid = session['spectra']["%i" % (r.spectrum_id)]
-        elem_sym, elem_name = session['elements']["%i" % _z]
-        edge =  session['edges']["%i" % _edge]
-        spectra.append({'spectrum_id': r.spectrum_id,
-                        'name': _nam, 'elem_sym': elem_sym, 'edge': edge})
+    if stid is not None:
+        for r in db.filtered_query('spectrum_suite', suite_id=int(stid)):
+            spec = db.get_spectrum(r.spectrum_id)
+            elem = db.get_element(spec.element_z)
+            edge = db.get_edge(spec.edge_id)
+            spectra.append({'spectrum_id': r.spectrum_id, 'name': spec.name,
+                            'elem_sym': elem.symbol, 'edge': edge.name})
     return spectra
 
 
-def parse_spectrum(s, session):
-    edge = session['edges']['%i' % s.edge_id]
-    elem = session['elements']['%i' % s.element_z]
-    person = session['people']['%i' % s.person_id]
-
-    eunits = session['energy_units']['%i'% s.energy_units_id]
+def parse_spectrum(s, db):
+    edge   = db.get_edge(s.edge_id)
+    elem   = db.get_element(s.element_z)
+    person = db.get_person(s.person_id)
+    eunits = db.filtered_query('energy_units', id=s.energy_units_id)[0].units
     d_spacing = '%f'% s.d_spacing
 
     notes =  json.loads(s.notes)
 
-    try:
-        beamline_id  = '%i'% s.beamline_id
-        beamline     = session['beamlines'][beamline_id]
-        beamline_desc = '%s @ %s ' % (beamline[0], beamline[4])
-    except:
-        beamline_desc = 'unknown '
-        beamline = None
-        beamline_id  = '-1'
-        tname = notes.get('beamline', {}).get('name', None)
-        if tname is not None:
-            beamline_desc = "%s -- may be '%s'" % (beamline_desc, tname)
+    beamline_desc = 'unknown '
+    beamline = None
+    beamline_id  = '-1'
+    tname = notes.get('beamline', {}).get('name', None)
+    if tname is not None:
+        beamline_desc = "%s -- may be '%s'" % (beamline_desc, tname)
+    if s.beamline_id is not None:
+        beamline_id  = '%i' % s.beamline_id
+        beamline   = db.filtered_query('beamline', id=s.beamline_id)[0]
+        facility   = db.filtered_query('facility', id=beamline.facility_id)[0]
+        beamline_desc = '%s @ %s ' % (beamline.name, facility.name)
 
     try:
-        sample = session['samples']['%i'% s.sample_id]
+        sample = db.filtered_query('sample', id=s.sample_id)[0]
         sample_id = '%i'% s.sample_id
-        sample_name = sample[0]
-        sample_form = sample[1]
-        sample_prep = sample[2]
+        sample_name = sample.name
+        sample_form = sample.formula
+        sample_prep = sample.preparation
     except:
         sample_id  = '-1'
         sample_name = 'unknown'
@@ -256,9 +196,9 @@ def parse_spectrum(s, session):
 
     return {'spectrum_id': s.id,
             'spectrum_name': s.name,
-            'elem_sym': elem[0],
-            'elem_name': elem[1],
-            'edge': edge,
+            'elem_sym': elem.symbol,
+            'elem_name': elem.name,
+            'edge': edge.name,
             'energy_units': eunits,
             'raw_comments': s.comments,
             'comments': multiline_text(s.comments),
@@ -272,8 +212,8 @@ def parse_spectrum(s, session):
             'sample_name':  sample_name,
             'sample_form':  sample_form,
             'sample_prep':  sample_prep,
-            'person_email': person[0],
-            'person_name': person[1],
+            'person_email': person.email,
+            'person_name': person.name,
             'upload_date': fmttime(s.submission_date),
             'collection_date': fmttime(s.collection_date),
             'fullfig': None,
