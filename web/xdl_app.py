@@ -56,14 +56,10 @@ def allowed_file(filename):
     return '.' in filename and \
            filename.rsplit('.', 1)[1] in ALLOWED_EXTENSIONS
 
-@app.errorhandler(404)
-def page_not_found(error):
-    return render_template('notfound.html')
-    
-@app.route('/')
-def index():
-    session_init(session, db)
-    return redirect(url_for('search'))
+## @app.errorhandler(404)
+## def page_not_found(error):
+##     return render_template('notfound.html')
+
 
 @app.route('/clear')
 def clear():
@@ -95,12 +91,12 @@ def create_account():
                 error = 'password must be at least 5 characters long'
             elif password != password2:
                 error = 'passwords must match.'
-            else:    
+            else:
                 db.add_person(name, email, password=password,
                               affiliation=affiliation)
-                flash('Account created for %s' % email)                    
+                flash('Account created for %s' % email)
                 return render_template('login.html', error=error)
-            
+
     return render_template('create_account.html', error=error)
 
 @app.route('/login/')
@@ -108,6 +104,8 @@ def create_account():
 def login():
     session_init(session, db)
     error = None
+    print 'login ', time.ctime()
+    session['username'] = None
     if request.method == 'POST':
         email = request.form['email']
         password = request.form['password']
@@ -121,18 +119,20 @@ def login():
             else:
                 session['person_id'] = "%i" % person.id
                 session['username'] = request.form['email']
-                session['logged_in'] = True
-                session.pop('people')
-                return redirect(url_for('search'))
-    return render_template('login.html', error=error)
+    print session['username'], session['person_id'], session['username'] is not None
+    if session['username'] is not None:
+        return redirect(url_for('search'))
+    else:
+        return render_template('login.html', error=error)
+
 
 @app.route('/logout')
 def logout():
     session_init(session, db)
-    session.pop('username', None)
-    session['person_id'] = None
-    session['logged_in'] = False
+    session['username'] = None
+    session['person_id'] = '-1'
     flash('You have been logged out')
+    print 'Log out'
     return redirect(url_for('search'))
 
 @app.route('/user/')
@@ -140,7 +140,7 @@ def user():
     # show the user profile for that user
     session_init(session, db)
     error = None
-    if 'username' not in session or not session['logged_in']:
+    if 'username' not in session:
         error = 'Not logged in'
         email, name, affiliation = '', '', ''
     else:
@@ -148,13 +148,16 @@ def user():
         person = db.get_person(email)
         name = person.name
         affiliation = person.affiliation
-    
+
     return render_template('userprofile.html', error=error, email=email,
                            name=name, affiliation=affiliation)
 
+@app.route('/')
+@app.route('/search')
 @app.route('/search/')
 @app.route('/search/<elem>')
 def search(elem=None):
+    print 'Search 1 ', 'username' in session, session.keys()
     session_init(session, db)
     dbspectra = []
     if elem is not None:
@@ -277,7 +280,7 @@ def showspectrum_rating(spid=None):
 def submit_spectrum_edits():
     session_init(session, db)
     error=None
-    if not session['logged_in']:
+    if session['username'] is not None:
         error='must be logged in to edit spectrum'
         return render_template('search', error=error)
     if request.method == 'POST':
@@ -290,16 +293,16 @@ def submit_spectrum_edits():
                   beamline_id= int(request.form['beamline']),
                   sample_id= int(request.form['sample']),
                   energy_units_id=int(request.form['energy_units']))
-                  
+
         time.sleep(0.25)
-        
-    return redirect(url_for('spectrum', spid=spid, error=error))        
+
+    return redirect(url_for('spectrum', spid=spid, error=error))
 
 @app.route('/editspectrum/<int:spid>')
 def editspectrum(spid=None):
     session_init(session, db)
     error=None
-    if not session['logged_in']:
+    if session['username'] is not None:
         error='must be logged in to edit spectrum'
         return render_template('search', error=error)
 
@@ -311,10 +314,10 @@ def editspectrum(spid=None):
     opts = parse_spectrum(s, session)
 
     for s in session['sample_list']:
-        x = '     ' 
+        x = '     '
         if s['id'] == opts['sample_id']: x = ' Bingo!'
         # print x, s['id'], s['name']
-        
+
     return render_template('editspectrum.html', error=error,
                            elems=session['element_list'],
                            eunits=session['energy_units_list'],
@@ -441,7 +444,7 @@ def rate_suite(stid=None):
         if _p == pid:
             score = _s
             review =  _r
-    
+
     return render_template('ratesuite.html', error=error,
                            suite_id=stid, suite_name=spname,
                            person_id=pid, score=score, review=review)
@@ -557,7 +560,7 @@ def suites(stid=None):
                 sum = 0.0
                 for rate in ratings: sum = sum + rate[0]
                 rating = sum*1.0/len(ratings)
-            rating = 'Average rating %.1f (%i ratings)' % (rating, len(ratings))
+                rating = 'Average rating %.1f (%i ratings)' % (rating, len(ratings))
             suites.append({'id': stid, 'name': name, 'notes': notes,
                            'person_email': person_email,
                            'rating': rating,
@@ -575,10 +578,10 @@ def suites(stid=None):
             sum = 0.0
             for rate in ratings: sum = sum + rate[0]
             rating = sum*1.0/len(ratings)
-        rating = 'Average rating %.1f (%i ratings)' % (rating, len(ratings))
-            
+            rating = 'Average rating %.1f (%i ratings)' % (rating, len(ratings))
+
         suites.append({'id': stid, 'name': name, 'notes': notes,
-                       'person_email': person_email, 'rating': rating, 
+                       'person_email': person_email, 'rating': rating,
                        'nspectra': len(spectra), 'spectra': spectra})
 
     return render_template('suites.html', nsuites=len(suites), suites=suites)
@@ -764,6 +767,6 @@ def submit_upload():
     return render_template('upload.html', error='upload error')
 
 if __name__ == "__main__":
-    # app.jinja_env.cache = {}
+    app.jinja_env.cache = {}
     print 'Server Ready %s ' % time.ctime()
-    app.run(port=7112)
+    app.run(port=4966)

@@ -46,32 +46,34 @@ def session_clear(session):
               'beamlines', 'spectra', 'samples', 'suites', 'people'):
         if s in session:
             session.pop(s)
+    print 'Cleared Session'
 
 def session_init(session, db):
     if 'last_refresh' not in session:
         session['last_refresh'] = 0.0
 
     if time.time() - session.get('last_refresh', time.time()) > 1800.0:
-        session_clear(session)
         session['last_refresh'] = time.time()
 
     if 'username' not in session:
+        print 'Null username'
         session['username'] = None
 
     if 'person_id' not in session:
-        session['person_id'] = "-1"
+       print 'Null person_id'
+       session['person_id'] = "-1"
 
     if 'logged_in' not in session:
         session['logged_in'] = False
 
     if 'elements' not in session:
         session['elements'] = d = {}
-        session['element_list'] = l = []        
+        session['element_list'] = l = []
         for r in db.get_elements():
             d['%i'%r.z]  = (r.symbol, r.name)
             l.append({'z': '%i' % r.z, 'symbol': r.symbol,
                       'name': r.name})
-            
+
     if 'edges' not in session:
         session['edges'] = d = {}
         session['edge_list'] = l = []
@@ -85,7 +87,7 @@ def session_init(session, db):
         for r in db.filtered_query('energy_units'):
             d['%i'%r.id] = r.units
             l.append({'id': '%i' % r.id, 'units': r.units})
-            
+
     if 'facilities' not in session:
         session['facilities'] = d = {}
         for r in db.get_facility():
@@ -115,16 +117,16 @@ def session_init(session, db):
 
     if 'samples' not in session:
         session['samples'] = d = {}
-        session['sample_list'] = l = []           
+        session['sample_list'] = l = []
         for r in db.filtered_query('sample'):
             d['%i'%r.id] = (r.name, r.formula, r.preparation,
                             r.material_source, r.notes, '%i'%r.person_id)
             l.append({'id': '%i' % r.id, 'name': r.name,
                       'formula': r.formula, 'notes': r.notes,
-                      'preparation': r.preparation, 
+                      'preparation': r.preparation,
                       'person_id': r.person_id,
                       'material_source': r.material_source})
-            
+
     if 'suites' not in session:
         session['suites'] = d = {}
         session['suite_list'] = l = []
@@ -132,7 +134,7 @@ def session_init(session, db):
             d['%i'%r.id] = (r.name, r.notes, '%i'%r.person_id)
             l.append({'id': '%i' % r.id, 'name': r.name,
                        'notes': r.notes, 'person_id': r.person_id})
-            
+
     if 'people' not in session:
         session['people'] = d = {}
         session['people_list'] = l = []
@@ -141,7 +143,11 @@ def session_init(session, db):
             l.append({'id': '%i' % r.id, 'email': r.email, 'name': r.name,
                       'affiliation': r.affiliation})
 
-            
+    print( 'End session init: ' , session['username'],
+           session['person_id'], time.ctime())
+    return session
+
+
 def spectrum_ratings(db, sid):
     """list of score, comments, time, person) for spectrum ratings"""
     d = []
@@ -223,7 +229,7 @@ def parse_spectrum(s, session):
         sample_form = sample[1]
         sample_prep = sample[2]
     except:
-        sample_id  = '-1'        
+        sample_id  = '-1'
         sample_name = 'unknown'
         sample_form = 'unknown'
         sample_prep = 'unknown'

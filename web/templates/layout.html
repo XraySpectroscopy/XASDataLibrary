@@ -25,7 +25,7 @@
   <li> <a href="{{ url_for('suites') }}"> Browse Suites </a> </li>
   <li> <a href="{{ url_for('beamlines') }}"> Browse Beamlines </a> </li>
 
-  {% if session.logged_in %}
+  {% if session.username != none %}
   <li> <a href="{{ url_for('upload') }}"> Upload Data</a></li>
   <li> <a href="{{ url_for('user') }}"> User Profile</a></li>
   {% endif %}
