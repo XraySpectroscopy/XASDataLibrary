@@ -303,7 +303,8 @@ def editspectrum(spid=None):
     error=None
     if session['username'] is None:
         error='must be logged in to edit spectrum'
-        return render_template('ptable.html', error=error)
+        return render_template('ptable.html',
+                               error=error)
 
     s  = db.get_spectrum(spid)
     if s is None:
@@ -483,7 +484,7 @@ def add_spectrum_to_suite(spid=None):
 
     suites = []
     for st in db.filtered_query('suite'):
-        suites.append({'id': key, 'name': st.name})
+        suites.append({'id': st.id, 'name': st.name})
 
     return render_template('add_spectrum_to_suite.html', error=error,
                            spectrum_id=spid, spectrum_name=s.name,
@@ -572,8 +573,6 @@ def suites(stid=None):
         suites.append({'id': stid, 'name': name, 'notes': notes,
                        'person_email': person_email, 'rating': rating,
                        'nspectra': len(spectra), 'spectra': spectra})
-
-    print ' SEND TO SUITES : ', suites
     return render_template('suites.html', nsuites=len(suites), suites=suites)
 
 @app.route('/add_suite')
@@ -595,7 +594,7 @@ def add_suite():
         except:
             error = 'a suite named %s exists'
         db.add_suite(suite_name, notes=notes, person_id=int(person_id))
-        time.sleep(1)
+        time.sleep(0.5)
         return redirect(url_for('suites', error=error))
     else:
 
@@ -753,5 +752,6 @@ def submit_upload():
 
 if __name__ == "__main__":
     app.jinja_env.cache = {}
-    print 'Server Ready %s ' % time.ctime()
-    app.run(port=4966)
+    port = 4966
+    print 'Server at port %i ready at  %s ' % (port, time.ctime())
+    app.run(port=port)
