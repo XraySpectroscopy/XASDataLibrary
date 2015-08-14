@@ -2,8 +2,6 @@
 {% block body %}
 
 <p> <div class=subfont> Beamlines</div>
-{% if error %}<p class=error><strong>Error:</strong> {{ error }}{% endif %}
-
 
 {% if session.username is not none %}
   &nbsp;   &nbsp;
@@ -15,15 +13,15 @@
 {% if nbeamlines == 0 %}
       No beamlines defined.
 {% else %}
-   <table cellspacing=3 cellpadding=3 border=1>
+   <table cellspacing=3 cellpadding=1>
     <tr><th>Abbreviation</th>
 <th> # Spectra</ht><th>Name</th><th> X-ray Source</th><th>Facility Location</th></tr>
    {% for bl in beamlines %}
-       <tr><td id='spectra'>
-           <a href="../beamlines/{{ bl.id }}"> {{bl.name}} at {{bl.fac_name}} </a></td>
+       <tr id="{{ loop.cycle('odd', 'even') }}">
+       <td>  <a href="../beamlines/{{ bl.id }}"> {{bl.name}} at {{bl.fac_name}} </a></td>
         <td>  &nbsp; {{ bl.nspectra }}  &nbsp;</td>
-	<td>  &nbsp; {{bl.notes}}  &nbsp; </td>  
-	<td>  &nbsp; {{bl.xray_source}}  &nbsp; </td>  
+	<td>  &nbsp; {{bl.notes}}  &nbsp; </td>
+	<td>  &nbsp; {{bl.xray_source}}  &nbsp; </td>
         <td>  &nbsp; {{bl.fac_loc}}</td></tr>
    {% endfor %}
    </table>

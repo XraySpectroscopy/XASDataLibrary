@@ -2,11 +2,10 @@
 {% block body %}
 
 <p><div class=subfont> Upload XDI Spectra</div>
-{% if error %}<p class=error><strong>Error:</strong> {{ error }}{% endif %}
 
 Note: The uploaded file must
 be a valid
-XAS-Data-Interchange (XDI) file, 
+XAS-Data-Interchange (XDI) file,
 and have an extension of '.xdi'.
 
 <p>
@@ -20,7 +19,7 @@ For example files, see
 
 </p>
 
-<form action="{{ url_for('submit_upload') }}" 
+<form action="{{ url_for('submit_upload') }}"
     method=post enctype=multipart/form-data>
     <input type=hidden name=person value={{person_id}}>
     <input type=file name=file> <br> <input type=submit value=upload>

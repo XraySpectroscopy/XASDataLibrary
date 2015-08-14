@@ -1,13 +1,12 @@
 {% extends "layout.html" %}
 {% block body %}
 <p> <div class=subfont> Suites of Spectra</div>
-{% if error %}<p class=error><strong>Error:</strong> {{ error }}{% endif %}
 
 {% if session.username is not none %}
   &nbsp;   &nbsp;
   <a href="../add_suite"> [add a suite] </a>
 {% endif %}
-</div>
+<p>
 
 <div id='spectra'>
 <hr>
@@ -16,7 +15,8 @@
 {% else %}
    <table cellspacing=5 cellpadding=2>
    {% for s in suites %}
-       <tr><td id='spectra'>
+       <tr class="{{ loop.cycle('odd', 'even') }}">
+       <td id='spectra'>
            <a href="../suites/{{ s.id }}"> {{ s.name }}</a></td>
         <td> {{ s.nspectra }} spectra:   {{ s.notes|safe }} </td>
         <td> <a href="../showsuite_rating/{{ s.id }}"> {{ s.rating }} </a></td>

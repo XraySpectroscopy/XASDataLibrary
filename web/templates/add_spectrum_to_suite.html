@@ -1,11 +1,15 @@
 {% extends "layout.html" %}
 {% block body %}
-  <h4>Add Spectrum to Suite: </h4>
-  {% if error %}<p class=error><strong>Error:</strong> {{ error }}</p>{% endif %}
+<p> <div class=subfont> Add Spectrum to Suite</div>
 
+{% if session.username is not none %}
+  &nbsp;   &nbsp;
+  <a href="../add_suite"> [add a suite] </a>
+{% endif %}
+<p>
 
 <form action="{{ url_for('submit_spectrum_to_suite') }}" method=post>
-Add {{ spectrum_name }} to 
+Add {{ spectrum_name }} to
     <input type=hidden name=person value={{person_id}}>
     <input type=hidden name=spectrum_id value={{spectrum_id}}>
     <input type=hidden name=spectrum_name value={{spectrum_name}}>
