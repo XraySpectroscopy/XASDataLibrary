@@ -50,6 +50,7 @@ h2 {font:bold 22px verdana,arial,sans-serif;color:#044484;font-weight:bold;}
 #spectra a.active {color: #CC0000;  background: #FAFAE0;}
 #spectra a:hover {color: #CC0000;  background: #FAFAE0;}
 #spectra hr {height: 3px; background-color: #999955;}
+#even {background-color: #F0F0F0;}
 
 
 #grayentry {color:#B0B0B0;}
