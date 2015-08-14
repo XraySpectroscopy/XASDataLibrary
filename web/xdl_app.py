@@ -22,7 +22,9 @@ from xasdb import XASDataLibrary, fmttime, valid_score, unique_name
 
 from utils import (get_session_key, random_string, multiline_text,
                    session_init, session_clear, parse_spectrum,
-                   spectrum_ratings, suite_ratings, spectra_for_suite,
+                   spectrum_ratings_summary, suite_ratings_summary,
+                   spectrum_ratings, suite_ratings,
+                   spectra_for_suite, beamline_for_spectrum,
                    spectra_for_beamline, get_element_list,
                    get_energy_units_list, get_edge_list, get_beamline_list,
                    get_sample_list)
@@ -174,13 +176,21 @@ def search(elem=None):
         edge     = db.get_edge(s.edge_id)
         elem_sym = db.get_element(s.element_z).symbol
         person   = db.get_person(s.person_id)
+        ratings  = spectrum_ratings_summary(db, s.id)
+        bl_id, bl_desc = beamline_for_spectrum(db, s)
+
+
         spectra.append({'id': s.id,
-                    'name': s.name,
-                    'element': elem,
-                    'edge': edge.name,
-                    'person_email': person.email,
-                    'person_name': person.name,
-                    'elem_sym': elem_sym})
+                        'name': s.name,
+                        'element': elem,
+                        'edge': edge.name,
+                        'person_email': person.email,
+                        'person_name': person.name,
+                        'elem_sym': elem_sym,
+                        'rating': ratings,
+                        'beamline_desc': bl_desc,
+                        'beamline_id': bl_id,
+                        })
 
     return render_template('ptable.html', nspectra=len(dbspectra),
                            elem=elem, spectra=spectra)
@@ -196,16 +206,7 @@ def spectrum(spid=None):
 
     opts = parse_spectrum(s, db)
     opts['spectrum_owner'] = (session['person_id'] == "%i" % s.person_id)
-
-    ratings = spectrum_ratings(db, spid)
-    opts['rating'] = 'No ratings'
-
-    if len(ratings) > 0:
-        sum = 0.0
-        for rate in ratings: sum = sum + rate[0]
-        rating = sum*1.0/len(ratings)
-        opts['rating'] = 'Average rating %.1f (%i ratings)' % (rating, len(ratings))
-
+    opts['rating'] = spectrum_ratings_summary(db, spid)
     try:
         energy = np.array(json.loads(s.energy))
         i0     = np.array(json.loads(s.i0))
@@ -315,7 +316,6 @@ def editspectrum(spid=None):
         return render_template('ptable.html', error=error)
 
     opts = parse_spectrum(s, db)
-
     return render_template('editspectrum.html', error=error,
                            elems=get_element_list(db),
                            eunits=get_energy_units_list(db),
@@ -546,15 +546,8 @@ def suites(stid=None):
             name, notes, person_id = st.name, st.notes, st.person_id
             person_email = db.get_person(person_id).email
             spectra = spectra_for_suite(db, st.id)
+            rating = suite_ratings_summary(db, st.id)
 
-            ratings = suite_ratings(db, st.id)
-            rating  = 'No ratings'
-
-            if len(ratings) > 0:
-                sum = 0.0
-                for rate in ratings: sum = sum + rate[0]
-                rating = sum*1.0/len(ratings)
-                rating = 'Average rating %.1f (%i ratings)' % (rating, len(ratings))
             suites.append({'id': st.id, 'name': name, 'notes': notes,
                            'person_email': person_email,
                            'rating': rating,
@@ -565,14 +558,7 @@ def suites(stid=None):
         name, notes, person_id = st.name, st.notes, st.person_id
         person_email = db.get_person(person_id).email
         spectra = spectra_for_suite(db, stid)
-        ratings = suite_ratings(db, stid)
-        rating  = 'No ratings'
-        if len(ratings) > 0:
-            sum = 0.0
-            for rate in ratings: sum = sum + rate[0]
-            rating = sum*1.0/len(ratings)
-            rating = 'Average rating %.1f (%i ratings)' % (rating, len(ratings))
-
+        rating  = suite_ratings_summary(db, stid)
         suites.append({'id': stid, 'name': name, 'notes': notes,
                        'person_email': person_email, 'rating': rating,
                        'nspectra': len(spectra), 'spectra': spectra})
@@ -724,9 +710,9 @@ def submit_upload():
 
     if request.method == 'POST':
         pid    = request.form['person']
-        pemail = db.get_person(pid).email
+        pemail = db.get_person(int(pid)).email
         file = request.files['file']
-
+        s = None
         file_ok = False
         if file and allowed_file(file.filename):
             fname = secure_filename(file.filename)
@@ -739,18 +725,27 @@ def submit_upload():
                 pass
 
             if file_ok:
-                time.sleep(0.5)
-                db.add_xdifile(fullpath, person=peemail, create_sample=True)
-                time.sleep(0.5)
-                session_init(session, db)
-
+                time.sleep(1.0)
+                db.add_xdifile(fullpath, person=pemail, create_sample=True)
+                time.sleep(1.0)
+                db.session.commit()
+                
             s  = db.get_spectra()[-1]
             if s is None:
                 error = 'Could not find Spectrum #%i' % s.id
-                return render_template('ptable.html', error=error)
+                return render_template('upload.html', error=error)
+            print 'GOT Spectrum ', s.id, s.name
 
-        opts = parse_spectrum(s, db)
-        return render_template('editspectrum.html', error=error, **opts)
+        if s is None:
+            error = "File '%s' not found or not suppported type" %  (file.filename)
+            return render_template('upload.html', error=error)            
+        
+        try:
+            opts = parse_spectrum(s, db)
+        except:
+            error = "Could not read spectrum from '%s'" % (file.filename)
+            return render_template('upload.html', error=error)            
+        return redirect(url_for('spectrum', spid=s.id, error=error))
     return render_template('upload.html', error='upload error')
 
 if __name__ == "__main__":
