@@ -2,21 +2,14 @@
 {% block body %}
 
 <p> <div class=subfont> Ratings for Suite:  {{ suite_name }}</div>
+<p>{{ suite_notes}} </p> <div> <hr>
 
-{{ suite_notes}}
-<div>
-<hr>
-
-  {% for r in ratings %}
-<p>
-  Score: {{r.score}}  <p>
+{% for r in ratings %}
+  <p>  Score: {{r.score}}  <p>
   &nbsp;&nbsp;  <i> {{r.person_name}} ({{r.person_email}})
   &nbsp;&nbsp; {{r.date}} </i> <p>
-
-    {{r.review|safe}}
-<hr>
+  {{r.review|safe}}
+  <hr>
 {% endfor %}
-
-
 </div>
 {% endblock %}

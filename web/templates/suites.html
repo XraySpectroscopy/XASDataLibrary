@@ -13,13 +13,14 @@
 {% if nsuites == 0 %}
       No suites defined.
 {% else %}
-   <table cellspacing=5 cellpadding=2>
+   <table cellspacing=0 cellpadding=4 border=0>
+   <tr><th>Name</th><th> # Spectra</ht><th> Ratings</th><th></th><th></th></tr>
    {% for s in suites %}
-       <tr class="{{ loop.cycle('odd', 'even') }}">
-       <td id='spectra'>
+       <tr id="{{ loop.cycle('odd', 'even') }}" >
+       <td>
            <a href="../suites/{{ s.id }}"> {{ s.name }}</a></td>
-        <td> {{ s.nspectra }} spectra:   {{ s.notes|safe }} </td>
-        <td> <a href="../showsuite_rating/{{ s.id }}"> {{ s.rating }} </a></td>
+        <td align=center> {{ s.nspectra }} </td> 
+       <td> <a href="../showsuite_rating/{{s.id}}"> {{s.rating}}</td>
         {% if session.username is not none %}
            <td>  &nbsp;   &nbsp;
              <a href="../rate_suite/{{s.id}}"> [rate this suite] </a></td>
@@ -27,6 +28,10 @@
              <a href="../del_suite/{{s.id}}/ask=1"> [delete this suite] </a></td>
         {% endif %}
         </tr>
+       <tr id="{{ loop.cycle('odd', 'even') }}">
+         <td></td><td colspan=4>{{s.notes|safe}}</td></tr>
+      </tr>  
+
    {% endfor %}
    </table>
    {% if nsuites == 1 %}
