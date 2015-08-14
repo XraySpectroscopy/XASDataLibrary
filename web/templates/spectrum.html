@@ -2,7 +2,6 @@
 {% block body %}
 
 <p> <div class=subfont> Spectrum:  {{ spectrum_name }}</div>
-{% if error %}<p class=error><strong>Error:</strong> {{ error }}{% endif %}
 
 {% if session.username is not none %}
   &nbsp;   &nbsp;
@@ -44,8 +43,8 @@
 <tr><td> Absorption Edge: </td> <td> {{ elem_sym }} {{ edge }} edge   </td></tr>
 <tr><td> Sample Name:     </td> <td>  {{sample_name}}   </td></tr>
 <tr><td> Sample Prep:     </td> <td>  {{sample_prep}}   </td></tr>
-<tr><td> Beamline:        </td> <td>  
-    {% if  beamline_id != '-1' %} 
+<tr><td> Beamline:        </td> <td>
+    {% if  beamline_id != '-1' %}
         <a href="../beamlines/{{ beamline_id }}"> {{ beamline_desc }}</a> &nbsp; &nbsp;
     {% else %} {{ beamline_desc }} &nbsp; &nbsp;
     {% endif %} </td></tr>
