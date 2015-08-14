@@ -404,9 +404,12 @@ class XASDataLibrary(object):
         """return list of elements z, name, symbol"""
         return self.filtered_query('element')
 
-    def get_edge(self, name):
-        """return edge by name"""
-        return None_or_one(self.filtered_query('edge', name=name))
+    def get_edge(self, val, key='name'):
+        """return edge by name  or id"""
+        if isinstance(val, int):
+            key = 'id'
+        kws = {key: val}
+        return None_or_one(self.filtered_query('edge', **kws))
 
     def get_edges(self):
         """return list of edges"""
@@ -478,9 +481,13 @@ class XASDataLibrary(object):
         if password is not None:
             self.set_person_password(email, password)
 
-    def get_person(self, email):
+    def get_person(self, val, key='email'):
         """get person by email"""
-        return None_or_one(self.filtered_query('person', email=email),
+        if isinstance(val, int):
+            key = 'id'
+        kws = {key: val}
+
+        return None_or_one(self.filtered_query('person', **kws),
                            "expected 1 or None person")
 
     def get_persons(self, **kws):
@@ -581,7 +588,7 @@ class XASDataLibrary(object):
     def update(self, tablename, where, use_id=True, **kws):
         """update a row (by id) in a table (by name) using keyword args
         db.update('spectrum', 5, **kws)
-       
+
         """
         table = self.tables[tablename]
         if use_id:
@@ -733,7 +740,7 @@ class XASDataLibrary(object):
         if isinstance(edge, Edge):
             edge_id = edge.id
         elif edge is not None:
-            edge_id = self.get_edge(name=edge).id
+            edge_id = self.get_edge(edge).id
         if edge_id is not None:
             query = query.where(tab.c.edge_id==edge_id)
 
@@ -757,7 +764,7 @@ class XASDataLibrary(object):
         if isinstance(person, Person):
             person_id = person.id
         elif person is not None:
-            person_id = self.get_person(email=person).id
+            person_id = self.get_person(person).id
         if person_id is not None:
             query = query.where(tab.c.person_id==person_id)
 
@@ -835,7 +842,7 @@ class XASDataLibrary(object):
         if isinstance(person, Person):
             person_id = person.id
         else:
-            person_id = self.get_person(email=person).id
+            person_id = self.get_person(person).id
 
         sample_id = None
         if create_sample:
