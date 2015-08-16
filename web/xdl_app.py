@@ -568,10 +568,10 @@ def suites(stid=None):
             person_email = db.get_person(person_id).email
             spectra = spectra_for_suite(db, st.id)
             rating = suite_ratings_summary(db, st.id)
-
+            is_owner = (int(session['person_id']) == int(st.person_id))
             suites.append({'id': st.id, 'name': name, 'notes': notes,
                            'person_email': person_email,
-                           'rating': rating,
+                           'rating': rating, 'suite_owner': is_owner,
                            'nspectra': len(spectra), 'spectra': spectra})
 
     else:
@@ -580,8 +580,10 @@ def suites(stid=None):
         person_email = db.get_person(person_id).email
         spectra = spectra_for_suite(db, stid)
         rating  = suite_ratings_summary(db, stid)
+        is_owner = (int(session['person_id']) == int(st.person_id))
         suites.append({'id': stid, 'name': name, 'notes': notes,
-                       'person_email': person_email, 'rating': rating,
+                       'person_email': person_email,
+                       'rating': rating, 'suite_owner': is_owner,
                        'nspectra': len(spectra), 'spectra': spectra})
     return render_template('suites.html', nsuites=len(suites), suites=suites)
 
@@ -631,6 +633,48 @@ def delete_suite(stid, ask=1):
         flash('Deleted suite %s' % s_name)
     return redirect(url_for('suites', error=error))
 
+
+@app.route('/edit_suite/<int:stid>')
+def edit_suite(stid=None):
+    session_init(session, db)
+    error=None
+    if session['username'] is None:
+        error='must be logged in to edit suite'
+        return render_template('ptable.html', error=error)
+
+    st = db.filtered_query('suite', id=stid)[0]
+    name, notes, person_id = st.name, st.notes, st.person_id
+    person_email = db.get_person(person_id).email
+    spectra = spectra_for_suite(db, stid)
+    rating  = suite_ratings_summary(db, stid)
+    is_owner = (int(session['person_id']) == int(st.person_id))
+    opts = {'id': stid, 'name': name, 'notes': notes,
+            'person_email': person_email,
+            'rating': rating, 'suite_owner': is_owner,
+            'nspectra': len(spectra), 'spectra': spectra}
+    return render_template('edit_suite.html', **opts)
+
+@app.route('/submit_suite_edits', methods=['GET', 'POST'])
+def submit_suite_edits():
+    session_init(session, db)
+    error=None
+    if session['username'] is None:
+        error='must be logged in to edit suite'
+        return render_template('ptable.html', error=error)
+    if request.method == 'POST':
+        stid  = int(request.form['suite'])
+        db.update('suite', stid,
+                  name=request.form['name'],
+                  notes=request.form['comments'])
+
+        for spec in spectra_for_suite(db, stid):
+            spid = int(spec['spectrum_id'])
+            key = 'spec_%i' % spid
+            if key not in request.form:
+                db.remove_spectrum_from_suite(stid, spid)
+        time.sleep(0.25)
+
+    return redirect(url_for('suites', stid=stid, error=error))
 
 @app.route('/beamlines')
 @app.route('/beamlines/<int:blid>')
