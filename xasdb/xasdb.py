@@ -540,7 +540,16 @@ class XASDataLibrary(object):
         table.delete().where(table.c.suite_id==suite_id).execute()
         table = self.tables['suite_rating']
         table.delete().where(table.c.id==suite_id).execute()
+        self.set_mod_time()
+        self.session.commit()
 
+    def remove_spectrum_from_suite(self, suite_id, spectrum_id):
+        tab = self.tables['spectrum_suite']
+        rows = tab.select().where(tab.c.suite_id==suite_id
+                                  ).where(tab.c.spectrum_id==spectrum_id
+                                          ).execute().fetchall()
+        for row in rows:
+            tab.delete().where(tab.c.id==row.id).execute()
         self.set_mod_time()
         self.session.commit()
 
@@ -554,8 +563,6 @@ class XASDataLibrary(object):
 
         self.set_mod_time()
         self.session.commit()
-
-
 
     def set_suite_rating(self, person_id, suite_id, score, comments=None):
         """add a score to a suite:"""
