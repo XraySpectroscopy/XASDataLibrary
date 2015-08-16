@@ -23,9 +23,13 @@
        <td> <a href="../showsuite_rating/{{s.id}}"> {{s.rating}}</td>
         {% if session.username is not none %}
            <td>  &nbsp;   &nbsp;
-             <a href="../edit_suite/{{s.id}}"> [edit this suite] </a></td>
-           <td>  &nbsp;   &nbsp;
-             <a href="../delete_suite/{{s.id}}/ask=1"> [delete this suite] </a></td>
+             <a href="../rate_suite/{{s.id}}"> [rate suite] </a></td>
+           {% if s.suite_owner %}
+                <td>  &nbsp;   &nbsp;
+                 <a href="../edit_suite/{{s.id}}"> [edit suite] </a></td>
+                <td>  &nbsp;   &nbsp;
+                 <a href="../delete_suite/{{s.id}}/ask=1"> [delete suite] </a></td>
+           {% endif %}
         {% endif %}
         </tr>
        <tr id="{{ loop.cycle('odd', 'even') }}">
