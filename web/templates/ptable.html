@@ -141,13 +141,13 @@
    {% endif %}
    <p>
    <table cellspacing=5 cellpadding=2>
-   <tr><th>Name</th><th> Edge</ht><th> Beamline</th><th>Rating</th></tr>
+   <tr><th> &nbsp;&nbsp;  Name</th><th> &nbsp; Edge</ht><th> &nbsp; Beamline</th><th> &nbsp; Rating</th></tr>
    {% for spec in spectra %}
         <tr id="{{ loop.cycle('odd', 'even') }}" >
-        <td> <a href="../spectrum/{{ spec.id }}"> {{ spec.name }}</a></td>
-        <td> {{ spec.edge }} </td>
-        <td> {{ spec.beamline_desc }} </td>
-        <td> {{ spec.rating }} </td>
+        <td> &nbsp; &nbsp; <a href="../spectrum/{{ spec.id }}"> {{ spec.name }}</a></td>
+        <td> &nbsp; {{ spec.edge }} </td>
+        <td> &nbsp; {{ spec.beamline_desc }} </td>
+        <td> &nbsp; {{ spec.rating }} </td>
    </tr>
    {% endfor %}
    </table>

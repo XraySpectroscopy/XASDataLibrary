@@ -19,18 +19,18 @@
        <tr id="{{ loop.cycle('odd', 'even') }}" >
        <td>
            <a href="../suites/{{ s.id }}"> {{ s.name }}</a></td>
-        <td align=center> {{ s.nspectra }} </td> 
+        <td align=center> {{ s.nspectra }} </td>
        <td> <a href="../showsuite_rating/{{s.id}}"> {{s.rating}}</td>
         {% if session.username is not none %}
            <td>  &nbsp;   &nbsp;
-             <a href="../rate_suite/{{s.id}}"> [rate this suite] </a></td>
+             <a href="../edit_suite/{{s.id}}"> [edit this suite] </a></td>
            <td>  &nbsp;   &nbsp;
-             <a href="../del_suite/{{s.id}}/ask=1"> [delete this suite] </a></td>
+             <a href="../delete_suite/{{s.id}}/ask=1"> [delete this suite] </a></td>
         {% endif %}
         </tr>
        <tr id="{{ loop.cycle('odd', 'even') }}">
          <td></td><td colspan=4>{{s.notes|safe}}</td></tr>
-      </tr>  
+      </tr>
 
    {% endfor %}
    </table>
@@ -39,12 +39,12 @@
     <table>
       {% for suite in suites %}
           {% for spec in suite.spectra %}
-           <tr><td id='spectra'>
-              &nbsp;   &nbsp;
-               <a href="../spectrum/{{ spec.spectrum_id }}"> {{ spec.name }}</a>
-           </td><td> &nbsp; {{ spec.elem_sym }} {{spec.edge}} edge </td></tr>
-          {% endfor %}
-      {% endfor %}
+            <tr id="{{ loop.cycle('odd', 'even') }}" >
+            <td> &nbsp; &nbsp; <a href="../spectrum/{{ spec.spectrum_id }}"> {{ spec.name }}</a></td>
+            <td> &nbsp; {{ spec.elem_sym }}  {{ spec.edge }} edge </td>
+            </tr>
+         {% endfor %}
+     {% endfor %}
     </table>
    {% endif %}
 {% endif %}

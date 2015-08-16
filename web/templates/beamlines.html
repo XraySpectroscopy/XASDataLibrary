@@ -30,10 +30,11 @@
     <table>
       {% for bl in beamlines %}
           {% for spec in bl.spectra %}
-           <tr><td id='spectra'>
-               <a href="../spectrum/{{ spec.spectrum_id }}"> {{ spec.name }}</a>
-           </td><td> &nbsp; {{ spec.elem_sym }} {{spec.edge}} edge </td></tr>
-          {% endfor %}
+            <tr id="{{ loop.cycle('odd', 'even') }}" >
+            <td> &nbsp; &nbsp; <a href="../spectrum/{{ spec.spectrum_id }}"> {{ spec.name }}</a></td>
+            <td> &nbsp; {{ spec.elem_sym }}  {{ spec.edge }} edge </td>
+            </tr>
+         {% endfor %}
       {% endfor %}
     </table>
    {% endif %}

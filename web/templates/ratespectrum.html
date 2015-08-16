@@ -1,10 +1,12 @@
 {% extends "layout.html" %}
 {% block body %}
-  <div class=subfont> Spectrumm: {{spectrum_name}} </div>
+  <div class=subfont> Spectrum: {{spectrum_name}} </div>
+<p>
 
 {% if session.username is not none %}
 
 Enter Rating (0 to 5:  0=worst, 5=best):
+<p>
 
 <form action="{{ url_for('submit_spectrum_rating') }}" method=post>
     <input type=hidden name=person value={{person_id}}>
