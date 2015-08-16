@@ -112,7 +112,6 @@ def create_account():
 def login():
     session_init(session, db)
     error = None
-    print 'login ', time.ctime()
     session['username'] = None
     if request.method == 'POST':
         email = request.form['email']
@@ -139,7 +138,6 @@ def logout():
     session['username'] = None
     session['person_id'] = '-1'
     flash('You have been logged out')
-    print 'Log out'
     return redirect(url_for('search'))
 
 @app.route('/user/')
@@ -301,8 +299,8 @@ def submit_spectrum_edits():
 
     return redirect(url_for('spectrum', spid=spid, error=error))
 
-@app.route('/editspectrum/<int:spid>')
-def editspectrum(spid=None):
+@app.route('/edit_spectrum/<int:spid>')
+def edit_spectrum(spid=None):
     session_init(session, db)
     error=None
     if session['username'] is None:
@@ -323,6 +321,29 @@ def editspectrum(spid=None):
                            beamlines=get_beamline_list(db),
                            samples=get_sample_list(db),
                            **opts)
+
+
+@app.route('/delete_spectrum/<int:spid>')
+@app.route('/delete_spectrum/<int:spid>/ask=<int:ask>')
+def delete_spectrum(spid, ask=1):
+    session_init(session, db)
+    error=None
+    if session['username'] is None:
+        error='must be logged in to delete a spectrum'
+        return redirect(url_for('search', error=error))
+
+    s_name = db.filtered_query('spectrum', id=spid)[0].name
+    if ask != 0:
+        return render_template('confirm_delete_spectrum.html',
+                               spectrum_id=spid,
+                               spectrum_name=s_name)
+
+    else:
+        db.del_spectrum(spid)
+        time.sleep(1)
+        flash('Deleted spectrum %s' % s_name)
+    return redirect(url_for('search', error=error))
+
 
 @app.route('/submit_spectrum_rating', methods=['GET', 'POST'])
 def submit_spectrum_rating(spid=None):
@@ -377,7 +398,7 @@ def rate_spectrum(spid=None):
     score = 3
     review = '<review>'
     for _s, _r, _d, _p in spectrum_ratings(db, spid):
-        if _p == pid:
+        if int(_p) == int(pid):
             score = _s
             review =  _r
     spid = s.id
@@ -590,22 +611,24 @@ def add_suite():
         return render_template('add_suite.html', error=error,
                                person_id=session['person_id'])
 
-@app.route('/del_suite/<int:stid>/ask=<int:ask>')
-def del_suite(stid, ask=1):
+@app.route('/delete_suite/<int:stid>')
+@app.route('/delete_suite/<int:stid>/ask=<int:ask>')
+def delete_suite(stid, ask=1):
     session_init(session, db)
     error=None
     if session['username'] is None:
         error='must be logged in to delete a suite'
         return redirect(url_for('suites', error=error))
 
+    suite_name = db.filtered_query('suite', id=stid)[0].name
     if ask != 0:
-        suite_name = db.filtered_query('suite', id=stid).name
         return render_template('confirm_del_suite.html', stid=stid,
                                suite_name=suite_name)
 
     else:
         db.del_suite(stid)
         time.sleep(1)
+        flash('Deleted suite %s' % s_name)
     return redirect(url_for('suites', error=error))
 
 
@@ -729,22 +752,21 @@ def submit_upload():
                 db.add_xdifile(fullpath, person=pemail, create_sample=True)
                 time.sleep(1.0)
                 db.session.commit()
-                
+
             s  = db.get_spectra()[-1]
             if s is None:
                 error = 'Could not find Spectrum #%i' % s.id
                 return render_template('upload.html', error=error)
-            print 'GOT Spectrum ', s.id, s.name
 
         if s is None:
             error = "File '%s' not found or not suppported type" %  (file.filename)
-            return render_template('upload.html', error=error)            
-        
+            return render_template('upload.html', error=error)
+
         try:
             opts = parse_spectrum(s, db)
         except:
             error = "Could not read spectrum from '%s'" % (file.filename)
-            return render_template('upload.html', error=error)            
+            return render_template('upload.html', error=error)
         return redirect(url_for('spectrum', spid=s.id, error=error))
     return render_template('upload.html', error='upload error')
 
