@@ -544,6 +544,18 @@ class XASDataLibrary(object):
         self.set_mod_time()
         self.session.commit()
 
+    def del_spectrum(self, sid):
+        table = self.tables['spectrum']
+        table.delete().where(table.c.id==sid).execute()
+        table = self.tables['spectrum_suite']
+        table.delete().where(table.c.spectrum_id==sid).execute()
+        table = self.tables['spectrum_rating']
+        table.delete().where(table.c.id==sid).execute()
+
+        self.set_mod_time()
+        self.session.commit()
+
+
 
     def set_suite_rating(self, person_id, suite_id, score, comments=None):
         """add a score to a suite:"""
