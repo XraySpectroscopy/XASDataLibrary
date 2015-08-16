@@ -3,14 +3,55 @@
 
    <p>
 
-  Welcome to the XAFS Spectral Library.
+<h3> Welcome to the XAS Spectral Library.</h3>
+<p>
 
-   <ul>
-     <li> <a href="{{ url_for('search') }}"> Browse the collection</a> </li>
-     <li> </li>
-   </ul>
+This is a collection of X-ray Absorption Spectra.  Generally, the data here
+are intended to be of high quality and on well-characterized samples, but no
+guarantees are made about either of these.
 
-<hr>
+<p>
 
-    Documentation goes here....
+
+<p> Disclaimer:<br> All data files extracted from this library have been
+put in the Public Domain, and can be used for any purpose, without
+restrictions.  To better explain the data, information is included about
+the beamlines and facilities (typically National Labs) where the data were
+collected, and sometimes the people involved with the measurement.  This
+should not be viewed as an endorsement of the data, or as a notice of
+copyright.  No additional permission is needed to use any of the data in
+this library.
+
+</p>
+
+
+<hr> <h3> XDI -- the XAFS Data Interchange Format.</h3>
+
+To import data into this library, the data must be in the XAS-Data-Interchange
+(XDI) format, and must have a file extenstion of '.xdi'.
+
+<p>
+A detailed description of this format can be found at <a
+href='https://github.com/XraySpectroscopy/XAS-Data-Interchange/blob/master/specification/spec.md'>
+XAS Data Interchange Specification</a>. Example files are at <a
+href='https://github.com/XraySpectroscopy/XAS-Data-Interchange/tree/master/data'>
+Example XDI data</a> and in this collection.
+
+
+ <hr> <h3> Suites -- Tagging Related Spectra </h3>
+
+A suite is a collection of similar spectra.
+
+
+<hr> <h3> Rating Spectra and Suites </h3>
+
+Either individual spectra or suites of spectra can be rated and reviewed by
+any one who has logged in.  Scores can range from 0 to 5 (similar to many
+on-line shopping sites), and comments on the spectrum or suite can be made.
+
+<hr> <h3> Uploading Data</h3>
+
+To upload data, you must be logged in, and the data to load must be a valid
+XDI file.
+
 {% endblock %}
