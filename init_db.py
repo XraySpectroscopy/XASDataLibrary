@@ -20,7 +20,9 @@ if os.path.exists(dbname):
     os.unlink(dbname)
 
 xasdb.create_xasdb(dbname)
+print 'Created'
 db = xasdb.connect_xasdb(dbname)
+print 'Connected'
 db.add_person('Matt Newville',
               'newville@cars.uchicago.edu',
               affiliation='CARS, UChicago')
@@ -29,7 +31,7 @@ db.add_person('Bruce Ravel',
               affiliation='NIST')
 
 me = db.set_person_password('newville@cars.uchicago.edu', 'xafsdb')
-me = db.get_person(email='newville@cars.uchicago.edu')
+me = db.get_person('newville@cars.uchicago.edu')
 
 datadir = 'data'
 n = 0
