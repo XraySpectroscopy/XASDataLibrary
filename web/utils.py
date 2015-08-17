@@ -204,6 +204,14 @@ def parse_spectrum(s, db):
             if isinstance(sample_name, dict):
                 sample_name = dict_repr(sample_name)
 
+    # reference sample
+    refer_id = '-1'
+    refer_name = ''
+    if s.reference_id is not None:
+        rsample = db.filtered_query('sample', id=s.reference_id)[0]
+        refer_id = s.reference_id
+        refer_name = rsample.name
+        
     mononame = 'unknown'
     if 'mono' in notes:
         if 'name' in notes['mono']:
@@ -237,6 +245,8 @@ def parse_spectrum(s, db):
             'sample_name':  sample_name,
             'sample_form':  sample_form,
             'sample_prep':  sample_prep,
+            'refer_id': refer_id,
+            'refer_name': refer_name,             
             'person_email': person.email,
             'person_name': person.name,
             'upload_date': fmttime(s.submission_date),
