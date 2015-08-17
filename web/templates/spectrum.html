@@ -18,8 +18,9 @@
  {% endif %}
 <p>
 
-<table> <tr><td><img src="data:image/png;base64,{{ fullfig|safe }}"></td>
-<td> <img src="data:image/png;base64,{{ xanesfig|safe }}"><br></td></tr></table>
+<table> <tr>
+<td><img width=450 src="data:image/png;base64,{{ fullfig|safe }}"></td>
+<td><img width=450 src="data:image/png;base64,{{ xanesfig|safe }}"><br></td></tr></table>
 
 <table>
 <tr>
@@ -45,6 +46,8 @@
 <tr><td> Absorption Edge: </td> <td> {{ elem_sym }} {{ edge }} edge   </td></tr>
 <tr><td> Sample Name:     </td> <td>  {{sample_name}}   </td></tr>
 <tr><td> Sample Prep:     </td> <td>  {{sample_prep}}   </td></tr>
+<tr><td> Reference Sample: </td> <td>
+{% if  refer_id != '-1' %} {{refer_name}}  {% else %} no reference used {% endif %}  </td></tr>
 <tr><td> Beamline:        </td> <td>
     {% if  beamline_id != '-1' %}
         <a href="../beamlines/{{ beamline_id }}"> {{ beamline_desc }}</a> &nbsp; &nbsp;
