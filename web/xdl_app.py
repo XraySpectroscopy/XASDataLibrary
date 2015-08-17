@@ -214,6 +214,14 @@ def spectrum(spid=None):
         error = 'Could not extract data from spectrum'
         return render_template('spectrum.html', **opts)
 
+    murefer = None
+    try:
+        irefer = np.array(json.loads(s.irefer))
+        murefer = -np.log(irefer/itrans)
+    except:
+        pass
+    
+    
     opts['fullfig'] = make_xafs_plot(energy, mutrans, s.name, ylabel='Raw XAFS')
 
     eunits = opts['energy_units']
@@ -236,15 +244,26 @@ def spectrum(spid=None):
         e0 = _larch.symtable.tmp_e0
     except:
         pass
-
+    
+    time.sleep(0.1)
     i1 = max(np.where(group.energy<=e0 - 30)[0])
     i2 = max(np.where(group.energy<=e0 + 70)[0]) + 1
     xanes_en = group.energy[i1:i2] - e0
     xanes_mu = group.norm[i1:i2]
+    xanes_ref = None
+    if murefer is not None:
+        gname = 'ref_%s' % random_string(6)
+        rgroup = larch.Group(energy=energy, mu=murefer)
+        _larch.symtable.set_symbol(gname, rgroup)
+        _larch.run('pre_edge(%s)' % gname)
+        xanes_ref =rgroup.norm[i1:i2]
+        
     opts['e0'] = '%f' % e0
     opts['xanesfig'] = make_xafs_plot(xanes_en, xanes_mu, s.name,
                                       xlabel='Energy-%.1f (eV)' % e0,
-                                      ylabel='Normalized XANES', x0=e0)
+                                      ylabel='Normalized XANES',
+                                      x0=e0, ref_mu=xanes_ref,
+                                      ref_name='with reference')
 
     suites = []
     for r in db.filtered_query('spectrum_suite', spectrum_id=s.id):
