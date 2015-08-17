@@ -22,7 +22,9 @@ from sqlalchemy.orm import sessionmaker,  mapper, relationship, backref
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm.exc import  NoResultFound
 
-from xdifile import XDIFile
+import larch
+from larch_plugins.io import XDIFile
+# from xdifile import XDIFile
 
 
 PW_ALGORITHM = 'sha512'
@@ -178,9 +180,9 @@ class Ligand(_BaseTable):
     "ligand table"
     pass
 
-#class Crystal_Structure(_BaseTable):
-#     "crystal structure table"
-#     pass
+class Crystal_Structure(_BaseTable):
+     "crystal structure table"
+     pass
 
 class Citation(_BaseTable):
     "literature citation table"
@@ -302,8 +304,8 @@ class XASDataLibrary(object):
                properties={'spectrum': relate(Spectrum, backref='ligand',
                                               secondary=tables['spectrum_ligand'])})
 
-#         mapper(Crystal_Structure,   tables['crystal_structure'],
-#               properties={'samples': relate(Sample, backref='structure')})
+        mapper(Crystal_Structure,   tables['crystal_structure'],
+               properties={'samples': relate(Sample, backref='structure')})
 
         mapper(Facility, tables['facility'],
                properties={'beamlines': relate(Beamline, backref='facility')})
@@ -316,7 +318,6 @@ class XASDataLibrary(object):
         mapper(Suite,   tables['suite'],
         properties={'spectrum': relate(Spectrum, backref='suite',
                                         secondary=tables['spectrum_suite'])})
-
 
         self.update_mod_time =  None
 
@@ -430,14 +431,14 @@ class XASDataLibrary(object):
         returns Mode instance"""
         return self.addrow('mode', name=name, notes=notes, **kws)
 
-#     def add_crystal_structure(self, name, notes='',
-#                                format=None, data=None, **kws):
-#          """add data format: name required
-#          returns Format instance"""
-#          kws['notes'] = notes
-#          kws['format'] = format
-#          kws['data'] = data
-#          return self.addrow(Crystal_Structure, ('name',), (name,), **kws)
+    def add_crystal_structure(self, name, notes='',
+                               format=None, data=None, **kws):
+         """add data format: name required
+         returns Format instance"""
+         kws['notes'] = notes
+         kws['format'] = format
+         kws['data'] = data
+         return self.addrow(Crystal_Structure, ('name',), (name,), **kws)
 
     def add_edge(self, name, level):
         """add edge: name and level required
@@ -867,18 +868,38 @@ class XASDataLibrary(object):
         if create_sample:
             sattrs  = xfile.attrs['sample']
             formula, prep, notes = '', '', ''
+            notes = "sample for '%s', uploaded %s" % (fname, now)
             if 'name' in sattrs:
-                formula = sattrs.pop('name')
+                sname = sattrs.pop('name')
             if 'prep' in sattrs:
                 prep = sattrs.pop('prep')
+            if 'formula' in sattrs:
+                formula = sattrs.pop('formula')
             if len(sattrs) > 0:
-                notes  = json_encode(sattrs)
-            sname = "sample for '%s', uploaded %s" % (fname, now)
+                notes  = '%s\n%s' % (notes, json_encode(sattrs))
             self.add_sample(sname, person_id, formula=formula,
                             preparation=prep, notes=notes)
+
             stab = self.tables['sample']
-            sample = self.query(stab).filter(stab.c.name==sname).one()
+            sample = self.query(stab).filter(stab.c.name==sname).all()
+            if len(sample) > 1:
+                print 'Warning: multiple (%i) samples name %s' % (len(sample), sname)
+            sample = sample[0]
+                
             sample_id = sample.id
+            sample_ref_id = None
+            if 'reference' in sattrs:
+                rname = sattrs['reference']
+                note = "reference for '%s', uploaded %s" % (fname, now)
+                try:
+                    rsample = self.query(stab).filter(stab.c.name==rname).one()
+                except:
+                    self.add_sample(rname, person_id, formula='',
+                                    preparation='', notes=notes)
+                    rsample = self.query(stab).filter(stab.c.name==rname).one()
+                sample_ref_id = rsample.id
+                print 'REF SAMPLE ', sample_ref_id
+
 
         beamline = None
         beamline_name  = xfile.attrs['beamline']['name']
@@ -892,7 +913,8 @@ class XASDataLibrary(object):
                           comments=comments,
                           notes=notes,
                           filetext=filetext,
-                          )
+                          reference_sample=sample_ref_id)
+
 
         for mode in modes:
             self.set_spectrum_mode(spectrum_name, mode)
