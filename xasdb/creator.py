@@ -36,11 +36,11 @@ def DateCol(name, timezone=True, **kws):
     return Column(name, DateTime(timezone=timezone), **kws)
 
 def NamedTable(tablename, metadata, keyid='id', nameid='name',
-               name=True, notes=True, cols=None):
+               name=True, notes=True, cols=None, name_unique=True):
     """create table with name, id, and optional notes colums"""
     args  = [IntCol(keyid, primary_key=True)]
     if name:
-        args.append(StrCol(nameid, nullable=False, unique=True))
+        args.append(StrCol(nameid, nullable=False, unique=name_unique))
     if notes:
         args.append(StrCol('notes'))
     if cols is not None:
@@ -48,7 +48,7 @@ def NamedTable(tablename, metadata, keyid='id', nameid='name',
     return Table(tablename, metadata, *args)
 
 class InitialData:
-    info    = [["version", "1.0.0"],
+    info    = [["version", "1.1.0"],
                ["create_date", '<now>'],
                ["modify_date", '<now>']]
 
@@ -82,6 +82,7 @@ class InitialData:
                  ['20ID',  'PNC/XOR 20-ID',   'APS Undulator A',     6],
                  ['20BM',  'PNC/XOR 20-BM',   'APS Bending Magnet',  6],
                  ['X11A',  'NSLS X11-A',      'NSLS bending magnet', 3],
+                 ['2-3',   'SSRL, 2-3',       '',                    1],
                  ['4-3',   'SSRL, 4-3',       '',                    1],
                  ['4-1',   'SSRL, 4-1',       '',                    1]]
 
@@ -203,9 +204,9 @@ def  make_newdb(dbname, server= 'sqlite', user='',
 
     energy_units = NamedTable('energy_units', metadata, nameid='units')
 
-#     crystal_structure = NamedTable('crystal_structure', metadata,
-#                          cols=[StrCol('format'),
-#                                StrCol('data')])
+    crystal_structure = NamedTable('crystal_structure', metadata,
+                                   cols=[StrCol('format'),
+                                         StrCol('data')])
 
     person = NamedTable('person', metadata, nameid='email',
                         cols=[StrCol('name', nullable=False),
@@ -221,15 +222,15 @@ def  make_newdb(dbname, server= 'sqlite', user='',
                                 StrCol('year'),
                                 StrCol('doi')])
 
-    sample = NamedTable('sample', metadata,
+    sample = NamedTable('sample', metadata, name_unique=False, 
                         cols=[StrCol('formula'),
                               StrCol('material_source'),
                               StrCol('preparation'),
                               PointerCol('person'),
-                              # PointerCol('crystal_structure')
+                              PointerCol('crystal_structure')
                               ])
 
-    spectrum = NamedTable('spectrum', metadata,
+    spectrum = NamedTable('spectrum', metadata, name_unique=False,
                           cols=[StrCol('energy'),
                                 StrCol('i0'),
                                 StrCol('itrans'),
