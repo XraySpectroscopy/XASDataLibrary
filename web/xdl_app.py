@@ -713,13 +713,20 @@ def add_beamline():
 
     if request.method == 'POST':
         bl_name = request.form['beamline_name']
+        notes = request.form['notes']
+        fac_id = int(request.form['fac_id'])
+        source = request.form['xray_source']
+
         _blnames = [s.name for s in db.filtered_query('beamline')]
         try:
             bl_name = unique_name(bl_name, _blnames,
                                   msg='beamline', maxcount=5)
         except:
             error = 'a beamline named %s exists'
-        db.add_beamline(bl_name)
+
+        db.add_beamline(bl_name, notes=notes, xray_source=source,
+                        facility_id=fac_id)
+
         time.sleep(1)
         return redirect(url_for('beamlines', error=error))
     else:
