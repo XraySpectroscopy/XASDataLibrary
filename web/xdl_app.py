@@ -276,7 +276,10 @@ def spectrum(spid=None):
         pass
 
     time.sleep(0.1)
-    i1 = max(np.where(group.energy<=e0 - 30)[0])
+    try:
+        i1 = max(np.where(group.energy<=e0 - 30)[0])
+    except:
+        i1 = 0
     i2 = max(np.where(group.energy<=e0 + 70)[0]) + 1
     xanes_en = group.energy[i1:i2] - e0
     xanes_mu = group.norm[i1:i2]
