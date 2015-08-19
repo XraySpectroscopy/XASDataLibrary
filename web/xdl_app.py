@@ -194,6 +194,36 @@ def search(elem=None):
                            elem=elem, spectra=spectra)
 
 
+@app.route('/all')
+@app.route('/all/')
+def all():
+    session_init(session, db)
+    spectra = []
+    dbspectra = db.get_spectra()
+    for s in dbspectra:
+        edge     = db.get_edge(s.edge_id)
+        elem_sym = db.get_element(s.element_z).symbol
+        elem     = s.element_z
+        person   = db.get_person(s.person_id)
+        ratings  = spectrum_ratings_summary(db, s.id)
+        bl_id, bl_desc = beamline_for_spectrum(db, s)
+
+
+        spectra.append({'id': s.id,
+                        'name': s.name,
+                        'element': elem,
+                        'edge': edge.name,
+                        'person_email': person.email,
+                        'person_name': person.name,
+                        'elem_sym': elem_sym,
+                        'rating': ratings,
+                        'beamline_desc': bl_desc,
+                        'beamline_id': bl_id,
+                        })
+
+    return render_template('ptable.html', nspectra=len(dbspectra),
+                           elem='All Elements', spectra=spectra)
+
 @app.route('/spectrum/<int:spid>')
 def spectrum(spid=None):
     session_init(session, db)
@@ -220,8 +250,8 @@ def spectrum(spid=None):
         murefer = -np.log(irefer/itrans)
     except:
         pass
-    
-    
+
+
     opts['fullfig'] = make_xafs_plot(energy, mutrans, s.name, ylabel='Raw XAFS')
 
     eunits = opts['energy_units']
@@ -244,7 +274,7 @@ def spectrum(spid=None):
         e0 = _larch.symtable.tmp_e0
     except:
         pass
-    
+
     time.sleep(0.1)
     i1 = max(np.where(group.energy<=e0 - 30)[0])
     i2 = max(np.where(group.energy<=e0 + 70)[0]) + 1
@@ -257,7 +287,7 @@ def spectrum(spid=None):
         _larch.symtable.set_symbol(gname, rgroup)
         _larch.run('pre_edge(%s)' % gname)
         xanes_ref =rgroup.norm[i1:i2]
-        
+
     opts['e0'] = '%f' % e0
     opts['xanesfig'] = make_xafs_plot(xanes_en, xanes_mu, s.name,
                                       xlabel='Energy-%.1f (eV)' % e0,
@@ -842,6 +872,5 @@ def submit_upload():
 
 if __name__ == "__main__":
     app.jinja_env.cache = {}
-    port = 4966
-    print 'Server at port %i ready at  %s ' % (port, time.ctime())
-    app.run(port=port)
+    print 'Server at port %i ready at  %s ' % (PORT, time.ctime())
+    app.run(port=PORT)
