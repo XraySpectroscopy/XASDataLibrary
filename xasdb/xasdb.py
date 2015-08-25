@@ -619,9 +619,9 @@ class XASDataLibrary(object):
         self.set_mod_time()
         self.session.commit()
 
-    def add_spectrum(self, name, notes='', d_spacing=-1,
-                     notes_i0='', notes_itrans='', notes_ifluor='',
-                     notes_irefer='', submission_date=None,
+    def add_spectrum(self, name, notes='', d_spacing=-1, energy_notes='',
+                     i0_notes='', itrans_notes='', ifluor_notes='',
+                     irefer_notes='', submission_date=None,
                      collection_date=None, temperature='', energy=None,
                      i0=None, itrans=None, ifluor=None, irefer=None,
                      energy_stderr=None, i0_stderr=None,
@@ -642,8 +642,8 @@ class XASDataLibrary(object):
 
         dlocal = locals()
         # simple values
-        for attr in ('notes', 'notes_i0', 'notes_itrans'
-                     'notes_ifluor', 'notes_irefer', 'temperature',
+        for attr in ('notes', 'energy_notes', 'i0_notes', 'itrans_notes',
+                     'ifluor_notes', 'irefer_notes', 'temperature',
                      'd_spacing', 'reference_used'):
             kws[attr] = dlocal.get(attr, '')
 
@@ -887,7 +887,7 @@ class XASDataLibrary(object):
             if len(sample) > 1:
                 print 'Warning: multiple (%i) samples name %s' % (len(sample), sname)
             sample = sample[0]
-                
+
             sample_id = sample.id
             sample_ref_id = None
             if 'reference' in sattrs:
