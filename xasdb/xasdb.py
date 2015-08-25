@@ -22,12 +22,7 @@ from sqlalchemy.orm import sessionmaker,  mapper, relationship, backref
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm.exc import  NoResultFound
 
-import larch
-try:
-    from larch_plugins.io import XDIFile
-except ImportError:
-    from xdifile import XDIFile
-
+from xdifile import XDIFile
 
 PW_ALGORITHM = 'sha512'
 PW_NROUNDS   = 120000
