@@ -1,75 +1,61 @@
-CREATE TABLE person (
-	id INTEGER NOT NULL, 
-	email TEXT NOT NULL, 
-	notes TEXT, 
-	attributes TEXT, 
-	name TEXT NOT NULL, 
-	affiliation TEXT, 
-	PRIMARY KEY (id), 
-	UNIQUE (email)
-);
-CREATE TABLE ligand (
-	id INTEGER NOT NULL, 
-	name TEXT NOT NULL, 
-	notes TEXT, 
-	attributes TEXT, 
-	PRIMARY KEY (id), 
-	UNIQUE (name)
-);
+
 CREATE TABLE info (
-	"key" TEXT NOT NULL, 
-	value TEXT, 
-	PRIMARY KEY ("key"), 
+	"key" TEXT NOT NULL,
+	value TEXT,
+	PRIMARY KEY ("key"),
 	UNIQUE ("key")
 );
-INSERT INTO "info" VALUES('version','1.0.0');
-INSERT INTO "info" VALUES('create_date','2015-04-24T13:00:28.956661');
-INSERT INTO "info" VALUES('modify_date','2015-04-24T13:00:28.956661');
-CREATE TABLE crystal_structure (
-	id INTEGER NOT NULL, 
-	name TEXT NOT NULL, 
-	notes TEXT, 
-	attributes TEXT, 
-	format TEXT,
-	data TEXT,
-	PRIMARY KEY (id), 
+INSERT INTO "info" VALUES('version','1.1.0');
+INSERT INTO "info" VALUES('create_date','2015-08-25T09:09:36.785775');
+INSERT INTO "info" VALUES('modify_date','2015-08-25T09:09:36.785775');
+CREATE TABLE ligand (
+	id INTEGER NOT NULL,
+	name TEXT NOT NULL,
+	notes TEXT,
+	PRIMARY KEY (id),
 	UNIQUE (name)
 );
-
-CREATE TABLE edge (
-	id INTEGER NOT NULL, 
-	name TEXT NOT NULL, 
-	level VARCHAR(32) NOT NULL, 
-	PRIMARY KEY (id), 
-	UNIQUE (name), 
-	UNIQUE (level)
+CREATE TABLE facility (
+	id INTEGER NOT NULL,
+	name TEXT NOT NULL,
+	notes TEXT,
+	fullname TEXT,
+	laboratory TEXT,
+	city TEXT,
+	region TEXT,
+	country TEXT NOT NULL,
+	PRIMARY KEY (id),
+	UNIQUE (name)
 );
-INSERT INTO "edge" VALUES(1,'K','1s');
-INSERT INTO "edge" VALUES(2,'L3','2p3/2');
-INSERT INTO "edge" VALUES(3,'L2','2p1/2');
-INSERT INTO "edge" VALUES(4,'L1','2s');
-INSERT INTO "edge" VALUES(5,'M4,5','3d3/2,5/2');
-
-CREATE TABLE energy_units (
-	id INTEGER NOT NULL, 
-	units TEXT NOT NULL, 
-	notes TEXT, 
-	attributes TEXT, 
-	PRIMARY KEY (id), 
-	UNIQUE (units)
+INSERT INTO "facility" VALUES(1,'SSRL',NULL,'Stanford Synchrotron Radiation Laboratory','SLAC','Palo Alto','CA','US');
+INSERT INTO "facility" VALUES(2,'SRS',NULL,'Synchrotron Radiation Source','Daresbury Laboratory','Cheshire','','UK');
+INSERT INTO "facility" VALUES(3,'NSLS',NULL,'National Synchrotron Light Source','BNL','Upton','NY','US');
+INSERT INTO "facility" VALUES(4,'PF',NULL,'Photon Factory','KEK','Tsukuba','','Japan');
+INSERT INTO "facility" VALUES(5,'ESRF',NULL,'European Synchrotron Radiation Facility','','Grenoble','','France');
+INSERT INTO "facility" VALUES(6,'APS',NULL,'Advanced Photon Source','ANL','Argonne','IL','US');
+INSERT INTO "facility" VALUES(7,'ALS',NULL,'Advanced Light Source','LBNL','Berkeley','CA','US');
+INSERT INTO "facility" VALUES(8,'DLS',NULL,'Diamond Light Source','','Didcot','','UK');
+INSERT INTO "facility" VALUES(9,'SOLEIL',NULL,'Synchrotron SOLEIL','','GIF-sur-YVETTE','','France');
+CREATE TABLE citation (
+	id INTEGER NOT NULL,
+	name TEXT NOT NULL,
+	notes TEXT,
+	journal TEXT,
+	authors TEXT,
+	title TEXT,
+	volume TEXT,
+	pages TEXT,
+	year TEXT,
+	doi TEXT,
+	PRIMARY KEY (id),
+	UNIQUE (name)
 );
-
-
-INSERT INTO energy_units VALUES(1,'eV','electronVolts',NULL);
-INSERT INTO energy_units VALUES(2,'keV','kiloelectronVolts',NULL);
-INSERT INTO energy_units VALUES(3,'degrees','angle in degrees for Bragg Monochromator.  Need mono dspacing to convert to eV',NULL);
-
 CREATE TABLE element (
-        z INTEGER NOT NULL, 
-	name TEXT NOT NULL, 
-	symbol VARCHAR(2) NOT NULL, 
-	PRIMARY KEY (z), 
-	UNIQUE (name), 
+	z INTEGER NOT NULL,
+	name TEXT NOT NULL,
+	symbol VARCHAR(2) NOT NULL,
+	PRIMARY KEY (z),
+	UNIQUE (name),
 	UNIQUE (symbol)
 );
 INSERT INTO "element" VALUES(1,'hydrogen','H');
@@ -175,207 +161,202 @@ INSERT INTO "element" VALUES(100,'fermium','Fm');
 INSERT INTO "element" VALUES(101,'mendelevium','Md');
 INSERT INTO "element" VALUES(102,'nobelium','No');
 INSERT INTO "element" VALUES(103,'lawerencium','Lw');
-INSERT INTO "element" VALUES(104,'Rutherfordium','Rf');
-INSERT INTO "element" VALUES(105,'Dubnium','Ha');
-INSERT INTO "element" VALUES(106,'Seaborgium','Sg');
-INSERT INTO "element" VALUES(107,'Bohrium','Bh');
-INSERT INTO "element" VALUES(108,'Hassium','Hs');
-INSERT INTO "element" VALUES(109,'Meitnerium','Mt');
-
-CREATE TABLE facility (
-	id INTEGER NOT NULL, 
-	name TEXT NOT NULL, 
-	notes TEXT, 
-	attributes TEXT, 
-	PRIMARY KEY (id), 
-	UNIQUE (name)
+INSERT INTO "element" VALUES(104,'rutherfordium','Rf');
+INSERT INTO "element" VALUES(105,'dubnium','Ha');
+INSERT INTO "element" VALUES(106,'seaborgium','Sg');
+INSERT INTO "element" VALUES(107,'bohrium','Bh');
+INSERT INTO "element" VALUES(108,'hassium','Hs');
+INSERT INTO "element" VALUES(109,'meitnerium','Mt');
+INSERT INTO "element" VALUES(110,'darmstadtium','Ds');
+INSERT INTO "element" VALUES(111,'roentgenium','Rg');
+INSERT INTO "element" VALUES(112,'copernicium','Cn');
+CREATE TABLE person (
+	id INTEGER NOT NULL,
+	email TEXT NOT NULL,
+	notes TEXT,
+	name TEXT NOT NULL,
+	password TEXT,
+	affiliation TEXT,
+	PRIMARY KEY (id),
+	UNIQUE (email)
 );
-
-INSERT INTO "facility" VALUES( 1,'SSRL','Stanford Synchrotron Radiation Laboratory, SLAC, Palo Alto, CA, USA',NULL);
-INSERT INTO "facility" VALUES( 2,'SRS','Synchrotron Radiation Source, Daresbury Lab, Cheshire, UK',NULL);
-INSERT INTO "facility" VALUES( 3,'NSLS','National Synchrotron Light Source, BNL, Upton, IL, USA',NULL);
-INSERT INTO "facility" VALUES( 4,'Photon Factory','Photon Factory, KEK, Tsukuba, Japan',NULL);
-INSERT INTO "facility" VALUES( 5,'ESRF','European Synchrotron Radiation Facility, Grenoble, France',NULL);
-INSERT INTO "facility" VALUES( 6,'APS','Advanced Photon Source, ANL, Argonne, IL, USA',NULL);
-INSERT INTO "facility" VALUES( 7,'ALS','Advanced Light Source, LBNL, Berkeley, CA, USA',NULL);
-INSERT INTO "facility" VALUES( 8,'DLS','Diamond Light Source, Didcot, Oxfordshire, Great Britian',NULL);
-INSERT INTO "facility" VALUES( 9,'SOLEIL','Synchrotron SOLEIL, GIF-sur-YVETTE, France',NULL);
-INSERT INTO "facility" VALUES(10,'SPring-8','SPring=8 Synchrotron,  Hyogo, Japan',NULL);
-INSERT INTO "facility" VALUES(11,'DESY','DESY Synchrotron, Hamburg, Germany',NULL);
-INSERT INTO "facility" VALUES(12,'ANKA','Karlsruhe, Germany',NULL);
-INSERT INTO "facility" VALUES(13,'Elettra','Elettra, Trieste, Italy',NULL);
-INSERT INTO "facility" VALUES(14,'AS','Australian Synchrotron ',NULL);
-
-
+CREATE TABLE edge (
+	id INTEGER NOT NULL,
+	name TEXT NOT NULL,
+	level VARCHAR(32) NOT NULL,
+	PRIMARY KEY (id),
+	UNIQUE (name),
+	UNIQUE (level)
+);
+INSERT INTO "edge" VALUES(1,'K','1s');
+INSERT INTO "edge" VALUES(2,'L3','2p3/2');
+INSERT INTO "edge" VALUES(3,'L2','2p1/2');
+INSERT INTO "edge" VALUES(4,'L1','2s');
+INSERT INTO "edge" VALUES(5,'M4,5','3d3/2,5/2');
+CREATE TABLE energy_units (
+	id INTEGER NOT NULL,
+	units TEXT NOT NULL,
+	notes TEXT,
+	PRIMARY KEY (id),
+	UNIQUE (units)
+);
+INSERT INTO "energy_units" VALUES(1,'eV','electronVolts');
+INSERT INTO "energy_units" VALUES(2,'keV','kiloelectronVolts');
+INSERT INTO "energy_units" VALUES(3,'degrees','angle in degrees for Bragg monochromator.  Needs mono d_spacing');
 CREATE TABLE mode (
-	id INTEGER NOT NULL, 
-	name TEXT NOT NULL, 
-	notes TEXT, 
-	attributes TEXT, 
-	PRIMARY KEY (id), 
+	id INTEGER NOT NULL,
+	name TEXT NOT NULL,
+	notes TEXT,
+	PRIMARY KEY (id),
 	UNIQUE (name)
 );
-INSERT INTO "mode" VALUES(1,'transmission','transmission intensity through sample',NULL);
-INSERT INTO "mode" VALUES(2,'fluorescence, total yield','total x-ray fluorescence intensity, no energy analysis',NULL);
-INSERT INTO "mode" VALUES(3,'fluorescence, energy analyzed','x-ray fluorescence  with an energy dispersive (solid-state) detector', NULL);
-INSERT INTO "mode" VALUES(4,'xeol','visible or uv light emission',NULL);
-INSERT INTO "mode" VALUES(5,'electron emission','emitted electrons from sample',NULL);
-
-
-
-CREATE TABLE citation (
-	id INTEGER NOT NULL, 
-	name TEXT NOT NULL, 
-	notes TEXT, 
-	attributes TEXT, 
-	journal TEXT, 
-	authors TEXT, 
-	title TEXT, 
-	volume TEXT, 
-	pages TEXT, 
-	year TEXT, 
-	doi TEXT, 
-	PRIMARY KEY (id), 
+INSERT INTO "mode" VALUES(1,'transmission','transmission intensity through sample');
+INSERT INTO "mode" VALUES(2,'fluorescence','X-ray fluorescence, no further details');
+INSERT INTO "mode" VALUES(3,'fluorescence, total yield','X-ray fluorescence, no energy analysis');
+INSERT INTO "mode" VALUES(4,'fluorescence, energy analyzed','X-ray fluorescence with an energy dispersive detector');
+INSERT INTO "mode" VALUES(5,'xeol','visible or uv light emission');
+INSERT INTO "mode" VALUES(6,'electron emission','emitted electrons from sample');
+CREATE TABLE crystal_structure (
+	id INTEGER NOT NULL,
+	name TEXT NOT NULL,
+	notes TEXT,
+	format TEXT,
+	data TEXT,
+	PRIMARY KEY (id),
 	UNIQUE (name)
 );
 CREATE TABLE sample (
-	id INTEGER NOT NULL, 
-	name TEXT NOT NULL, 
-	notes TEXT, 
-	attributes TEXT, 
-	formula TEXT, 
-	material_source TEXT, 
-	person_id INTEGER, 
-	crystal_structure_id INTEGER, 
-	PRIMARY KEY (id), 
-	UNIQUE (name), 
-	FOREIGN KEY(crystal_structure_id) REFERENCES crystal_structure (id), 
-	FOREIGN KEY(person_id) REFERENCES person (id)
-);
-CREATE TABLE suite (
-	id INTEGER NOT NULL, 
-	name TEXT NOT NULL, 
-	notes TEXT, 
-	attributes TEXT, 
-	person_id INTEGER, 
-	PRIMARY KEY (id), 
-	UNIQUE (name), 
-	FOREIGN KEY(person_id) REFERENCES person (id)
-);
-
-CREATE TABLE beamline (
-	id INTEGER NOT NULL, 
-	name TEXT NOT NULL, 
-	notes TEXT, 
-	attributes TEXT, 
-	xray_source TEXT, 
-	facility_id INTEGER, 
-	PRIMARY KEY (id), 
-	UNIQUE (name), 
-	FOREIGN KEY(facility_id) REFERENCES facility (id) 
-);
-INSERT INTO "beamline" VALUES(1,'13ID','GSECARS 13-ID',NULL,'APS Undulator A',1);
-INSERT INTO "beamline" VALUES(2,'13BM','GSECARS 13-BM',NULL,'APS bending magnet',1);
-INSERT INTO "beamline" VALUES(3,'10ID','MR-CAT  10-ID',NULL,'APS Undulator A',1);
-INSERT INTO "beamline" VALUES(4,'10BM','MR-CAT  10-BM',NULL,'APS Bending Magnet',1);
-INSERT INTO "beamline" VALUES(5,'12BM','APS 12-BM',NULL,'APS bending magnet',1);
-INSERT INTO "beamline" VALUES(6,'20ID','APS 20-ID',NULL,'APS Undulator A',1);
-INSERT INTO "beamline" VALUES(7,'20BM','APS 20-BM',NULL,'APS Bending Magnet',1);
-INSERT INTO "beamline" VALUES(8,'X11A','NSLS X11-A',NULL,'NSLS bending magnet',3);
-INSERT INTO "beamline" VALUES(9,'4-3','SSRL, 4-3',NULL,'SSRL',4);
-INSERT INTO "beamline" VALUES(10,'4-1','SSRL, 4-1',NULL,'SSRL',4);
-
-CREATE TABLE suite_rating (
-	id INTEGER NOT NULL, 
-	score INTEGER, 
-	comments TEXT, 
+	id INTEGER NOT NULL,
+	name TEXT NOT NULL,
+	notes TEXT,
+	formula TEXT,
+	material_source TEXT,
+	preparation TEXT,
 	person_id INTEGER,
-	comment_date TIMESTAMP, 		
-	suite_id INTEGER, 
-	PRIMARY KEY (id), 
-	FOREIGN KEY(person_id) REFERENCES person (id), 
+	crystal_structure_id INTEGER,
+	PRIMARY KEY (id),
+	FOREIGN KEY(person_id) REFERENCES person (id),
+	FOREIGN KEY(crystal_structure_id) REFERENCES crystal_structure (id)
+);
+CREATE TABLE beamline (
+	id INTEGER NOT NULL,
+	name TEXT NOT NULL,
+	notes TEXT,
+	xray_source TEXT,
+	facility_id INTEGER,
+	PRIMARY KEY (id),
+	UNIQUE (name),
+	FOREIGN KEY(facility_id) REFERENCES facility (id)
+);
+INSERT INTO "beamline" VALUES(1,'13ID','GSECARS 13-ID','APS Undulator A',6);
+INSERT INTO "beamline" VALUES(2,'13BM','GSECARS 13-BM','APS bending magnet',6);
+INSERT INTO "beamline" VALUES(3,'10ID','MR-CAT  10-ID','APS Undulator A',6);
+INSERT INTO "beamline" VALUES(4,'10BM','MR-CAT  10-BM','APS Bending Magnet',6);
+INSERT INTO "beamline" VALUES(5,'20ID','PNC/XOR 20-ID','APS Undulator A',6);
+INSERT INTO "beamline" VALUES(6,'20BM','PNC/XOR 20-BM','APS Bending Magnet',6);
+INSERT INTO "beamline" VALUES(7,'X11A','NSLS X11-A','NSLS bending magnet',3);
+INSERT INTO "beamline" VALUES(8,'2-3','SSRL, 2-3','',1);
+INSERT INTO "beamline" VALUES(9,'4-3','SSRL, 4-3','',1);
+INSERT INTO "beamline" VALUES(10,'4-1','SSRL, 4-1','',1);
+CREATE TABLE suite (
+	id INTEGER NOT NULL,
+	name TEXT NOT NULL,
+	notes TEXT,
+	person_id INTEGER,
+	PRIMARY KEY (id),
+	UNIQUE (name),
+	FOREIGN KEY(person_id) REFERENCES person (id)
+);
+CREATE TABLE suite_rating (
+	id INTEGER NOT NULL,
+	score INTEGER,
+	datetime DATETIME,
+	comments TEXT,
+	person_id INTEGER,
+	suite_id INTEGER,
+	PRIMARY KEY (id),
+	FOREIGN KEY(person_id) REFERENCES person (id),
 	FOREIGN KEY(suite_id) REFERENCES suite (id)
 );
-
-CREATE TABLE spectra (
-	id INTEGER NOT NULL, 
-	name TEXT NOT NULL, 
-	notes TEXT, 
-	attributes TEXT, 
-	data_energy TEXT, 
-	data_i0 TEXT DEFAULT '[1.0]', 
-	data_itrans TEXT DEFAULT '[1.0]', 
-	data_iemit TEXT DEFAULT '[1.0]', 
-	data_irefer TEXT DEFAULT '[1.0]', 
-	data_dtime_corr TEXT DEFAULT '[1.0]', 
-	calc_mu_trans TEXT DEFAULT '-log(itrans/i0)', 
-	calc_mu_emit TEXT DEFAULT '(iemit*dtime_corr/i0)', 
-	calc_mu_refer TEXT DEFAULT '-log(irefer/itrans)', 
-	notes_i0 TEXT, 
-	notes_itrans TEXT, 
-	notes_iemit TEXT, 
-	notes_irefer TEXT, 
+CREATE TABLE spectrum (
+	id INTEGER NOT NULL,
+	name TEXT NOT NULL,
+	notes TEXT,
+	energy TEXT,
+	i0 TEXT,
+	itrans TEXT,
+	ifluor TEXT,
+	irefer TEXT,
+	energy_stderr TEXT,
+	i0_stderr TEXT,
+	itrans_stderr TEXT,
+	ifluor_stderr TEXT,
+	irefer_stderr TEXT,
+	energy_notes TEXT,
+	i0_notes TEXT,
+	itrans_notes TEXT,
+	ifluor_notes TEXT,
+	irefer_notes TEXT,
 	temperature TEXT,
-	dspacing FLOAT, 
-	submission_date TIMESTAMP, 
-	collection_date TIMESTAMP, 
-	reference_used INTEGER, 
-	energy_units_id INTEGER, 
-	person_id INTEGER, 
-	element_z INTEGER, 
-	edge_id INTEGER, 
-	sample_id INTEGER, 
-	beamline_id INTEGER, 
-	citation_id INTEGER, 
-	reference_id INTEGER, 
-	PRIMARY KEY (id), 
-	UNIQUE (name), 
-	FOREIGN KEY(person_id) REFERENCES person (id), 
+	filetext TEXT,
+	comments TEXT,
+	d_spacing FLOAT,
+	submission_date DATETIME,
+	collection_date DATETIME,
+	reference_used INTEGER,
+	energy_units_id INTEGER,
+	person_id INTEGER,
+	edge_id INTEGER,
+	element_z INTEGER,
+	sample_id INTEGER,
+	beamline_id INTEGER,
+	citation_id INTEGER,
+	reference_mode_id INTEGER,
+	reference_id INTEGER,
+	PRIMARY KEY (id),
+	FOREIGN KEY(energy_units_id) REFERENCES energy_units (id),
+	FOREIGN KEY(person_id) REFERENCES person (id),
+	FOREIGN KEY(edge_id) REFERENCES edge (id),
 	FOREIGN KEY(element_z) REFERENCES element (z),
-	FOREIGN KEY(edge_id) REFERENCES edge (id), 
-	FOREIGN KEY(sample_id) REFERENCES sample (id), 
-	FOREIGN KEY(beamline_id) REFERENCES beamline (id), 
-	FOREIGN KEY(citation_id) REFERENCES citation (id), 
-	FOREIGN KEY(reference_id) REFERENCES sample (id), 
-	FOREIGN KEY(energy_units_id) REFERENCES energy_units (id) 
+	FOREIGN KEY(sample_id) REFERENCES sample (id),
+	FOREIGN KEY(beamline_id) REFERENCES beamline (id),
+	FOREIGN KEY(citation_id) REFERENCES citation (id),
+	FOREIGN KEY(reference_mode_id) REFERENCES mode (id),
+	FOREIGN KEY(reference_id) REFERENCES sample (id)
 );
-
-CREATE TABLE spectra_suite (
-	id INTEGER NOT NULL, 
-	suite_id INTEGER, 
-	spectra_id INTEGER, 
-	PRIMARY KEY (id), 
-	FOREIGN KEY(suite_id) REFERENCES suite (id), 
-	FOREIGN KEY(spectra_id) REFERENCES spectra (id)
+CREATE TABLE spectrum_suite (
+	id INTEGER NOT NULL,
+	suite_id INTEGER,
+	spectrum_id INTEGER,
+	PRIMARY KEY (id),
+	FOREIGN KEY(suite_id) REFERENCES suite (id),
+	FOREIGN KEY(spectrum_id) REFERENCES spectrum (id)
 );
-
-CREATE TABLE spectra_ligand (
-	id INTEGER NOT NULL, 
-	ligand_id INTEGER, 
-	spectra_id INTEGER, 
-	PRIMARY KEY (id), 
-	FOREIGN KEY(ligand_id) REFERENCES ligand (id), 
-	FOREIGN KEY(spectra_id) REFERENCES spectra (id)
+CREATE TABLE spectrum_mode (
+	id INTEGER NOT NULL,
+	mode_id INTEGER,
+	spectrum_id INTEGER,
+	PRIMARY KEY (id),
+	FOREIGN KEY(mode_id) REFERENCES mode (id),
+	FOREIGN KEY(spectrum_id) REFERENCES spectrum (id)
 );
-
-CREATE TABLE spectra_mode (
-	id INTEGER NOT NULL, 
-	mode_id INTEGER, 
-	spectra_id INTEGER, 
-	PRIMARY KEY (id), 
-	FOREIGN KEY(mode_id) REFERENCES mode (id), 
-	FOREIGN KEY(spectra_id) REFERENCES spectra (id)
+CREATE TABLE spectrum_rating (
+	id INTEGER NOT NULL,
+	score INTEGER,
+	datetime DATETIME,
+	comments TEXT,
+	person_id INTEGER,
+	spectrum_id INTEGER,
+	PRIMARY KEY (id),
+	FOREIGN KEY(person_id) REFERENCES person (id),
+	FOREIGN KEY(spectrum_id) REFERENCES spectrum (id)
 );
-
-CREATE TABLE spectra_rating (
-	id INTEGER NOT NULL, 
-	score INTEGER, 
-	comments TEXT, 
-	comment_date TIMESTAMP, 	
-	person_id INTEGER, 
-	spectra_id INTEGER,
-	PRIMARY KEY (id), 
-	FOREIGN KEY(person_id) REFERENCES person (id), 
-	FOREIGN KEY(spectra_id) REFERENCES spectra (id)
+CREATE TABLE spectrum_ligand (
+	id INTEGER NOT NULL,
+	ligand_id INTEGER,
+	spectrum_id INTEGER,
+	PRIMARY KEY (id),
+	FOREIGN KEY(ligand_id) REFERENCES ligand (id),
+	FOREIGN KEY(spectrum_id) REFERENCES spectrum (id)
 );
-
+COMMIT;
