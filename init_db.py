@@ -1,37 +1,35 @@
-# def add_spectrum(self, name, notes='', attributes='', d_spacing=-1,
-#                      notes_i0='', notes_itrans='', notes_ifluor='',
-#                      notes_irefer='', submission_date=None,
-#                      collection_date=None, temperature='', energy=None,
-#                      i0=None, itrans=None, ifluor=None, irefer=None,
-#                      energy_stderr=None, i0_stderr=None,
-#                      itrans_stderr=None, ifluor_stderr=None,
-#                      irefer_stderr=None, energy_units=None, person=None,
-#                      edge=None, element=None, sample=None, beamline=None,
-#                      data_format=None, citation=None, reference_used=False,
-#                      reference_mode=None, reference_sample=None, **kws):
+#!/usr/bin/env python
+# initialize an XAS Spectral Library DB
+# with a small amount of data, suitable for testing
+#
 
+
+from __future__ import print_function
+import sys
 import os
-
 import glob
 import xasdb
 
 dbname = 'example.db'
-if os.path.exists(dbname):
-    os.unlink(dbname)
 
-xasdb.create_xasdb(dbname)
-print 'Created'
+if len(sys.argv) > 1:
+    dbname = sys.argv[1]
+
+if not os.path.exists(dbname):
+    print("Error:  database file '%s' does not exist" % dbname)
+    print("Use create_empty_db.py to create database")
+    sys.exit()
+
+
 db = xasdb.connect_xasdb(dbname)
-print 'Connected'
+print('Connected!')
+
 db.add_person('Matt Newville',
               'newville@cars.uchicago.edu',
               affiliation='CARS, UChicago')
-db.add_person('Bruce Ravel',
-              'bravel@bnl.gov',
-              affiliation='NIST')
 
-me = db.set_person_password('newville@cars.uchicago.edu', 'xafsdb')
-me = db.get_person('newville@cars.uchicago.edu')
+person = db.set_person_password('newville@cars.uchicago.edu', 'xafsdb')
+email  = db.get_person('newville@cars.uchicago.edu').email
 
 datadir = 'data'
 n = 0
@@ -40,8 +38,7 @@ files.sort()
 for f in files:
     if 'nonxafs' in f or 'upload' in f:
         continue
-    print 'Addfile ', f, me.email
     n = n + 1
-    db.add_xdifile(f, person=me.email)
+    db.add_xdifile(f, person=email)
     if n > 12:
         break
