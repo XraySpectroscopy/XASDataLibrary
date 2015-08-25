@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# creates an empty, ready-to-be-used XAS Spectral DB
+# creates an empty, ready-to-be-used XAS Spectral Library DB
 #
 
 from __future__ import print_function
