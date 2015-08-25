@@ -23,8 +23,10 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm.exc import  NoResultFound
 
 import larch
-from larch_plugins.io import XDIFile
-# from xdifile import XDIFile
+try:
+    from larch_plugins.io import XDIFile
+except ImportError:
+    from xdifile import XDIFile
 
 
 PW_ALGORITHM = 'sha512'
