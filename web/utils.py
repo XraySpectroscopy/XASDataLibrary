@@ -153,7 +153,7 @@ def beamline_for_spectrum(db, s, notes=None):
         if tname is not None:
             desc = "%s -- may be '%s'" % (desc, tname)
     return '%i' % id, desc
-    
+
 def spectra_for_beamline(db, blid):
     spectra = []
     for r in db.get_spectra():
@@ -211,7 +211,7 @@ def parse_spectrum(s, db):
         rsample = db.filtered_query('sample', id=s.reference_id)[0]
         refer_id = s.reference_id
         refer_name = rsample.name
-        
+
     mononame = 'unknown'
     if 'mono' in notes:
         if 'name' in notes['mono']:
@@ -245,8 +245,8 @@ def parse_spectrum(s, db):
             'sample_name':  sample_name,
             'sample_form':  sample_form,
             'sample_prep':  sample_prep,
-            'refer_id': refer_id,
-            'refer_name': refer_name,             
+            'refer_id': "%i" % int(refer_id),
+            'refer_name': refer_name,
             'person_email': person.email,
             'person_name': person.name,
             'upload_date': fmttime(s.submission_date),
