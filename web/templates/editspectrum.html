@@ -56,8 +56,13 @@
               {% if sm.id == sample_id  %} selected=1 {% endif %} >
           {{ sm.name }} </option>
           {% endfor %}
-	  </select>
-
+	</select>
+        {% if session.username is not none %}
+            &nbsp;   &nbsp;
+            <a href="../edit_sample/{{ sample_id }}"> [edit this sample] </a>
+            &nbsp; &nbsp;
+        {% endif %}
+      </td></tr>
     <tr><td> User Comment: </td><td>
 	<textarea cols=45  rows=10 type=text name=comments>{{raw_comments}}</textarea></td></tr>
   <tr><td colspan=2> <hr> </td></tr>
