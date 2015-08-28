@@ -816,6 +816,17 @@ def add_facility():
                                facilities=facilities)
 
 
+@app.route('/sample/<int:sid>')
+def sample(sid):
+    session_init(session, db)
+    samples = []
+    opts = {}
+    for sdat in get_sample_list(db):
+        if int(sid) == int(sdat['id']):
+            opts = sdat
+    return render_template('sample.html', **opts)
+
+
 @app.route('/upload')
 @app.route('/upload/')
 def upload():
