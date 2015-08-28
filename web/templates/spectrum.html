@@ -44,10 +44,11 @@
 
 
 <tr><td> Absorption Edge: </td> <td> {{ elem_sym }} {{ edge }} edge   </td></tr>
-<tr><td> Sample Name:     </td> <td>  {{sample_name}}   </td></tr>
+<tr><td> Sample Name:     </td> <td> <a href="../sample/{{ sample_id }}"> {{sample_name}} </a></td></tr>
 <tr><td> Sample Prep:     </td> <td>  {{sample_prep}}   </td></tr>
 <tr><td> Reference Sample: </td> <td>
-{% if  refer_id != '-1' %} {{refer_name}}  {% else %} no reference used {% endif %}  </td></tr>
+    {% if  refer_id != '-1' %} <a href="../sample/{{ refer_id }}"> {{refer_name}} </a>
+    {% else %}  no reference used {% endif %}  </td></tr>
 <tr><td> Beamline:        </td> <td>
     {% if  beamline_id != '-1' %}
         <a href="../beamlines/{{ beamline_id }}"> {{ beamline_desc }}</a> &nbsp; &nbsp;
