@@ -15,7 +15,10 @@ import numpy as np
 from datetime import datetime
 
 from base64 import b64encode
-from hashlib import pbkdf2_hmac
+try:
+    from hashlib import pbkdf2_hmac
+except ImportError:
+    from .pbkdf2_local import pbkdf2_hmac
 
 from sqlalchemy import MetaData, create_engine
 from sqlalchemy.orm import sessionmaker,  mapper, relationship, backref
