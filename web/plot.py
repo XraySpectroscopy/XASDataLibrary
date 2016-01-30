@@ -23,7 +23,7 @@ def make_xafs_plot(x, y, title, xlabel='Energy (eV)', ylabel='mu', x0=None,
 
     axes.set_xlabel(xlabel, fontproperties=mpl_lfont)
     axes.set_ylabel(ylabel, fontproperties=mpl_lfont)
-    axes.plot(x, y, linewidth=4.5)
+    axes.plot(x, y, linewidth=3.5)
     if x0 is not None:
         axes.axvline(0, ymin=min(y), ymax=max(y),
                      linewidth=2, color='#CCBBDD', zorder=-10)
