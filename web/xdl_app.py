@@ -15,10 +15,8 @@ from flask import (Flask, request, session, redirect, url_for,
 
 from werkzeug import secure_filename
 
-import larch
-
 from xasdb import XASDataLibrary, fmttime, valid_score, unique_name
-
+from xafs_preedge import preedge, edge_energies
 
 from utils import (get_session_key, random_string, multiline_text,
                    session_init, session_clear, parse_spectrum,
@@ -43,18 +41,12 @@ PORT     = 7112
 DEBUG    = True
 SECRET_KEY = get_session_key()
 
-print 'Imports done %.1f sec ' % (time.time()-t0)
 
 app = Flask(__name__)
 app.config.from_object(__name__)
 app.config['MAX_CONTENT_LENGTH'] = 32 * 1024 * 1024
 
-print 'Flask app created %.1f sec ' % (time.time()-t0)
 db = XASDataLibrary(DATABASE, server='sqlite')
-print 'XASDB connected %.1f sec ' % (time.time()-t0)
-
-_larch = larch.Interpreter()
-print 'Larch Interpreter connected %.1f sec ' % (time.time()-t0)
 
 def allowed_file(filename):
     return '.' in filename and \
@@ -260,36 +252,25 @@ def spectrum(spid=None):
     elif eunits.startswith('deg'):
         print 'Need to convert angle to energy'
 
-    group = larch.Group(energy=energy, mu=mutrans)
-    gname = 'data_%s' % random_string(6)
-
-    _larch.symtable.set_symbol(gname, group)
-    _larch.run('pre_edge(%s)' % gname)
-
-    opts['e0'] = e0 = group.e0
+    group = preedge(energy, mutrans)
+    e0 = group['e0']
 
     try:
-        cmd = "tmp_e0 = xray_edge(%i, '%s')[0]" % (s.element_z, str(opts['edge']))
-        _larch.run(cmd)
-        e0 = _larch.symtable.tmp_e0
+        e0 = edge_energies[int(s.element_z)][str(opts['edge'])]
     except:
         pass
 
-    time.sleep(0.1)
     try:
-        i1 = max(np.where(group.energy<=e0 - 30)[0])
+        i1 = max(np.where(energy<=e0 - 25)[0])
     except:
         i1 = 0
-    i2 = max(np.where(group.energy<=e0 + 70)[0]) + 1
-    xanes_en = group.energy[i1:i2] - e0
-    xanes_mu = group.norm[i1:i2]
+    i2 = max(np.where(energy<=e0 + 75)[0]) + 1
+    xanes_en = energy[i1:i2] - e0
+    xanes_mu = group['norm'][i1:i2]
     xanes_ref = None
     if murefer is not None:
-        gname = 'ref_%s' % random_string(6)
-        rgroup = larch.Group(energy=energy, mu=murefer)
-        _larch.symtable.set_symbol(gname, rgroup)
-        _larch.run('pre_edge(%s)' % gname)
-        xanes_ref =rgroup.norm[i1:i2]
+        rgroup = preedge(energy, murefer)
+        xanes_ref = rgroup['norm'][i1:i2]
 
     opts['e0'] = '%f' % e0
     opts['xanesfig'] = make_xafs_plot(xanes_en, xanes_mu, s.name,
@@ -886,5 +867,4 @@ def submit_upload():
 
 if __name__ == "__main__":
     app.jinja_env.cache = {}
-    print 'Server at port %i ready at  %s ' % (PORT, time.ctime())
     app.run(port=PORT)
