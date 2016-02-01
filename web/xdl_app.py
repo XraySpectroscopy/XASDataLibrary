@@ -37,6 +37,7 @@ ALLOWED_EXTENSIONS = set(['XDI', 'xdi'])
 
 NAME = 'XASDB'
 DATABASE = 'example.db'
+DBSERVER = 'sqlite'
 PORT     = 7112
 DEBUG    = True
 SECRET_KEY = get_session_key()
@@ -46,11 +47,19 @@ app = Flask(__name__)
 app.config.from_object(__name__)
 app.config['MAX_CONTENT_LENGTH'] = 32 * 1024 * 1024
 
-db = XASDataLibrary(DATABASE, server='sqlite')
+db = XASDataLibrary(DATABASE, server=DBSERVER)
 
 def allowed_file(filename):
     return '.' in filename and \
            filename.rsplit('.', 1)[1] in ALLOWED_EXTENSIONS
+
+
+def send_confirm_email(email, pid, hash, style='new'):
+    """send email with account confirmation/reset link"""
+    print('send email here!!!')
+
+
+
 
 @app.errorhandler(404)
 def page_not_found(error):
@@ -83,23 +92,52 @@ def create_account():
         if person is not None:
             error = "Account with email '%s' exists" % email
         else:
-            if len(name) < 6:
-                error = 'Must give a valid name (at least 5 characters)'
+            if len(name) < 4:
+                error = 'Must give a valid name (at least 4 characters)'
             elif '@' not in email or '.' not in email or len(email) < 10:
                 error = 'Must give a valid email address'
-            elif len(password)<5:
-                error = 'password must be at least 5 characters long'
+            elif len(password) < 7:
+                error = 'password must be at least 7 characters long'
             elif password != password2:
                 error = 'passwords must match.'
             else:
-                db.add_person(name, email, password=password,
+                db.add_person(name, email,
+                              password=password,
                               affiliation=affiliation)
-                flash('Account created for %s' % email)
-                return render_template('login.html', error=error)
+                hash = db.person_unconfirm(email)
+                if DBSERVER.startswith('sqlit'):
+                    db.person_confirm(email, hash)
+                else:
+                    ## send email here!!
+                    person = db.get_person(email)
+                    send_confirm_email(email, person.id, hash, style='new')
+                    return render_template('confirmation_email_sent.html',
+                                       email=email, error=error)
 
     return render_template('create_account.html', error=error)
 
-@app.route('/login/')
+
+@app.route('/confirmaccount/<pid>/<hash>')
+def confirmaccount(pid='-1', hash=''):
+    session_init(session, db)
+    error = 'Could not confirm an account with that information'
+    if pid > 0 and len(hash) > 8:
+        pid = int(pid)
+        person = db.get_person(pid, key='id')
+        if person is None:
+            error = 'Could not locate account'
+        elif person.confirmed == 'true':
+            error = 'The account for %s is already confirmed' % person.email
+        else:
+            confirmed = db.person_confirm(person.email, hash)
+            if not confirmed:
+                error = 'Confirmation key incorrect for %s' % person.email
+            else:
+                error = 'Congratulations, account confirmed. You can now log in!'
+                return render_template('login.html', error=error)
+    return render_template('confirmation_email_sent.html', error=error)
+
+
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     session_init(session, db)
@@ -112,12 +150,13 @@ def login():
         session['person_id'] = "-1"
         if person is None:
             error = 'Invalid email'
+        elif not db.test_person_confirmed(email):
+            error = 'Account not confirmed'
+        elif not db.test_person_password(email, password):
+            error = 'Invalid password'
         else:
-            if not db.test_person_password(email, password):
-                error = 'Invalid password'
-            else:
-                session['person_id'] = "%i" % person.id
-                session['username'] = request.form['email']
+            session['person_id'] = "%i" % person.id
+            session['username'] = request.form['email']
     if session['username'] is not None:
         return redirect(url_for('search'))
     else:
