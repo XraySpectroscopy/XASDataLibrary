@@ -211,7 +211,8 @@ def  make_newdb(dbname, server= 'sqlite', user='',
     person = NamedTable('person', metadata, nameid='email',
                         cols=[StrCol('name', nullable=False),
                               StrCol('password'),
-                              StrCol('affiliation')])
+                              StrCol('affiliation'),
+                              StrCol('confirmed')])
 
     citation = NamedTable('citation', metadata,
                           cols=[StrCol('journal'),
