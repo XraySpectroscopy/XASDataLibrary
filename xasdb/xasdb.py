@@ -477,7 +477,8 @@ class XASDataLibrary(object):
         name, email with affiliation and password optional
         returns Person instance"""
         person = self.addrow('person', email=email, name=name,
-                             affiliation=affiliation, **kws)
+                             affiliation=affiliation,
+                             confirmed='false', **kws)
 
         if password is not None:
             self.set_person_password(email, password)
@@ -515,6 +516,34 @@ class XASDataLibrary(object):
         except:
             return False
         return hash == b64encode(pbkdf2_hmac(algo, password, salt, niter))
+
+    def test_person_confirmed(self, email):
+        """test if account for a person is confirmed"""
+
+        table = self.tables['person']
+        row  = table.select(table.c.email==email).execute().fetchone()
+        return row.confirmed.lower() == 'true'
+
+    def person_unconfirm(self, email):
+        """ sets a person to 'unconfirmed' status, pending confirmation,
+        returns hash, which must be used to confirm person"""
+        hash = b64encode(os.urandom(24))
+        table = self.tables['person']
+        table.update(whereclause="email='%s'" % email).execute(confirmed=hash)
+        return hash
+
+    def person_confirm(self, email, hash):
+        """try to confirm a person,
+        test the supplied hash for confirmation,
+        setting 'confirmed' to 'true' if correct.
+        """
+        tab = self.tables['person']
+        row = tab.select(tab.c.email==email).execute().fetchone()
+        is_confirmed = False
+        if hash == row.confirmed:
+            tab.update(whereclause="email='%s'" % email).execute(confirmed='true')
+            is_confirmed = True
+        return is_confirmed
 
     def add_sample(self, name, person_id, notes='', **kws):
         """add sample: name required
