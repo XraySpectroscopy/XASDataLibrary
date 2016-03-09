@@ -91,9 +91,9 @@ class InitialData:
 
     elements = [[1, "H", "hydrogen"],  [2, "He", "helium"],
                 [3, "Li","lithium"],   [4, "Be", "beryllium"],
-		[5, "B", "boron"],     [6, "C", "carbon"],
+                [5, "B", "boron"],     [6, "C", "carbon"],
                 [7, "N", "nitrogen"],  [8, "O", "oxygen"],
-		[9, "F", "fluorine"],  [10, "Ne", "neon"],
+                [9, "F", "fluorine"],  [10, "Ne", "neon"],
                 [11, "Na", "sodium"],  [12, "Mg", "magnesium"],
                 [13, "Al", "aluminum"],  [14, "Si", "silicon"],
                 [15, "P", "phosphorus"], [16, "S", "sulfur"],
@@ -169,8 +169,11 @@ def  make_newdb(dbname, server= 'sqlite', user='',
         conn.execute("commit")
         dbs = [i[0].lower() for i in conn.execute(query).fetchall()]
         if  dbname not in dbs:
-            conn.execute("create database %s" % dbname)
-            conn.execute("commit")
+            try:
+                conn.execute("create database %s" % dbname)
+                conn.execute("commit")
+            except:
+                pass
         conn.close()
         time.sleep(0.5)
 
