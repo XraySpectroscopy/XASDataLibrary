@@ -655,7 +655,7 @@ class XASDataLibrary(object):
                      itrans_stderr=None, ifluor_stderr=None,
                      irefer_stderr=None, energy_units=None, person=None,
                      edge=None, element=None, sample=None, beamline=None,
-                     data_format=None, citation=None, reference_used=False,
+                     data_format=None, citation=None, reference_used=0,
                      reference_mode=None, reference_sample=None, **kws):
 
         """add spectrum: name required
@@ -669,6 +669,7 @@ class XASDataLibrary(object):
 
         dlocal = locals()
         # simple values
+
         for attr in ('notes', 'energy_notes', 'i0_notes', 'itrans_notes',
                      'ifluor_notes', 'irefer_notes', 'temperature',
                      'd_spacing', 'reference_used'):
@@ -856,6 +857,7 @@ class XASDataLibrary(object):
         if hasattr(xfile, 'i0'):
             i0 = xfile.i0
 
+        #
         modes = []
         ifluor = itrans = irefer = None
         if hasattr(xfile, 'itrans'):
@@ -912,7 +914,7 @@ class XASDataLibrary(object):
             stab = self.tables['sample']
             sample = self.query(stab).filter(stab.c.name==sname).all()
             if len(sample) > 1:
-                print 'Warning: multiple (%i) samples name %s' % (len(sample), sname)
+                print( 'Warning: multiple (%i) samples name %s' % (len(sample), sname))
             sample = sample[0]
 
             sample_id = sample.id
@@ -927,23 +929,28 @@ class XASDataLibrary(object):
                                     preparation='', notes=notes)
                     rsample = self.query(stab).filter(stab.c.name==rname).one()
                 sample_ref_id = rsample.id
-                print 'REF SAMPLE ', sample_ref_id
 
 
         beamline = None
         beamline_name  = xfile.attrs['beamline']['name']
         notes = json_encode(xfile.attrs)
-        self.add_spectrum(spectrum_name, d_spacing=d_spacing,
-                          collection_date=c_date, person=person_id,
-                          beamline=beamline, edge=edge, element=element,
-                          energy=energy, energy_units=en_units,
-                          i0=i0,itrans=itrans, ifluor=ifluor, irefer=irefer,
-                          sample=sample_id,
-                          comments=comments,
-                          notes=notes,
-                          filetext=filetext,
-                          reference_sample=sample_ref_id)
+        spec  = self.add_spectrum(spectrum_name, d_spacing=d_spacing,
+                                  collection_date=c_date, person=person_id,
+                                  beamline=beamline, edge=edge, element=element,
+                                  energy=energy, energy_units=en_units,
+                                  i0=i0,itrans=itrans, ifluor=ifluor,
+                                  irefer=irefer,
+                                  sample=sample_id,
+                                  comments=comments,
+                                  notes=notes,
+                                  filetext=filetext,
+                                  reference_sample=sample_ref_id)
 
 
+        modes_map = {}
+        for row in self.tables['mode'].select().execute().fetchall():
+            modes_map[row.name] = row.id
         for mode in modes:
-            self.set_spectrum_mode(spectrum_name, mode)
+            mode_id = modes_map.get(mode, None)
+            if mode_id is not None:
+                self.set_spectrum_mode(spec.id, mode_id)
