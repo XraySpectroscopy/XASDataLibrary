@@ -15,39 +15,34 @@ from flask import (Flask, request, session, redirect, url_for,
 
 from werkzeug import secure_filename
 
-from xasdb import XASDataLibrary, fmttime, valid_score, unique_name
-from xafs_preedge import preedge, edge_energies
+from xasdb import (connect_xasdb, fmttime, valid_score, unique_name)
+from xafs_preedge import (preedge, edge_energies)
 
-from utils import (get_session_key, random_string, multiline_text,
-                   session_init, session_clear, parse_spectrum,
-                   spectrum_ratings_summary, suite_ratings_summary,
-                   spectrum_ratings, suite_ratings,
+from utils import (random_string, multiline_text, session_init,
+                   session_clear, parse_spectrum, spectrum_ratings_summary,
+                   suite_ratings_summary, spectrum_ratings, suite_ratings,
                    spectra_for_suite, beamline_for_spectrum,
                    spectra_for_beamline, get_element_list,
                    get_energy_units_list, get_edge_list, get_beamline_list,
                    get_sample_list)
 
+# sys.path.insert(0, '/home/newville/XASDB_Secrets')
+
+from xasdb_secrets import (SECRET_KEY, DBNAME, DBCONN, PORT, DEBUG,
+                           UPLOAD_FOLDER, LOCAL_ONLY)
+
+
 from plot import make_xafs_plot
 
-# configuration
-UPLOAD_FOLDER = '/tmp/'
-if os.name =='nt':
-    UPLOAD_FOLDER = 'C:/tmp/'
 ALLOWED_EXTENSIONS = set(['XDI', 'xdi'])
 
 NAME = 'XASDB'
-DATABASE = 'example.db'
-DBSERVER = 'sqlite'
-PORT     = 7112
-DEBUG    = True
-SECRET_KEY = get_session_key()
-
 
 app = Flask(__name__)
 app.config.from_object(__name__)
 app.config['MAX_CONTENT_LENGTH'] = 32 * 1024 * 1024
 
-db = XASDataLibrary(DATABASE, server=DBSERVER)
+db = connect_xasdb(DBNAME, **DBCONN)
 
 def allowed_file(filename):
     return '.' in filename and \
@@ -57,8 +52,6 @@ def allowed_file(filename):
 def send_confirm_email(email, pid, hash, style='new'):
     """send email with account confirmation/reset link"""
     print('send email here!!!')
-
-
 
 
 @app.errorhandler(404)
@@ -105,7 +98,7 @@ def create_account():
                               password=password,
                               affiliation=affiliation)
                 hash = db.person_unconfirm(email)
-                if DBSERVER.startswith('sqlit'):
+                if LOCAL_ONLY:
                     db.person_confirm(email, hash)
                 else:
                     ## send email here!!
@@ -283,8 +276,6 @@ def spectrum(spid=None):
         pass
 
 
-    opts['fullfig'] = make_xafs_plot(energy, mutrans, s.name, ylabel='Raw XAFS')
-
     eunits = opts['energy_units']
     if eunits.startswith('keV'):
         energy = energy /1000.0
@@ -293,7 +284,6 @@ def spectrum(spid=None):
 
     group = preedge(energy, mutrans)
     e0 = group['e0']
-
     try:
         e0 = edge_energies[int(s.element_z)][str(opts['edge'])]
     except:
@@ -312,6 +302,9 @@ def spectrum(spid=None):
         xanes_ref = rgroup['norm'][i1:i2]
 
     opts['e0'] = '%f' % e0
+    opts['fullfig'] =  make_xafs_plot(energy, mutrans, s.name,
+                                      ylabel='Raw XAFS')
+
     opts['xanesfig'] = make_xafs_plot(xanes_en, xanes_mu, s.name,
                                       xlabel='Energy-%.1f (eV)' % e0,
                                       ylabel='Normalized XANES',
@@ -324,6 +317,7 @@ def spectrum(spid=None):
         suites.append({'id': r.suite_id, 'name': st.name})
     opts['nsuites'] = len(suites)
     opts['suites'] = suites
+
     return render_template('spectrum.html', **opts)
 
 @app.route('/showspectrum_rating/<int:spid>')
