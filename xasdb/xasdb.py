@@ -527,7 +527,7 @@ class XASDataLibrary(object):
     def person_unconfirm(self, email):
         """ sets a person to 'unconfirmed' status, pending confirmation,
         returns hash, which must be used to confirm person"""
-        hash = b64encode(os.urandom(24))
+        hash = b64encode(os.urandom(24).replace('/', '_')
         table = self.tables['person']
         table.update(whereclause="email='%s'" % email).execute(confirmed=hash)
         return hash
@@ -845,7 +845,10 @@ class XASDataLibrary(object):
         _s_names = [s.name for s in stab.select().execute()]
         spectrum_name = unique_name(spectrum_name, _s_names)
 
-        c_date    = xfile.attrs['scan']['start_time']
+        try:
+            c_date = xfile.attrs['scan']['start_time']
+        except:
+            c_date = 'collection date unknown'
         d_spacing = xfile.dspacing
         edge      = xfile.edge
         element   = xfile.element
@@ -913,8 +916,8 @@ class XASDataLibrary(object):
 
             stab = self.tables['sample']
             sample = self.query(stab).filter(stab.c.name==sname).all()
-            if len(sample) > 1:
-                print( 'Warning: multiple (%i) samples name %s' % (len(sample), sname))
+            # if len(sample) > 1:
+                # print( 'Warning: multiple (%i) samples name %s' % (len(sample), sname))
             sample = sample[0]
 
             sample_id = sample.id
@@ -934,6 +937,7 @@ class XASDataLibrary(object):
         beamline = None
         beamline_name  = xfile.attrs['beamline']['name']
         notes = json_encode(xfile.attrs)
+        spectrum_name = "%s (%s)" % (sname, spectrum_name)
         spec  = self.add_spectrum(spectrum_name, d_spacing=d_spacing,
                                   collection_date=c_date, person=person_id,
                                   beamline=beamline, edge=edge, element=element,
