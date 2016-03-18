@@ -527,7 +527,7 @@ class XASDataLibrary(object):
     def person_unconfirm(self, email):
         """ sets a person to 'unconfirmed' status, pending confirmation,
         returns hash, which must be used to confirm person"""
-        hash = b64encode(os.urandom(24).replace('/', '_')
+        hash = b64encode(os.urandom(24)).replace('/', '_')
         table = self.tables['person']
         table.update(whereclause="email='%s'" % email).execute(confirmed=hash)
         return hash
