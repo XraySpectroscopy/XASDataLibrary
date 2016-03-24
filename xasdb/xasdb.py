@@ -532,6 +532,12 @@ class XASDataLibrary(object):
         table.update(whereclause="email='%s'" % email).execute(confirmed=hash)
         return hash
 
+    def person_test_confirmhash(self, email, hash):
+        """test if a person's confirmation hash is correct"""
+        tab = self.tables['person']
+        row = tab.select(tab.c.email==email).execute().fetchone()
+        return hash == row.confirmed:
+
     def person_confirm(self, email, hash):
         """try to confirm a person,
         test the supplied hash for confirmation,
