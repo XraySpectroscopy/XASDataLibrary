@@ -6,6 +6,8 @@ import time
 
 t0 = time.time()
 
+import smtplib
+
 import json
 import base64
 import numpy as np
@@ -25,6 +27,7 @@ from utils import (random_string, multiline_text, session_init,
                    spectra_for_beamline, get_element_list,
                    get_energy_units_list, get_edge_list, get_beamline_list,
                    get_sample_list)
+
 
 # sys.path.insert(0, '/home/newville/XASDB_Secrets')
 
@@ -49,9 +52,41 @@ def allowed_file(filename):
            filename.rsplit('.', 1)[1] in ALLOWED_EXTENSIONS
 
 
-def send_confirm_email(email, pid, hash, style='new'):
+BASE_URL = 'http://cars.uchicago.edu/ptest' # xaslib'
+
+def send_confirm_email(person, hash, style='new'):
     """send email with account confirmation/reset link"""
     print('send email here!!!')
+
+    subject = "XAS Library Account Password Reset"
+    message = """
+        Someone (hopefully you) reset your account for the XAS Spectra Library.
+
+        To change your passowrd, please follow this link:
+               %s/newpassword/%i/%s
+
+        Thank you.
+
+""" % (BASE_URL, person.id, hash)
+
+    if style == 'new':
+        subject = "XAS Library Account Confirmation"
+        message = """
+        An account at the XAS Spectra Library has been created for %s, but not yet confirmed.
+
+        To confirm this account, please follow this link:
+           %s/confirmaccount/%i/%s
+
+        Thank you.
+
+""" % (person.name, BASE_URL, person.id, hash)
+
+    mail_from = 'xaslib@millenia.cars.aps.anl.gov'
+    fullmsg   = "From: %s\r\nTo: %s\r\nSubject: %s\r\n%s\n" % (mail_from, person.email,
+                                                               subject, message)
+    s  = smtplib.SMTP('localhost')
+    s.sendmail(mail_from, (person.email, ), fullmsg)
+    s.quit()
 
 
 @app.errorhandler(404)
@@ -103,12 +138,73 @@ def create_account():
                 else:
                     ## send email here!!
                     person = db.get_person(email)
-                    send_confirm_email(email, person.id, hash, style='new')
+                    send_confirm_email(person, hash, style='new')
                     return render_template('confirmation_email_sent.html',
                                        email=email, error=error)
 
     return render_template('create_account.html', error=error)
 
+
+
+@app.route('/password_reset_request/')
+@app.route('/password_reset_request', methods=['GET', 'POST'])
+def password_reset_request():
+    session_init(session, db)
+    error = None
+    if request.method == 'POST':
+        email = request.form['email']
+        person = db.get_person(email)
+        # log in existing
+        if person is None:
+            error = "No account with email '%s' exists" % email
+        else:
+            hash = db.person_unconfirm(email)
+            send_confirm_email(person, hash, style='reset')
+            return render_template('password_reset_response.html',
+                                   email=email, error=error)
+
+    return render_template('password_reset_request.html', error=error)
+
+
+
+@app.route('/newpassword/<pid>/<hash>')
+def newpassword(pid='-1', hash=''):
+    session_init(session, db)
+    if pid > 0 and len(hash) > 8:
+        pid = int(pid)
+        person = db.get_person(pid, key='id')
+        email = person.email
+        return render_template('newpassword_form.html', pid=pid, hash=hash)
+    return render_template('password_reset_request.html')
+
+@app.route('/setnewpassword/', methods=['GET', 'POST'])
+def setnewpassword(pid='-1', hash=''):
+    session_init(session, db)
+
+    if request.method == 'POST':
+
+        password = request.form['password']
+        password2 = request.form['password2']
+        hash      = request.form['hash']
+        email     = request.form['email']
+
+        if len(password) < 7:
+            error = 'password must be at least 7 characters long'
+        elif password != password2:
+            error = 'passwords must match.'
+        elif not db.person_test_confirmhash(email, hash):
+            error = 'password reset was not requested correctly.'
+        else:
+            db.set_person_password(name, email, password)
+            hash = db.person_unconfirm(email)
+            db.person_confirm(email, hash)
+            flash("Your password has been reset.")
+            error = None
+            return render_template('login.html', error=error)
+
+        return render_template('newpassword_form.html', hash=hash, email=email)
+
+    return render_template('password_reset_request.html')
 
 @app.route('/confirmaccount/<pid>/<hash>')
 def confirmaccount(pid='-1', hash=''):
@@ -126,8 +222,10 @@ def confirmaccount(pid='-1', hash=''):
             if not confirmed:
                 error = 'Confirmation key incorrect for %s' % person.email
             else:
-                error = 'Congratulations, account confirmed. You can now log in!'
-                return render_template('login.html', error=error)
+                flash('''Congratulations, %s, your account is confirmed.
+                You can now log in!''' % person.name)
+
+                return render_template('login.html')
     return render_template('confirmation_email_sent.html', error=error)
 
 
@@ -164,12 +262,19 @@ def logout():
     flash('You have been logged out')
     return redirect(url_for('search'))
 
-@app.route('/user/')
+@app.route('/user')
+@app.route('/user', methods=['GET', 'POST'])
 def user():
     # show the user profile for that user
     session_init(session, db)
     error = None
-    if 'username' not in session:
+    if request.method == 'POST':
+        email = request.form['email']
+        name  = request.form['name']
+        affiliation = request.form['affiliation']
+        person = db.get_person(email)
+
+    elif 'username' not in session:
         error = 'Not logged in'
         email, name, affiliation = '', '', ''
     else:
