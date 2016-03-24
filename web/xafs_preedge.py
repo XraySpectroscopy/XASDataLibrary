@@ -196,6 +196,7 @@ def preedge(energy, mu, e0=None, step=None,
     pre1  = max(pre1,  (min(energy) - e0))
     norm2 = min(norm2, (max(energy) - e0))
 
+
     if pre1 > pre2:
         pre1, pre2 = pre2, pre1
     if norm1 > norm2:
@@ -206,9 +207,12 @@ def preedge(energy, mu, e0=None, step=None,
     if p2-p1 < 2:
         p2 = min(len(energy), p1 + 2)
 
+
     omu  = mu*energy**nvict
     ex, mx = remove_nans2(energy[p1:p2], omu[p1:p2])
+
     precoefs = polyfit(ex, mx, 1)
+
     pre_edge = (precoefs[0] * energy + precoefs[1]) * energy**(-nvict)
     # normalization
     p1 = index_of(energy, norm1+e0)
@@ -221,18 +225,18 @@ def preedge(energy, mu, e0=None, step=None,
     for n, c in enumerate(reversed(list(coefs))):
         post_edge += c * energy**(n-nvict)
         norm_coefs.append(c)
+
     edge_step = step
     if edge_step is None:
         edge_step = post_edge[ie0] - pre_edge[ie0]
 
     norm = (mu - pre_edge)/edge_step
-    out = {'e0': e0, 'edge_step': edge_step, 'norm': norm,
-           'pre_edge': pre_edge, 'post_edge': post_edge,
-           'norm_coefs': norm_coefs, 'nvict': nvict,
-           'nnorm': nnorm, 'norm1': norm1, 'norm2': norm2,
-           'pre1': pre1, 'pre2': pre2, 'precoefs': precoefs}
 
-    return out
+    return {'e0': e0, 'edge_step': edge_step, 'norm': norm,
+            'pre_edge': pre_edge, 'post_edge': post_edge,
+            'norm_coefs': norm_coefs, 'nvict': nvict,
+            'nnorm': nnorm, 'norm1': norm1, 'norm2': norm2,
+            'pre1': pre1, 'pre2': pre2, 'precoefs': precoefs}
 
 symbols = ["", "H", "He", "Li", "Be", "B", "C", "N", "O", "F", "Ne", "Na",
            "Mg", "Al", "Si", "P", "S", "Cl", "Ar", "K", "Ca", "Sc", "Ti",
