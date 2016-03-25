@@ -1,57 +1,80 @@
 {% extends "layout.html" %}
 {% block body %}
 
-   <p>
+<p> </p>
 
 <h3> Welcome to the XAS Spectral Library.</h3>
-<p>
-
-This is a collection of X-ray Absorption Spectra.  Generally, the data here
-are intended to be of high quality and on well-characterized samples, but no
-guarantees are made about either of these.
 
 <p>
+  This is a collection of X-ray Absorption Spectra.  The data here are
+  intended to be of good quality, and on well-characterized samples, but no
+  guarantees are made about either of these intentions.
+</p>
 
 
-<p> Disclaimer:<br> All data files extracted from this library have been
-put in the Public Domain, and can be used for any purpose, without
-restrictions.  To better explain the data, information is included about
-the beamlines and facilities (typically National Labs) where the data were
-collected, and sometimes the people involved with the measurement.  This
-should not be viewed as an endorsement of the data, or as a notice of
-copyright.  No additional permission is needed to use any of the data in
-this library.
-
+<p> <b>Disclaimer</b>:<br> All data files extracted from this library have
+  been put in the Public Domain, and can be used for any purpose, without
+  restrictions. To better explain the data, information is included about
+  the beamlines and facilities (typically federally funnded laboratories)
+  where the data were collected, and sometimes the people involved with the
+  measurement.  This should not be viewed as an endorsement of the data or
+  as a notice of copyright.  No additional permission is needed to use any
+  of the data in this library.
 </p>
 
 
 <hr> <h3> XDI -- the XAFS Data Interchange Format.</h3>
 
-To import data into this library, the data must be in the XAS-Data-Interchange
-(XDI) format, and must have a file extension of '.xdi'.
+<p>
+  To import data into this library, the data must be in the
+  XAS-Data-Interchange (XDI) format, and must have a file extension of
+  '.xdi'.
+</p>
 
 <p>
-A detailed description of this format can be found at <a
-href='https://github.com/XraySpectroscopy/XAS-Data-Interchange/blob/master/specification/spec.md'>
-XAS Data Interchange Specification</a>. Example files are at <a
-href='https://github.com/XraySpectroscopy/XAS-Data-Interchange/tree/master/data'>
-Example XDI data</a> and in this collection.
+  A detailed description of this format can be found
+  at <a href='https://github.com/XraySpectroscopy/XAS-Data-Interchange/blob/master/specification/spec.md'>
+    XAS Data Interchange Specification</a>. Example files are
+  at <a href='https://github.com/XraySpectroscopy/XAS-Data-Interchange/tree/master/data'>
+  Example XDI data</a> and are available in this collection.
+</p>
 
+<p>
+  The XDI format has been designed to describe a single XAS spectrum in a
+  way that conveys all the important information needed to work with and
+  understand that spectrum.
+</p>
 
- <hr> <h3> Suites -- Tagging Related Spectra </h3>
+<hr> <h3> Suites: Tagging Related Spectra </h3>
 
-A suite is a collection of similar spectra.
+<p>
+  A suite is a collection of similar spectra. From an organizational point
+  of view, suites are simply tags that can be applied to spectra.  Each
+  suite can "have" multiple spectra in the sense that each tag can be
+  applied to multiple spectra.
+</p>
+<p>
+  In addition, each spectra can be assigned to many suites.  With this
+  simple mechanism of tags, one can build complex sets of spectra, and be
+  able to assemble suites of something like <i>V oxides prepared by Person
+  X and measured at beamline Y</i>
+</p>
 
 
 <hr> <h3> Rating Spectra and Suites </h3>
 
-Either individual spectra or suites of spectra can be rated and reviewed by
-any one who has logged in.  Scores can range from 0 to 5 (similar to many
-on-line shopping sites), and comments on the spectrum or suite can be made.
+<p>
+  Any individual spectra or suites of spectra can be rated and reviewed by
+  any person who has logged in.  Scores can range from 0 to 5 (similar to
+  many on-line shopping sites), and comments or reviews on the spectrum or
+  suite can be made.
+</p>
 
 <hr> <h3> Uploading Data</h3>
 
-To upload data, you must be logged in, and the data to load must be a valid
-XDI file.
+<p>
+  To upload data, you must be logged in, and the data to load must be a
+  valid XDI file.
+</p>
 
 {% endblock %}

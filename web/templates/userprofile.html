@@ -3,17 +3,20 @@
 
 {% if session.username is not none %}
 
-<p> <div class=subfont> User Profile:</div>
+<p> <div class=subfont> User Profile: for {{email}}</div>
 
+<form action="{{ url_for('user') }}" method=post>
+  <input type=hidden name=email value={{email}}>
+    <table>
+      <tr><td>Full Name:</td>
+	  <td><input size=60 type=text name=name value='{{name|safe}}'></td></tr>
+      <tr><td>Affiliation:</td>
+	<td><input size=60 type=text  name=affiliation value='{{affiliation|safe}}'></td></tr>
+      <tr><td><input type=submit name=button value='Update Account'></td>
+    </table>
+</form>
 
-<table>
-<tr>
-<tr><td colspan=2> <hr> </td></tr>
-<tr><td width="25%"> Email</td> <td> {{email}} </td></tr>
-<tr><td> Name: </td> <td> {{name}} </td></tr>
-<tr><td> Affiliation: </td> <td> {{affiliation}} </td></tr>
-<tr><td colspan=2> <hr> </td></tr>
-</table>
 {% endif %}
+
 
 {% endblock %}

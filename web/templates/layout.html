@@ -6,33 +6,41 @@
 
 <div class=page>
   <div class=topbar>
-  <table cellpadding=1 width=100%>
-     <tr><td width=35% padding=5 align=left>
-         <font size=+1>XAFS Spectra Library</font></td>
-          <td width=65% align=right>
-  {% if session.username == none %}
-     Guest <a href="{{ url_for('login') }}">log in</a>
-  {% else %}
-     {{ session.username }} <a href="{{ url_for('logout') }}">log out</a>
-  {% endif %}
-    </td></tr></table>
-</div>
+    <table cellpadding=1 width=100%>
+      <tr><td width=35% padding=5 align=left>
+	  <font size=+1>XAFS Spectra Library</font></td>
+	<td width=65% align=right> <font size=-1>
+	    [ &nbsp;
+	    {% if session.username == none %}
+	    <a href="{{ url_for('login') }}">log in</a>
+	    &nbsp;  | &nbsp;
+	    <a href="{{ url_for('create_account') }}">create account</a>
+	    {% else %}
+	    <a href="{{ url_for('user') }}"> {{ session.username }}</a>
+	    &nbsp; |  &nbsp;
+	    <a href="{{ url_for('logout') }}">log out</a>
+	    {% endif %}
+	    &nbsp; ]
+	  </font>
+	</td>
+      </tr>
+    </table>
+  </div>
 
 <div id='tab'>
-<ul id='tabmenu'>
-  <li> <a href="{{ url_for('about') }}"> About </a> </li>
-  <li> <a href="{{ url_for('search') }}"> Browse Elements </a> </li>
-  <li> <a href="{{ url_for('suites') }}"> Browse Suites </a> </li>
-  <li> <a href="{{ url_for('beamlines') }}"> Browse Beamlines </a> </li>
+  <ul id='tabmenu'>
+    <li> <a href="{{ url_for('about') }}"> About </a> </li>
+    <li> <a href="{{ url_for('search') }}"> Browse By Element </a> </li>
+    <li> <a href="{{ url_for('suites') }}"> Browse By Suite </a> </li>
+    <li> <a href="{{ url_for('beamlines') }}"> Browse By Beamline </a> </li>
 
-  {% if session.username != none %}
-  <li> <a href="{{ url_for('upload') }}"> Upload Data</a></li>
-  <li> <a href="{{ url_for('user') }}"> User Profile</a></li>
-  {% endif %}
-</ul>
+    {% if session.username != none %}
+    <li> <a href="{{ url_for('upload') }}"> Upload Data</a></li>
+    {% endif %}
+  </ul>
 </div>
 
-{% if error %}<p class=error><strong>Error:</strong> {{ error }}{% endif %}
+{% if error %}<p class=error><strong>Error:</strong> {{ error }}</p>{% endif %}
 {% for message in get_flashed_messages() %}
     <div class=flash>{{ message }}</div>
 {% endfor %}
