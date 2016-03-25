@@ -536,7 +536,7 @@ class XASDataLibrary(object):
         """test if a person's confirmation hash is correct"""
         tab = self.tables['person']
         row = tab.select(tab.c.email==email).execute().fetchone()
-        return hash == row.confirmed:
+        return hash == row.confirmed
 
     def person_confirm(self, email, hash):
         """try to confirm a person,
