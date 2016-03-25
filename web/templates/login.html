@@ -2,7 +2,6 @@
 {% block body %}
 <h4>Login: </h4>
 
-<p>To create a new account <a href="{{ url_for('create_account') }}">Click here</a></p>
 
 <form action="{{ url_for('login') }}" method=post>
     <table>
@@ -11,5 +10,12 @@
       <tr><td><input type=submit name=button value=login></td>
     </table>
 </form>
+
+<p>
+  <a href="{{ url_for('create_account') }}">Create New Account</a>
+
+  &nbsp; &nbsp; &nbsp;
+
+  <a href="{{ url_for('password_reset_request') }}">Reset Password</a></p>
 
 {% endblock %}
