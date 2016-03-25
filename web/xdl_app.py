@@ -56,11 +56,10 @@ BASE_URL = 'http://cars.uchicago.edu/ptest' # xaslib'
 
 def send_confirm_email(person, hash, style='new'):
     """send email with account confirmation/reset link"""
-    print('send email here!!!')
 
     subject = "XAS Library Account Password Reset"
     message = """
-        Someone (hopefully you) reset your account for the XAS Spectra Library.
+        Someone (hopefully you) asked to reset your account for the XAS Spectra Library.
 
         To change your passowrd, please follow this link:
                %s/newpassword/%i/%s
@@ -174,7 +173,8 @@ def newpassword(pid='-1', hash=''):
         pid = int(pid)
         person = db.get_person(pid, key='id')
         email = person.email
-        return render_template('newpassword_form.html', pid=pid, hash=hash)
+        return render_template('newpassword_form.html',
+                               hash=hash, email=email)
     return render_template('password_reset_request.html')
 
 @app.route('/setnewpassword/', methods=['GET', 'POST'])
@@ -195,14 +195,15 @@ def setnewpassword(pid='-1', hash=''):
         elif not db.person_test_confirmhash(email, hash):
             error = 'password reset was not requested correctly.'
         else:
-            db.set_person_password(name, email, password)
+            db.set_person_password(email, password)
             hash = db.person_unconfirm(email)
             db.person_confirm(email, hash)
             flash("Your password has been reset.")
             error = None
             return render_template('login.html', error=error)
 
-        return render_template('newpassword_form.html', hash=hash, email=email)
+        return render_template('newpassword_form.html', hash=hash,
+                               email=email, error=error)
 
     return render_template('password_reset_request.html')
 
@@ -273,6 +274,15 @@ def user():
         name  = request.form['name']
         affiliation = request.form['affiliation']
         person = db.get_person(email)
+
+        ptab = db.tables['person']
+        kws = {}
+        if name != person.name:
+            kws['name'] = name
+        if affiliation != person.affiliation:
+            kws['affiliation'] = affiliation
+        if len(kws) > 1:
+            ptab.update(whereclause="email='%s'" % email).execute(**kws)
 
     elif 'username' not in session:
         error = 'Not logged in'
