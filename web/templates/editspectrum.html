@@ -15,53 +15,53 @@
     <tr><td> Element: </td><td>
 	<select name='elem' style="width: 100px;">
 	  {% for el in elems %}
-             <option value={{el.z}}
-              {% if el.symbol == elem_sym %} selected=1 {% endif %} >
-            {{ el.symbol }}</option>
-          {% endfor %}
+	     <option value={{el.z}}
+	      {% if el.symbol == elem_sym %} selected=1 {% endif %} >
+	    {{ el.symbol }}</option>
+	  {% endfor %}
 	  </select>
     </td></tr>
     <tr><td> Edge:  </td><td>
 	<select  name='edge' style="width: 100px;">
 	  {% for e in edges %}
-           <option value={{e.id}}
-            {% if e.name == edge %} selected=1 {% endif %} >
-           {{ e.name }}</option>
-          {% endfor %}
+	   <option value={{e.id}}
+	    {% if e.name == edge %} selected=1 {% endif %} >
+	   {{ e.name }}</option>
+	  {% endfor %}
 	  </select>
-        </td></tr>
+	</td></tr>
     <tr><td> Energy Units:  </td><td>
 	<select  name='energy_units' style="width: 100px;">
 	  {% for e in eunits %}
-            <option value={{e.id}}
-              {% if e.name == energy_units %} selected=1 {% endif %} >
-            {{ e.units }}</option>
-          {% endfor %}
+	    <option value={{e.id}}
+	      {% if e.name == energy_units %} selected=1 {% endif %} >
+	    {{ e.units }}</option>
+	  {% endfor %}
 	  </select>
-        </td></tr>
+	</td></tr>
 
     <tr><td> Beamline: </td><td>
 	<select  name='beamline' style="width: 350px;">
 	  {% for bl in beamlines %}
-            <option value={{bl.id}} s
-              {% if bl.id == beamline_id  %} selected=1 {% endif %} >
-              {{ bl.name }} @ {{bl.fac_name}} </option>
-          {% endfor %}
+	    <option value={{bl.id}} s
+	      {% if bl.id == beamline_id  %} selected=1 {% endif %} >
+	      {{ bl.name }} @ {{bl.fac_name}} </option>
+	  {% endfor %}
 	  </select>
-        </td></tr>
+	</td></tr>
     <tr><td> Sample: </td><td>
 	<select  name='sample' style="width: 350px;">
 	  {% for sm in samples %}
-           <option value={{sm.id}}
-              {% if sm.id == sample_id  %} selected=1 {% endif %} >
-          {{ sm.name }} </option>
-          {% endfor %}
+	   <option value={{sm.id}}
+	      {% if sm.id == sample_id  %} selected=1 {% endif %} >
+	  {{ sm.name }} </option>
+	  {% endfor %}
 	</select>
-        {% if session.username is not none %}
-            &nbsp;   &nbsp;
-            <a href="../edit_sample/{{ sample_id }}"> [edit this sample] </a>
-            &nbsp; &nbsp;
-        {% endif %}
+	{% if session.username is not none %}
+	    &nbsp;   &nbsp;
+	    <a href="{{url_for('edit_sample', sid=sample_id)}}"> [edit this sample] </a>
+	    &nbsp; &nbsp;
+	{% endif %}
       </td></tr>
     <tr><td> User Comment: </td><td>
 	<textarea cols=45  rows=10 type=text name=comments>{{raw_comments}}</textarea></td></tr>

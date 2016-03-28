@@ -4,7 +4,7 @@
 
 {% if session.username is not none %}
   &nbsp;   &nbsp;
-  <a href="../add_suite"> [add a suite] </a>
+  <a href="{{url_for('add_suite')}}"> [add a suite] </a>
 {% endif %}
 <p>
 
@@ -15,7 +15,7 @@ Add {{ spectrum_name }} to
     <input type=hidden name=spectrum_name value={{spectrum_name}}>
     <select id='suite_id' name='suite_id'>
       {% for suite in suites %}
-        <option value={{suite.id}}> {{suite.name}}</option>
+	<option value={{suite.id}}> {{suite.name}}</option>
       {% endfor %}
     </select>
       <tr><td><input type=submit value=submit></td><td></td></tr>

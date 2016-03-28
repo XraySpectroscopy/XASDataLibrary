@@ -4,7 +4,7 @@
 
 {% if session.username is not none %}
   &nbsp;   &nbsp;
-  <a href="../add_suite"> [add a suite] </a>
+  <a href="{{url_for('add_suite')}}"> [add a suite] </a>
 {% endif %}
 <p>
 
@@ -18,22 +18,22 @@
    {% for s in suites %}
        <tr id="{{ loop.cycle('odd', 'even') }}" >
        <td>
-           <a href="../suites/{{ s.id }}"> {{ s.name }}</a></td>
-        <td align=center> {{ s.nspectra }} </td>
-       <td> <a href="../showsuite_rating/{{s.id}}"> {{s.rating}}</td>
-        {% if session.username is not none %}
-           <td>  &nbsp;   &nbsp;
-             <a href="../rate_suite/{{s.id}}"> [rate suite] </a></td>
-           {% if s.suite_owner %}
-                <td>  &nbsp;   &nbsp;
-                 <a href="../edit_suite/{{s.id}}"> [edit suite] </a></td>
-                <td>  &nbsp;   &nbsp;
-                 <a href="../delete_suite/{{s.id}}/ask=1"> [delete suite] </a></td>
-           {% endif %}
-        {% endif %}
-        </tr>
+	   <a href="{{url_for('suites')}}/{{ s.id }}"> {{ s.name }}</a></td>
+	<td align=center> {{ s.nspectra }} </td>
+       <td> <a href="{{url_for('showsuite_rating', stid=s.id)}}"> {{s.rating}}</td>
+	{% if session.username is not none %}
+	   <td>  &nbsp;   &nbsp;
+	     <a href="{{url_for('rate_suite', stid=s.id)}}"> [rate suite] </a></td>
+	   {% if s.suite_owner %}
+		<td>  &nbsp;   &nbsp;
+		 <a href="{{url_for('edit_suite', stid=s.id)}}"> [edit suite] </a></td>
+		<td>  &nbsp;   &nbsp;
+		 <a href="{{url_for('delete_suite', stid=s.id, ask=1)}}"> [delete suite] </a></td>
+	   {% endif %}
+	{% endif %}
+	</tr>
        <tr id="{{ loop.cycle('odd', 'even') }}">
-         <td></td><td colspan=4>{{s.notes|safe}}</td></tr>
+	 <td></td><td colspan=4>{{s.notes|safe}}</td></tr>
       </tr>
 
    {% endfor %}
@@ -42,12 +42,12 @@
     Spectra:
     <table>
       {% for suite in suites %}
-          {% for spec in suite.spectra %}
-            <tr id="{{ loop.cycle('odd', 'even') }}" >
-            <td> &nbsp; &nbsp; <a href="../spectrum/{{ spec.spectrum_id }}"> {{ spec.name }}</a></td>
-            <td> &nbsp; {{ spec.elem_sym }}  {{ spec.edge }} edge </td>
-            </tr>
-         {% endfor %}
+	  {% for spec in suite.spectra %}
+	    <tr id="{{ loop.cycle('odd', 'even') }}" >
+	    <td> &nbsp; &nbsp; <a href="{{url_for('spectrum')}}/{{ spec.spectrum_id }}"> {{ spec.name }}</a></td>
+	    <td> &nbsp; {{ spec.elem_sym }}  {{ spec.edge }} edge </td>
+	    </tr>
+	 {% endfor %}
      {% endfor %}
     </table>
    {% endif %}

@@ -141,10 +141,19 @@
    {% endif %}
    <p>
    <table cellspacing=5 cellpadding=2>
-   <tr><th> &nbsp;&nbsp;  Name</th><th> &nbsp; Edge</ht><th> &nbsp; Beamline</th><th> &nbsp; Rating</th></tr>
+     <tr>
+       <th><a href="{{url_for('search')}}/{{elem}}/name/{{reverse}}">
+	   &nbsp; Name &nbsp;</a></th>
+       <th><a href="{{url_for('search')}}/{{elem}}/edge/{{reverse}}">
+	   &nbsp; Edge &nbsp;</a></th>
+       <th><a href="{{url_for('search')}}/{{elem}}/beamline/{{reverse}}">
+	   &nbsp; Beamline &nbsp;</a></th>
+       <th><a href="{{url_for('search')}}/{{elem}}/rating_summary/{{reverse}}">
+	   &nbsp; Rating &nbsp;</a></th>
+     </tr>
    {% for spec in spectra %}
 	<tr id="{{ loop.cycle('odd', 'even') }}" >
-	<td> &nbsp; &nbsp; <a href="{{url_for('spectrum')}}/{{ spec.id }}"> {{ spec.name }}</a></td>
+	<td> &nbsp; &nbsp; <a href="{{url_for('spectrum', spid= spec.id)}}"> {{ spec.name }}</a></td>
 	<td> &nbsp; {{ spec.edge }} </td>
 	<td> &nbsp; {{ spec.beamline_desc }} </td>
 	<td> &nbsp; {{ spec.rating }} </td>

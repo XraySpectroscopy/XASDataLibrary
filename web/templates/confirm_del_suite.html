@@ -4,7 +4,7 @@
 <p> <div class=subfont> Delete Suite?</div>
 
 {% if session.username is not none %}
-   <p> Click: <a href="../../del_suite/{{stid}}/ask=0"> YES &nbsp;</a>
+   <p> Click: <a href="{{url_for('delete_suite', stid=stid, ask=0)}}"> YES &nbsp;</a>
    to permanently delete the Suite '{{suite_name}}'. </p>
    <p> Note:  This cannot be undone!</p>
 {% endif %}

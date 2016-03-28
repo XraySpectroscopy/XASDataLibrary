@@ -4,7 +4,7 @@
 <p> <div class=subfont> Delete Spectrum?</div>
 
 {% if session.username is not none %}
-   <p> Click: <a href="../../delete_spectrum/{{spectrum_id}}/ask=0"> YES &nbsp;</a>
+   <p> Click: <a href="{{url_for('delete_spectrum', spid=spectrum_id, ask=0)}}"> YES &nbsp;</a>
    to permanently delete the Spectrum '{{spectrum_name}}'. </p>
    <p> Note:  This cannot be undone!</p>
 {% endif %}
