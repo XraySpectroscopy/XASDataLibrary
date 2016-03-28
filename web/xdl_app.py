@@ -933,8 +933,9 @@ def beamlines(blid=None, orderby='id', reverse=0):
                            nbeamlines=len(beamlines),
                            beamlines=beamlines, reverse=reverse)
 
+@app.route('/beamline')
 @app.route('/beamline/<int:blid>')
-def beamline(blid):
+def beamline(blid=None):
     session_init(session, db)
     beamlines = []
     for _bldat in get_beamline_list(db):
