@@ -25,7 +25,8 @@ from utils import (random_string, multiline_text, session_init,
                    spectrum_ratings, suite_ratings,
                    spectra_for_suite, beamline_for_spectrum,
                    spectra_for_beamline, get_element_list,
-                   get_energy_units_list, get_edge_list, get_beamline_list,
+                   get_energy_units_list, get_edge_list,
+                   get_beamline_list,
                    get_sample_list)
 
 
@@ -83,6 +84,25 @@ def send_confirm_email(person, hash, style='new'):
     mail_from = 'xaslib@millenia.cars.aps.anl.gov'
     fullmsg   = "From: %s\r\nTo: %s\r\nSubject: %s\r\n%s\n" % (mail_from, person.email,
                                                                subject, message)
+    s  = smtplib.SMTP('localhost')
+    s.sendmail(mail_from, (person.email, ), fullmsg)
+    s.quit()
+
+def notify_account_creation(person):
+    """send email to administrator about account creation"""
+
+    subject = "XAS Library Account created"
+    message = """
+        An account on the XAS Spectra Library was created for user:
+          email= %s
+          name = %s
+""" % (person.email, person.name)
+
+    mail_from = 'xaslib@millenia.cars.aps.anl.gov'
+    fullmsg   = "From: %s\r\nTo: %s\r\nSubject: %s\r\n%s\n" % (mail_from,
+                                                               ADMIN_EMAIL,
+                                                               subject,
+                                                               message)
     s  = smtplib.SMTP('localhost')
     s.sendmail(mail_from, (person.email, ), fullmsg)
     s.quit()
@@ -225,6 +245,8 @@ def confirmaccount(pid='-1', hash=''):
             else:
                 flash('''Congratulations, %s, your account is confirmed.
                 You can now log in!''' % person.name)
+                # notify
+                notify_account_creation(person)
 
                 return render_template('login.html')
     return render_template('confirmation_email_sent.html', error=error)
@@ -300,18 +322,23 @@ def user():
 @app.route('/search/<elem>')
 @app.route('/search/<elem>/<orderby>')
 @app.route('/search/<elem>/<orderby>/<reverse>')
-def search(elem=None, orderby=None, reverse=False):
+def search(elem=None, orderby=None, reverse=0):
     session_init(session, db)
     dbspectra = []
+    if orderby is None: orderby = 'id'
     if elem is not None:
         try:
-            if orderby is None: orderby = 'id'
             dbspectra = db.get_spectra(element=elem, orderby=orderby)
         except:
             pass
 
-    # if reverse:
-    #     dbspectra.reverse()
+    reverse = int(reverse)
+    if reverse:
+        dbspectra.reverse()
+        reverse = 0
+    else:
+        reverse = 1
+
     spectra = []
     for s in dbspectra:
         edge     = db.get_edge(s.edge_id)
@@ -334,7 +361,8 @@ def search(elem=None, orderby=None, reverse=False):
                         })
 
     return render_template('ptable.html', nspectra=len(dbspectra),
-                           elem=elem, spectra=spectra)
+                           elem=elem, spectra=spectra,
+                           reverse=reverse)
 
 
 @app.route('/all')
@@ -827,7 +855,6 @@ def delete_suite(stid, ask=1):
         flash('Deleted suite %s' % s_name)
     return redirect(url_for('suites', error=error))
 
-
 @app.route('/edit_suite/<int:stid>')
 def edit_suite(stid=None):
     session_init(session, db)
@@ -871,28 +898,54 @@ def submit_suite_edits():
 
     return redirect(url_for('suites', stid=stid, error=error))
 
+
+@app.route('/edit_sample/<int:sid>')
+def edit_sample(sid=None):
+    session_init(session, db)
+    error=None
+    if session['username'] is None:
+        error='must be logged in to edit sample'
+        return render_template('ptable.html', error=error)
+    return redirect(url_for('sample', sid=sid, error=error))
+
 @app.route('/beamlines')
-@app.route('/beamlines/<int:blid>')
-def beamlines(blid=None):
+@app.route('/beamlines/<orderby>')
+@app.route('/beamlines/<orderby>/<reverse>')
+def beamlines(blid=None, orderby='id', reverse=0):
     session_init(session, db)
     beamlines = []
-    if blid is None:
-        for bldat in get_beamline_list(db):
-            blid = bldat['id']
-            spectra = spectra_for_beamline(db, blid)
-            opts = {'nspectra': len(spectra), 'spectra': spectra}
-            opts.update(bldat)
-            beamlines.append(opts)
-    else:
-        for _bldat in get_beamline_list(db):
-            if _bldat['id'] == "%i" % blid:
-                bldat = _bldat
-                break
 
+    for bldat in get_beamline_list(db, orderby=orderby):
+        blid = bldat['id']
         spectra = spectra_for_beamline(db, blid)
         opts = {'nspectra': len(spectra), 'spectra': spectra}
         opts.update(bldat)
         beamlines.append(opts)
+
+    reverse = int(reverse)
+    if reverse:
+        beamlines.reverse()
+        reverse = 0
+    else:
+        reverse = 1
+
+    return render_template('beamlines.html',
+                           nbeamlines=len(beamlines),
+                           beamlines=beamlines, reverse=reverse)
+
+@app.route('/beamline/<int:blid>')
+def beamline(blid):
+    session_init(session, db)
+    beamlines = []
+    for _bldat in get_beamline_list(db):
+        if _bldat['id'] == "%i" % blid:
+            bldat = _bldat
+            break
+
+    spectra = spectra_for_beamline(db, blid)
+    opts = {'nspectra': len(spectra), 'spectra': spectra}
+    opts.update(bldat)
+    beamlines.append(opts)
 
     return render_template('beamlines.html',
                            nbeamlines=len(beamlines), beamlines=beamlines)
@@ -975,14 +1028,14 @@ def list_facilities():
 
 
 @app.route('/sample/<int:sid>')
-def sample(sid):
+def sample(sid=None):
     session_init(session, db)
     samples = []
     opts = {}
     for sdat in get_sample_list(db):
         if int(sid) == int(sdat['id']):
             opts = sdat
-    return render_template('sample.html', **opts)
+    return render_template('sample.html', sid=sid, **opts)
 
 
 @app.route('/upload')
