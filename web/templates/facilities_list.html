@@ -1,0 +1,27 @@
+{% extends "layout.html" %}
+{% block body %}
+
+<p> <div class=subfont>Facilities</div>
+
+<div id='spectra'>
+<hr>
+<table cellspacing=3 cellpadding=1>
+  <tr>
+    <th> &nbsp; Abbreviation &nbsp; </th>
+    <th> &nbsp; Full Name  &nbsp; </th>
+    <th> &nbsp; Laboratory  &nbsp; </th>
+    <th> &nbsp; City, Region  &nbsp; </th>
+    <th> &nbsp; Country  &nbsp;</th>
+  </tr>
+  {% for f in facilities %}
+  <tr id="{{ loop.cycle('odd', 'even') }}">
+    <td>  <a href="{{ url_for('facility') }}/{{ f.id }}"> {{f.name }} </a></td>
+    <td>  &nbsp; {{f.fullname}}  &nbsp;</td>
+    <td>  &nbsp; {{f.laboratory}}  &nbsp; </td>
+    <td>  &nbsp; {{f.city}}, {{f.region}}  &nbsp; </td>
+    <td>  &nbsp; {{f.country}}</td></tr>
+  {% endfor %}
+</table>
+
+</div>
+{% endblock %}

@@ -5,16 +5,16 @@
 
 {% if session.username is not none %}
   &nbsp;   &nbsp;
-  <a href="../rate_spectrum/{{ spectrum_id }}"> [rate spectrum] </a>
+  <a href="{{url_for('rate_spectrum', spid=spectrum_id) }}"> [rate spectrum] </a>
   &nbsp;   &nbsp;
-  <a href="../add_spectrum_to_suite/{{spectrum_id}}"> [add spectrum to suite] </a>
+  <a href="{{url_for('add_spectrum_to_suite', spid=spectrum_id)}}"> [add spectrum to suite] </a>
 {% endif %}
 
 {% if spectrum_owner %}
 &nbsp;   &nbsp;
-  <a href="../edit_spectrum/{{ spectrum_id }}"> [edit spectrum] </a>
+  <a href="{{url_for('edit_spectrum',  spid=spectrum_id)}}"> [edit spectrum] </a>
 &nbsp;   &nbsp;
-  <a href="../delete_spectrum/{{spectrum_id}}"> [delete spectrum] </a>
+  <a href="{{url_for('delete_spectrum', spid=spectrum_id)}}"> [delete spectrum] </a>
  {% endif %}
 <p>
 
@@ -26,39 +26,39 @@
 <tr>
 <tr><td colspan=2> <hr> </td></tr>
 <td width=25%> Original Data File: </td>
-    <td> <a href="../rawfile/{{ spectrum_id }}/{{ spectrum_name }}.xdi">
-             {{ spectrum_name }}.xdi </a>
+    <td> <a href="{{url_for('rawfile', spid=spectrum_id, fname=xdi_filename)}}">
+	     {{ spectrum_name }}.xdi </a>
     </td>
 <tr><td width=25%> Ratings: </td>
-    <td> <a href="../showspectrum_rating/{{ spectrum_id }}"> {{ rating }} </a>
+    <td> <a href="{{url_for('showspectrum_rating', spid=spectrum_id)}}"> {{ rating }} </a>
     </td></tr>
 <tr><td> Suites:  </td>  <td>
   {% if nsuites == 0 %}
     No suites contain this spectrum
   {% else %}
      {% for s in suites %}
-        <a href="../suites/{{ s.id }}"> {{ s.name }}</a> &nbsp; &nbsp;
+	<a href="{{url_for('suites', stid=s.id)}}"> {{ s.name }}</a> &nbsp; &nbsp;
      {% endfor %}
   {% endif %}
 </td></tr>
 
 
 <tr><td> Absorption Edge: </td> <td> {{ elem_sym }} {{ edge }} edge   </td></tr>
-<tr><td> Sample Name:     </td> <td> <a href="../sample/{{ sample_id }}"> {{sample_name}} </a></td></tr>
+<tr><td> Sample Name:     </td> <td> <a href="{{url_for('sample', sid=sample_id)}}"> {{sample_name}} </a></td></tr>
 <tr><td> Sample Prep:     </td> <td>  {{sample_prep}}   </td></tr>
 <tr><td> Reference Sample: </td> <td>
-    {% if  refer_id != '-1' %} <a href="../sample/{{ refer_id }}"> {{refer_name}} </a>
+    {% if  refer_id != '-1' %} <a href="{{url_for('sample', sid=refer_id)}}"> {{refer_name}} </a>
     {% else %}  no reference used {% endif %}  </td></tr>
 <tr><td> Beamline:        </td> <td>
     {% if  beamline_id != '-1' %}
-        <a href="../beamlines/{{ beamline_id }}"> {{ beamline_desc }}</a> &nbsp; &nbsp;
+	<a href="{{url_for('beamlines', blid=beamline_id) }}"> {{ beamline_desc }}</a> &nbsp; &nbsp;
     {% else %} {{ beamline_desc }} &nbsp; &nbsp;
     {% endif %} </td></tr>
 <tr><td> Energy Units:    </td> <td>  {{energy_units}}  </td></tr>
 <tr><td> Mono d-spacing:  </td> <td>  {{d_spacing}} &#197; ({{mononame}})   </td></tr>
 <tr><td> Date Measured:   </td> <td>  {{collection_date}}     </td></tr>
 <tr><td> Date Uploaded:   </td>
-          <td>  {{upload_date}}, {{ person_name }} ({{ person_email }})    </td></tr>
+	  <td>  {{upload_date}}, {{ person_name }} ({{ person_email }})    </td></tr>
 <tr><td> User Comments:   </td>  <td>   {{ comments|safe }} </td></tr>
 <tr><td colspan=2> <hr> </td></tr>
 <tr><td colspan=2> &nbsp;&nbsp;&nbsp; <i>unsorted file headers:</i> </td></tr>

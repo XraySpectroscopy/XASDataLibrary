@@ -5,7 +5,7 @@
 
 {% if session.username is not none %}
   &nbsp;   &nbsp;
-  <a href="../add_beamline"> [add a beamline or facility] </a>
+  <a href="{{ url_for('add_beamline') }}"> [add a beamline or facility] </a>
 {% endif %}
 
 <div id='spectra'>
