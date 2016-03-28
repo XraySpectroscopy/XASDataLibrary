@@ -21,15 +21,15 @@ from xasdb import (connect_xasdb, fmttime, valid_score, unique_name)
 from xafs_preedge import (preedge, edge_energies)
 
 from utils import (random_string, multiline_text, session_init,
-                   session_clear, parse_spectrum, spectrum_ratings_summary,
-                   suite_ratings_summary, spectrum_ratings, suite_ratings,
+                   session_clear, parse_spectrum,
+                   spectrum_ratings, suite_ratings,
                    spectra_for_suite, beamline_for_spectrum,
                    spectra_for_beamline, get_element_list,
                    get_energy_units_list, get_edge_list, get_beamline_list,
                    get_sample_list)
 
 
-# sys.path.insert(0, '/home/newville/XASDB_Secrets')
+sys.path.insert(0, '/home/newville/XASDB_Secrets')
 
 from xasdb_secrets import (SECRET_KEY, DBNAME, DBCONN, PORT, DEBUG,
                            UPLOAD_FOLDER, LOCAL_ONLY)
@@ -297,25 +297,29 @@ def user():
                            name=name, affiliation=affiliation)
 
 @app.route('/search')
-@app.route('/search/')
 @app.route('/search/<elem>')
-def search(elem=None):
+@app.route('/search/<elem>/<orderby>')
+@app.route('/search/<elem>/<orderby>/<reverse>')
+def search(elem=None, orderby=None, reverse=False):
     session_init(session, db)
     dbspectra = []
     if elem is not None:
         try:
-            dbspectra = db.get_spectra(element=elem)
+            if orderby is None: orderby = 'id'
+            dbspectra = db.get_spectra(element=elem, orderby=orderby)
         except:
             pass
 
+    # if reverse:
+    #     dbspectra.reverse()
     spectra = []
     for s in dbspectra:
         edge     = db.get_edge(s.edge_id)
         elem_sym = db.get_element(s.element_z).symbol
         person   = db.get_person(s.person_id)
-        ratings  = spectrum_ratings_summary(db, s.id)
         bl_id, bl_desc = beamline_for_spectrum(db, s)
-
+        rating = s.rating_summary
+        if len(rating) < 1: rating = 'No ratings'
 
         spectra.append({'id': s.id,
                         'name': s.name,
@@ -324,7 +328,7 @@ def search(elem=None):
                         'person_email': person.email,
                         'person_name': person.name,
                         'elem_sym': elem_sym,
-                        'rating': ratings,
+                        'rating': rating,
                         'beamline_desc': bl_desc,
                         'beamline_id': bl_id,
                         })
@@ -344,7 +348,9 @@ def all():
         elem_sym = db.get_element(s.element_z).symbol
         elem     = s.element_z
         person   = db.get_person(s.person_id)
-        ratings  = spectrum_ratings_summary(db, s.id)
+        rating   = s.rating_summary
+        if len(rating) < 1: rating = 'No ratings'
+
         bl_id, bl_desc = beamline_for_spectrum(db, s)
 
 
@@ -355,7 +361,7 @@ def all():
                         'person_email': person.email,
                         'person_name': person.name,
                         'elem_sym': elem_sym,
-                        'rating': ratings,
+                        'rating': rating,
                         'beamline_desc': bl_desc,
                         'beamline_id': bl_id,
                         })
@@ -363,6 +369,7 @@ def all():
     return render_template('ptable.html', nspectra=len(dbspectra),
                            elem='All Elements', spectra=spectra)
 
+@app.route('/spectrum/')
 @app.route('/spectrum/<int:spid>')
 def spectrum(spid=None):
     session_init(session, db)
@@ -373,7 +380,10 @@ def spectrum(spid=None):
 
     opts = parse_spectrum(s, db)
     opts['spectrum_owner'] = (session['person_id'] == "%i" % s.person_id)
-    opts['rating'] = spectrum_ratings_summary(db, spid)
+    rating  = s.rating_summary
+    if len(rating) < 1: rating = 'No ratings'
+    opts['rating'] = rating
+
     try:
         energy = np.array(json.loads(s.energy))
         i0     = np.array(json.loads(s.i0))
@@ -748,7 +758,9 @@ def suites(stid=None):
             name, notes, person_id = st.name, st.notes, st.person_id
             person_email = db.get_person(person_id).email
             spectra = spectra_for_suite(db, st.id)
-            rating = suite_ratings_summary(db, st.id)
+            rating = st.rating_summary
+            if len(rating) < 1: rating = 'No ratings'
+
             is_owner = (int(session['person_id']) == int(st.person_id))
             suites.append({'id': st.id, 'name': name, 'notes': notes,
                            'person_email': person_email,
@@ -760,7 +772,8 @@ def suites(stid=None):
         name, notes, person_id = st.name, st.notes, st.person_id
         person_email = db.get_person(person_id).email
         spectra = spectra_for_suite(db, stid)
-        rating  = suite_ratings_summary(db, stid)
+        rating  = st.rating_summary
+        if len(rating) < 1: rating = 'No ratings'
         is_owner = (int(session['person_id']) == int(st.person_id))
         suites.append({'id': stid, 'name': name, 'notes': notes,
                        'person_email': person_email,
@@ -827,7 +840,8 @@ def edit_suite(stid=None):
     name, notes, person_id = st.name, st.notes, st.person_id
     person_email = db.get_person(person_id).email
     spectra = spectra_for_suite(db, stid)
-    rating  = suite_ratings_summary(db, stid)
+    rating  = st.rating_summary
+    if len(rating) < 1: rating = 'No ratings'
     is_owner = (int(session['person_id']) == int(st.person_id))
     opts = {'id': stid, 'name': name, 'notes': notes,
             'person_email': person_email,
@@ -918,6 +932,12 @@ def add_beamline():
                                facilities=facilities)
 
 
+@app.route('/facility')
+def facility():
+    session_init(session, db)
+    return render_template('beamline.html')
+
+
 @app.route('/add_facility')
 @app.route('/add_facility', methods=['GET', 'POST'])
 def add_facility():
@@ -931,18 +951,27 @@ def add_facility():
         fac_name = request.form['facility_name']
         _facnames = [s.name for s in db.filtered_query('facility')]
         try:
-            fac_name = unique_name(fac_name, _facnames,  msg='facility', maxcoutn=5)
+            fac_name = unique_name(fac_name, _facnames,  msg='facility', maxcount=5)
         except:
             error = 'a facility named %s exists'
         db.add_beamline(fac_name)
         time.sleep(1)
-        return redirect(url_for('facilities', error=error))
+        return redirect(url_for('list_facilities', error=error))
     else:
         facilities = []
         for r in db.filtered_query('facility'):
             facilities.append({'id': r.id, 'name': r.name})
         return render_template('add_facility.html', error=error,
                                facilities=facilities)
+
+
+@app.route('/list_facilities')
+def list_facilities():
+    session_init(session, db)
+    error=None
+    facilities = db.filtered_query('facility')
+    return render_template('facilities_list.html', error=error,
+                           facilities=facilities)
 
 
 @app.route('/sample/<int:sid>')
