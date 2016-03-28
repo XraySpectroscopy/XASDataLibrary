@@ -632,7 +632,7 @@ class XASDataLibrary(object):
 
         sum = 0
         rows = tab.select(tab.c.suite_id==suite_id).execute().fetchall()
-        for r in rows:
+        for row in rows:
             sum += 1.0*row.score
 
         rating = 'No ratings'
@@ -668,7 +668,7 @@ class XASDataLibrary(object):
 
         sum = 0
         rows = tab.select(tab.c.spectrum_id==spectrum_id).execute().fetchall()
-        for r in rows:
+        for row in rows:
             sum += 1.0*row.score
 
         rating = 'No ratings'
