@@ -113,6 +113,16 @@ def None_or_one(val, msg='Expected 1 or None result'):
     else:
         raise XASDBException(msg)
 
+def apply_orderby(q, tab, orderby=None):
+    """apply an order_by to a query to sort results"""
+    if orderby is not None:
+        key = getattr(tab.c, orderby, None)
+        if key is None:
+            key = getattr(tab.c, "%s_id" % orderby, None)
+        if key is not None:
+            q = q.order_by(key)
+    return q
+
 
 class XASDBException(Exception):
     """XAS DB Access Exception: General Errors"""
@@ -618,6 +628,20 @@ class XASDataLibrary(object):
             tab.insert().execute(**kws)
         else:
             tab.update(whereclause="id='%i'" % rowid).execute(**kws)
+        self.session.commit()
+
+        sum = 0
+        rows = tab.select(tab.c.suite_id==suite_id).execute().fetchall()
+        for r in rows:
+            sum += 1.0*row.score
+
+        rating = 'No ratings'
+        if len(rows) > 0:
+            rating = '%.1f (%i ratings)' % (sum/len(rows), len(rows))
+
+        stab = self.tables['suite']
+        stab.update(whereclause="id='%i'" % suite_id).execute(rating_summary=rating)
+
 
     def set_spectrum_rating(self, person_id, spectrum_id, score, comments=None):
         """add a score to a spectrum: person_id, spectrum_id, score, comment
@@ -639,6 +663,22 @@ class XASDataLibrary(object):
             tab.insert().execute(**kws)
         else:
             tab.update(whereclause="id='%i'" % rowid).execute(**kws)
+
+        self.session.commit()
+
+        sum = 0
+        rows = tab.select(tab.c.spectrum_id==spectrum_id).execute().fetchall()
+        for r in rows:
+            sum += 1.0*row.score
+
+        rating = 'No ratings'
+        if len(rows) > 0:
+            rating = '%.1f (%i ratings)' % (sum/len(rows), len(rows))
+
+        stab = self.tables['spectrum']
+        stab.update(whereclause="id='%i'" % spectrum_id).execute(rating_summary=rating)
+
+
 
     def update(self, tablename, where, use_id=True, **kws):
         """update a row (by id) in a table (by name) using keyword args
@@ -721,7 +761,7 @@ class XASDataLibrary(object):
         return self.query(table).filter(table.c.name == name).one()
 
 
-    def get_beamlines(self, facility=None):
+    def get_beamlines(self, facility=None, orderby='id'):
         """get all beamlines for a facility
         Parameters
         --------
@@ -747,6 +787,8 @@ class XASDataLibrary(object):
             query = tab.select(tab.c.facility_id==fac_id)
         else:
             query = tab.select()
+
+        query = apply_orderby(query, tab, orderby)
         return query.execute().fetchall()
 
 
@@ -763,7 +805,6 @@ class XASDataLibrary(object):
         self.addrow('spectrum_mode',
                      spectrum_id=spectrum_id, mode_id=mode_id)
 
-
     def get_spectrum(self, id):
         """ get spectrum by id"""
         tab = self.tables['spectrum']
@@ -771,7 +812,7 @@ class XASDataLibrary(object):
 
     def get_spectra(self, edge=None, element=None, beamline=None,
                     person=None, mode=None, sample=None, facility=None,
-                    suite=None, citation=None, ligand=None):
+                    suite=None, citation=None, ligand=None, orderby='id'):
         """get all spectra matching some set of criteria
 
         Parameters
@@ -824,6 +865,7 @@ class XASDataLibrary(object):
         if person_id is not None:
             query = query.where(tab.c.person_id==person_id)
 
+        query = apply_orderby(query, tab, orderby)
         return query.execute().fetchall()
 
     def add_xdifile(self, fname, person=None, create_sample=True, **kws):

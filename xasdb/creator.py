@@ -253,6 +253,7 @@ def  make_newdb(dbname, server= 'sqlite', user='',
                                 StrCol('temperature'),
                                 StrCol('filetext'),
                                 StrCol('comments'),
+                                StrCol('rating_summary'),
                                 Column('d_spacing', Float),
                                 DateCol('submission_date'),
                                 DateCol('collection_date'),
@@ -267,10 +268,10 @@ def  make_newdb(dbname, server= 'sqlite', user='',
                                 PointerCol('reference_mode', 'mode'),
                                 PointerCol('reference', 'sample')])
 
-
-
     suite = NamedTable('suite', metadata,
-                       cols=[PointerCol('person')])
+                       cols=[PointerCol('person'),
+                             StrCol('rating_summary'),
+                             ])
 
     beamline = NamedTable('beamline', metadata,
                           cols=[StrCol('xray_source'),
