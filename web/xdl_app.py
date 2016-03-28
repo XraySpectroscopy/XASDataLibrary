@@ -33,7 +33,7 @@ from utils import (random_string, multiline_text, session_init,
 sys.path.insert(0, '/home/newville/XASDB_Secrets')
 
 from xasdb_secrets import (SECRET_KEY, DBNAME, DBCONN, PORT, DEBUG,
-                           UPLOAD_FOLDER, LOCAL_ONLY)
+                           UPLOAD_FOLDER, LOCAL_ONLY, ADMIN_EMAIL)
 
 
 from plot import make_xafs_plot
