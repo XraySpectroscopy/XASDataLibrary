@@ -26,11 +26,10 @@ from utils import (random_string, multiline_text, session_init,
                    spectra_for_suite, beamline_for_spectrum,
                    spectra_for_beamline, get_element_list,
                    get_energy_units_list, get_edge_list,
-                   get_beamline_list,
-                   get_sample_list)
+                   get_beamline_list, get_sample_list, get_rating)
 
 
-sys.path.insert(0, '/home/newville/XASDB_Secrets')
+# sys.path.insert(0, '/home/newville/XASDB_Secrets')
 
 from xasdb_secrets import (SECRET_KEY, DBNAME, DBCONN, PORT, DEBUG,
                            UPLOAD_FOLDER, LOCAL_ONLY, ADMIN_EMAIL)
@@ -345,8 +344,6 @@ def search(elem=None, orderby=None, reverse=0):
         elem_sym = db.get_element(s.element_z).symbol
         person   = db.get_person(s.person_id)
         bl_id, bl_desc = beamline_for_spectrum(db, s)
-        rating = s.rating_summary
-        if len(rating) < 1: rating = 'No ratings'
 
         spectra.append({'id': s.id,
                         'name': s.name,
@@ -355,7 +352,7 @@ def search(elem=None, orderby=None, reverse=0):
                         'person_email': person.email,
                         'person_name': person.name,
                         'elem_sym': elem_sym,
-                        'rating': rating,
+                        'rating': get_rating(s),
                         'beamline_desc': bl_desc,
                         'beamline_id': bl_id,
                         })
@@ -376,11 +373,8 @@ def all():
         elem_sym = db.get_element(s.element_z).symbol
         elem     = s.element_z
         person   = db.get_person(s.person_id)
-        rating   = s.rating_summary
-        if len(rating) < 1: rating = 'No ratings'
 
         bl_id, bl_desc = beamline_for_spectrum(db, s)
-
 
         spectra.append({'id': s.id,
                         'name': s.name,
@@ -389,7 +383,7 @@ def all():
                         'person_email': person.email,
                         'person_name': person.name,
                         'elem_sym': elem_sym,
-                        'rating': rating,
+                        'rating': get_rating(s),
                         'beamline_desc': bl_desc,
                         'beamline_id': bl_id,
                         })
@@ -408,9 +402,7 @@ def spectrum(spid=None):
 
     opts = parse_spectrum(s, db)
     opts['spectrum_owner'] = (session['person_id'] == "%i" % s.person_id)
-    rating  = s.rating_summary
-    if len(rating) < 1: rating = 'No ratings'
-    opts['rating'] = rating
+    opts['rating'] = get_rating(s)
 
     try:
         energy = np.array(json.loads(s.energy))
@@ -485,7 +477,8 @@ def showspectrum_rating(spid=None):
     ratings = []
     for score, review, dtime, pid in spectrum_ratings(db, spid):
         person = db.get_person(pid)
-        ratings.append({'score': score, 'review': multiline_text(review),
+        ratings.append({'score': score,
+                        'review': multiline_text(review),
                         'date': fmttime(dtime),
                         'person_email': person.email,
                         'person_name': person.name,
@@ -786,13 +779,12 @@ def suites(stid=None):
             name, notes, person_id = st.name, st.notes, st.person_id
             person_email = db.get_person(person_id).email
             spectra = spectra_for_suite(db, st.id)
-            rating = st.rating_summary
-            if len(rating) < 1: rating = 'No ratings'
 
             is_owner = (int(session['person_id']) == int(st.person_id))
             suites.append({'id': st.id, 'name': name, 'notes': notes,
                            'person_email': person_email,
-                           'rating': rating, 'suite_owner': is_owner,
+                           'rating': get_rating(st),
+                           'suite_owner': is_owner,
                            'nspectra': len(spectra), 'spectra': spectra})
 
     else:
@@ -800,12 +792,12 @@ def suites(stid=None):
         name, notes, person_id = st.name, st.notes, st.person_id
         person_email = db.get_person(person_id).email
         spectra = spectra_for_suite(db, stid)
-        rating  = st.rating_summary
-        if len(rating) < 1: rating = 'No ratings'
+
         is_owner = (int(session['person_id']) == int(st.person_id))
         suites.append({'id': stid, 'name': name, 'notes': notes,
                        'person_email': person_email,
-                       'rating': rating, 'suite_owner': is_owner,
+                       'rating': get_rating(st),
+                       'suite_owner': is_owner,
                        'nspectra': len(spectra), 'spectra': spectra})
     return render_template('suites.html', nsuites=len(suites), suites=suites)
 
@@ -867,12 +859,12 @@ def edit_suite(stid=None):
     name, notes, person_id = st.name, st.notes, st.person_id
     person_email = db.get_person(person_id).email
     spectra = spectra_for_suite(db, stid)
-    rating  = st.rating_summary
-    if len(rating) < 1: rating = 'No ratings'
+
     is_owner = (int(session['person_id']) == int(st.person_id))
     opts = {'id': stid, 'name': name, 'notes': notes,
             'person_email': person_email,
-            'rating': rating, 'suite_owner': is_owner,
+            'rating': get_rating(st),
+            'suite_owner': is_owner,
             'nspectra': len(spectra), 'spectra': spectra}
     return render_template('edit_suite.html', **opts)
 

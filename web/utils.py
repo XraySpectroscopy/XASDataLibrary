@@ -48,6 +48,13 @@ def session_init(session, db):
     if 'username' not in session:    session['username'] = None
     if 'person_id' not in session:   session['person_id'] = "-1"
 
+def get_rating(item):
+    rating = getattr(item, 'rating_summary', None)
+    if rating is None or len(rating) < 1:
+        rating = 'No ratings'
+    return rating
+
+
 def get_element_list(db):
     l = []
     for r in db.get_elements():
