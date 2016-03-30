@@ -66,9 +66,9 @@ def get_edge_list(db):
         l.append({'id': '%i' % r.id, 'name': r.name})
     return l
 
-def get_beamline_list(db):
+def get_beamline_list(db, orderby='id'):
     l = []
-    for r in db.get_beamlines():
+    for r in db.get_beamlines(orderby=orderby):
         facid = '%i' % r.facility_id
         fac  = db.filtered_query('facility', id=r.facility_id)[0]
         l.append({'id': '%i' % r.id,
@@ -183,7 +183,6 @@ def parse_spectrum(s, db):
     person = db.get_person(s.person_id)
     eunits = db.filtered_query('energy_units', id=s.energy_units_id)[0].units
     d_spacing = '%f'% s.d_spacing
-
     notes =  json.loads(s.notes)
 
     beamline_id, beamline_desc = beamline_for_spectrum(db, s, notes)
@@ -251,5 +250,6 @@ def parse_spectrum(s, db):
             'person_name': person.name,
             'upload_date': fmttime(s.submission_date),
             'collection_date': fmttime(s.collection_date),
+            'xdi_filename': "%s.xdi" % (s.name.strip()),
             'fullfig': None,
             'xanesfig': None}
