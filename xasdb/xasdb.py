@@ -914,8 +914,16 @@ class XASDataLibrary(object):
         if hasattr(xfile, 'itrans'):
             itrans = xfile.itrans
             modes.append('transmission')
+        elif hasattr(xfile, 'i1'):
+            itrans = xfile.i1
+            modes.append('transmission')
+
         if hasattr(xfile, 'ifluor'):
             ifluor= xfile.ifluor
+            modes.append('fluorescence')
+
+        elif hasattr(xfile, 'ifl'):
+            ifluor= xfile.ifl
             modes.append('fluorescence')
 
         # special case: mutrans given,
@@ -932,6 +940,9 @@ class XASDataLibrary(object):
         if hasattr(xfile, 'irefer'):
             refer_used = 1
             irefer= xfile.irefer
+        elif hasattr(xfile, 'i2'):
+            refer_used = 1
+            irefer= xfile.i2
 
         en_units = 'eV'
         for index, value in xfile.attrs['column'].items():
@@ -948,7 +959,12 @@ class XASDataLibrary(object):
 
         sample_id = None
         if create_sample:
-            sattrs  = xfile.attrs['sample']
+            try:
+                sattrs  = xfile.attrs['sample']
+            except:
+                sattrs = {'name': 'unknown',
+                          'prep': 'unknown'}
+
             formula, prep, notes = '', '', ''
             notes = "sample for '%s', uploaded %s" % (fname, now)
             if 'name' in sattrs:
