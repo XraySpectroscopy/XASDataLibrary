@@ -1,0 +1,34 @@
+{% extends "layout.html" %}
+{% block body %}
+
+<p><div class=subfont> Add a Citation </div>
+
+<p> A Citation is published document used to describe the XAS
+  spectrum or where the spectrum was used in an analysis.
+  Please check for
+  existing citations
+  to avoid duplication.<p>
+
+{% if session.username is not none %}
+
+<form action="{{ url_for('add_citation') }}" method=post>
+    <table>
+      <tr><td>Name:</td>
+	  <td><input size=40 type=text name=beamline_name></td></tr>
+      <tr><td>Notes:</td>
+	  <td><input size=40 type=text name=notes></td></tr>
+      <tr><td>X-ray Source:</td>
+	   <td><input size=40 type=text name=xray_source></td></tr>
+      <tr><td>Facility:</td>
+	  <td> <select id='fac_id' name='fac_id'>
+	  {% for fac in facilities %}
+	    <option value={{fac.id}}> {{fac.name}}</option>
+	  {% endfor %}
+	      </select> </td></tr>
+      <tr><td><input type=submit value=submit></td><td></td></tr>
+    </table>
+</form>
+{% else %}
+You must be logged in to add a citation.
+{% endif %}
+{% endblock %}
