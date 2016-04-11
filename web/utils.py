@@ -147,19 +147,33 @@ def get_spectrum_suites(db, sid):
 
 def beamline_for_spectrum(db, s, notes=None):
     "return id, desc for beamline of a spectrum"
-    id  = -1
+    blid  = -1
     desc = 'unknown'
     if s.beamline_id is not None:
-        id  = s.beamline_id
-        bl  = db.filtered_query('beamline', id=s.beamline_id)[0]
+        blid = s.beamline_id
+        bl   = db.filtered_query('beamline', id=blid)[0]
         fac  = db.filtered_query('facility', id=bl.facility_id)[0]
         desc = '%s @ %s ' % (bl.name, fac.name)
-    if (id is None or id < 0) and (notes is not None):
-        id = -1
+    if (blid is None or blid < 0) and (notes is not None):
+        blid = -1
         tname = notes.get('beamline', {}).get('name', None)
         if tname is not None:
             desc = "%s -- may be '%s'" % (desc, tname)
-    return '%i' % id, desc
+    return '%i' % blid, desc
+
+def citation_for_spectrum(db, s, notes=None):
+    "return id, desc for citation of a spectrum"
+    cid  = -1
+    desc = 'unknown'
+    if s.citation_id is not None:
+        cid  = s.citation_id
+        cit  = db.filtered_query('citation', id=cid)[0]
+        desc = cit.name
+    if (cid is None or cid < 0) and (notes is not None):
+        cid = -1
+        desc = notes.get('citation', {}).get('name', 'unknown')
+    return '%i' % cid, desc
+
 
 def spectra_for_beamline(db, blid):
     spectra = []
@@ -171,6 +185,19 @@ def spectra_for_beamline(db, blid):
         spectra.append({'spectrum_id': r.id, 'name':    r.name,
                         'elem_sym': elem.symbol, 'edge': edge.name})
     return spectra
+
+
+def spectra_for_citation(db, cid):
+    spectra = []
+    for r in db.get_spectra():
+        if r.citation_id !=int(cid):
+            continue
+        elem = db.get_element(r.element_z)
+        edge = db.get_edge(r.edge_id)
+        spectra.append({'spectrum_id': r.id, 'name':    r.name,
+                        'elem_sym': elem.symbol, 'edge': edge.name})
+    return spectra
+
 
 def spectra_for_suite(db, stid):
     spectra = []
@@ -193,6 +220,7 @@ def parse_spectrum(s, db):
     notes =  json.loads(s.notes)
 
     beamline_id, beamline_desc = beamline_for_spectrum(db, s, notes)
+    citation_id, citation_name = citation_for_spectrum(db, s, notes)
 
     try:
         sample = db.filtered_query('sample', id=s.sample_id)[0]
@@ -244,6 +272,8 @@ def parse_spectrum(s, db):
             'comments': multiline_text(s.comments),
             'beamline_id': beamline_id,
             'beamline_desc': beamline_desc,
+            'citation_id': citation_id,
+            'citation_name': citation_name,
             'mononame': mononame,
             'd_spacing': d_spacing,
             'misc': misc,
