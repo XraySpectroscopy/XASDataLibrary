@@ -496,6 +496,7 @@ def submit_spectrum_edits():
     if session['username'] is None:
         error='must be logged in to edit spectrum'
         return render_template('ptable.html', error=error)
+    spid = 0
     if request.method == 'POST':
         spid  = int(request.form['spectrum'])
         db.update('spectrum', int(spid),
@@ -891,6 +892,16 @@ def submit_suite_edits():
     return redirect(url_for('suites', stid=stid, error=error))
 
 
+@app.route('/sample/<int:sid>')
+def sample(sid=None):
+    session_init(session, db)
+    samples = []
+    opts = {}
+    for sdat in get_sample_list(db):
+        if int(sid) == int(sdat['id']):
+            opts = sdat
+    return render_template('sample.html', sid=sid, **opts)
+
 @app.route('/edit_sample/<int:sid>')
 def edit_sample(sid=None):
     session_init(session, db)
@@ -898,6 +909,40 @@ def edit_sample(sid=None):
     if session['username'] is None:
         error='must be logged in to edit sample'
         return render_template('ptable.html', error=error)
+
+    opts = {}
+    for sdat in get_sample_list(db):
+        if int(sid) == int(sdat['id']):
+            opts = sdat
+    return render_template('editsample.html', sid=sid, **opts)
+
+@app.route('/submit_sample_edits', methods=['GET', 'POST'])
+def submit_sample_edits():
+    session_init(session, db)
+    error=None
+    if session['username'] is None:
+        error='must be logged in to edit sample'
+        return render_template('ptable.html', error=error)
+    sid = 0
+    if request.method == 'POST':
+        sid  = request.form['sample_id']
+        pid  = request.form['person_id']
+        name = request.form['name']
+        notes = request.form['notes']
+        prep = request.form['preparation']
+        formula = request.form['formula']
+        source = request.form['material_source']
+        # xtal_format = request.form['xtal_format']
+        # xtal_data   = request.form['xtal_data']
+
+        db.update('sample', int(sid),
+                  person=pid,
+                  name=name,
+                  notes=notes,
+                  formula=formula,
+                  material_source=source,
+                  preparation=prep)
+        time.sleep(0.25)
     return redirect(url_for('sample', sid=sid, error=error))
 
 @app.route('/beamlines')
@@ -1019,16 +1064,25 @@ def list_facilities():
     return render_template('facilities_list.html', error=error,
                            facilities=facilities)
 
-
-@app.route('/sample/<int:sid>')
-def sample(sid=None):
+@app.route('/citation')
+@app.route('/citation/<int:cid>')
+def citation(blid=None):
     session_init(session, db)
-    samples = []
-    opts = {}
-    for sdat in get_sample_list(db):
-        if int(sid) == int(sdat['id']):
-            opts = sdat
-    return render_template('sample.html', sid=sid, **opts)
+    spectra = spectra_for_citation(db, cid)
+    opts = {'nspectra': len(spectra), 'spectra': spectra}
+    return render_template('citations.html', ncitations=1, **opts)
+
+
+@app.route('/add_citation')
+@app.route('/add_citation', methods=['GET', 'POST'])
+def add_citation(spid=None):
+    session_init(session, db)
+    error=None
+    if session['username'] is None:
+        error='must be logged in to add citation for spectrum'
+        return redirect(url_for('ptable',  error=error))
+
+    return render_template('add_citation.html', spid=spid)
 
 
 @app.route('/upload')
