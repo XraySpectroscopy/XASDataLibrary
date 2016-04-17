@@ -9,6 +9,8 @@ Main Class:  XASDataLibrary
 
 import os
 import sys
+import time
+import random
 import json
 import logging
 import numpy as np
@@ -122,6 +124,20 @@ def apply_orderby(q, tab, orderby=None):
         if key is not None:
             q = q.order_by(key)
     return q
+
+def slow_string_compare(a, b):
+    """
+    does a slow-as-possible compare of 2 strings, a and b
+    returns whether the two strings are equal
+    this is meant to confuse and slow down attempts to guess / crack
+    passwords that time how long a string comparison takes to fail.
+    """
+    isgood = 0
+    if len(a) != len(b): isgood = 1
+    time.sleep(3.e-5*(len(a)*(1+4*random.random())))
+    for x, y in zip(a, b):
+        isgood |= ord(x) ^ ord(y)
+    return isgood == 0
 
 
 class XASDBException(Exception):
@@ -525,7 +541,8 @@ class XASDataLibrary(object):
             niter = int(niter)
         except:
             return False
-        return hash == b64encode(pbkdf2_hmac(algo, password, salt, niter))
+        test_pw = b64encode(pbkdf2_hmac(algo, password, salt, niter))
+        return slow_string_compare(hash, test_pw)
 
     def test_person_confirmed(self, email):
         """test if account for a person is confirmed"""
@@ -546,7 +563,7 @@ class XASDataLibrary(object):
         """test if a person's confirmation hash is correct"""
         tab = self.tables['person']
         row = tab.select(tab.c.email==email).execute().fetchone()
-        return hash == row.confirmed
+        return slow_string_compare(hash, row.confirmed)
 
     def person_confirm(self, email, hash):
         """try to confirm a person,
