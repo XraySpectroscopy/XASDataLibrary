@@ -253,7 +253,6 @@ def  make_newdb(dbname, server= 'sqlite', user='',
                                 StrCol('temperature'),
                                 StrCol('filetext'),
                                 StrCol('comments'),
-                                StrCol('rating_summary'),
                                 Column('d_spacing', Float),
                                 DateCol('submission_date'),
                                 DateCol('collection_date'),
@@ -266,7 +265,8 @@ def  make_newdb(dbname, server= 'sqlite', user='',
                                 PointerCol('beamline'),
                                 PointerCol('citation'),
                                 PointerCol('reference_mode', 'mode'),
-                                PointerCol('reference', 'sample')])
+                                PointerCol('reference', 'sample'),
+                                StrCol('rating_summary')])
 
     suite = NamedTable('suite', metadata,
                        cols=[PointerCol('person'),
