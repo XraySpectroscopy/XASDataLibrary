@@ -5,7 +5,8 @@ import base64
 import numpy as np
 import matplotlib
 matplotlib.use('agg')
-from matplotlib.backends.backend_agg import Figure, FigureCanvas
+from matplotlib.figure import Figure
+from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 
 from matplotlib.font_manager import FontProperties
 from matplotlib import rcParams
