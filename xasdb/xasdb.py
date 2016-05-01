@@ -498,13 +498,13 @@ class XASDataLibrary(object):
         return self.addrow('ligand', name=name, **kws)
 
     def add_person(self, name, email,
-                   affiliation='', password=None, **kws):
+                   affiliation='', password=None, con='false', **kws):
         """add person: arguments are
         name, email with affiliation and password optional
         returns Person instance"""
         person = self.addrow('person', email=email, name=name,
                              affiliation=affiliation,
-                             confirmed='false', **kws)
+                             confirmed=con, **kws)
 
         if password is not None:
             self.set_person_password(email, password)
@@ -822,6 +822,11 @@ class XASDataLibrary(object):
         self.addrow('spectrum_mode',
                      spectrum_id=spectrum_id, mode_id=mode_id)
 
+    def get_spectrum_mode(self,id):
+        """get mode for a spectrum"""
+        tab = self.tables['spectrum_mode']
+        return tab.select().where(tab.c.spectrum_id == id).execute().fetchall()
+
     def get_spectrum(self, id):
         """ get spectrum by id"""
         tab = self.tables['spectrum']
@@ -953,6 +958,22 @@ class XASDataLibrary(object):
                 itrans = np.exp(-xfile.mutrans)
             modes.append('transmission')
 
+        if (hasattr(xfile, 'mufluor') and
+            not hasattr(xfile, 'ifluor')):
+            if not hasattr(xfile, 'i0'):
+                i0 = np.ones(len(xfile.mufluor))*1.0
+                ifluor = xfile.mufluor
+            modes.append('fluorescence')
+
+        if (hasattr(xfile, 'samnorm')):
+            i0 = np.ones(len(xfile.samnorm))*1.0
+            ifluor = xfile.samnorm
+            modes.append('fluorescence, unitstep')
+        if (hasattr(xfile, 'munorm')):
+            i0 = np.ones(len(xfile.munorm))*1.0
+            ifluor = xfile.munorm
+            modes.append('fluorescence, unitstep')
+
         refer_used = 0
         if hasattr(xfile, 'irefer'):
             refer_used = 1
@@ -1019,6 +1040,9 @@ class XASDataLibrary(object):
         beamline_name  = xfile.attrs['beamline']['name']
         notes = json_encode(xfile.attrs)
         spectrum_name = "%s (%s)" % (sname, spectrum_name)
+        
+        print spectrum_name,modes    
+        
         spec  = self.add_spectrum(spectrum_name, d_spacing=d_spacing,
                                   collection_date=c_date, person=person_id,
                                   beamline=beamline, edge=edge, element=element,

@@ -62,7 +62,8 @@ class InitialData:
              ["fluorescence, energy analyzed",
               "X-ray fluorescence with an energy dispersive detector"],
              ["xeol", "visible or uv light emission"],
-             ["electron emission", "emitted electrons from sample"]]
+             ["electron emission", "emitted electrons from sample"],
+             ["fluorescence, unitstep", "X-ray fluorescence, normalized"]]
 
     facilities = [['SSRL', 'US', 'Palo Alto', 'CA', 'Stanford Synchrotron Radiation Laboratory', 'SLAC'],
                   ['SRS',  'UK',  'Cheshire', '',    'Synchrotron Radiation Source', 'Daresbury Laboratory'],
@@ -82,9 +83,14 @@ class InitialData:
                  ['20ID',  'PNC/XOR 20-ID',   'APS Undulator A',     6],
                  ['20BM',  'PNC/XOR 20-BM',   'APS Bending Magnet',  6],
                  ['X11A',  'NSLS X11-A',      'NSLS bending magnet', 3],
-                 ['2-3',   'SSRL, 2-3',       '',                    1],
-                 ['4-3',   'SSRL, 4-3',       '',                    1],
-                 ['4-1',   'SSRL, 4-1',       '',                    1]]
+                 ['BL 2-3',   'SSRL, 2-3',       'SSRL Bending Magnet',                    1],
+                 ['BL 4-3',   'SSRL, 4-3',       'SSRL Wiggler',                    1],
+                 ['BL 10-2',   'SSRL, 10-2',       'SSRL Wiggler',                    1],
+                 ['BL 11-2',   'SSRL, 11-2',       'SSRL Wiggler',                    1],
+                 ['BL 14-3',   'SSRL, 14-3',       'SSRL Bending Magnet',                    1],
+                 ['BL 7-3',   'SSRL, 7-3',       'SSRL Wiggler',                    1],
+                 ['BL 9-3',   'SSRL, 9-3',       'SSRL Wiggler',                    1],
+                 ['BL 4-1',   'SSRL, 4-1',       'SSRL Wiggler',                    1]]
 
     edges = [["K", "1s"], ["L3", "2p3/2"],
              ["L2", "2p1/2"], ["L1", "2s"], ["M4,5", "3d3/2,5/2"]]
