@@ -965,10 +965,7 @@ class XASDataLibrary(object):
                 ifluor = xfile.mufluor
             modes.append('fluorescence')
 
-        if (hasattr(xfile, 'samnorm')):
-            i0 = np.ones(len(xfile.samnorm))*1.0
-            ifluor = xfile.samnorm
-            modes.append('fluorescence, unitstep')
+
         if (hasattr(xfile, 'munorm')):
             i0 = np.ones(len(xfile.munorm))*1.0
             ifluor = xfile.munorm
