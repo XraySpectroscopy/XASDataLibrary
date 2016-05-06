@@ -44,7 +44,7 @@
       {% for suite in suites %}
 	  {% for spec in suite.spectra %}
 	    <tr id="{{ loop.cycle('odd', 'even') }}" >
-	    <td> &nbsp; &nbsp; <a href="{{url_for('spectrum')}}/{{ spec.spectrum_id }}"> {{ spec.name }}</a></td>
+	    <td> &nbsp; &nbsp; <a href="{{url_for('spectrum')}}{{ spec.spectrum_id }}"> {{ spec.name }}</a></td>
 	    <td> &nbsp; {{ spec.elem_sym }}  {{ spec.edge }} edge </td>
 	    </tr>
 	 {% endfor %}

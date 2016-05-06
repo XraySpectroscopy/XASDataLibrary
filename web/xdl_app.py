@@ -404,14 +404,30 @@ def spectrum(spid=None):
     opts['spectrum_owner'] = (session['person_id'] == "%i" % s.person_id)
     opts['rating'] = get_rating(s)
 
-    try:
-        energy = np.array(json.loads(s.energy))
-        i0     = np.array(json.loads(s.i0))
-        itrans = np.array(json.loads(s.itrans))
-        mutrans = -np.log(itrans/i0)
-    except:
-        error = 'Could not extract data from spectrum'
-        return render_template('spectrum.html', **opts)
+    modes = db.get_spectrum_mode(spid)
+    if modes is None:
+        modes = 1
+    else:
+        modes = modes[0][1]
+
+    if modes == 1:
+        try:
+            energy = np.array(json.loads(s.energy))
+            i0     = np.array(json.loads(s.i0))
+            itrans = np.array(json.loads(s.itrans))
+            mutrans = -np.log(itrans/i0)
+        except:
+            error = 'Could not extract data from spectrum'
+            return render_template('spectrum.html', **opts)
+    else: #get a fluorescence
+        try:
+            energy = np.array(json.loads(s.energy))
+            i0     = np.array(json.loads(s.i0))
+            ifluor = np.array(json.loads(s.ifluor))
+            mutrans = ifluor/i0
+        except:
+            error = 'Could not extract data from spectrum'
+            return render_template('spectrum.html', **opts)
 
     murefer = None
     try:
@@ -427,8 +443,10 @@ def spectrum(spid=None):
     elif eunits.startswith('deg'):
         print 'Need to convert angle to energy'
 
-    group = preedge(energy, mutrans)
-    e0 = group['e0']
+
+    if modes != 7:
+        group = preedge(energy, mutrans)
+        e0 = group['e0']
     try:
         e0 = edge_energies[int(s.element_z)][str(opts['edge'])]
     except:
@@ -440,7 +458,12 @@ def spectrum(spid=None):
         i1 = 0
     i2 = max(np.where(energy<=e0 + 75)[0]) + 1
     xanes_en = energy[i1:i2] - e0
-    xanes_mu = group['norm'][i1:i2]
+    
+    if modes !=3:
+        xanes_mu = group['norm'][i1:i2]
+    else:
+        xanes_mu = mutrans[i1:i2]
+        
     xanes_ref = None
     if murefer is not None:
         rgroup = preedge(energy, murefer)
