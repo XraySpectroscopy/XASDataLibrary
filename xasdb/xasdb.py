@@ -22,7 +22,7 @@ try:
 except ImportError:
     from .pbkdf2_local import pbkdf2_hmac
 
-from sqlalchemy import MetaData, create_engine
+from sqlalchemy import MetaData, create_engine, text
 from sqlalchemy.orm import sessionmaker,  mapper, relationship, backref
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm.exc import  NoResultFound
@@ -62,7 +62,7 @@ def isXASDataLibrary(dbname):
 
 def json_encode(val):
     "simple wrapper around json.dumps"
-    if val is None or isinstance(val, (str, unicode)):
+    if val is None or isinstance(val, str):
         return val
     if isinstance(val, np.ndarray):
         val = val.flatten().tolist()
@@ -377,7 +377,7 @@ class XASDataLibrary(object):
         """set modify_date in info table"""
         if self.update_mod_time is None:
             self.update_mod_time = self.tables['info'].update(
-                whereclause="key='modify_date'")
+                whereclause=text("key='modify_date'"))
         self.update_mod_time.execute(value=fmttime())
 
     def addrow(self, tablename, **kws):
@@ -529,7 +529,7 @@ class XASDataLibrary(object):
         hash   = '%s$%i$%s$%s' % (PW_ALGORITHM, PW_NROUNDS, salt, result)
 
         table = self.tables['person']
-        table.update(whereclause="email='%s'" % email).execute(password=hash)
+        table.update(whereclause=text("email='%s'" % email)).execute(password=hash)
 
     def test_person_password(self, email, password):
         """test password for person, returns True if valid"""
@@ -752,7 +752,7 @@ class XASDataLibrary(object):
             submission_date = datetime.now()
         for attr, val in (('submission_date', submission_date),
                           ('collection_date', collection_date)):
-            if isinstance(val, (str, unicode)):
+            if isinstance(val, str):
                 try:
                     val = isotime2datetime(val)
                 except ValueError:
@@ -764,8 +764,8 @@ class XASDataLibrary(object):
         # foreign keys, pointers to other tables
         kws['beamline_id'] = beamline
         kws['person_id'] = person
-        kws['edge_id'] = self.get_edge(edge).id
-        kws['element_z'] = self.get_element(element).z
+        kws['edge_id'] = self.get_edge(edge.decode("utf-8")).id
+        kws['element_z'] = self.get_element(element.decode("utf-8")).z
         kws['energy_units_id'] = self.filtered_query('energy_units', name=energy_units)[0].id
 
         kws['sample_id'] = sample
@@ -1038,7 +1038,7 @@ class XASDataLibrary(object):
         notes = json_encode(xfile.attrs)
         spectrum_name = "%s (%s)" % (sname, spectrum_name)
         
-        print spectrum_name,modes    
+        print(spectrum_name,modes)
         
         spec  = self.add_spectrum(spectrum_name, d_spacing=d_spacing,
                                   collection_date=c_date, person=person_id,
