@@ -24,11 +24,14 @@ if not os.path.exists(dbname):
 db = xasdb.connect_xasdb(dbname)
 print('Connected!')
 
-db.add_person('Matt Newville',
-              'newville@cars.uchicago.edu',
-              affiliation='CARS, UChicago')
-
-person = db.set_person_password('newville@cars.uchicago.edu', 'xafsdb')
+import sqlalchemy
+try:
+    db.add_person('Matt Newville',
+                  'newville@cars.uchicago.edu',
+                  affiliation='CARS, UChicago')
+except sqlalchemy.exc.IntegrityError as e:
+    pass
+person = db.set_person_password('newville@cars.uchicago.edu', str.encode('xafsdb'))
 email  = db.get_person('newville@cars.uchicago.edu').email
 
 datadir = 'data'

@@ -74,6 +74,7 @@ class InitialData:
                   ['ALS',  'US', 'Berkeley', 'CA', 'Advanced Light Source', 'LBNL'],
                   ['DLS',  'UK', 'Didcot', '', 'Diamond Light Source', ''],
                   ['SOLEIL', 'France',  'GIF-sur-YVETTE', '',  'Synchrotron SOLEIL', '' ],
+                  ['NSLS-II', 'US', 'Upton', 'NY',     'National Synchrotron Light Source II', 'BNL'],
                   ]
 
     beamlines = [['13ID',  'GSECARS 13-ID',   'APS Undulator A',     6],
@@ -83,6 +84,12 @@ class InitialData:
                  ['20ID',  'PNC/XOR 20-ID',   'APS Undulator A',     6],
                  ['20BM',  'PNC/XOR 20-BM',   'APS Bending Magnet',  6],
                  ['X11A',  'NSLS X11-A',      'NSLS bending magnet', 3],
+                 ['X23A2',  'NSLS X23-A2',      'NSLS bending magnet', 3],
+                 ['6BM',  'NSLS-II BMM',      'NSLS-II 3-pole wiggle', 10],
+                 ['7BM',  'NSLS-II QAS',      'NSLS-II 3-pole wiggle', 10],
+                 ['8BM',  'NSLS-II TES',      'NSLS-II 3-pole wiggle', 10],
+                 ['8ID',  'NSLS-II ISS',      'NSLS-II damping wiggle', 10],
+                 ['23ID-2',  'NSLS-II IOS',      'NSLS-II undulator', 10],
                  ['BL 2-3',   'SSRL, 2-3',       'SSRL Bending Magnet',                    1],
                  ['BL 4-3',   'SSRL, 4-3',       'SSRL Wiggler',                    1],
                  ['BL 10-2',   'SSRL, 10-2',       'SSRL Wiggler',                    1],
@@ -345,6 +352,7 @@ def  make_newdb(dbname, server= 'sqlite', user='',
             value = now
         info.insert().execute(key=key, value=value)
 
+    session.flush()
     session.commit()
 
 
@@ -362,9 +370,9 @@ def backup_versions(fname, max=10):
             fb0 = "%s.%i" % (fname, i)
             fb1 = "%s.%i" % (fname, i+1)
             if os.path.exists(fb0):
-                print ' %s -> %s ' % (fb0, fb1)
+                print(' %s -> %s ' % (fb0, fb1))
                 shutil.move(fb0, fb1)
-        print ' %s -> %s.1 ' % (fname, fname)
+        print(' %s -> %s.1 ' % (fname, fname))
         shutil.move(fname, "%s.1" % fname)
 
 
@@ -374,5 +382,5 @@ if __name__ == '__main__':
         backup_versions(dbname)
 
     make_newdb(dbname, server='sqlite')
-    print '''%s  created and initialized.''' % dbname
+    print('''%s  created and initialized.''' % dbname)
     dumpsql(dbname)
