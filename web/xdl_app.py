@@ -37,6 +37,8 @@ from xasdb_secrets import (SECRET_KEY, DBNAME, DBCONN, PORT, DEBUG,
 
 from plot import make_xafs_plot
 
+from sqlalchemy import text
+
 ALLOWED_EXTENSIONS = set(['XDI', 'xdi'])
 
 NAME = 'XASDB'
@@ -303,7 +305,7 @@ def user():
         if affiliation != person.affiliation:
             kws['affiliation'] = affiliation
         if len(kws) > 1:
-            ptab.update(whereclause="email='%s'" % email).execute(**kws)
+            ptab.update(whereclause=text("email='%s'" % email)).execute(**kws)
 
     elif 'username' not in session:
         error = 'Not logged in'
@@ -441,7 +443,7 @@ def spectrum(spid=None):
     if eunits.startswith('keV'):
         energy = energy /1000.0
     elif eunits.startswith('deg'):
-        print 'Need to convert angle to energy'
+        print('Need to convert angle to energy')
 
 
     if modes != 7:
@@ -471,13 +473,13 @@ def spectrum(spid=None):
 
     opts['e0'] = '%f' % e0
     opts['fullfig'] =  make_xafs_plot(energy, mutrans, s.name,
-                                      ylabel='Raw XAFS')
+                                      ylabel='Raw XAFS').decode('UTF-8')
 
     opts['xanesfig'] = make_xafs_plot(xanes_en, xanes_mu, s.name,
                                       xlabel='Energy-%.1f (eV)' % e0,
                                       ylabel='Normalized XANES',
                                       x0=e0, ref_mu=xanes_ref,
-                                      ref_name='with reference')
+                                      ref_name='with reference').decode('UTF-8')
 
     suites = []
     for r in db.filtered_query('spectrum_suite', spectrum_id=s.id):

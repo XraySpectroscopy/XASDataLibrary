@@ -20,7 +20,7 @@ def make_xafs_plot(x, y, title, xlabel='Energy (eV)', ylabel='mu', x0=None,
 
     fig  = Figure(figsize=(8.5, 5.0), dpi=300)
     canvas = FigureCanvas(fig)
-    axes = fig.add_axes([0.16, 0.16, 0.75, 0.75], axisbg='#FFFFFF')
+    axes = fig.add_axes([0.16, 0.16, 0.75, 0.75]) #, axisbg='#FFFFFF')
 
     axes.set_xlabel(xlabel, fontproperties=mpl_lfont)
     axes.set_ylabel(ylabel, fontproperties=mpl_lfont)

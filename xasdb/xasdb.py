@@ -442,6 +442,13 @@ class XASDataLibrary(object):
         """return list of edges"""
         return self.filtered_query('edge')
 
+    def get_beamline(self, val, key='name'):
+        """return beamline by name  or id"""
+        if isinstance(val, int):
+            key = 'id'
+        kws = {key: val}
+        return None_or_one(self.filtered_query('beamline', **kws))
+
     def add_energy_units(self, units, notes=None, **kws):
         """add Energy Units: units required
         notes  optional
@@ -762,7 +769,7 @@ class XASDataLibrary(object):
             kws[attr] = val
 
         # foreign keys, pointers to other tables
-        kws['beamline_id'] = beamline
+        kws['beamline_id'] = self.get_beamline(beamline).id # beamline
         kws['person_id'] = person
         kws['edge_id'] = self.get_edge(edge.decode("utf-8")).id
         kws['element_z'] = self.get_element(element.decode("utf-8")).z
@@ -795,7 +802,7 @@ class XASDataLibrary(object):
             fac_id = facility.id
         elif isinstance(facility, int):
             fac_id = facility
-        elif isinstance(facility, basestring):
+        elif isinstance(facility, str):
             ftab = self.tables['facility']
             row  = ftab.select(ftab.c.name==facility).execute().fetchone()
             fac_id = row.id
@@ -1039,10 +1046,9 @@ class XASDataLibrary(object):
         spectrum_name = "%s (%s)" % (sname, spectrum_name)
         
         print(spectrum_name,modes)
-        
         spec  = self.add_spectrum(spectrum_name, d_spacing=d_spacing,
                                   collection_date=c_date, person=person_id,
-                                  beamline=beamline, edge=edge, element=element,
+                                  beamline=beamline_name, edge=edge, element=element,
                                   energy=energy, energy_units=en_units,
                                   i0=i0,itrans=itrans, ifluor=ifluor,
                                   irefer=irefer,
