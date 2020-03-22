@@ -6,6 +6,7 @@ from collections import namedtuple
 from datetime import datetime
 from random import randrange
 from string import printable
+from sqlalchemy import text
 
 from xasdb import fmttime
 
@@ -39,7 +40,7 @@ def random_string(n):
 
 def multiline_text(s):
     if '\n' in s:
-        return '%s' % (s.replace('\n', '<br>'))
+        return text('%s' % (s.replace('\n', '<br>')))
 
 def session_clear(session):
     pass
@@ -84,7 +85,7 @@ def get_beamline_list(db, orderby='id'):
                   'xray_source': r.xray_source,
                   'fac_id': facid,
                   'fac_name': fac.name,
-                  'fac_loc': "%s, %s" % (fac.city, fac.country)})
+                  'fac_loc': "%s %s, %s" % (fac.city, fac.region, fac.country)})
     return l
 
 def get_sample_list(db):
@@ -269,7 +270,8 @@ def parse_spectrum(s, db):
             'edge': edge.name,
             'energy_units': eunits,
             'raw_comments': s.comments,
-            'comments': multiline_text(s.comments),
+            #'comments': multiline_text(s.comments),
+            'comments': s.comments.decode("utf-8"),
             'beamline_id': beamline_id,
             'beamline_desc': beamline_desc,
             'citation_id': citation_id,

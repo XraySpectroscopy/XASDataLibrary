@@ -17,7 +17,7 @@ if _sys.version_info[0] == 2:
 
     _PY3 = False
     _text_type = unicode
-    _string_type = basestring
+    _string_type = str
     _trans_5C = b''.join(chr(x ^ 0x5C) for x in xrange(256))
     _trans_36 = b''.join(chr(x ^ 0x36) for x in xrange(256))
 
