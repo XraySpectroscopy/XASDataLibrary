@@ -271,7 +271,7 @@ def parse_spectrum(s, db):
             'energy_units': eunits,
             'raw_comments': s.comments,
             #'comments': multiline_text(s.comments),
-            'comments': s.comments.decode("utf-8"),
+            'comments': s.comments, # .decode("utf-8"),
             'beamline_id': beamline_id,
             'beamline_desc': beamline_desc,
             'citation_id': citation_id,
