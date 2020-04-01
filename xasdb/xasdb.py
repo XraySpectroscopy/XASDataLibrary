@@ -17,20 +17,16 @@ import numpy as np
 from datetime import datetime
 
 from base64 import b64encode
-try:
-    from hashlib import pbkdf2_hmac
-except ImportError:
-    from .pbkdf2_local import pbkdf2_hmac
+from hashlib import pbkdf2_hmac
 
 from sqlalchemy import MetaData, create_engine, text
-from sqlalchemy.orm import sessionmaker,  mapper, relationship, backref
-from sqlalchemy.exc import IntegrityError
-from sqlalchemy.orm.exc import  NoResultFound
+from sqlalchemy.orm import sessionmaker
 
 from xdifile import XDIFile
 
-PW_ALGORITHM = 'sha512'
-PW_NROUNDS   = 120000
+
+PW_ALGOR = 'sha512'
+PW_NITER = 200000
 
 def isXASDataLibrary(dbname):
     """test if a file is a valid XAS Data Library file:
@@ -133,8 +129,9 @@ def slow_string_compare(a, b):
     passwords that time how long a string comparison takes to fail.
     """
     isgood = 0
-    if len(a) != len(b): isgood = 1
-    time.sleep(3.e-5*(len(a)*(1+4*random.random())))
+    if len(a) != len(b):
+        isgood = 1
+    time.sleep(5.e-5*(len(a)*(1+5*random.random())))
     for x, y in zip(a, b):
         isgood |= ord(x) ^ ord(y)
     return isgood == 0
@@ -288,6 +285,9 @@ class XASDataLibrary(object):
             self.engine = create_engine(conn_str % (user, password, host,
                                                     port, dbname))
 
+        self.session = sessionmaker(bind=self.engine)()
+        self.query   = self.session.query
+
         self.metadata =  MetaData(self.engine)
         try:
             self.metadata.reflect()
@@ -295,10 +295,18 @@ class XASDataLibrary(object):
             raise XASDBException('%s is not a valid database' % dbname)
 
         tables = self.tables = self.metadata.tables
-        self.session = sessionmaker(bind=self.engine)()
-        self.query   = self.session.query
 
+        self.update_mod_time =  None
+        if self.logfile is None and server.startswith('sqlit'):
+            lfile = self.dbname
+            if lfile.endswith('.xdl'):
+                lfile = self.logfile[:-4]
+            self.logfile = "%s.log" % lfile
+            logging.basicConfig()
+            logger = logging.getLogger('sqlalchemy.engine')
+            logger.addHandler(logging.FileHandler(self.logfile))
 
+        mappers = """
         mapper(Info,             tables['info'])
         mapper(Sample,           tables['sample'])
         mapper(Spectrum_Rating,  tables['spectrum_rating'])
@@ -345,16 +353,7 @@ class XASDataLibrary(object):
         properties={'spectrum': relate(Spectrum, backref='suite',
                                         secondary=tables['spectrum_suite'])})
 
-        self.update_mod_time =  None
-
-        if self.logfile is None and server.startswith('sqlit'):
-            lfile = self.dbname
-            if lfile.endswith('.xdl'):
-                lfile = self.logfile[:-4]
-            self.logfile = "%s.log" % lfile
-            logging.basicConfig()
-            logger = logging.getLogger('sqlalchemy.engine')
-            logger.addHandler(logging.FileHandler(self.logfile))
+        """
 
 
     def close(self):
@@ -532,9 +531,10 @@ class XASDataLibrary(object):
     def set_person_password(self, email, password):
         """ set secure password for person"""
         salt   = b64encode(os.urandom(24))
-        result = b64encode(pbkdf2_hmac(PW_ALGORITHM, password, salt, PW_NROUNDS))
-        hash   = '%s$%i$%s$%s' % (PW_ALGORITHM, PW_NROUNDS, salt, result)
-
+        result = b64encode(pbkdf2_hmac(PW_ALGOR, password.encode('utf-8'),
+                                       salt, PW_NITER))
+        hash = '$'.join((PW_ALGOR, '%8.8d'%PW_NITER, salt.decode('utf-8'),
+                         result.decode('utf-8')))
         table = self.tables['person']
         table.update(whereclause=text("email='%s'" % email)).execute(password=hash)
 
@@ -544,12 +544,13 @@ class XASDataLibrary(object):
         table = self.tables['person']
         row  = table.select(table.c.email==email).execute().fetchone()
         try:
-            algo, niter, salt, hash = row.password.split('$')
-            niter = int(niter)
+            algo, niter, salt, hash_stored = row.password.split('$')
         except:
-            return False
-        test_pw = b64encode(pbkdf2_hmac(algo, password, salt, niter))
-        return slow_string_compare(hash, test_pw)
+            algo, niter, salt, hash_stored = PW_ALGOR, PW_NITER, '_nul_', '%bad%'
+        hash_test = b64encode(pbkdf2_hmac(algor, password.encode('utf-8'),
+                                          salt.encode('utf-8'),
+                                          int(niter))).decode('utf-8')
+        return slow_string_compare(hash_test, hash_stored)
 
     def test_person_confirmed(self, email):
         """test if account for a person is confirmed"""
@@ -1044,7 +1045,7 @@ class XASDataLibrary(object):
         beamline_name  = xfile.attrs['beamline']['name']
         notes = json_encode(xfile.attrs)
         spectrum_name = "%s (%s)" % (sname, spectrum_name)
-        
+
         print(spectrum_name,modes)
         spec  = self.add_spectrum(spectrum_name, d_spacing=d_spacing,
                                   collection_date=c_date, person=person_id,
