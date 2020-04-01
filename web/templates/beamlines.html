@@ -1,12 +1,16 @@
 {% extends "layout.html" %}
 {% block body %}
 
-<p> <div class=subfont> Beamlines</div>
+<p> <div class=subfont> Beamlines
 
 {% if session.username is not none %}
   &nbsp;   &nbsp;
-  <a href="{{ url_for('add_beamline') }}"> [add a beamline or facility] </a>
+  <a href="{{ url_for('add_beamline') }}"> [add a beamline] </a>
+  &nbsp;   &nbsp;
+  <a href="{{ url_for('add_facility') }}"> [add a facility] </a>
 {% endif %}
+
+</div>
 
 <div id='spectra'>
 <hr>
