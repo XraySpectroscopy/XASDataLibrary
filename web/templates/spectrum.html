@@ -1,7 +1,7 @@
 {% extends "layout.html" %}
 {% block body %}
 
-<p> <div class=subfont> Spectrum:  {{ spectrum_name }}</div>
+<p> <div class=subfont> Spectrum:  {{ spectrum_name }}
 
 {% if session.username is not none %}
   &nbsp;   &nbsp;
@@ -17,6 +17,8 @@
   <a href="{{url_for('delete_spectrum', spid=spectrum_id)}}"> [delete spectrum] </a>
  {% endif %}
 <p>
+
+</div>
 
 <table> <tr>
 <td><img width=550 src="data:image/png;base64,{{ fullfig|safe }}"></td>

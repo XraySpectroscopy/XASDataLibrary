@@ -1,11 +1,13 @@
 {% extends "layout.html" %}
 {% block body %}
-<p> <div class=subfont> Suites of Spectra</div>
+<p> <div class=subfont> Suites of Spectra
 
 {% if session.username is not none %}
   &nbsp;   &nbsp;
   <a href="{{url_for('add_suite')}}"> [add a suite] </a>
 {% endif %}
+
+</div>
 <p>
 
 <div id='spectra'>
@@ -13,29 +15,26 @@
 {% if nsuites == 0 %}
       No suites defined.
 {% else %}
-   <table cellspacing=0 cellpadding=4 border=0>
-   <tr><th>Name</th><th> # Spectra</ht><th> Ratings</th><th></th><th></th></tr>
+    <table cellspacing=0 cellpadding=3 border=0>
+<tr>
+  <th width="20%"> Name</th>
+  <th widht="10%"> # Spectra</th>
+  <th width="35%" align='left'> Description</th>
+  <th width="35%">  &nbsp; &nbsp; Ratings</th>
    {% for s in suites %}
        <tr id="{{ loop.cycle('odd', 'even') }}" >
-       <td>
-	   <a href="{{url_for('suites')}}/{{ s.id }}"> {{ s.name }}</a></td>
-	<td align=center> {{ s.nspectra }} </td>
-       <td> <a href="{{url_for('showsuite_rating', stid=s.id)}}"> {{s.rating}}</td>
+       <td><a href="{{url_for('suites')}}/{{ s.id }}"> {{ s.name }}</a></td>
+       <td> {{ s.nspectra }} </td>
+       <td align='left'>{{s.notes|safe}} </td>
+       <td> &nbsp; &nbsp; <a href="{{url_for('showsuite_rating', stid=s.id)}}"> {{s.rating}} &nbsp;
 	{% if session.username is not none %}
-	   <td>  &nbsp;   &nbsp;
-	     <a href="{{url_for('rate_suite', stid=s.id)}}"> [rate suite] </a></td>
-	   {% if s.suite_owner %}
-		<td>  &nbsp;   &nbsp;
-		 <a href="{{url_for('edit_suite', stid=s.id)}}"> [edit suite] </a></td>
-		<td>  &nbsp;   &nbsp;
-		 <a href="{{url_for('delete_suite', stid=s.id, ask=1)}}"> [delete suite] </a></td>
-	   {% endif %}
-	{% endif %}
-	</tr>
-       <tr id="{{ loop.cycle('odd', 'even') }}">
-	 <td></td><td colspan=4>{{s.notes|safe}}</td></tr>
-      </tr>
-
+	   <a href="{{url_for('rate_suite', stid=s.id)}}"> [rate] </a>
+           {% if s.suite_owner %}
+             &nbsp; <a href="{{url_for('edit_suite', stid=s.id)}}"> [edit] </a>
+ 	     &nbsp; <a href="{{url_for('delete_suite', stid=s.id, ask=1)}}"> [delete] </a>
+           {% endif %}
+        {% endif %}
+	</td></tr>
    {% endfor %}
    </table>
    {% if nsuites == 1 %}

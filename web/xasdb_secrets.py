@@ -9,6 +9,5 @@ DBCONN = dict(user='xasdb', password='secret',
 PORT = 7112
 DEBUG = True
 LOCAL_ONLY = False
-
 UPLOAD_FOLDER='/tmp'
-ADMIN_EMAIL='nobody@here'
+ADMIN_EMAIL='xaslib@xrayabsorption.org'

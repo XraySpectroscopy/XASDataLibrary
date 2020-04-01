@@ -13,9 +13,14 @@ import base64
 import numpy as np
 
 from flask import (Flask, request, session, redirect, url_for,
-                   abort, render_template, flash, Response)
+                   abort, render_template, flash, Response,
+                   send_from_directory)
 
-from werkzeug import secure_filename
+try:
+    from werkzeug.utils import secure_filename
+except ImportError:
+    from werkzeug import secure_filename
+
 
 from xasdb import (connect_xasdb, fmttime, valid_score, unique_name)
 from xafs_preedge import (preedge, edge_energies)
@@ -34,7 +39,6 @@ from utils import (random_string, multiline_text, session_init,
 from xasdb_secrets import (SECRET_KEY, DBNAME, DBCONN, PORT, DEBUG,
                            UPLOAD_FOLDER, LOCAL_ONLY, ADMIN_EMAIL)
 
-
 from plot import make_xafs_plot
 
 from sqlalchemy import text
@@ -43,7 +47,7 @@ ALLOWED_EXTENSIONS = set(['XDI', 'xdi'])
 
 NAME = 'XASDB'
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder='static')
 app.config.from_object(__name__)
 app.config['MAX_CONTENT_LENGTH'] = 32 * 1024 * 1024
 
@@ -52,7 +56,6 @@ db = connect_xasdb(DBNAME, **DBCONN)
 def allowed_file(filename):
     return '.' in filename and \
            filename.rsplit('.', 1)[1] in ALLOWED_EXTENSIONS
-
 
 BASE_URL = 'http://cars.uchicago.edu/ptest' # xaslib'
 
@@ -82,11 +85,10 @@ def send_confirm_email(person, hash, style='new'):
 
 """ % (person.name, BASE_URL, person.id, hash)
 
-    mail_from = 'xaslib@millenia.cars.aps.anl.gov'
-    fullmsg   = "From: %s\r\nTo: %s\r\nSubject: %s\r\n%s\n" % (mail_from, person.email,
+    fullmsg   = "From: %s\r\nTo: %s\r\nSubject: %s\r\n%s\n" % (ADMIN_EMAIL, person.email,
                                                                subject, message)
     s  = smtplib.SMTP('localhost')
-    s.sendmail(mail_from, (person.email, ), fullmsg)
+    s.sendmail(ADMIN_EMAIL_from, (person.email, ), fullmsg)
     s.quit()
 
 def notify_account_creation(person):
@@ -99,15 +101,20 @@ def notify_account_creation(person):
           name = %s
 """ % (person.email, person.name)
 
-    mail_from = 'xaslib@millenia.cars.aps.anl.gov'
-    fullmsg   = "From: %s\r\nTo: %s\r\nSubject: %s\r\n%s\n" % (mail_from,
+    fullmsg   = "From: %s\r\nTo: %s\r\nSubject: %s\r\n%s\n" % (ADMIN_EMAIL,
                                                                ADMIN_EMAIL,
                                                                subject,
                                                                message)
     s  = smtplib.SMTP('localhost')
-    s.sendmail(mail_from, (person.email, ), fullmsg)
+    s.sendmail(ADMIN_EMAIL, (person.email, ), fullmsg)
     s.quit()
 
+
+
+@app.route('/favicon.ico')
+def favicon():
+    return send_from_directory(os.path.join(app.root_path, 'static'),
+                               'ixas_logo.ico', mimetype='image/vnd.microsoft.icon')
 
 @app.errorhandler(404)
 def page_not_found(error):
@@ -460,12 +467,12 @@ def spectrum(spid=None):
         i1 = 0
     i2 = max(np.where(energy<=e0 + 75)[0]) + 1
     xanes_en = energy[i1:i2] - e0
-    
+
     if modes !=3:
         xanes_mu = group['norm'][i1:i2]
     else:
         xanes_mu = mutrans[i1:i2]
-        
+
     xanes_ref = None
     if murefer is not None:
         rgroup = preedge(energy, murefer)

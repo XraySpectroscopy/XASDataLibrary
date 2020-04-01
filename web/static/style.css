@@ -1,94 +1,94 @@
-body            { font-family: sans-serif; background: #FEFEFC; }
-a, h1, h2       { color: #377ba8; text-decoration: none; }
+
+
+
+body            { font-family: sans-serif; background: #FFFFDD; }
+a, h1, h2       { color: #5060C0; text-decoration: none; }
 h1, h2          { font-family: 'Georgia', serif; margin: 0; }
-h1              { border-bottom: 2px solid #eee; }
+h1              { border-bottom: 1px solid #eee; }
 h2              { font-size: 1.2em; }
 
-.page           { margin: 3px auto; border: 2px solid #F0F0F0;
-		 padding: 3px; background: #FEFEFC; }
+.page           { margin: 0 auto; border: 0px solid #F0F0F0;
+		 padding: 4px; background: #FFFFFDD; }
 .entries        { list-style: none; margin: 0; padding: 0; }
 .entries li     { margin: 0.2em 30em; }
 .entries li h2  { margin-left: -1em; }
-.add-entry      { font-size: 0.9em; border-bottom: 1px solid #ccc; }
+.add-entry      { font-size: 0.9em; border-bottom: 0px solid #ccc; }
 .add-entry dl   { font-weight: bold; }
 .metanav        { text-align: right; font-size: 0.8em; padding: 0.3em;
-		  margin-bottom: 1em; background: #FEFEFC; }
+		  margin-bottom: 1em; background: #FFFFDD; }
 
-.flash          { background: #cee5F5; padding: 0.5em; border: 1px solid #aacbe2; }
+.flash          { background: #cee5F5; padding: 0.5em; border: 3px solid #aacbe2; }
 
-.error          { background: #f0d6d6; padding: 0.5em; border: 1px solid #702020; }
+.error          { background: #f0d6d6; padding: 0.5em; border: 3px solid #702020; }
 
-.topbar {
-    font: bold 12px verdana, arial, sans-serif;
-    text-decoration: none;
-    color: #553233;
-    background: #FEFEFC
-}
+.topbar {font: bold 16px verdana, arial, sans-serif;
+	 padding: 5px;
+	 text-decoration: none;
+	 color: #FFFFFF;
+	 background: #2090B0;}
 
-.topbar a {text-decoration: none; }
+.topbar a        {background: #2090A0; color: #FFFFFF; margin: 10px}
+.topbar a:hover  {background: #60B0E0; color: #FFEF60; margin: 10px}
 
-pre {text-indent: 20px}
-h5 {font:bold 14px verdana,arial,sans-serif;color:#042264;}
-h4 {font:bold 18px verdana,arial,sans-serif;color:#A42424;}
-h3 {font:bold 18px verdana,arial,sans-serif;color:#A42424;
+
+pre {text-indent: 16px}
+h5 {font:bold 12px verdana,arial,sans-serif;color:#042264;}
+h4 {font:bold 14px verdana,arial,sans-serif;color:#A42424;}
+h3 {font:bold 16px verdana,arial,sans-serif;color:#A42424;
     font-weight:bold;font-style:italic;}
-h2 {font:bold 22px verdana,arial,sans-serif;color:#044484;font-weight:bold;}
+h2 {font:bold 18px verdana,arial,sans-serif;color:#044484;font-weight:bold;}
 
-.subfont {font:bold 18px verdana,arial,sans-serif;color:#A42424;}
+.subfont {font:bold 16px verdana, arial, sans-serif;color:#CC0000;}
 
-.h5font {font:bold 14px verdana,arial,sans-serif;color:#042264;}
-.h4font {font:bold 18px verdana,arial,sans-serif;color:#042264;}
-.h3font {font:bold 18px verdana,arial,sans-serif;color:#A42424;font-weight:bold;font-style:italic;}
+.h5font {font:bold 12px verdana,arial,sans-serif; color:#042264;}
+.h4font {font:bold 14px verdana,arial,sans-serif; color:#042264;}
+.h3font {font:bold 16px verdana,arial,sans-serif; color:#A42424;font-weight:bold;font-style:italic;}
 
-#ptable {background:#FEFEFC;}
-#elem {font: bold 13pt verdana; font-family: monospace; font-size: 13pt; font-weight:bold;
-       background:#FFFFFD; text-align:justify;}
+#ptable {background:#FFFFFD;}
+#elem {font: bold 16px verdana; background:#FFFFFD; text-align:justify; padding: 2px;}
 #elem a, a.active {color: #4444AA; solid #880000 ; text-decoration: none; }
-#elem a.active {color: #CC0000;  background: #FAFAE0;}
-#elem a:hover {color: #CC0000;  background: #FAFAE0;}
-
+#elem a.active {color: #CC0000;  background: #FFFFFD;}
+#elem a:hover  {color: #CC0000;  background: #FAFAE0;}
 
 #spectra {font: bold 11pt verdana,arial,san-serif;  background:#FAFAF8; text-align:justify;}
 #spectra a, a.active {color: #4444AA; solid #880000 ; text-decoration: none; }
 #spectra a.active {color: #CC0000;  background: #FAFAE0;}
 #spectra a:hover {color: #CC0000;  background: #FAFAE0;}
-#spectra hr {height: 3px; background-color: #999955;}
-#even {background-color: #F0F0F0;}
+
+##  #spectra hr {height: 12px; background-color: #990033; padding: 10px}
+
+#even {background-color: #F3F3F0;}
 
 
 #grayentry {color:#B0B0B0;}
 
 .xx {font-size: 3pt;}
-body {margin:10px; padding:0px;background:#FCFCFC; font:bold 14px verdana, arial, sans-serif;}
+body {margin:10px; padding:0px;background:#FFFFFD; font:bold 14px verdana, arial, sans-serif;}
 
 #content {
     text-align:justify;
-    background:#FCFCFC;
+    background:#FFFFFD;
     padding: 0px;
-    border:4px solid #88000;
-    border-top: none;
-    z-index: 2;
 }
 
 #tabmenu {
-    font: bold 11px verdana, arial, sans-serif;
+    font: bold 12px verdana, arial, sans-serif;
     margin: 0px;
-    padding: 0px;
-    padding-left: 5px;
-    border-left:   3px solid #999955;
-    border-right:  3px solid #999955;
-    border-top:    3px solid #999955;
-    border-bottom: 3px solid #999955;
+    padding: 2px;
+    padding-left: 8px;
+    border-left:   3px solid #777777;
+    border-right:  3px solid #777777;
+    border-top:    3px solid #777777;
+    border-bottom: 3px solid #777777;
 }
 
-#tabmenu ul {margin: 0px;  padding: 10px; padding-left: 10px}
+#tabmenu ul {margin: 0px;  padding: 10px}
 
 #tabmenu li {display: inline;  margin: 0px; list-style-type: none; }
 
-#tabmenu a, a.active {
-    color: #4444AA;
-    border-right: 3px solid #999955;
-    padding: 0px 12px 0px 12px;
+#tabmenu a, a.active {color: #4444AA;
+    border-right: 3px solid #777777;
+    padding: 1px 12px 1px 12px;
 }
 
 #tabmenu a.active {color: #CC0000; background: #FCFCCC;}

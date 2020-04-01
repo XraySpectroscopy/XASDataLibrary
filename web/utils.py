@@ -1,7 +1,7 @@
 import os
 import json
 import time
-import base64
+from base64 import b64encode
 from collections import namedtuple
 from datetime import datetime
 from random import randrange
@@ -13,7 +13,7 @@ from xasdb import fmttime
 def make_secret_key():
     "make a secret key for web app"
     f = open('secret.py', 'w')
-    f.write("session_key = '%s'\n" % base64.b64encode(os.urandom(36)))
+    f.write("session_key = '%s'\n" % b64encode(os.urandom(24)).decode('utf-8'))
     f.close()
 
 def get_session_key():
@@ -46,8 +46,10 @@ def session_clear(session):
     pass
 
 def session_init(session, db):
-    if 'username' not in session:    session['username'] = None
-    if 'person_id' not in session:   session['person_id'] = "-1"
+    if 'username' not in session:
+        session['username'] = None
+    if 'person_id' not in session:
+        session['person_id'] = "-1"
 
 def get_rating(item):
     rating = getattr(item, 'rating_summary', None)
@@ -55,35 +57,33 @@ def get_rating(item):
         rating = 'No ratings'
     return rating
 
-
 def get_element_list(db):
     l = []
     for r in db.get_elements():
-        l.append({'z': '%i' % r.z, 'symbol': r.symbol, 'name': r.name})
+        l.append({'z': '%d' % r.z, 'symbol': r.symbol, 'name': r.name})
     return l
 
 def get_energy_units_list(db):
     l = []
     for r in db.filtered_query('energy_units'):
-        l.append({'id': '%i' % r.id, 'units': r.units})
+        l.append({'id': '%d' % r.id, 'units': r.units})
     return l
 
 def get_edge_list(db):
     l = []
     for r in db.get_edges():
-        l.append({'id': '%i' % r.id, 'name': r.name})
+        l.append({'id': '%d' % r.id, 'name': r.name})
     return l
 
 def get_beamline_list(db, orderby='id'):
     l = []
     for r in db.get_beamlines(orderby=orderby):
-        facid = '%i' % r.facility_id
         fac  = db.filtered_query('facility', id=r.facility_id)[0]
-        l.append({'id': '%i' % r.id,
+        l.append({'id': '%d' % r.id,
                   'name': r.name,
                   'notes': r.notes,
                   'xray_source': r.xray_source,
-                  'fac_id': facid,
+                  'fac_id': '%d' % r.facility_id,
                   'fac_name': fac.name,
                   'fac_loc': "%s %s, %s" % (fac.city, fac.region, fac.country)})
     return l
@@ -91,7 +91,7 @@ def get_beamline_list(db, orderby='id'):
 def get_sample_list(db):
     l = []
     for r in db.filtered_query('sample'):
-        l.append({'id': '%i' % r.id, 'name': r.name,
+        l.append({'id': '%d' % r.id, 'name': r.name,
                   'formula': r.formula, 'notes': r.notes,
                   'preparation': r.preparation,
                   'person_id': r.person_id,
@@ -112,7 +112,7 @@ def spectrum_ratings_summary(db, sid):
         sum += 1.0*r.score
         n  += 1
     if n > 0:
-        rating = ' %.1f (%i ratings)' % (sum/n, n)
+        rating = ' %.1f (%d ratings)' % (sum/n, n)
     return rating
 
 def suite_ratings(db, sid):
@@ -129,7 +129,7 @@ def suite_ratings_summary(db, sid):
         sum += 1.0*r.score
         n  += 1
     if n > 0:
-        rating = ' %.1f (%i ratings)' % (sum/n, n)
+        rating = ' %.1f (%d ratings)' % (sum/n, n)
     return rating
 
 def get_suite_spectra(db, sid):
@@ -160,7 +160,7 @@ def beamline_for_spectrum(db, s, notes=None):
         tname = notes.get('beamline', {}).get('name', None)
         if tname is not None:
             desc = "%s -- may be '%s'" % (desc, tname)
-    return '%i' % blid, desc
+    return '%d' % blid, desc
 
 def citation_for_spectrum(db, s, notes=None):
     "return id, desc for citation of a spectrum"
@@ -173,7 +173,7 @@ def citation_for_spectrum(db, s, notes=None):
     if (cid is None or cid < 0) and (notes is not None):
         cid = -1
         desc = notes.get('citation', {}).get('name', 'unknown')
-    return '%i' % cid, desc
+    return '%d' % cid, desc
 
 
 def spectra_for_beamline(db, blid):
@@ -225,7 +225,7 @@ def parse_spectrum(s, db):
 
     try:
         sample = db.filtered_query('sample', id=s.sample_id)[0]
-        sample_id = '%i'% s.sample_id
+        sample_id = '%d'% s.sample_id
         sample_name = sample.name
         sample_form = sample.formula
         sample_prep = sample.preparation
@@ -271,7 +271,7 @@ def parse_spectrum(s, db):
             'energy_units': eunits,
             'raw_comments': s.comments,
             #'comments': multiline_text(s.comments),
-            'comments': s.comments.decode("utf-8"),
+            'comments': s.comments, # .decode("utf-8"),
             'beamline_id': beamline_id,
             'beamline_desc': beamline_desc,
             'citation_id': citation_id,
@@ -283,7 +283,7 @@ def parse_spectrum(s, db):
             'sample_name':  sample_name,
             'sample_form':  sample_form,
             'sample_prep':  sample_prep,
-            'refer_id': "%i" % int(refer_id),
+            'refer_id': "%d" % int(refer_id),
             'refer_name': refer_name,
             'person_email': person.email,
             'person_name': person.name,

@@ -1,35 +1,28 @@
 <!doctype html>
-<title>XAS Spectra Library (beta)</title>
+<title>X-ray Absorption Data Library</title>
 
-<link rel=stylesheet type=text/css
-      href="{{ url_for('static', filename='style.css') }}">
+<link rel=stylesheet type=text/css href="{{ url_for('static',filename='style.css') }}">
 
-<div class=page>
-  <div class=topbar>
+<div class=topbar>
     <table cellpadding=1 width=100%>
       <tr><td width=35% padding=5 align=left>
-	  <font size=+1>XAFS Spectra Library (beta)</font></td>
-	<td width=65% align=right> <font size=-1>
-	    [ &nbsp;
+             X-ray Absorption Data Library
+          </td>
+	  <td width=65% align=right>
 	    {% if session.username == none %}
-	    <a href="{{ url_for('login') }}">log in</a>
-	    &nbsp;  | &nbsp;
-	    <a href="{{ url_for('create_account') }}">create account</a>
+	       <a href="{{ url_for('login') }}">Log In</a>
+	       <a href="{{ url_for('create_account') }}">Create Account</a>
 	    {% else %}
-	    <a href="{{ url_for('user') }}"> {{ session.username }}</a>
-	    &nbsp; |  &nbsp;
-	    <a href="{{ url_for('logout') }}">log out</a>
+	       <a href="{{ url_for('logout') }}">Log Out</a>
 	    {% endif %}
-	    &nbsp; ]
-	  </font>
+            <a href="{{ url_for('about') }}"> About </a>
 	</td>
       </tr>
     </table>
-  </div>
+</div>
 
 <div id='tab'>
   <ul id='tabmenu'>
-    <li> <a href="{{ url_for('about') }}"> About </a> </li>
     <li> <a href="{{ url_for('search') }}"> Browse By Element </a> </li>
     <li> <a href="{{ url_for('suites') }}"> Browse By Suite </a> </li>
     <li> <a href="{{ url_for('beamlines') }}"> Browse By Beamline </a> </li>
@@ -46,4 +39,3 @@
 {% endfor %}
 
 {% block body %}{% endblock %}
-</div>
