@@ -46,8 +46,10 @@ def session_clear(session):
     pass
 
 def session_init(session, db):
-    if 'username' not in session:    session['username'] = None
-    if 'person_id' not in session:   session['person_id'] = "-1"
+    if 'username' not in session:
+        session['username'] = None
+    if 'person_id' not in session:
+        session['person_id'] = "-1"
 
 def get_rating(item):
     rating = getattr(item, 'rating_summary', None)
