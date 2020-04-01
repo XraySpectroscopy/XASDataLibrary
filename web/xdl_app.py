@@ -15,7 +15,12 @@ import numpy as np
 from flask import (Flask, request, session, redirect, url_for,
                    abort, render_template, flash, Response)
 
-from werkzeug import secure_filename
+try:
+    from werkzeug.utils import secure_filename
+except ImportError:
+    from werkzeug import secure_filename
+
+
 
 from xasdb import (connect_xasdb, fmttime, valid_score, unique_name)
 from xafs_preedge import (preedge, edge_energies)
@@ -460,12 +465,12 @@ def spectrum(spid=None):
         i1 = 0
     i2 = max(np.where(energy<=e0 + 75)[0]) + 1
     xanes_en = energy[i1:i2] - e0
-    
+
     if modes !=3:
         xanes_mu = group['norm'][i1:i2]
     else:
         xanes_mu = mutrans[i1:i2]
-        
+
     xanes_ref = None
     if murefer is not None:
         rgroup = preedge(energy, murefer)
