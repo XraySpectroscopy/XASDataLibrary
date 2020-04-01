@@ -545,9 +545,9 @@ class XASDataLibrary(object):
         table = self.tables['person']
         row  = table.select(table.c.email==email).execute().fetchone()
         try:
-            algo, niter, salt, hash_stored = row.password.split('$')
+            algor, niter, salt, hash_stored = row.password.split('$')
         except:
-            algo, niter, salt, hash_stored = PW_ALGOR, PW_NITER, '_nul_', '%bad%'
+            algor, niter, salt, hash_stored = PW_ALGOR, PW_NITER, '_nul_', '%bad%'
         hash_test = b64encode(pbkdf2_hmac(algor, password.encode('utf-8'),
                                           salt.encode('utf-8'),
                                           int(niter))).decode('utf-8')
