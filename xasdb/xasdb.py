@@ -22,12 +22,10 @@ from hashlib import pbkdf2_hmac
 from sqlalchemy import MetaData, create_engine, text
 from sqlalchemy.orm import sessionmaker
 
-
 try:
     from xdifile import XDIFile
 except ImportError:
     from larch.io import XDIFile
-
 
 PW_ALGOR = 'sha512'
 PW_NITER = 200000
@@ -404,7 +402,6 @@ class XASDataLibrary(object):
         """
         table = self.tables[tablename]
         query = self.query(table)
-
         for key, val in kws.items():
             if key in table.c and val is not None:
                 query = query.filter(getattr(table.c, key)==val)
@@ -1050,7 +1047,7 @@ class XASDataLibrary(object):
         notes = json_encode(xfile.attrs)
         spectrum_name = "%s (%s)" % (sname, spectrum_name)
 
-        print(spectrum_name,modes)
+        # print(spectrum_name,modes)
         spec  = self.add_spectrum(spectrum_name, d_spacing=d_spacing,
                                   collection_date=c_date, person=person_id,
                                   beamline=beamline_name, edge=edge, element=element,
