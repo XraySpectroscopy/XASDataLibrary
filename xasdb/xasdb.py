@@ -22,7 +22,11 @@ from hashlib import pbkdf2_hmac
 from sqlalchemy import MetaData, create_engine, text
 from sqlalchemy.orm import sessionmaker
 
-from xdifile import XDIFile
+
+try:
+    from xdifile import XDIFile
+except ImportError:
+    from larch.io import XDIFile
 
 
 PW_ALGOR = 'sha512'
