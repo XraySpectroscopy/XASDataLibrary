@@ -1,9 +1,11 @@
 {% extends "layout.html" %}
 {% block body %}
 
+<div class=subtitle> User Profile: for {{email}}</div>
+<div class=body>
+
 {% if session.username is not none %}
 
-<p> <div class=subfont> User Profile: for {{email}}</div>
 
 <form action="{{ url_for('user') }}" method=post>
   <input type=hidden name=email value={{email}}>
@@ -15,8 +17,9 @@
       <tr><td><input type=submit name=button value='Update Account'></td>
     </table>
 </form>
-
+{% else %}
+You must be logged in to view user profiles
 {% endif %}
 
-
+</div>
 {% endblock %}

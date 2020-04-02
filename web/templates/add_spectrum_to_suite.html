@@ -1,6 +1,8 @@
 {% extends "layout.html" %}
 {% block body %}
-<p> <div class=subfont> Add Spectrum to Suite</div>
+
+<div class=subtitle> Add Spectrum to Suite</div>
+<div class=body>
 
 {% if session.username is not none %}
   &nbsp;   &nbsp;
@@ -19,6 +21,7 @@ Add {{ spectrum_name }} to
       {% endfor %}
     </select>
       <tr><td><input type=submit value=submit></td><td></td></tr>
-  </form>
+</form>
+</div>
 
 {% endblock %}

@@ -1,9 +1,9 @@
 {% extends "layout.html" %}
 {% block body %}
 
-<p> <div class=subfont>Facilities</div>
+<p> <div class=subtitle>Facilities</div>
 
-<div id='spectra'>
+<div class=body>
 <hr>
 <table cellspacing=3 cellpadding=1>
   <tr>
@@ -14,7 +14,7 @@
     <th> &nbsp; Country  &nbsp;</th>
   </tr>
   {% for f in facilities %}
-  <tr id="{{ loop.cycle('odd', 'even') }}">
+  <tr class={{ loop.cycle('odd', 'even') }}>
     <td>  <a href="{{ url_for('facility') }}/{{ f.id }}"> {{f.name }} </a></td>
     <td>  &nbsp; {{f.fullname}}  &nbsp;</td>
     <td>  &nbsp; {{f.laboratory}}  &nbsp; </td>

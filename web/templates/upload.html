@@ -1,7 +1,8 @@
 {% extends "layout.html" %}
 {% block body %}
 
-<p><div class=subfont> Upload XDI Spectra</div>
+<div class=subtitle> Upload XDI Spectra</div>
+<div class=body>
 
 Note: The uploaded file must
 be a valid
@@ -24,5 +25,6 @@ For example files, see
     <input type=hidden name=person value={{person_id}}>
     <input type=file name=file> <br> <input type=submit value=upload>
 </form>
+</div>
 
 {% endblock %}

@@ -1,7 +1,8 @@
 {% extends "layout.html" %}
 {% block body %}
 
-<p> <div class=subfont> Spectrum:  {{ spectrum_name }}
+<div class=subtitle> Spectrum:  {{ spectrum_name }}
+
 
 {% if session.username is not none %}
   &nbsp;   &nbsp;
@@ -19,6 +20,8 @@
 <p>
 
 </div>
+
+<div class=body>
 
 <table> <tr>
 <td><img width=550 src="data:image/png;base64,{{ fullfig|safe }}"></td>
@@ -82,5 +85,5 @@
 
 
 </table>
-
+</div>
 {% endblock %}

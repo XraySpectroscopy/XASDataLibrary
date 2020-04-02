@@ -1,6 +1,6 @@
 {% extends "layout.html" %}
 {% block body %}
-<p> <div class=subfont> Suites of Spectra
+<p> <div class=subtitle> Suites of Spectra
 
 {% if session.username is not none %}
   &nbsp;   &nbsp;
@@ -10,7 +10,7 @@
 </div>
 <p>
 
-<div id='spectra'>
+<div class=body>
 <hr>
 {% if nsuites == 0 %}
       No suites defined.
@@ -22,7 +22,7 @@
   <th width="35%" align='left'> Description</th>
   <th width="35%">  &nbsp; &nbsp; Ratings</th>
    {% for s in suites %}
-       <tr id="{{ loop.cycle('odd', 'even') }}" >
+       <tr class={{ loop.cycle('odd', 'even') }}>
        <td><a href="{{url_for('suites')}}/{{ s.id }}"> {{ s.name }}</a></td>
        <td> {{ s.nspectra }} </td>
        <td align='left'>{{s.notes|safe}} </td>
@@ -42,7 +42,7 @@
     <table>
       {% for suite in suites %}
 	  {% for spec in suite.spectra %}
-	    <tr id="{{ loop.cycle('odd', 'even') }}" >
+	    <tr class={{ loop.cycle('odd', 'even') }}>
 	    <td> &nbsp; &nbsp; <a href="{{url_for('spectrum')}}{{ spec.spectrum_id }}"> {{ spec.name }}</a></td>
 	    <td> &nbsp; {{ spec.elem_sym }}  {{ spec.edge }} edge </td>
 	    </tr>

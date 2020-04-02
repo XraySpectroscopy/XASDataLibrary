@@ -1,7 +1,8 @@
 {% extends "layout.html" %}
 {% block body %}
 
-<p><div class=subfont> Add a Beamline </div>
+<div class=subtitle> Add a Beamline </div>
+<div class=body>
 
 {% if session.username is not none %}
   &nbsp;   &nbsp;
@@ -10,8 +11,7 @@
 
 <p> A Beamline is a place where spectra have been collectd.  A beamline has
   an X-ray source, and must be associated with a Facility. Check for
-  existing beamlines
-  to avoid duplication.<p>
+  existing beamlines to avoid duplication.<p>
 
 {% if session.username is not none %}
 
@@ -35,4 +35,7 @@
 {% else %}
 You must be logged in to add a beamline
 {% endif %}
+
+</div>
+
 {% endblock %}
