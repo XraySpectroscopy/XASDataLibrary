@@ -31,6 +31,10 @@ h2              { font-size: 1.2em; }
 .subfont {font:bold 16px verdana, arial, sans-serif;color:#CC0000;}
 .subtitle {font:bold 16px verdana, arial, sans-serif;color:#CC0000;}
 
+.confirm {font-family: sans-serif; margin:5px; padding:2px;
+	  background: #FFFFFF; font:bold 14px verdana,sans-serif;}
+.confirm a, a.active {color: #444AAA;  font:bold 14px verdana,sans-serif;}
+
 pre {text-indent: 16px}
 h5 {font:bold 12px verdana,arial,sans-serif;color:#042264;}
 h4 {font:bold 14px verdana,arial,sans-serif;color:#042264;}

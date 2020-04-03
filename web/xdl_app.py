@@ -560,7 +560,7 @@ def edit_spectrum(spid=None):
         return render_template('ptable.html', error=error)
 
     opts = parse_spectrum(s, db)
-    return render_template('editspectrum.html', error=error,
+    return render_template('edit_spectrum.html', error=error,
                            elems=get_element_list(db),
                            eunits=get_energy_units_list(db),
                            edges=get_edge_list(db),
@@ -620,7 +620,7 @@ def submit_spectrum_rating(spid=None):
             return redirect(url_for('spectrum', spid=spid))
         else:
             error='score must be an integer:  0, 1, 2, 3, 4, or 5'
-            return render_template('ratespectrum.html', error=error,
+            return render_template('rate_spectrum.html', error=error,
                                    spectrum_id=spid, spectrum_name=sname,
                                    person_id=pid, score=score,
                                    review=multilne_text(review))
@@ -650,7 +650,7 @@ def rate_spectrum(spid=None):
     spid = s.id
     spname = s.name
 
-    return render_template('ratespectrum.html', error=error,
+    return render_template('rate_spectrum.html', error=error,
                            spectrum_id=spid, spectrum_name=spname,
                            person_id=pid, score=score, review=review)
 
@@ -684,7 +684,7 @@ def submit_suite_rating(spid=None):
             return redirect(url_for('suites', spid=spid))
         else:
             error='score must be an integer:  0, 1, 2, 3, 4, or 5'
-            return render_template('ratesuite.html', error=error,
+            return render_template('rate_suite.html', error=error,
                                    suite_id=stid, suite_name=stname,
                                    person_id=pid, score=score,
                                    review=multilne_text(review))
@@ -710,7 +710,7 @@ def rate_suite(stid=None):
             score = _s
             review =  _r
 
-    return render_template('ratesuite.html', error=error,
+    return render_template('rate_suite.html', error=error,
                            suite_id=stid, suite_name=stname,
                            person_id=pid, score=score, review=review)
 
@@ -872,7 +872,7 @@ def delete_suite(stid, ask=1):
 
     suite_name = db.filtered_query('suite', id=stid)[0].name
     if ask != 0:
-        return render_template('confirm_del_suite.html', stid=stid,
+        return render_template('confirm_delete_suite.html', stid=stid,
                                suite_name=suite_name)
 
     else:
@@ -947,7 +947,7 @@ def edit_sample(sid=None):
     for sdat in get_sample_list(db):
         if int(sid) == int(sdat['id']):
             opts = sdat
-    return render_template('editsample.html', sid=sid, **opts)
+    return render_template('edit_sample.html', sid=sid, **opts)
 
 @app.route('/submit_sample_edits', methods=['GET', 'POST'])
 def submit_sample_edits():
@@ -1094,7 +1094,7 @@ def list_facilities():
     session_init(session, db)
     error=None
     facilities = db.filtered_query('facility')
-    return render_template('facilities_list.html', error=error,
+    return render_template('facilities.html', error=error,
                            facilities=facilities)
 
 @app.route('/citation')
