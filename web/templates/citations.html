@@ -1,14 +1,14 @@
 {% extends "layout.html" %}
 {% block body %}
 
-<p> <div class=subfont> Citations</div>
+<div class=subtitle> Citations</div>
 
 {% if session.username is not none %}
   &nbsp;   &nbsp;
   <a href="{{ url_for('add_citation') }}"> [add a citationy] </a>
 {% endif %}
 
-<div id='spectra'>
+<div class=body>
 <hr>
 {% if ncitations == 0 %}
       No citations defined.
@@ -21,7 +21,7 @@
        <th> Journal, Volume, Pages, Year </th>
        <th> Authors</th> <th> Title</th> </tr>
    {% for c in citations %}
-       <tr id="{{ loop.cycle('odd', 'even') }}">
+       <tr class={{ loop.cycle('odd', 'even') }}>
 	 <td>  <a href="{{ url_for('citation', cd=c.id)}}"> {{c.name}} </a></td>
 	 <td>  &nbsp; {{c.nspectra}}  &nbsp;</td>
 	 <td>  &nbsp; {{c.doi}}  &nbsp; </td>

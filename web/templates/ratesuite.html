@@ -1,6 +1,8 @@
 {% extends "layout.html" %}
 {% block body %}
-  <div class=subfont> Suite: {{suite_name}} </div>
+
+<div class=subtitle> Suite: {{suite_name}} </div>
+<div class=body>
 
 {% if session.username is not none %}
 
@@ -20,4 +22,5 @@ Enter Rating (0 to 5:  0=worst, 5=best):
 {% else %}
 You must be logged in to rate a suite.
 {% endif %}
+</div>
 {% endblock %}

@@ -1,7 +1,8 @@
 {% extends "layout.html" %}
 {% block body %}
 
-<p> <div class=subfont>Edit Suite:  {{ name }}</div> <p>
+<div class=subtitle>Edit Suite:  {{ name }}</div>
+<div class=body>
 
 <form action="{{ url_for('submit_suite_edits') }}" method=post>
   <input type=hidden name=person value={{person_id}}>
@@ -22,5 +23,5 @@
      <tr><td><input type=submit value=submit></td><td></td></tr>
     </table>
 </form>
-
+</div>
 {% endblock %}

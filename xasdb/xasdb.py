@@ -21,6 +21,7 @@ from hashlib import pbkdf2_hmac
 
 from sqlalchemy import MetaData, create_engine, text
 from sqlalchemy.orm import sessionmaker
+from sqlalchemy.pool import SingletonThreadPool
 
 try:
     from xdifile import XDIFile
@@ -281,7 +282,9 @@ class XASDataLibrary(object):
 
         self.dbname = dbname
         if server.startswith('sqlit'):
-            self.engine = create_engine('sqlite:///%s' % self.dbname)
+            self.engine = create_engine('sqlite:///%s' % self.dbname,
+                                        # poolclass=SingletonThreadPool,
+                                        connect_args={'check_same_thread': False})
         else:
             conn_str= 'postgresql://%s:%s@%s:%i/%s'
             self.engine = create_engine(conn_str % (user, password, host,
