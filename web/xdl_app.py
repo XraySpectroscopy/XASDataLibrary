@@ -51,6 +51,7 @@ app = Flask(__name__, static_folder='static')
 app.config.from_object(__name__)
 app.config['MAX_CONTENT_LENGTH'] = 32 * 1024 * 1024
 
+
 db = connect_xasdb(DBNAME, **DBCONN)
 
 def allowed_file(filename):
@@ -88,7 +89,7 @@ def send_confirm_email(person, hash, style='new'):
     fullmsg   = "From: %s\r\nTo: %s\r\nSubject: %s\r\n%s\n" % (ADMIN_EMAIL, person.email,
                                                                subject, message)
     s  = smtplib.SMTP('localhost')
-    s.sendmail(ADMIN_EMAIL_from, (person.email, ), fullmsg)
+    s.sendmail(ADMIN_EMAIL, (person.email, ), fullmsg)
     s.quit()
 
 def notify_account_creation(person):
