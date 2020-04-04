@@ -800,8 +800,13 @@ def rawfile(spid, fname):
 @app.route('/about')
 @app.route('/about/')
 def about():
-    session_init(session, db)
-    return render_template('about.html')
+    return render_template('doc/about.html')
+
+@app.route('/doc')
+@app.route('/doc/')
+@app.route('/doc/<page>')
+def doc(page='index.html'):
+    return render_template('doc/%s' % page)
 
 @app.route('/suites')
 @app.route('/suites/<int:stid>')
