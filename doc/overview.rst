@@ -1,15 +1,15 @@
 
 
 Next Generation XAFS Data Library
----------------------------------
+=======================================
 
 This page is a Work-in-Progress Proposal for how to build a *Next
-Generation XAFS Data Library* The main idea is to facilitate the
-exchange XAFS specra, particularly on model compounds, such as found
-in Model Compound Libraries [#f1]_, [#f2]_, [#f3]_, [#f4]_ We will
-create a mechanism to store multiple XAFS spectra in a manner that can
-be used within dedicated applications and embedded into existing data
-processing software with minimal effort.
+Generation XAFS Data Library* The main idea is to facilitate the exchange
+XAFS specra, particularly on model compounds, such as found in Model
+Compound Libraries [#f1]_, [#f2]_, [#f3]_, [#f4]_ We will create a
+mechanism to store multiple XAFS spectra in a manner that can be used
+within dedicated applications and embedded into existing data processing
+software with minimal effort.
 
 Motivation
 ----------
@@ -19,7 +19,7 @@ XAFS. In particular, retrieving data on *Standards* or *Model Compounds*
 is a continuing need for analysis. Additionally, data taken on samples
 at different facilities and beamlines need to be compared and analyzed
 together. At this point, there is no commonly accepted data format for
-XAFS data. There have been a few attempts [#f5]_ 
+XAFS data. There have been a few attempts [#f5]_
 
 Most beamline data collection software, and most processing and analysis
 software use some variation of *ASCII Column Data Files*, in which data
@@ -132,7 +132,7 @@ data [8000, 8001.0 , 8002.0] would be encoded in json as
 
 .. sourcecode:: json
 
-   '[8000, 8001.0, 8002.0]'
+   [8000, 8001.0, 8002.0]
 
 
 This is considerably easier and lighter weight than using XML to encode
@@ -172,7 +172,7 @@ addition, it is useful to include data on Sample preparation,
 measurement conditions, and so on. In addition it is useful to be able
 to combine several spectra into a *Suite*, and to identify the people
 adding to the library. Thus the XAFS Data Library contains the following
-main tables: 
+main tables:
 
 .. table:: Main Tables
    :name:  main-tables
@@ -183,16 +183,16 @@ main tables:
     spectra               main XAS spectra, pointers to other table
     sample                Samples
     crystal_structure     Crystal structures
-    person                People 
+    person                People
     citation              Literature or Other Citations
     format                Data Formats
     suite                 Spectra Suites
-    facility              Facilities 
+    facility              Facilities
     beamline              Beamlines
-    monochromator         Monochromators 
+    monochromator         Monochromators
     mode                  Modes of Data Collection
     ligand                Ligands
-    element               names of Elements 
+    element               names of Elements
     edge                  names of x-ray Edges
     energy_units          units for energies stored for a spectra
    ===================   ==========================================
@@ -203,7 +203,7 @@ the tables are really quite simple, holding a few pieces of information.
 In addition there are a few `Join
 Tables <http://en.wikipedia.org/wiki/Junction_table>`__ to tie together
 information and allow *Many-to-One* and *Many-to-Many* relations. These
-tables include 
+tables include
 
 .. table:: Join Tables
    :name:  join-tables
@@ -213,7 +213,7 @@ tables include
    =================   ==========================================
     spectra_mode        mode(s) used for a particular spectra
     spectra_ligand      ligand(s) present in a particular spectra
-    spectra_suite       spectra contained in a suite 
+    spectra_suite       spectra contained in a suite
     spectra_rating      People's comments and scores for Spectra
     suite_rating        People's comments and scores for Suites
    =================   ==========================================
@@ -240,27 +240,27 @@ discussion should probably be focused.
    --
    create table spectra (
 		id integer primary key
-		name text not null, 
-		notes text, 
-		attributes text, 
-		file_link text, 
-		data_energy text, 
-		data_i0 text default '[1.0]', 
-		data_itrans text default '[1.0]', 
-		data_iemit text default '[1.0]', 
-		data_irefer text default '[1.0]', 
-		data_dtime_corr text default '[1.0]', 
-		calc_mu_trans text default '-log(itrans/i0)', 
-		calc_mu_emit text default '(iemit*dtime_corr/i0)', 
-		calc_mu_refer text default '-log(irefer/itrans)', 
-		notes_i0 text, 
-		notes_itrans text, 
-		notes_iemit text, 
-		notes_irefer text, 
-		temperature text, 
-		submission_date datetime, 
-		collection_date datetime, 
-		reference_used integer, 
+		name text not null,
+		notes text,
+		attributes text,
+		file_link text,
+		data_energy text,
+		data_i0 text default '[1.0]',
+		data_itrans text default '[1.0]',
+		data_iemit text default '[1.0]',
+		data_irefer text default '[1.0]',
+		data_dtime_corr text default '[1.0]',
+		calc_mu_trans text default '-log(itrans/i0)',
+		calc_mu_emit text default '(iemit*dtime_corr/i0)',
+		calc_mu_refer text default '-log(irefer/itrans)',
+		notes_i0 text,
+		notes_itrans text,
+		notes_iemit text,
+		notes_irefer text,
+		temperature text,
+		submission_date datetime,
+		collection_date datetime,
+		reference_used integer,
 		energy_units_id   -- > energy_units table
 		monochromator_id  -- > monochromator table
 		person_id         -- > person table
@@ -308,7 +308,7 @@ these are explicit while others are allowed to be put in the
     notes                   any notes on data
     attributes              JSON-encoded hash table of extra attributes
     temperature             Sample temperature during measurement
-    submission_date         date of submission 
+    submission_date         date of submission
     reference_used          Boolean (0=False, 1=True) of whether a Reference was used
     file_link               link to external file
    =====================   ===========================================================
@@ -327,22 +327,22 @@ themselves
    :name:  data-table
 
    =====================   ============================================================   ======================================
-    spectra Column Name     Description                                                    Default 
+    spectra Column Name     Description                                                    Default
    =====================   ============================================================   ======================================
     data_energy             JSON data for energy                                           --
-    data_i0                 JSON data for I_0 (Monitor)                                    1.0 
-    data_itrans             JSON data for I_transmission (I_1)                             1.0 
+    data_i0                 JSON data for I_0 (Monitor)                                    1.0
+    data_itrans             JSON data for I_transmission (I_1)                             1.0
     data_iemit              JSON data for I_emisssion (fluorescence, electron yield)       1.0
-    data_irefer             JSON data for I_trans for reference channel                    1.0 
+    data_irefer             JSON data for I_trans for reference channel                    1.0
     data_dtime_corr         JSON data for Multiplicative Deadtime Correction for I_emit    1.0
     calc_mu_trans           calculation for mu_transmission                                -log(dat_itrans/dat_i0)
     calc_mu_emit            calculation for mu_emission                                    dat_iemit * dat_dtime_corr / dat_i0
     calc_mu_refer           calculation for mu_reference                                   -log(dat_irefer/dat_itrans)
     calc_energy_ev          calculation to convert energy to eV                            None
-    notes_energy            notes on energy 
+    notes_energy            notes on energy
     notes_i0                notes on dat_i0
-    notes_itrans            notes on dat_itrans 
-    notes_iemit             notes on dat_iemit 
+    notes_itrans            notes on dat_itrans
+    notes_iemit             notes on dat_iemit
     notes_irefer            notes on dat_irefer
    =====================   ============================================================   ======================================
 
@@ -376,12 +376,12 @@ Sample Table
 
    -- sample information
    create table sample (
-      id               integer primary key, 
+      id               integer primary key,
       person_id         integer not null,    -- > person table
       crystal_structure_id  integer,        -- > crystal_structure table
       name             text,
       formula          text,
-      material_source  text,  
+      material_source  text,
       notes            text,
       attributes       text);
 
@@ -394,7 +394,7 @@ Crystal_Structure Table
 
    -- crystal information (example format = CIFS , PDB, atoms.inp)
    create table crystal (
-      id          integer primary key , 
+      id          integer primary key ,
       format      text not null,
       data        text not null,
       notes       text,
@@ -407,12 +407,12 @@ Ligand Table
 .. sourcecode:: sql
 
    create table ligand (
-      id integer primary key, 
+      id integer primary key,
       name text,
       notes text);
 
    create table spectra_ligand (
-      id       integer primary key, 
+      id       integer primary key,
       ligand   integer not null,     --> ligand table
       spectra  integer not null);    --> spectra table
 
@@ -424,7 +424,7 @@ Person Table
 .. sourcecode:: sql
 
    create table person (
-      id           integer primary key , 
+      id           integer primary key ,
       email        text not null unique,
       first_name   text not null,
       last_name    text not null,
@@ -436,7 +436,7 @@ Citation Table
 .. sourcecode:: sql
 
    create table citation (
-      id           integer primary key , 
+      id           integer primary key ,
       journal      text,
       authors      text,
       title        text,
@@ -444,7 +444,7 @@ Citation Table
       pages        text,
       year         text,
       notes        text,
-      attributes   text,  
+      attributes   text,
       doi          text);
 
 
@@ -456,10 +456,10 @@ Format Table
    -- spectra format: table of data formats
    --
    --  name='internal-json' means data is stored as json data in spectra table
-   -- 
+   --
    create table format (
-      id          integer primary key, 
-      name        text, 
+      id          integer primary key,
+      name        text,
       notes       text,
       attributes  text);
 
@@ -473,7 +473,7 @@ Suite Table
 
    --  Suite:  collection of spectra
    create table suite (
-      id          integer primary key , 
+      id          integer primary key ,
       person      integer not null,     -- > person table
       name        text not null,
       notes       text,
@@ -481,7 +481,7 @@ Suite Table
 
    -- SUITE_SPECTRA: Join table for suite and spectra
    create table spectra_suite (
-      id       integer primary key , 
+      id       integer primary key ,
       suite    integer  not null,     -- > suite table
       spectra  integer  not null);    -- > spectra table
 
@@ -500,7 +500,7 @@ should be *Amazon Scoring*: a scale of 1 to 5, with 5 being best.
 .. sourcecode:: sql
 
    create table rating (
-      id         integer primary key , 
+      id         integer primary key ,
       person     integer  not null,    -- > person table
       spectra    integer,              -- > spectra table
       suite      integer,              -- > suite table
@@ -520,17 +520,17 @@ collection modes.
 
    -- Monochromator descriptions
    create table monochomator (
-      id integer primary key, 
-      name             text, 
-      lattice_constant text, 
-      steps_per_degree text, 
+      id integer primary key,
+      name             text,
+      lattice_constant text,
+      steps_per_degree text,
       notes            text,
       attributes       text);
 
    -- XAS collection modes ('transmission', 'fluorescence', ...)
    create table collection_mode (
-      id  integer primary key, 
-      name text, 
+      id  integer primary key,
+      name text,
       notes text);
    insert into  collection_mode (name, notes) values ('transmission', 'transmission intensity through sample');
    insert into  collection_mode (name, notes) values ('fluorescence, total yield', 'total x-ray fluorescence intensity, as measured with ion chamber');
@@ -539,8 +539,8 @@ collection modes.
    insert into  collection_mode (name, notes) values ('xeol', 'visible or uv light emission');
 
    create table spectra_modes (
-      id       integer primary key , 
-      mode     integer  not null,   -- > collection_mode 
+      id       integer primary key ,
+      mode     integer  not null,   -- > collection_mode
       spectra  integer  not null);  -- > spectra table
 
 
@@ -554,22 +554,22 @@ Note that a monochromator is optional for a beamline.
 
 .. sourcecode:: sql
 
-   -- beamline description 
+   -- beamline description
    --    must have a facility
    --    a single, physical beamline can be represented many times for different configurations
    create table beamline (
-      id            integer primary key ,  
+      id            integer primary key ,
       facility      integer  not null,    --> facility table
-      name          text, 
-      xray_source   text, 
+      name          text,
+      xray_source   text,
       monochromator integer,   -- > monochromator table (optional)
       notes         text,
       attributes    text);
 
    -- facilities
    create table facility (
-      id integer primary key, 
-      name         text not null unique, 
+      id integer primary key,
+      name         text not null unique,
       notes        text,
       attributes   text);
 
@@ -583,15 +583,15 @@ edges. The schema are
 
 .. sourcecode:: sql
 
-   create table element (z integer primary key, 
-                         symbol text not null unique, 
+   create table element (z integer primary key,
+                         symbol text not null unique,
                          name text);
    insert into  element (z, symbol, name) values (1, 'H', 'hydrogen');
    insert into  element (z, symbol, name) values (2, 'He', 'helium');
- 
 
-   create table edge (id integer primary key, 
-                      name text not null unique, 
+
+   create table edge (id integer primary key,
+                      name text not null unique,
                       level text);
    insert into  edge (name,  level) values ('K', '1s');
    insert into  edge (name,  level) values ('L3', '2p3/2');
