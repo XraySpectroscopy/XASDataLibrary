@@ -30,11 +30,10 @@ from utils import (random_string, multiline_text, session_init,
 
 # sys.path.insert(0, '/home/newville/XASDB_Secrets')
 
-from xasdb_secrets import (SECRET_KEY, DBNAME, DBCONN, PORT, DEBUG,
-                           UPLOAD_FOLDER, LOCAL_ONLY, ADMIN_EMAIL, BASE_URL)
+from xasdb_config import (SECRET_KEY, DBNAME, DBCONN, PORT, DEBUG,
+                          UPLOAD_FOLDER, LOCAL_ONLY, ADMIN_EMAIL, BASE_URL)
 
 from plot import make_xafs_plot
-
 
 app = Flask('xaslib', static_folder='static')
 app.config.from_object(__name__)
