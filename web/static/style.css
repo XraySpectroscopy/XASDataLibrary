@@ -66,3 +66,17 @@ h2 {font:bold 18px verdana,arial,sans-serif;color:#044484;font-weight:bold;}
 .tabmenu a, a.active {color: #4444AA; border-right: 3px solid #777777;  padding: 1px 12px 1px 12px;}
 .tabmenu a.active {color: #CC0000; background: #FCFCCC;}
 .tabmenu a:hover {color: #CC0000; background: #FCFCCC;}
+
+.input[type=submit] {    border: 1px solid #f44c0e;    color: #fff;    background: tomato;    padding: 100px 20px;    border-radius: 3px; }
+.input[type=submit]:hover {    background: #f44c0e; }
+
+
+.formsubmit input[type=submit] {background: #FE8;
+    color: red;
+    border-style: outset;
+    border-color: #FD0;
+    height: 30px;
+    width: 100px;
+    font: bold 17px arial, sans-serif;
+    text-shadow:none;
+}
