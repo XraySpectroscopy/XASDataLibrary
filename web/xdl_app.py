@@ -1,26 +1,19 @@
 #!/usr/bin/env python
 
 import sys
-import os
 import time
 
 t0 = time.time()
 
 import smtplib
-
 import json
 import base64
 import numpy as np
+from sqlalchemy import text
 
 from flask import (Flask, request, session, redirect, url_for,
                    abort, render_template, flash, Response,
                    send_from_directory)
-
-try:
-    from werkzeug.utils import secure_filename
-except ImportError:
-    from werkzeug import secure_filename
-
 
 from xasdb import (connect_xasdb, fmttime, valid_score, unique_name)
 from xafs_preedge import (preedge, edge_energies)
@@ -31,34 +24,26 @@ from utils import (random_string, multiline_text, session_init,
                    spectra_for_suite, beamline_for_spectrum,
                    spectra_for_beamline, get_element_list,
                    get_energy_units_list, get_edge_list,
-                   get_beamline_list, get_sample_list, get_rating)
+                   get_beamline_list, get_sample_list, get_rating,
+                   allowed_filename, get_fullpath, pathjoin)
 
 
 # sys.path.insert(0, '/home/newville/XASDB_Secrets')
 
 from xasdb_secrets import (SECRET_KEY, DBNAME, DBCONN, PORT, DEBUG,
-                           UPLOAD_FOLDER, LOCAL_ONLY, ADMIN_EMAIL)
+                           UPLOAD_FOLDER, LOCAL_ONLY, ADMIN_EMAIL, BASE_URL)
 
 from plot import make_xafs_plot
 
-from sqlalchemy import text
 
-ALLOWED_EXTENSIONS = set(['XDI', 'xdi'])
-
-NAME = 'XASDB'
-
-app = Flask(__name__, static_folder='static')
+app = Flask('xaslib', static_folder='static')
 app.config.from_object(__name__)
 app.config['MAX_CONTENT_LENGTH'] = 32 * 1024 * 1024
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 
 db = connect_xasdb(DBNAME, **DBCONN)
 
-def allowed_file(filename):
-    return '.' in filename and \
-           filename.rsplit('.', 1)[1] in ALLOWED_EXTENSIONS
-
-BASE_URL = 'http://cars.uchicago.edu/ptest' # xaslib'
 
 def send_confirm_email(person, hash, style='new'):
     """send email with account confirmation/reset link"""
@@ -114,8 +99,9 @@ def notify_account_creation(person):
 
 @app.route('/favicon.ico')
 def favicon():
-    return send_from_directory(os.path.join(app.root_path, 'static'),
-                               'ixas_logo.ico', mimetype='image/vnd.microsoft.icon')
+    return send_from_directory(pathjoin(app.root_path, 'static'),
+                               'ixas_logo.ico',
+                               mimetype='image/vnd.microsoft.icon')
 
 @app.errorhandler(404)
 def page_not_found(error):
@@ -678,7 +664,6 @@ def submit_suite_rating(spid=None):
         stname = request.form['suite_name']
         stid   = int(request.form['suite'])
         pid    = int(request.form['person'])
-
         if score_is_valid:
             db.set_suite_rating(pid, stid, vscore, comments=review)
             return redirect(url_for('suites', spid=spid))
@@ -702,14 +687,15 @@ def rate_suite(stid=None):
         if st.id == stid:
             stname, notes, person_id = st.name, st.notes, st.person_id
 
-    pid = session['person_id']
-    score = 3
-    review = '<review>'
+    pid = int(session['person_id'])
+    score = '3'
+    review = ''
     for _s, _r, _d, _p in suite_ratings(db, stid):
-        if _p == pid:
-            score = _s
+        if int(_p) == pid:
+            score = '%d' % _s
             review =  _r
 
+    print("Rate Suite: -> template with score=%s, review='%s'" % (score, review))
     return render_template('rate_suite.html', error=error,
                            suite_id=stid, suite_name=stname,
                            person_id=pid, score=score, review=review)
@@ -1147,10 +1133,8 @@ def submit_upload():
         file = request.files['file']
         s = None
         file_ok = False
-        if file and allowed_file(file.filename):
-            fname = secure_filename(file.filename)
-            fullpath = os.path.abspath(os.path.join(
-                app.config['UPLOAD_FOLDER'], fname))
+        if file and allowed_filename(file.filename):
+            fullpath = get_fullpath(file, UPLOAD_FOLDER)
             try:
                 file.save(fullpath)
                 file_ok = True
@@ -1158,9 +1142,9 @@ def submit_upload():
                 pass
 
             if file_ok:
-                time.sleep(1.0)
+                time.sleep(0.50)
                 db.add_xdifile(fullpath, person=pemail, create_sample=True)
-                time.sleep(1.0)
+                time.sleep(0.50)
                 db.session.commit()
 
             s  = db.get_spectra()[-1]

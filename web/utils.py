@@ -1,4 +1,5 @@
-import os
+from os import urandom, path
+
 import json
 import time
 from base64 import b64encode
@@ -8,7 +9,25 @@ from random import randrange
 from string import printable
 from sqlalchemy import text
 
+try:
+    from werkzeug.utils import secure_filename
+except ImportError:
+    from werkzeug import secure_filename
+
 from xasdb import fmttime
+
+def pathjoin(*args):
+    return path.join(*args)
+
+def get_fullpath(fileobj, upload_folder):
+    fname = secure_filename(fileobj.filename)
+    return path.abspath(pathjoin(upload_folder, fname))
+
+def allowed_filename(filename):
+    return ('.' in filename and
+            len(filename) > 4 and
+            filename.rsplit('.', 1)[1].lower() == 'xdi')
+
 
 def make_secret_key():
     "make a secret key for web app"
@@ -36,7 +55,7 @@ def random_string(n):
     generates a random string of length n, that will match
        [a-z](n)
     """
-    return ''.join([printable[randrange(10,36)] for i in range(n)])
+    return ''.join([printable[randrange(10, 36)] for i in range(n)])
 
 def multiline_text(s):
     if '\n' in s:
