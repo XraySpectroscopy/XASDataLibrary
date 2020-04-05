@@ -84,7 +84,7 @@ def unique_name(name, namelist, maxcount=100, msg='spectrum'):
         if count > maxcount:
             msg = "a %s named '%s' already exists"  % (msg, name)
             raise XASDBException(msg)
-        name = "%s (%i)" % (basename, count)
+        name = "%s (%d)" % (basename, count)
     return name
 
 def isotime2datetime(isotime):
@@ -196,7 +196,7 @@ class Element(_BaseTable):
     def __repr__(self):
         name = self.__class__.__name__
         fields = ['%s' % getattr(self, 'symbol', 'NU'),
-                  'Z=%i' % getattr(self, 'z', 0),
+                  'Z=%d' % getattr(self, 'z', 0),
                   '%s' % getattr(self, 'name', 'UNNAMED'),
                   ]
         return "<%s(%s)>" % (name, ', '.join(fields))
@@ -230,9 +230,9 @@ class Spectrum_Rating(_BaseTable):
     "spectra rating"
     def __repr__(self):
         name = self.__class__.__name__
-        fields = ['%i' % (int(getattr(self, 'score', 0)))]
+        fields = ['%.1f' % getattr(self, 'score', 0)]
         if getattr(self, 'spectra', None) is not None:
-            fields.append('Spectrum %i' % getattr(self, 'spectra', 0))
+            fields.append('Spectrum %d' % getattr(self, 'spectra', 0))
 
         return "<%s(%s)>" % (name, ', '.join(fields))
 
@@ -241,9 +241,9 @@ class Suite_Rating(_BaseTable):
     "suite rating table"
     def __repr__(self):
         name = self.__class__.__name__
-        fields = ['%i' % (int(getattr(self, 'score', 0)))]
+        fields = ['%d' % (int(getattr(self, 'score', 0)))]
         if getattr(self, 'suite', None) is not None:
-            fields.append('Suite %i' % getattr(self, 'suite', 0))
+            fields.append('Suite %d' % getattr(self, 'suite', 0))
 
         return "<%s(%s)>" % (name, ', '.join(fields))
 
@@ -286,7 +286,7 @@ class XASDataLibrary(object):
                                         # poolclass=SingletonThreadPool,
                                         connect_args={'check_same_thread': False})
         else:
-            conn_str= 'postgresql://%s:%s@%s:%i/%s'
+            conn_str= 'postgresql://%s:%s@%s:%d/%s'
             self.engine = create_engine(conn_str % (user, password, host,
                                                     port, dbname))
 
@@ -375,7 +375,7 @@ class XASDataLibrary(object):
             # none found -- insert
             table.insert().execute(key=key, value=value)
         else:
-            table.update(whereclause="key='%s'" % key).execute(value=value)
+            table.update(whereclause=text("key='%s'" % key)).execute(value=value)
 
     def set_mod_time(self):
         """set modify_date in info table"""
@@ -568,7 +568,7 @@ class XASDataLibrary(object):
         returns hash, which must be used to confirm person"""
         hash = b64encode(os.urandom(24)).replace('/', '_')
         table = self.tables['person']
-        table.update(whereclause="email='%s'" % email).execute(confirmed=hash)
+        table.update(whereclause=text("email='%s'" % email)).execute(confirmed=hash)
         return hash
 
     def person_test_confirmhash(self, email, hash):
@@ -586,7 +586,7 @@ class XASDataLibrary(object):
         row = tab.select(tab.c.email==email).execute().fetchone()
         is_confirmed = False
         if hash == row.confirmed:
-            tab.update(whereclause="email='%s'" % email).execute(confirmed='true')
+            tab.update(whereclause=text("email='%s'" % email)).execute(confirmed='true')
             is_confirmed = True
         return is_confirmed
 
@@ -640,7 +640,7 @@ class XASDataLibrary(object):
         self.session.commit()
 
     def set_suite_rating(self, person_id, suite_id, score, comments=None):
-        """add a score to a suite:"""
+        """add a rating score to a suite:"""
         kws = {'score': valid_score(score),
                'person_id': person_id, 'suite_id': suite_id,
                'datetime': datetime.now(), 'comments': ''}
@@ -656,7 +656,7 @@ class XASDataLibrary(object):
         if rowid is None:
             tab.insert().execute(**kws)
         else:
-            tab.update(whereclause="id='%i'" % rowid).execute(**kws)
+            tab.update(whereclause=text("id='%d'" % rowid)).execute(**kws)
         self.session.commit()
 
         sum = 0
@@ -666,10 +666,10 @@ class XASDataLibrary(object):
 
         rating = 'No ratings'
         if len(rows) > 0:
-            rating = '%.1f (%i ratings)' % (sum/len(rows), len(rows))
+            rating = '%.1f (%d ratings)' % (sum/len(rows), len(rows))
 
         stab = self.tables['suite']
-        stab.update(whereclause="id='%i'" % suite_id).execute(rating_summary=rating)
+        stab.update(whereclause=text("id='%d'" % suite_id)).execute(rating_summary=rating)
 
 
     def set_spectrum_rating(self, person_id, spectrum_id, score, comments=None):
@@ -691,7 +691,7 @@ class XASDataLibrary(object):
         if rowid is None:
             tab.insert().execute(**kws)
         else:
-            tab.update(whereclause="id='%i'" % rowid).execute(**kws)
+            tab.update(whereclause=text("id='%d'" % rowid)).execute(**kws)
 
         self.session.commit()
 
@@ -702,10 +702,10 @@ class XASDataLibrary(object):
 
         rating = 'No ratings'
         if len(rows) > 0:
-            rating = '%.1f (%i ratings)' % (sum/len(rows), len(rows))
+            rating = '%.1f (%d ratings)' % (sum/len(rows), len(rows))
 
         stab = self.tables['spectrum']
-        stab.update(whereclause="id='%i'" % spectrum_id).execute(rating_summary=rating)
+        stab.update(whereclause=text("id='%d'" % spectrum_id)).execute(rating_summary=rating)
 
 
 
@@ -716,8 +716,8 @@ class XASDataLibrary(object):
         """
         table = self.tables[tablename]
         if use_id:
-            where ="id='%i'" % where
-        table.update(whereclause=where).execute(**kws)
+            where = "id='%d'" % where
+        table.update(whereclause=text(where)).execute(**kws)
         self.set_mod_time()
         self.session.commit()
 
@@ -1028,7 +1028,7 @@ class XASDataLibrary(object):
             stab = self.tables['sample']
             sample = self.query(stab).filter(stab.c.name==sname).all()
             # if len(sample) > 1:
-                # print( 'Warning: multiple (%i) samples name %s' % (len(sample), sname))
+                # print( 'Warning: multiple (%d) samples name %s' % (len(sample), sname))
             sample = sample[0]
 
             sample_id = sample.id
@@ -1071,3 +1071,4 @@ class XASDataLibrary(object):
             mode_id = modes_map.get(mode, None)
             if mode_id is not None:
                 self.set_spectrum_mode(spec.id, mode_id)
+        return spec.id
