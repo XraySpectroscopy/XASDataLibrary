@@ -1,0 +1,556 @@
+{
+   "ALBA" : {
+      "CLAESS" : {
+         "facility" : "ALBA",
+         "flux" : "1 x 10^10 - 1 x 10^13",
+         "name" : "",
+         "purpose" : "XAS & XES",
+         "range" : "2.4 - 65",
+         "size" : "0.05 x 0.2\r to 0.4 x 8",
+         "status" : "Operational",
+         "website" : "http://www.cells.es/en/beamlines/bl22-claess"
+      }
+   },
+   "ANKA" : {
+      "INE" : {
+         "facility" : "ANKA",
+         "flux" : "5 X 10^11",
+         "name" : "",
+         "purpose" : "Actinide research, microXAS, GIXAFS",
+         "range" : "2.1 - 26",
+         "size" : "0.5 x 0.5",
+         "status" : "Operational",
+         "website" : "http://www.anka.kit.edu/981.php"
+      },
+      "SUL-X" : {
+         "facility" : "ANKA",
+         "flux" : "10^10",
+         "name" : "",
+         "purpose" : "microXAS, environmental science,\r GIXAFS",
+         "range" : "1.5 - 22",
+         "size" : "0.01 x 0.01",
+         "status" : "Operational",
+         "website" : "http://www.anka.kit.edu/1629.php"
+      },
+      "XAS" : {
+         "facility" : "ANKA",
+         "flux" : "10^10",
+         "name" : "",
+         "purpose" : "General purpose",
+         "range" : "2.4 - 25",
+         "size" : "1 x 8",
+         "status" : "Operational",
+         "website" : "http://www.anka.kit.edu/992.php"
+      }
+   },
+   "DAFNE" : {
+      "DXR-1" : {
+         "facility" : "DAFNE",
+         "flux" : "10^9-10^10",
+         "name" : "",
+         "purpose" : "General purpose",
+         "range" : "1.3 - 3",
+         "size" : "1 x 10",
+         "status" : "Operational",
+         "website" : "http://web.infn.it/Dafne_Light/index.php/beamlines/dxr1"
+      }
+   },
+   "Diamond" : {
+      "B18" : {
+         "facility" : "Diamond",
+         "flux" : "5 x 10^11",
+         "name" : "Core XAFS",
+         "purpose" : "General purpose XAFS",
+         "range" : "2 - 35",
+         "size" : ".2 x .25",
+         "status" : "Optimization mode",
+         "website" : "http://www.diamond.ac.uk/Home/Beamlines/B18.html"
+      },
+      "I06" : {
+         "facility" : "Diamond",
+         "flux" : ".",
+         "name" : "Nanoscience",
+         "purpose" : "MicroXAS, PES microscopy, XMCD, XMLD",
+         "range" : "0.1 - 2",
+         "size" : "3 x 10 µm2",
+         "status" : "Operational",
+         "website" : "http://www.diamond.ac.uk/Home/Beamlines/I06.html"
+      },
+      "I09" : {
+         "facility" : "Diamond",
+         "flux" : "",
+         "name" : "Surface & Interface Structural Analysis",
+         "purpose" : "",
+         "range" : "0.15 - 2.1 or 2 - 20",
+         "size" : "",
+         "status" : "Completion date Oct. 2012",
+         "website" : ""
+      },
+      "I10" : {
+         "facility" : "Diamond",
+         "flux" : "",
+         "name" : "BLADE",
+         "purpose" : "XMCD, XAFS",
+         "range" : "0.4 - 2",
+         "size" : "",
+         "status" : "Optimization mode",
+         "website" : "http://www.maxlab.lu.se/beamline/max-ii/i1011/i1011.html"
+      },
+      "I18" : {
+         "facility" : "Diamond",
+         "flux" : "4 x 10^12",
+         "name" : "Microfocus spectroscopy",
+         "purpose" : "MicroXAS",
+         "range" : "2 - 20",
+         "size" : "1.5 x 6 µm2",
+         "status" : "Operational",
+         "website" : "http://www.diamond.ac.uk/Home/Beamlines/I18.html"
+      },
+      "I20" : {
+         "facility" : "Diamond",
+         "flux" : "10^12 or 10^12",
+         "name" : "LOLA: X-ray spectroscopy",
+         "purpose" : "XAFS and XES or Dispersive XAFS",
+         "range" : "4 - 34 (scanning branch) or 6 - 26 (dispersive branch)",
+         "size" : "0.35 x 0.4 or 70 µm x 60 µm",
+         "status" : "Commissioning",
+         "website" : "http://www.diamond.ac.uk/Home/Beamlines/I20.html"
+      }
+   },
+   "ELETTRA" : {
+      "ALOISA" : {
+         "facility" : "ELETTRA",
+         "flux" : "10^12",
+         "name" : "",
+         "purpose" : "XANES,\r surface science,\r dilute elements",
+         "range" : "0.12 - 2\r\r 3 - 8",
+         "size" : "0.02 X 0.15",
+         "status" : "Operational",
+         "website" : "http://www.elettra.trieste.it/experiments/beamlines/aloisa"
+      },
+      "BACH" : {
+         "facility" : "ELETTRA",
+         "flux" : "10^11",
+         "name" : "",
+         "purpose" : "XMCD, XANES, surface science",
+         "range" : "0.035 - 1.6",
+         "size" : "0.01 X 0.2",
+         "status" : "Operational",
+         "website" : "http://www.elettra.trieste.it/experiments/beamlines/bach"
+      },
+      "BEAR" : {
+         "facility" : "ELETTRA",
+         "flux" : "5 X10^9 - 5 X10^10",
+         "name" : "",
+         "purpose" : "XAFS, reflectivity, surface science",
+         "range" : "0.004 - 1.4",
+         "size" : "0.03 X 0.1",
+         "status" : "Operational",
+         "website" : "http://www.elettra.trieste.it/experiments/beamlines/bear"
+      },
+      "POLAR" : {
+         "facility" : "ELETTRA",
+         "flux" : "10^12",
+         "name" : "",
+         "purpose" : "XMCD, PES, surface science",
+         "range" : "0.005 - 1",
+         "size" : "slits X 0.5",
+         "status" : "Operational",
+         "website" : "http://www.elettra.trieste.it/experiments/beamlines/polar"
+      },
+      "TWINMIC" : {
+         "facility" : "ELETTRA",
+         "flux" : ".",
+         "name" : "",
+         "purpose" : "microXAS",
+         "range" : "0.25 - 2",
+         "size" : "< 50 nm spot",
+         "status" : "Operational",
+         "website" : "http://www.elettra.trieste.it/experiments/beamlines/twinmic"
+      },
+      "XAFS" : {
+         "facility" : "ELETTRA",
+         "flux" : ".",
+         "name" : "",
+         "purpose" : "General purpose",
+         "range" : "2.3 - 25",
+         "size" : ".",
+         "status" : "Operational",
+         "website" : "http://www.elettra.trieste.it/experiments/beamlines/xafs"
+      }
+   },
+   "ESRF" : {
+      "BM2" : {
+         "facility" : "ESRF",
+         "flux" : "10^10 - 10^11",
+         "name" : "D2AM",
+         "purpose" : "DAFS",
+         "range" : "5 - 25",
+         "size" : "0.3 x 0.3",
+         "status" : "Operational",
+         "website" : "http://www.esrf.eu/UsersAndScience/Experiments/Beamlines/beamline-snapshot?BeamlineID=BM23"
+      },
+      "BM20" : {
+         "facility" : "ESRF",
+         "flux" : ".",
+         "name" : "ROBL",
+         "purpose" : "General purpose XAFS, dilute elements, radiochemistry",
+         "range" : "6 - 33",
+         "size" : ".",
+         "status" : "Operational",
+         "website" : "http://www.esrf.eu/UsersAndScience/Experiments/CRG/BM20/"
+      },
+      "BM23" : {
+         "facility" : "ESRF",
+         "flux" : ".",
+         "name" : "",
+         "purpose" : "General purpose XAFS",
+         "range" : "5 - 75",
+         "size" : ".",
+         "status" : "Operational",
+         "website" : "http://www.esrf.eu/UsersAndScience/Experiments/Beamlines/beamline-snapshot?BeamlineID=BM23"
+      },
+      "BM25A" : {
+         "facility" : "ESRF",
+         "flux" : ".",
+         "name" : "SPLINE",
+         "purpose" : "General purpose XAFS",
+         "range" : "5 - 45",
+         "size" : ".",
+         "status" : "Operational",
+         "website" : "http://www.esrf.eu/UsersAndScience/Experiments/CRG/BM25/"
+      },
+      "BM26A" : {
+         "facility" : "ESRF",
+         "flux" : "10^12",
+         "name" : "DUBBLE",
+         "purpose" : "General purpose XAFS, especially associated wtih diffraction techniques; catalysis",
+         "range" : "4 - 40",
+         "size" : "0.3 x 2",
+         "status" : "Operational",
+         "website" : "http://www.esrf.eu/UsersAndScience/Experiments/CRG/BM26/"
+      },
+      "BM30B" : {
+         "facility" : "ESRF",
+         "flux" : ".",
+         "name" : "FAME",
+         "purpose" : "General purpose XAFS, environmental sciences, high dilutions",
+         "range" : "4 - 40",
+         "size" : ".",
+         "status" : "Operational",
+         "website" : "http://www.esrf.fr/exp_facilities/BM30B/BM30Bb-en.html%20"
+      },
+      "BM8" : {
+         "facility" : "ESRF",
+         "flux" : "10^10 - 10^11",
+         "name" : "GILDA",
+         "purpose" : "General purpose XAFS, dilute elements, grazing incidence (Refle-XAFS)",
+         "range" : "5 - 85",
+         "size" : "1 x 2",
+         "status" : "Operational",
+         "website" : "http://www.esrf.fr/exp_facilities/BM8/handbook/control.html"
+      },
+      "ID08" : {
+         "facility" : "ESRF",
+         "flux" : ".",
+         "name" : "",
+         "purpose" : "XMCD, XES",
+         "range" : "0.4 - 1.5",
+         "size" : "< 1 x 1",
+         "status" : "Operational",
+         "website" : "http://www.esrf.eu/UsersAndScience/Experiments/ElectStructMagn/ID08/"
+      },
+      "ID12" : {
+         "facility" : "ESRF",
+         "flux" : ".",
+         "name" : "",
+         "purpose" : "XMCD",
+         "range" : "2.0 - 20",
+         "size" : ".",
+         "status" : "Operational",
+         "website" : "http://www.esrf.eu/UsersAndScience/Experiments/ElectStructMagn/ID12/"
+      },
+      "ID21" : {
+         "facility" : "ESRF",
+         "flux" : ".",
+         "name" : "",
+         "purpose" : "microXANES, microscopy",
+         "range" : "0.2 - 8\r\r 2.5 - 8",
+         "size" : ".",
+         "status" : "Operational",
+         "website" : "http://www.esrf.fr/exp_facilities/ID21/handbook.htm"
+      },
+      "ID22" : {
+         "facility" : "ESRF",
+         "flux" : "10^12",
+         "name" : "",
+         "purpose" : "microXANES, microfluorescence",
+         "range" : "6.5 - 18",
+         "size" : "3.5 mm x\r 1.5 mm",
+         "status" : "Operational",
+         "website" : "http://www.esrf.fr/UsersAndScience/Experiments/Imaging/ID22/"
+      },
+      "ID24" : {
+         "facility" : "ESRF",
+         "flux" : ".",
+         "name" : "",
+         "purpose" : "Dispersive XAFS, time resolved, XMCD, high pressure",
+         "range" : "5 - 28",
+         "size" : "0.015 x 0.015",
+         "status" : "Operational",
+         "website" : "http://www.esrf.eu/UsersAndScience/Experiments/ElectStructMagn/ID24"
+      },
+      "ID26" : {
+         "facility" : "ESRF",
+         "flux" : "> 10^13",
+         "name" : "",
+         "purpose" : "Ultra high dilutions, RIXS, XES",
+         "range" : "2.4 - 27",
+         "size" : ".",
+         "status" : "Operational",
+         "website" : "http://www.esrf.fr/UsersAndScience/Experiments/HRRS/ID26/"
+      }
+   },
+   "HZB" : {
+      "BAMLine" : {
+         "facility" : "HZB",
+         "flux" : "10^12",
+         "name" : "BAMLine",
+         "purpose" : "Materials science",
+         "range" : "5 - 10^0",
+         "size" : "0.15 x 0.25 minimum",
+         "status" : "Operational",
+         "website" : "http://www.helmholtz-berlin.de/pubbin/igama_output?modus=einzel&sprache=en&gid=1658&typoid=37587"
+      },
+      "KMC-2" : {
+         "facility" : "HZB",
+         "flux" : "10^7 - 10^10",
+         "name" : "XANES",
+         "purpose" : "General purpose, microXAS",
+         "range" : "5 - 14",
+         "size" : "0.6 x 0.25 to 5 x 5µm2",
+         "status" : "Operational",
+         "website" : "http://www.bessy.de/bit/bit_show_object.html.php?i_bit_id_object=160"
+      },
+      "U41_PGM" : {
+         "facility" : "HZB",
+         "flux" : "10^13",
+         "name" : "FLUORO",
+         "purpose" : "Fluorescence soft x-ray XAFS",
+         "range" : "0.17 - 1.8",
+         "size" : "12 x 23 µm2",
+         "status" : "Operational",
+         "website" : "http://www.bessy.de/bit/bit_show_object.html.php?i_bit_id_object=28"
+      },
+      "U49_PGM" : {
+         "facility" : "HZB",
+         "flux" : "10^11 - 10^13",
+         "name" : "SMART",
+         "purpose" : "surface science, XANES",
+         "range" : "0.1 - 1.8",
+         "size" : ".",
+         "status" : "Operational",
+         "website" : "http://www.bessy.de/bit/bit_show_object.html.php?i_bit_id_object=152"
+      },
+      "UE46_PGM-1" : {
+         "facility" : "HZB",
+         "flux" : "10^12",
+         "name" : "7-Tesla High field",
+         "purpose" : "XMCD",
+         "range" : "0.121 - 1.7",
+         "size" : "16 x 64 µm2 to 1.7 x 1.2 mm2",
+         "status" : "Operational",
+         "website" : "http://www.bessy.de/bit/bit_show_object.html.php?i_bit_id_object=24"
+      },
+      "UE56-1_PGM-A" : {
+         "facility" : "HZB",
+         "flux" : "2.5 X10^11",
+         "name" : "Femto-s-Pump-Probe",
+         "purpose" : "XMCD, time-resolved studies",
+         "range" : "0.06 - 1.3",
+         "size" : ".",
+         "status" : "Operational",
+         "website" : "http://www.bessy.de/bit/bit_show_object.html.php?i_bit_id_object=26"
+      },
+      "mySpot" : {
+         "facility" : "HZB",
+         "flux" : "10^12 - 10^13",
+         "name" : "mySpot",
+         "purpose" : "microXAS",
+         "range" : "2 - 30",
+         "size" : "15 to 300 µm diameter",
+         "status" : "Operational",
+         "website" : "http://www.bessy.de/bit/bit_show_object.html.php?i_bit_id_object=204"
+      }
+   },
+   "ISA" : {
+      "SX700" : {
+         "facility" : "ISA",
+         "flux" : "10^10",
+         "name" : "",
+         "purpose" : "Surface science, XANES",
+         "range" : "0.02 - 700",
+         "size" : "",
+         "status" : "Operational",
+         "website" : "http://www.isa.au.dk/facilities/astrid/beamlines/sx700/sx700.asp"
+      }
+   },
+   "MAX IV" : {
+      "D1011" : {
+         "facility" : "MAX IV",
+         "flux" : "10^10 - 10^11",
+         "name" : "",
+         "purpose" : "Surface science, XMCD, PES,",
+         "range" : "0.03 - 1.5",
+         "size" : "1 x 3",
+         "status" : "Operational",
+         "website" : "http://www.maxlab.lu.se/beamline/max-ii/d1011/d1011.html"
+      },
+      "I1011" : {
+         "facility" : "MAX IV",
+         "flux" : "10^12",
+         "name" : "",
+         "purpose" : "Surface science, XMCD",
+         "range" : "0.25 - 1.5",
+         "size" : "0.1 x 0.4",
+         "status" : "Commissioning",
+         "website" : "http://www.maxlab.lu.se/beamline/max-ii/i1011/i1011.html"
+      },
+      "I311" : {
+         "facility" : "MAX IV",
+         "flux" : "10^11 - 10^13",
+         "name" : "",
+         "purpose" : "Surface science, PES",
+         "range" : "0.03 - 1.5",
+         "size" : ".",
+         "status" : "Operational",
+         "website" : "http://www.maxlab.lu.se/beamline/max-ii/i311/i311.html"
+      },
+      "I411" : {
+         "facility" : "MAX IV",
+         "flux" : "10^11 - 10^13",
+         "name" : "",
+         "purpose" : "Surface science, PES, liquid and gaseous samples",
+         "range" : "0.05 - 1.5",
+         "size" : ".",
+         "status" : "Operational",
+         "website" : "http://www.maxlab.lu.se/beamline/max-ii/i411/i411.html"
+      },
+      "I511" : {
+         "facility" : "MAX IV",
+         "flux" : "10^11 - 10^13\r (1220 l/mm grating)",
+         "name" : "",
+         "purpose" : "Surface science, PES, XES, liquid and gaseous samples",
+         "range" : "0.05 - 1.5",
+         "size" : ".",
+         "status" : "Operational",
+         "website" : "http://www.maxlab.lu.se/beamline/max-ii/i511/i511.html"
+      },
+      "I811" : {
+         "facility" : "MAX IV",
+         "flux" : "10^11 - 10^12",
+         "name" : "",
+         "purpose" : "General purpose XAFS",
+         "range" : "2.3 - 20",
+         "size" : "0.5 x 0.5",
+         "status" : "Operational",
+         "website" : "http://www.maxlab.lu.se/beamline/max-ii/i811/i811.html"
+      }
+   },
+   "PETRA III" : {
+      "P04" : {
+         "facility" : "PETRA III",
+         "flux" : "10^12",
+         "name" : "Variable polarization XUV",
+         "purpose" : "XMCD",
+         "range" : "0.25 - 3",
+         "size" : "10 µm x 10 µm",
+         "status" : "Operational",
+         "website" : "http://hasylab.desy.de/facilities/petra_iii/beamlines/p04_xuv_beamline/index_eng.html"
+      },
+      "P06" : {
+         "facility" : "PETRA III",
+         "flux" : "10^7- 10^11",
+         "name" : "Hard X-ray micro-nano probe",
+         "purpose" : "micro - nano XAFS",
+         "range" : "2.4 - 50",
+         "size" : "80 nm - 250 nm",
+         "status" : "Operational",
+         "website" : "http://hasylab.desy.de/facilities/petra_iii/beamlines/p06_hard_x_ray_micro_probe/index_eng.html"
+      }
+   },
+   "SLS" : {
+      "MicroXAS" : {
+         "facility" : "SLS",
+         "flux" : "2 x 10^12\r (400 mA)",
+         "name" : "",
+         "purpose" : "MicroXAS, time resolved XAS",
+         "range" : "5 - 20",
+         "size" : "1 x 1 µm2",
+         "status" : "Open for expert users",
+         "website" : "http://sls.web.psi.ch/view.php/beamlines/mxas/index.html"
+      },
+      "SuperXAS" : {
+         "facility" : "SLS",
+         "flux" : "1 x 10^12\r (400 mA)",
+         "name" : "",
+         "purpose" : "General purpose XAFS, QEXAFS",
+         "range" : "4.5 - 35",
+         "size" : "0.1 x 0.1\r to 0.5 x 5",
+         "status" : "Operational",
+         "website" : "http://sls.web.psi.ch/view.php/beamlines/superxas/index.html"
+      }
+   },
+   "SOLEIL" : {
+      "DIFFABS" : {
+         "facility" : "SOLEIL",
+         "flux" : "6 x 10^12",
+         "name" : "",
+         "purpose" : "XAFS, XRD in materials science",
+         "range" : "3 - 23",
+         "size" : "0.05 x 0.25",
+         "status" : "Operational",
+         "website" : "http://www.synchrotron-soleil.fr/portal/page/portal/Recherche/LignesLumiere/DIFFABS"
+      },
+      "LUCIA" : {
+         "facility" : "SOLEIL",
+         "flux" : "2 x 10^11",
+         "name" : "",
+         "purpose" : "microXAS",
+         "range" : "0.8 - 8",
+         "size" : "4 x 5 µm2",
+         "status" : "Operational",
+         "website" : "http://www.synchrotron-soleil.fr/portal/page/portal/Recherche/LignesLumiere/LUCIA"
+      },
+      "ODE" : {
+         "facility" : "SOLEIL",
+         "flux" : "10^12",
+         "name" : "",
+         "purpose" : "Dispersive geometry, XMCD, high pressure, time resolved expt's",
+         "range" : "3.5 - 25",
+         "size" : "0.04 x 0.04",
+         "status" : "Operational",
+         "website" : "http://www.synchrotron-soleil.fr/portal/page/portal/Recherche/LignesLumiere/ODE"
+      },
+      "PROXIMA 1" : {
+         "facility" : "SOLEIL",
+         "flux" : "5 x 10^12",
+         "name" : "",
+         "purpose" : "Protein crystallography, BioXAS",
+         "range" : "5 - 15",
+         "size" : "0.2 x 0.2",
+         "status" : "Operational",
+         "website" : "http://www.synchrotron-soleil.fr/portal/page/portal/Recherche/LignesLumiere/PROXIMA1"
+      },
+      "SAMBA" : {
+         "facility" : "SOLEIL",
+         "flux" : "2 x 10^11 - 5 x 10^12",
+         "name" : "",
+         "purpose" : "General purpose XAFS, surfaces",
+         "range" : "4 - 40",
+         "size" : "0.2 x 0.2",
+         "status" : "Operational",
+         "website" : "http://www.synchrotron-soleil.fr/portal/page/portal/Recherche/LignesLumiere/SAMBA"
+      }
+   }
+}
