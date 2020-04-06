@@ -494,15 +494,6 @@ def  make_newdb(dbname, server= 'sqlite', user='',
     for name, notes in InitialData.modes:
         mode.insert().execute(name=name, notes=notes)
 
-    xl = None
-    for d in InitialData.beamlines:
-        if xl is None: xl = len(d)
-        if xl == len(d):
-            print(" OK  ", d[0])
-        else:
-            print(" -->  ", d[0], len(d))
-
-
     for name, country, city, fullname, lab in InitialData.facilities:
         facility.insert().execute(name=name, country=country,
                                   fullname=fullname, laboratory=lab)
@@ -513,7 +504,6 @@ def  make_newdb(dbname, server= 'sqlite', user='',
         f = facility.select(facility.c.name == fac_name).execute().fetchall()
         if len(f) > 0:
             fac_id = f[0].id
-        print(name, fac_name, fac_id, nickname, erange)
         beamline.insert().execute(name=name, nickname=nickname, energy_range=erange, facility_id=fac_id)
 
     now = datetime.isoformat(datetime.now())
