@@ -438,7 +438,6 @@ def spectrum(spid=None):
     elif eunits.startswith('deg'):
         print('Need to convert angle to energy')
 
-
     if modes != 7:
         group = preedge(energy, mutrans)
         e0 = group['e0']
@@ -619,7 +618,7 @@ def rate_spectrum(spid=None):
         error='must be logged in to rate spectrum'
         return redirect(url_for('spectrum', spid=spid, error=error))
 
-    pid = session['person_id']
+    pid = int(session['person_id'])
     s  = db.get_spectrum(spid)
     if s is None:
         error = 'Could not find Spectrum #%i' % spid
@@ -627,9 +626,9 @@ def rate_spectrum(spid=None):
 
     opts = parse_spectrum(s, db)
     score = 3
-    review = '<review>'
+    review = ''
     for _s, _r, _d, _p in spectrum_ratings(db, spid):
-        if int(_p) == int(pid):
+        if int(_p) == pid:
             score = _s
             review =  _r
     spid = s.id
@@ -694,7 +693,6 @@ def rate_suite(stid=None):
             score = '%d' % _s
             review =  _r
 
-    print("Rate Suite: -> template with score=%s, review='%s'" % (score, review))
     return render_template('rate_suite.html', error=error,
                            suite_id=stid, suite_name=stname,
                            person_id=pid, score=score, review=review)
