@@ -48,7 +48,7 @@ def NamedTable(tablename, metadata, keyid='id', nameid='name',
     return Table(tablename, metadata, *args)
 
 class InitialData:
-    info    = [["version", "1.1.0"],
+    info    = [["version", "1.2.0"],
                ["create_date", '<now>'],
                ["modify_date", '<now>']]
 
@@ -57,9 +57,11 @@ class InitialData:
                ["degrees","angle in degrees for Bragg monochromator.  Needs mono d_spacing"] ]
 
     modes = [["transmission", "transmission intensity through sample"],
-             ["fluorescence", "X-ray fluorescence, no further details"],
+             ["fluorescence", "X-ray fluorescence (non-specified)"],
              ["fluorescence, total yield", "X-ray fluorescence, no energy analysis"],
              ["fluorescence, energy analyzed", "X-ray fluorescence with an energy dispersive detector"],
+             ["herfd", "high-energy resolution fluorescence, with a crystal analyzer"],
+             ["raman", "non-resonant X-ray inelastic scattering"]
              ["xeol", "visible or uv light emission"],
              ["electron emission", "emitted electrons from sample"],
              ["fluorescence, unitstep", "X-ray fluorescence, normalized"]]
@@ -76,7 +78,7 @@ class InitialData:
                   ['NSLS-II', 'US',       'Upton',             'NY', 'National Synchrotron Light Source II', 'BNL'],
                   ['SLRI',    'Thailand', 'Nakhon Ratchasima', '',   'Synchrotron Light Research Institute', 'Siam Photon']
                   ]
-      
+
     beamlines = [['13ID',   'GSECARS 13-ID',   'APS Undulator A',         6],
                  ['13BM',   'GSECARS 13-BM',   'APS bending magnet',      6],
                  ['10ID',   'MR-CAT  10-ID',   'APS Undulator A',         6],
@@ -263,6 +265,7 @@ def  make_newdb(dbname, server= 'sqlite', user='',
                                 StrCol('ifluor_stderr'),
                                 StrCol('irefer_stderr'),
                                 StrCol('energy_notes'),
+                                StrCol('energy_resolution'),
                                 StrCol('i0_notes'),
                                 StrCol('itrans_notes'),
                                 StrCol('ifluor_notes'),
@@ -278,6 +281,7 @@ def  make_newdb(dbname, server= 'sqlite', user='',
                                 PointerCol('person'),
                                 PointerCol('edge'),
                                 PointerCol('element', keyid='z'),
+                                PointerCol('mode'),
                                 PointerCol('sample'),
                                 PointerCol('beamline'),
                                 PointerCol('citation'),
@@ -287,8 +291,7 @@ def  make_newdb(dbname, server= 'sqlite', user='',
 
     suite = NamedTable('suite', metadata,
                        cols=[PointerCol('person'),
-                             StrCol('rating_summary'),
-                             ])
+                             StrCol('rating_summary')])
 
     beamline = NamedTable('beamline', metadata,
                           cols=[StrCol('xray_source'),
