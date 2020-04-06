@@ -61,46 +61,196 @@ class InitialData:
              ["fluorescence, total yield", "X-ray fluorescence, no energy analysis"],
              ["fluorescence, energy analyzed", "X-ray fluorescence with an energy dispersive detector"],
              ["herfd", "high-energy resolution fluorescence, with a crystal analyzer"],
-             ["raman", "non-resonant X-ray inelastic scattering"]
+             ["raman", "non-resonant X-ray inelastic scattering"],
              ["xeol", "visible or uv light emission"],
              ["electron emission", "emitted electrons from sample"],
              ["fluorescence, unitstep", "X-ray fluorescence, normalized"]]
 
-    facilities = [['SSRL',    'US',       'Palo Alto',         'CA', 'Stanford Synchrotron Radiation Laboratory', 'SLAC'],
-                  ['SRS',     'UK',       'Cheshire',          '',   'Synchrotron Radiation Source', 'Daresbury Laboratory'],
-                  ['NSLS',    'US',       'Upton',             'NY', 'National Synchrotron Light Source', 'BNL'],
-                  ['PF',      'Japan',    'Tsukuba',           '',   'Photon Factory', 'KEK'],
-                  ['ESRF',    'France',   'Grenoble',          '',   'European Synchrotron Radiation Facility', ''],
-                  ['APS',     'US',       'Argonne',           'IL', 'Advanced Photon Source', 'ANL'],
-                  ['ALS',     'US',       'Berkeley',          'CA', 'Advanced Light Source', 'LBNL'],
-                  ['DLS',     'UK',       'Didcot',            '',   'Diamond Light Source', ''],
-                  ['SOLEIL',  'France',   'GIF-sur-YVETTE',    '',   'Synchrotron SOLEIL', '' ],
-                  ['NSLS-II', 'US',       'Upton',             'NY', 'National Synchrotron Light Source II', 'BNL'],
-                  ['SLRI',    'Thailand', 'Nakhon Ratchasima', '',   'Synchrotron Light Research Institute', 'Siam Photon']
-                  ]
+    facilities = [
+        ['SSRL',     'US',       'Palo Alto',          'Stanford Synchrotron Radiation Laboratory', 'SLAC'],
+        ['NSLS',     'US',       'Upton',              'National Synchrotron Light Source', 'BNL'],
+        ['NSLS-II',  'US',       'Upton',              'National Synchrotron Light Source II', 'BNL'],
+        ['APS',      'US',       'Argonne',            'Advanced Photon Source', 'ANL'],
+        ['ALS',      'US',       'Berkeley',           'Advanced Light Source', 'LBNL'],
+        ['CAMD',     'US',       'Baton Rouge',        'Center for Advanced Microstructures and Devices', 'Louisiana State U'],
+        ['CHESS',    'US',       'Ithaca',             'Cornell High Energy Synchrotron Source', 'Cornell U'],
+        ['CLS',      'Canada',   'Saskatoon',          'Canadian Light Source', 'U Saskatchewan'],
+        ['LNLS',     'Brasil',   'Campinas',           'Advanced Light Source', 'CNPEM'],
 
-    beamlines = [['13ID',   'GSECARS 13-ID',   'APS Undulator A',         6],
-                 ['13BM',   'GSECARS 13-BM',   'APS bending magnet',      6],
-                 ['10ID',   'MR-CAT  10-ID',   'APS Undulator A',         6],
-                 ['10BM',   'MR-CAT  10-BM',   'APS Bending Magnet',      6],
-                 ['20ID',   'PNC/XOR 20-ID',   'APS Undulator A',         6],
-                 ['20BM',   'PNC/XOR 20-BM',   'APS Bending Magnet',      6],
-                 ['X11A',   'NSLS X11-A',      'NSLS bending magnet',     3],
-                 ['X23A2',  'NSLS X23-A2',     'NSLS bending magnet',     3],
-                 ['6BM',    'NSLS-II BMM',     'NSLS-II 3-pole wiggle',  10],
-                 ['7BM',    'NSLS-II QAS',     'NSLS-II 3-pole wiggle',  10],
-                 ['8BM',    'NSLS-II TES',     'NSLS-II 3-pole wiggle',  10],
-                 ['8ID',    'NSLS-II ISS',     'NSLS-II damping wiggle', 10],
-                 ['23ID-2', 'NSLS-II IOS',     'NSLS-II undulator',      10],
-                 ['BL8',    'SLRI Beamline 8', 'bend magnet',            11],
-                 ['BL 2-3', 'SSRL, 2-3',       'SSRL Bending Magnet',     1],
-                 ['BL 4-3', 'SSRL, 4-3',       'SSRL Wiggler',            1],
-                 ['BL 10-2','SSRL, 10-2',      'SSRL Wiggler',            1],
-                 ['BL 11-2','SSRL, 11-2',      'SSRL Wiggler',            1],
-                 ['BL 14-3','SSRL, 14-3',      'SSRL Bending Magnet',     1],
-                 ['BL 7-3', 'SSRL, 7-3',       'SSRL Wiggler',            1],
-                 ['BL 9-3', 'SSRL, 9-3',       'SSRL Wiggler',            1],
-                 ['BL 4-1', 'SSRL, 4-1',       'SSRL Wiggler',            1]]
+        ['DLS',      'UK',       'Didcot',             'Diamond Light Source', ''],
+        ['SRS',      'UK',       'Cheshire',           'Synchrotron Radiation Source', 'Daresbury Laboratory'],
+
+        ['ESRF',     'France',   'Grenoble',           'European Synchrotron Radiation Facility', ''],
+        ['SOLEIL',   'France',   'GIF-sur-YVETTE',     'Synchrotron SOLEIL', '' ],
+        ['ALBA',     'Spain',    'Barcelona',          'ALBA', ''],
+        ['ANKA',     'Germany',  'Karlsruhe',          'Angstromquelle Karlsruhe', ''],
+        ['BESSY II', 'Germany',  'Berlin',             '', ''],
+        ['DAFNE',    'Italy',    'Frascati',           'DAFNE-Light','  Laboratori Nazionali di Frascati'],
+        ['DELSY',    'Russia',   'Dubna',              'Dubna Electron Synchrotron', ''],
+        ['SLS',      'Switzerland', 'Villingen',       'Swiss Light Source', ''],
+        ['ELETTRA',  'Italy',    'Trieste',            'Elettra Synchrotron Light Laboratory', ''],
+        ['PETRA III','Germany',  'Hamburg',            'DESY', ''],
+        ['PETRA IV', 'Germany',  'Hamburg',            'DESY', ''],
+        ['MAX IV',   'Sweden',   'Lund',               '', ''],
+        ['SLRI',     'Thailand', 'Nakhon Ratchasima',  'Synchrotron Light Research Institute', 'Siam Photon'],
+        ['PF',       'Japan',    'Tsukuba',            'Photon Factory', 'KEK'],
+        ['AS',       'Australia', 'Victoria',          'Australia Synchrotron', ''],
+        ['SESAME,',  'Jordan',   'Allaan',             'Synchrotron-light for Experimental Science and Applications in the Middle East', ''],
+        ['INDUS-2',  'India',    'Indore',             '', ''],
+        ['BSRF',     'China',    'Beijing',            'Beijing Synchrotron Radiation Facility', ''],
+        ['NSRL',     'China',    'Hfei',               'National Synchrotron Radiation Laboratory', ''],
+        ['NSRR',     'Taiwan',   'Hsinshu',            'National Synchrotron Radiation Research Center', ''],
+        ['PLS',      'Korea',    'Pohang',             'Pohang Light Source',  ''],
+        ['SPring-8', 'Japan',    'Hyogo',              'SPring-8',  ''],
+        ['SSLS',     'Singapore',  '',                 'Singapore Synchrotron Light Source',  ''],
+        ['SSRC',     'Russia',   'Novosibirsk',        'Siberian Synchrotron Research Centre', ''],
+        ['SSRF',     'China',    'Shangai',            'Shanghai Synchrotron Radiation Facility',  ''],
+        ]
+
+
+    beamlines = [
+        ['ALS 10.3.2', 'ALS', 'ALS 10.3.2', '2.5 - 17'],
+        ['APS 10-BM-B', 'APS', 'APS 10-BM-B', '3 - 200'],
+        ['APS 10-ID-B', 'APS', 'MRCAT', '4.3- 90'],
+        ['APS 11-ID-D', 'APS', 'APS 11-ID-D', '4 - 40'],
+        ['APS 12-BM-B', 'APS', 'APS 12-BM-B', '4.5 - 24'],
+        ['APS 13-BM-D', 'APS', 'GSECARS', '4.5 - 70'],
+        ['APS 13-ID-C,D', 'APS', 'GSECARS', '4 - 45'],
+        ['APS 13-ID-E', 'APS', 'GSECARS', '2.4 - 26'],
+        ['APS 16-BM-D', 'APS', 'APS 16-BM-D', '6 - 70'],
+        ['APS 18-ID-D', 'APS', 'BIOCAT', '3.5 - 35'],
+        ['APS 2-ID-D', 'APS', 'APS 2-ID-D', '5 - 30'],
+        ['APS 20-BM-B', 'APS', 'APS 20-BM-B', '2.7- 30'],
+        ['APS 20-ID-B,C', 'APS', 'APS 20-ID-B,C', '3 - 50'],
+        ['APS 4-ID-C', 'APS', 'APS 4-ID-C', '0.5 - 3'],
+        ['APS 4-ID-D', 'APS', 'APS 4-ID-D', '0.5 - 50'],
+        ['APS 5-BM-D', 'APS', 'DNDCAT', '4.5 - 80'],
+        ['APS 7-ID-B,C,D', 'APS', 'APS 7-ID-B,C,D', '6 - 21'],
+        ['APS 9-BM-B,C', 'APS', 'APS 9-BM-B,C', '2.1 - 23'],
+
+        ['CAMD DCM', 'CAMD', 'CAMD DCM', '0.9 - 20'],
+        ['CLS HXMA', 'CLS', 'CLS HXMA', '5 - 40'],
+        ['CLS REIXS', 'CLS', 'CLS REIXS', '0.08 - 2'],
+        ['CLS SGM', 'CLS', 'CLS SGM', '0.25 - 2'],
+        ['CLS SXRMB', 'CLS', 'CLS SXRMB', '1.7 - 10'],
+        ['CLS VESPERS', 'CLS', 'CLS VESPERS', '6 - 30'],
+        ['LNLS DXAS', 'LNLS', 'LNLS DXAS', '5 - 14'],
+        ['LNLS XAFS1', 'LNLS', 'LNLS XAFS1', '4 -24'],
+        ['LNLS XAFS2', 'LNLS', 'LNLS XAFS2', '4 - 17'],
+
+        ['NSLS X10C', 'NSLS', 'NSLS X10C', '4 - 24'],
+        ['NSLS X11A', 'NSLS', 'NSLS X11A', '4.5 - 40'],
+        ['NSLS X11B', 'NSLS', 'NSLS X11B', '5 - 23'],
+        ['NSLS X15B', 'NSLS', 'NSLS X15B', '1.2 - 8'],
+        ['NSLS X18B', 'NSLS', 'NSLS X18B', '4.8 - 40'],
+        ['NSLS X19A', 'NSLS', 'NSLS X19A', '2.1 - 17'],
+        ['NSLS X23A2', 'NSLS', 'NSLS X23A2', '4.7 - 30'],
+        ['NSLS X24A', 'NSLS', 'NSLS X24A', '1.8 - 6'],
+        ['NSLS X3B', 'NSLS', 'NSLS X3B', '3.8-13.3'],
+
+        ['SSRL 10-1', 'SSRL', 'SSRL 10-1', '0.25 - 1.2'],
+        ['SSRL 10-2a', 'SSRL', 'SSRL 10-2a', '4.5 - 45'],
+        ['SSRL 11-2', 'SSRL', 'SSRL 11-2', '4.5 - 37'],
+        ['SSRL 13-2', 'SSRL', 'SSRL 13-2', '0.25 - 1.1'],
+        ['SSRL 14-3', 'SSRL', 'SSRL 14-3', '2 - 5'],
+        ['SSRL 2-3', 'SSRL', 'SSRL 2-3', '4.5 - 24'],
+        ['SSRL 4-1', 'SSRL', 'SSRL 4-1', '5.5 - 38'],
+        ['SSRL 4-3', 'SSRL', 'SSRL 4-3', '2.4 - 14'],
+        ['SSRL 6-2a', 'SSRL', 'SSRL 6-2a', '2.3 - 17'],
+        ['SSRL 7-3', 'SSRL', 'SSRL 7-3', '4.6 - 37'],
+        ['SSRL 8-2', 'SSRL', 'SSRL 8-2', '0.1 - 1.3'],
+        ['SSRL 9-3', 'SSRL', 'SSRL 9-3', '5 - 30'],
+
+        ['AS XAS', 'AS', 'AS XAS', '4 - 50'],
+
+        ['BSRF 4W1B', 'BSRF', 'BSRF 4W1B', '4 - 22'],
+
+        ['NSRL U19', 'NSRL', 'NSRL U19', '0.01 - 0.2'],
+        ['NSRL U7C', 'NSRL', 'NSRL U7C', '4 - 13'],
+        ['NSRRC BL01C1', 'NSRRC', 'NSRRC BL01C1', '6 - 33'],
+        ['NSRRC BL16A1', 'NSRRC', 'NSRRC BL16A1', '2 - 8'],
+        ['NSRRC BL17C1', 'NSRRC', 'NSRRC BL17C1', '4.8 - 14.2'],
+
+        ['PF AR-NW10A', 'PF', 'PF AR-NW10A', '8 - 42'],
+        ['PF AR-NW14A', 'PF', 'PF AR-NW14A', '5 - 20'],
+        ['PF AR-NW2A', 'PF', 'PF AR-NW2A', '5 - 20'],
+        ['PF BL-11A', 'PF', 'PF BL-11A', '0.07 - 1.9'],
+        ['PF BL-11B', 'PF', 'PF BL-11B', '1.7 - 5'],
+        ['PF BL-12C', 'PF', 'PF BL-12C', '6 - 23'],
+        ['PF BL-27B', 'PF', 'PF BL-27B', '4 - 20'],
+        ['PF BL-2A', 'PF', 'PF BL-2A', '1.7 - 5'],
+        ['PF BL-2C', 'PF', 'PF BL-2C', '0.25 - 1.5'],
+        ['PF BL-4A', 'PF', 'PF BL-4A', '4 - 20'],
+        ['PF BL-7A', 'PF', 'PF BL-7A', '0.1 - 1.5'],
+        ['PF BL-7C', 'PF', 'PF BL-7C', '4 - 20'],
+        ['PF BL-9A', 'PF', 'PF BL-9A', '2.1 - 15'],
+        ['PF BL-9C', 'PF', 'PF BL-9C', '4 - 23'],
+
+        ['PLS 10B', 'PLS', 'PLS 10B', '3.5 - 16'],
+        ['PLS 3C1', 'PLS', 'PLS 3C1', '2.3 - 32'],
+        ['PLS 7C1', 'PLS', 'PLS 7C1', '5 - 30'],
+        ['PLS 8C1', 'PLS', 'PLS 8C1', '3 - 22'],
+
+        ['SESAME A1', 'SESAME', 'SESAME A1', '3 - 30'],
+        ['SLRI BL4', 'SLRI', 'SLRI BL4', '2.5 - 8'],
+        ['SLRI BL8', 'SLRI', 'SLRI BL8', '1.25 - 10'],
+        ['SPRING-8 BL01B1', 'SPRING-8', 'SPRING-8 BL01B1', '3.8 - 113'],
+        ['SPRING-8 BL14B2', 'SPRING-8', 'SPRING-8 BL14B2', '3.8 - 72'],
+        ['SPRING-8 BL28B2', 'SPRING-8', 'SPRING-8 BL28B2', '8 - 40'],
+        ['SPRING-8 BL37XU', 'SPRING-8', 'SPRING-8 BL37XU', '5 - 37'],
+        ['SPRING-8 BL39XU', 'SPRING-8', 'SPRING-8 BL39XU', '5 - 38'],
+        ['SPRING-8 BL40XU', 'SPRING-8', 'SPRING-8 BL40XU', '8 - 17'],
+
+        ['SSLS XDD', 'SSLS', 'SSLS XDD', '2.3 - 10'],
+        ['SSRC EXAFS', 'SSRC', 'SSRC EXAFS', '.'],
+        ['SSRC Soft EXAFS', 'SSRC', 'SSRC Soft EXAFS', '.'],
+        ['SSRF BL08U1-A', 'SSRF', 'SSRF BL08U1-A', '0.25 - 2'],
+        ['SSRF BL14W1', 'SSRF', 'SSRF BL14W1', '3.5 - 50'],
+
+        ['ALBA CLAESS', 'ALBA', 'ALBA CLAESS', '2.4 - 65'],
+        ['ANKA INE', 'ANKA', 'ANKA INE', '2.1 - 26'],
+        ['ANKA SUL-X', 'ANKA', 'ANKA SUL-X', '1.5 - 22'],
+        ['ANKA XAS', 'ANKA', 'ANKA XAS', '2.4 - 25'],
+        ['DAFNE DXR-1', 'DAFNE', 'DAFNE DXR-1', '1.3 - 3'],
+        ['Diamond B18', 'Diamond', 'Core XAFS', '2 - 35'],
+        ['Diamond I06', 'Diamond', 'Nanoscience', '0.1 - 2'],
+        ['Diamond I09', 'Diamond', 'Surface & Interface Structural Analysis', '0.15 - 2.1 or 2 - 20'],
+        ['Diamond I10', 'Diamond', 'BLADE', '0.4 - 2'],
+        ['Diamond I18', 'Diamond', 'Microfocus spectroscopy', '2 - 20'],
+        ['Diamond I20', 'Diamond', 'LOLA: X-ray spectroscopy', '4 - 34'],
+
+        ['ELETTRA ALOISA', 'ELETTRA', 'ELETTRA ALOISA', '0.12 - 2'],
+        ['ELETTRA BACH', 'ELETTRA', 'ELETTRA BACH', '0.035 - 1.6'],
+        ['ELETTRA BEAR', 'ELETTRA', 'ELETTRA BEAR', '0.004 - 1.4'],
+        ['ELETTRA POLAR', 'ELETTRA', 'ELETTRA POLAR', '0.005 - 1'],
+        ['ELETTRA TWINMIC', 'ELETTRA', 'ELETTRA TWINMIC', '0.25 - 2'],
+        ['ELETTRA XAFS', 'ELETTRA', 'ELETTRA XAFS', '2.3 - 25'],
+        ['ESRF BM2', 'ESRF', 'D2AM', '5 - 25'],
+        ['ESRF BM20', 'ESRF', 'ROBL', '6 - 33'],
+        ['ESRF BM23', 'ESRF', 'ESRF BM23', '5 - 75'],
+        ['ESRF BM25A', 'ESRF', 'SPLINE', '5 - 45'],
+        ['ESRF BM26A', 'ESRF', 'DUBBLE', '4 - 40'],
+        ['ESRF BM30B', 'ESRF', 'FAME', '4 - 40'],
+        ['ESRF BM8', 'ESRF', 'GILDA', '5 - 85'],
+        ['ESRF ID08', 'ESRF', 'ESRF ID08', '0.4 - 1.5'],
+        ['ESRF ID12', 'ESRF', 'ESRF ID12', '2.0 - 20'],
+        ['ESRF ID21', 'ESRF', 'ESRF ID21', '0.2 - 8'],
+        ['ESRF ID22', 'ESRF', 'ESRF ID22', '6.5 - 18'],
+        ['ESRF ID24', 'ESRF', 'ESRF ID24', '5 - 28'],
+        ['ESRF ID26', 'ESRF', 'ESRF ID26', '2.4 - 27'],
+
+        ['MAX IV I811', 'MAX IV', 'MAX IV I811', '2.3 - 20'],
+        ['PETRA III P04', 'PETRA III', 'Variable polarization XUV', '0.25 - 3'],
+        ['PETRA III P06', 'PETRA III', 'Hard X-ray micro-nano probe', '2.4 - 50'],
+        ['SLS MicroXAS', 'SLS', 'SLS MicroXAS', '5 - 20'],
+        ['SLS SuperXAS', 'SLS', 'SLS SuperXAS', '4.5 - 35'],
+        ['SOLEIL DIFFABS', 'SOLEIL', 'SOLEIL DIFFABS', '3 - 23'],
+        ['SOLEIL LUCIA', 'SOLEIL', 'SOLEIL LUCIA', '0.8 - 8'],
+        ['SOLEIL ODE', 'SOLEIL', 'SOLEIL ODE', '3.5 - 25'],
+        ['SOLEIL PROXIMA 1', 'SOLEIL', 'SOLEIL PROXIMA 1', '5 - 15'],
+        ['SOLEIL SAMBA', 'SOLEIL', 'SOLEIL SAMBA', '4 - 40'],
+        ]
+
 
     edges = [["K",    "1s"],
              ["L3",   "2p3/2"],
@@ -171,7 +321,7 @@ def  make_newdb(dbname, server= 'sqlite', user='',
     'sqlite' or 'postgresql'
     """
     if server.startswith('sqlit'):
-        engine = create_engine('sqlite:///%s' % (dbname),
+        engine = create_engine('sqlite:///{:s}'.format(dbname),
                                poolclass=SingletonThreadPool)
     else: # postgres
         conn_str= 'postgresql://%s:%s@%s:%i/%s'
@@ -182,7 +332,7 @@ def  make_newdb(dbname, server= 'sqlite', user='',
         # first we check if dbname exists....
         query = "select datname from pg_database"
         pg_engine = create_engine(conn_str % (user, password,
-                                       host, port, 'postgres'))
+                                              host, port, 'postgres'))
         conn = pg_engine.connect()
         conn.execution_options(autocommit=True)
         conn.execute("commit")
@@ -212,7 +362,6 @@ def  make_newdb(dbname, server= 'sqlite', user='',
                           cols=[StrCol('fullname'),
                                 StrCol('laboratory'),
                                 StrCol('city'),
-                                StrCol('region'),
                                 StrCol('country', nullable=False)])
 
     element = NamedTable('element', metadata, keyid='z', notes=False,
@@ -295,6 +444,8 @@ def  make_newdb(dbname, server= 'sqlite', user='',
 
     beamline = NamedTable('beamline', metadata,
                           cols=[StrCol('xray_source'),
+                                StrCol('nickname'),
+                                StrCol('energy_range'),
                                 PointerCol('facility')] )
 
     spectrum_rating = Table('spectrum_rating', metadata,
@@ -343,15 +494,27 @@ def  make_newdb(dbname, server= 'sqlite', user='',
     for name, notes in InitialData.modes:
         mode.insert().execute(name=name, notes=notes)
 
-    for name, country, city, region, fullname, lab in InitialData.facilities:
-        facility.insert().execute(name=name, country=country, city=city,
-                                  region=region, fullname=fullname,
-                                  laboratory=lab)
+    xl = None
+    for d in InitialData.beamlines:
+        if xl is None: xl = len(d)
+        if xl == len(d):
+            print(" OK  ", d[0])
+        else:
+            print(" -->  ", d[0], len(d))
 
-    for name, notes, xray_source, fac_id in InitialData.beamlines:
-        beamline.insert().execute(name=name, notes=notes,
-                                  xray_source=xray_source,
-                                  facility_id=fac_id)
+
+    for name, country, city, fullname, lab in InitialData.facilities:
+        facility.insert().execute(name=name, country=country,
+                                  fullname=fullname, laboratory=lab)
+
+    session.commit()
+    for name, fac_name, nickname, erange in InitialData.beamlines:
+        fac_id = None
+        f = facility.select(facility.c.name == fac_name).execute().fetchall()
+        if len(f) > 0:
+            fac_id = f[0].id
+        print(name, fac_name, fac_id, nickname, erange)
+        beamline.insert().execute(name=name, nickname=nickname, energy_range=erange, facility_id=fac_id)
 
     now = datetime.isoformat(datetime.now())
     for key, value in InitialData.info:
