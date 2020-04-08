@@ -777,8 +777,8 @@ class XASDataLibrary(object):
         if bline is not None:
             kws['beamline_id'] = bline.id
         kws['person_id'] = person
-        kws['edge_id'] = self.get_edge(edge.decode("utf-8")).id
-        kws['element_z'] = self.get_element(element.decode("utf-8")).z
+        kws['edge_id'] = self.get_edge(edge).id
+        kws['element_z'] = self.get_element(element).z
         kws['energy_units_id'] = self.filtered_query('energy_units', name=energy_units)[0].id
 
         kws['sample_id'] = sample
@@ -832,7 +832,6 @@ class XASDataLibrary(object):
             if lname in b.name.lower() or lname in b.nickname.lower():
                 return b
         return None
-
 
 
     def get_suite_ratings(self, spectrum):
@@ -917,7 +916,6 @@ class XASDataLibrary(object):
         return query.execute().fetchall()
 
     def add_xdifile(self, fname, person=None, create_sample=True, **kws):
-
         try:
             fh  = open(fname, 'r')
             filetext  = fh.read()
@@ -946,12 +944,12 @@ class XASDataLibrary(object):
         except:
             c_date = 'collection date unknown'
         d_spacing = xfile.dspacing
-        edge      = xfile.edge
-        element   = xfile.element
         energy    = xfile.energy
+        edge      = xfile.edge.decode('utf-8')
+        element   = xfile.element.decode('utf-8')
         comments  = ''
         if hasattr(xfile, 'comments'):
-            comments = xfile.comments
+            comments = xfile.comments.decode('utf-8')
 
         if hasattr(xfile, 'i0'):
             i0 = xfile.i0
@@ -1021,7 +1019,7 @@ class XASDataLibrary(object):
         sample_id = None
         if create_sample:
             try:
-                sattrs  = xfile.attrs['sample']
+                sattrs  = xfile.attrs['sample'].decode('utf-8')
             except:
                 sattrs = {'name': 'unknown',
                           'prep': 'unknown'}
@@ -1029,20 +1027,20 @@ class XASDataLibrary(object):
             formula, prep, notes = '', '', ''
             notes = "sample for '%s', uploaded %s" % (fname, now)
             if 'name' in sattrs:
-                sname = sattrs.pop('name')
+                sample_name = sattrs.pop('name')
             if 'prep' in sattrs:
                 prep = sattrs.pop('prep')
             if 'formula' in sattrs:
                 formula = sattrs.pop('formula')
             if len(sattrs) > 0:
                 notes  = '%s\n%s' % (notes, json_encode(sattrs))
-            self.add_sample(sname, person_id, formula=formula,
+            self.add_sample(sample_name, person_id, formula=formula,
                             preparation=prep, notes=notes)
 
             stab = self.tables['sample']
-            sample = self.query(stab).filter(stab.c.name==sname).all()
+            sample = self.query(stab).filter(stab.c.name==sample_name).all()
             # if len(sample) > 1:
-                # print( 'Warning: multiple (%d) samples name %s' % (len(sample), sname))
+                # print( 'Warning: multiple (%d) samples name %s' % (len(sample), sample_name))
             sample = sample[0]
 
             sample_id = sample.id
@@ -1062,7 +1060,8 @@ class XASDataLibrary(object):
         beamline = None
         beamline_name  = xfile.attrs['beamline']['name']
         notes = json_encode(xfile.attrs)
-        spectrum_name = "%s (%s)" % (sname, spectrum_name)
+        if sample_name not in (None, 'unknown'):
+            spectrum_name = "%s [%s]" % (spectrum_name, sample_name)
 
         # print(spectrum_name,modes)
         spec  = self.add_spectrum(spectrum_name, d_spacing=d_spacing,
@@ -1085,4 +1084,5 @@ class XASDataLibrary(object):
             mode_id = modes_map.get(mode, None)
             if mode_id is not None:
                 self.set_spectrum_mode(spec.id, mode_id)
+        print("### Add spectrum done")
         return spec.id
