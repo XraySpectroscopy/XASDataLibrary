@@ -18,14 +18,12 @@
       No beamlines defined.
 {% else %}
    <table cellspacing=3 cellpadding=1>
-    <tr><th>Abbreviation</th>
-<th> # Spectra</ht><th>Name</th><th> X-ray Source</th><th>Facility Location</th></tr>
+    <tr><th>Beamline</th>
+<th> # Spectra</th> <th>Facility Location</th></tr>
    {% for bl in beamlines %}
        <tr class={{ loop.cycle('odd', 'even') }}>
-       <td>  <a href="{{ url_for('beamline', blid=bl.id)}}"> {{bl.name}} at {{bl.fac_name}} </a></td>
+       <td>  <a href="{{ url_for('beamline', blid=bl.id)}}"> {{bl.name}} </a></td>
 	<td>  &nbsp; {{bl.nspectra}}  &nbsp;</td>
-	<td>  &nbsp; {{bl.notes}}  &nbsp; </td>
-	<td>  &nbsp; {{bl.xray_source}}  &nbsp; </td>
 	<td>  &nbsp; {{bl.fac_loc}}</td></tr>
    {% endfor %}
    </table>
