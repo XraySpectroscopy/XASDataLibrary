@@ -98,13 +98,15 @@ def get_beamline_list(db, orderby='id'):
     l = []
     for r in db.get_beamlines(orderby=orderby):
         fac  = db.filtered_query('facility', id=r.facility_id)[0]
+        loc = fac.country
+        if fac.city is not None and len(fac.city) > 0:
+            loc = "%s, %s" % (fac.city, fac.country)
         l.append({'id': '%d' % r.id,
                   'name': r.name,
                   'notes': r.notes,
                   'xray_source': r.xray_source,
-                  'fac_id': '%d' % r.facility_id,
                   'fac_name': fac.name,
-                  'fac_loc': "%s %s, %s" % (fac.city, fac.region, fac.country)})
+                  'fac_loc': loc})
     return l
 
 def get_sample_list(db):
@@ -289,8 +291,8 @@ def parse_spectrum(s, db):
             'edge': edge.name,
             'energy_units': eunits,
             'raw_comments': s.comments,
-            #'comments': multiline_text(s.comments),
-            'comments': s.comments, # .decode("utf-8"),
+            'comments': multiline_text(s.comments),
+            # 'comments': s.comments, # .decode("utf-8"),
             'beamline_id': beamline_id,
             'beamline_desc': beamline_desc,
             'citation_id': citation_id,
