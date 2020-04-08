@@ -95,11 +95,11 @@ class InitialData:
         ['SLRI',     'Thailand', 'Nakhon Ratchasima',  'Synchrotron Light Research Institute', 'Siam Photon'],
         ['PF',       'Japan',    'Tsukuba',            'Photon Factory', 'KEK'],
         ['AS',       'Australia', 'Victoria',          'Australia Synchrotron', ''],
-        ['SESAME,',  'Jordan',   'Allaan',             'Synchrotron-light for Experimental Science and Applications in the Middle East', ''],
+        ['SESAME',  'Jordan',   'Allaan',             'Synchrotron-light for Experimental Science and Applications in the Middle East', ''],
         ['INDUS-2',  'India',    'Indore',             '', ''],
         ['BSRF',     'China',    'Beijing',            'Beijing Synchrotron Radiation Facility', ''],
         ['NSRL',     'China',    'Hfei',               'National Synchrotron Radiation Laboratory', ''],
-        ['NSRR',     'Taiwan',   'Hsinshu',            'National Synchrotron Radiation Research Center', ''],
+        ['NSRRC',    'Taiwan',   'Hsinshu',            'National Synchrotron Radiation Research Center', ''],
         ['PLS',      'Korea',    'Pohang',             'Pohang Light Source',  ''],
         ['SPring-8', 'Japan',    'Hyogo',              'SPring-8',  ''],
         ['SSLS',     'Singapore',  '',                 'Singapore Synchrotron Light Source',  ''],
@@ -190,16 +190,15 @@ class InitialData:
         ['PLS 3C1', 'PLS', 'PLS 3C1', '2.3 - 32'],
         ['PLS 7C1', 'PLS', 'PLS 7C1', '5 - 30'],
         ['PLS 8C1', 'PLS', 'PLS 8C1', '3 - 22'],
-
         ['SESAME A1', 'SESAME', 'SESAME A1', '3 - 30'],
         ['SLRI BL4', 'SLRI', 'SLRI BL4', '2.5 - 8'],
         ['SLRI BL8', 'SLRI', 'SLRI BL8', '1.25 - 10'],
-        ['SPRING-8 BL01B1', 'SPRING-8', 'SPRING-8 BL01B1', '3.8 - 113'],
-        ['SPRING-8 BL14B2', 'SPRING-8', 'SPRING-8 BL14B2', '3.8 - 72'],
-        ['SPRING-8 BL28B2', 'SPRING-8', 'SPRING-8 BL28B2', '8 - 40'],
-        ['SPRING-8 BL37XU', 'SPRING-8', 'SPRING-8 BL37XU', '5 - 37'],
-        ['SPRING-8 BL39XU', 'SPRING-8', 'SPRING-8 BL39XU', '5 - 38'],
-        ['SPRING-8 BL40XU', 'SPRING-8', 'SPRING-8 BL40XU', '8 - 17'],
+        ['SPring-8 BL01B1', 'SPring-8', 'SPring-8 BL01B1', '3.8 - 113'],
+        ['SPring-8 BL14B2', 'SPring-8', 'SPring-8 BL14B2', '3.8 - 72'],
+        ['SPring-8 BL28B2', 'SPring-8', 'SPring-8 BL28B2', '8 - 40'],
+        ['SPring-8 BL37XU', 'SPring-8', 'SPring-8 BL37XU', '5 - 37'],
+        ['SPring-8 BL39XU', 'SPring-8', 'SPring-8 BL39XU', '5 - 38'],
+        ['SPring-8 BL40XU', 'SPring-8', 'SPring-8 BL40XU', '8 - 17'],
 
         ['SSLS XDD', 'SSLS', 'SSLS XDD', '2.3 - 10'],
         ['SSRC EXAFS', 'SSRC', 'SSRC EXAFS', '.'],
@@ -212,12 +211,12 @@ class InitialData:
         ['ANKA SUL-X', 'ANKA', 'ANKA SUL-X', '1.5 - 22'],
         ['ANKA XAS', 'ANKA', 'ANKA XAS', '2.4 - 25'],
         ['DAFNE DXR-1', 'DAFNE', 'DAFNE DXR-1', '1.3 - 3'],
-        ['Diamond B18', 'Diamond', 'Core XAFS', '2 - 35'],
-        ['Diamond I06', 'Diamond', 'Nanoscience', '0.1 - 2'],
-        ['Diamond I09', 'Diamond', 'Surface & Interface Structural Analysis', '0.15 - 2.1 or 2 - 20'],
-        ['Diamond I10', 'Diamond', 'BLADE', '0.4 - 2'],
-        ['Diamond I18', 'Diamond', 'Microfocus spectroscopy', '2 - 20'],
-        ['Diamond I20', 'Diamond', 'LOLA: X-ray spectroscopy', '4 - 34'],
+        ['DLS B18', 'DLS', 'Core XAFS', '2 - 35'],
+        ['DLS I06', 'DLS', 'Nanoscience', '0.1 - 2'],
+        ['DLS I09', 'DLS', 'Surface & Interface Structural Analysis', '0.15 - 2.1 or 2 - 20'],
+        ['DLS I10', 'DLS', 'BLADE', '0.4 - 2'],
+        ['DLS I18', 'DLS', 'Microfocus spectroscopy', '2 - 20'],
+        ['DLS I20', 'DLS', 'LOLA: X-ray spectroscopy', '4 - 34'],
 
         ['ELETTRA ALOISA', 'ELETTRA', 'ELETTRA ALOISA', '0.12 - 2'],
         ['ELETTRA BACH', 'ELETTRA', 'ELETTRA BACH', '0.035 - 1.6'],
@@ -495,16 +494,17 @@ def  make_newdb(dbname, server= 'sqlite', user='',
         mode.insert().execute(name=name, notes=notes)
 
     for name, country, city, fullname, lab in InitialData.facilities:
-        facility.insert().execute(name=name, country=country,
+        facility.insert().execute(name=name, country=country, city=city,
                                   fullname=fullname, laboratory=lab)
 
     session.commit()
     for name, fac_name, nickname, erange in InitialData.beamlines:
         fac_id = None
-        f = facility.select(facility.c.name == fac_name).execute().fetchall()
+        f = facility.select(facility.c.name==fac_name).execute().fetchall()
         if len(f) > 0:
             fac_id = f[0].id
-        beamline.insert().execute(name=name, nickname=nickname, energy_range=erange, facility_id=fac_id)
+        beamline.insert().execute(name=name, nickname=nickname,
+                                  energy_range=erange, facility_id=fac_id)
 
     now = datetime.isoformat(datetime.now())
     for key, value in InitialData.info:
