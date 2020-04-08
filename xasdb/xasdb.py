@@ -735,7 +735,6 @@ class XASDataLibrary(object):
 
         """add spectrum: name required
         returns Spectrum instance"""
-
         stab = self.tables['spectrum']
         spectrum_names = [s.name for s in stab.select().execute()]
 
@@ -774,7 +773,9 @@ class XASDataLibrary(object):
             kws[attr] = val
 
         # foreign keys, pointers to other tables
-        kws['beamline_id'] = self.get_beamline(beamline).id # beamline
+        bline = self.guess_beamline(beamline)
+        if bline is not None:
+            kws['beamline_id'] = bline.id
         kws['person_id'] = person
         kws['edge_id'] = self.get_edge(edge.decode("utf-8")).id
         kws['element_z'] = self.get_element(element.decode("utf-8")).z
@@ -819,6 +820,19 @@ class XASDataLibrary(object):
 
         query = apply_orderby(query, tab, orderby)
         return query.execute().fetchall()
+
+    def guess_beamline(self, name, facility=None):
+        """return best guess of beamline by name"""
+        bline = None_or_one(self.filtered_query('beamline', name=name))
+        if bline is not None:
+            return bline
+        candidates = self.get_beamlines(facility=facility)
+        lname = name.lower()
+        for b in candidates:
+            if lname in b.name.lower() or lname in b.nickname.lower():
+                return b
+        return None
+
 
 
     def get_suite_ratings(self, spectrum):
