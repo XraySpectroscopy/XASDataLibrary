@@ -1084,5 +1084,4 @@ class XASDataLibrary(object):
             mode_id = modes_map.get(mode, None)
             if mode_id is not None:
                 self.set_spectrum_mode(spec.id, mode_id)
-        print("### Add spectrum done")
         return spec.id
