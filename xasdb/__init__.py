@@ -15,14 +15,12 @@
       Matthew Newville <newville@cars.uchicago.edu>
            CARS, University of Chicago
 
-   last update:  2015-August-11
-
 == Overview:
    The xasdb module provides a python interface to the XAFS Database,
    an SQLite tool for organizing XAS spectra.
 
 """
-__version__ = '0.1.2'
+from ._version import __version__
 
 from .xasdb import (isXASDataLibrary, XASDataLibrary, XASDBException,
                     Info, Mode, Facility, Beamline, EnergyUnits, Edge,

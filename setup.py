@@ -1,32 +1,25 @@
 #!/usr/bin/env python
-from distutils.core import setup
-import sys
-import xasdb
+from setuptools import setup
+import os
+
+version = '0.1'
+with open(os.path.join('xasdb', '_version.py')) as fh:
+    for line in fh.readlines():
+        line = line[:-1].strip()
+        if line.startswith('__version'):
+            words = line.split('=') + [' ', ' ']
+            version = words[1].strip().replace("'", '').replace('"', '')
+
 #
-no_sqlalchemy="""
-*******************************************************
-*** WARNING - WARNING - WARNING - WARNING - WARNING ***
-
-       Install or Upgrade SQLAlchemy!
-
-Version 0.6.5 or higher is needed for the xafs database
-
-try:
-      easy_install -U sqlalchemy
-
-*******************************************************
-"""
-
-
-import sqlalchemy
 
 setup(name = 'xasdb',
-      version = xasdb.__version__,
+      version = version,
       author = 'Matthew Newville',
       author_email = 'newville@cars.uchicago.edu',
-      url         = 'http://xas.org/XasDataLibrary',
+      url     = 'http://xas.org/XasDataLibrary',
       license = 'Public Domain',
       description = 'x-ray absorption spectra library',
+      install_requires=('sqlalchemy', 'numpy', 'scipy'),
       package_dir = {'xasdb': 'xasdb'},
       packages = ['xasdb','xasdb.wx']
 )
