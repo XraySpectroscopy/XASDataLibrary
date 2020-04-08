@@ -1,47 +1,35 @@
 #!/usr/bin/env python
 # initialize an XAS Spectral Library DB
 # with a small amount of data, suitable for testing
-#
 
-
-from __future__ import print_function
 import sys
 import os
 import glob
 import xasdb
+import sqlalchemy
 
-dbname = 'example.db'
+dbname = sys.argv[1] if len(sys.argv) > 1 else 'xastest.db'
 
-if len(sys.argv) > 1:
-    dbname = sys.argv[1]
+if os.path.exists(dbname):
+    os.unlink(dbname)
 
-if not os.path.exists(dbname):
-    print("Error:  database file '%s' does not exist" % dbname)
-    print("Use create_empty_db.py to create database")
-    sys.exit()
-
+xasdb.create_xasdb(dbname)
+print( 'Created database %s' % dbname)
 
 db = xasdb.connect_xasdb(dbname)
-print('Connected!')
+print( 'Verified that database %s can be accessed.' % dbname)
 
-import sqlalchemy
-try:
-    db.add_person('Matt Newville',
-                  'newville@cars.uchicago.edu',
-                  affiliation='CARS, UChicago')
-except sqlalchemy.exc.IntegrityError as e:
-    pass
-person = db.set_person_password('newville@cars.uchicago.edu', str.encode('xafsdb'))
-email  = db.get_person('newville@cars.uchicago.edu').email
+db.add_person('xaslib admin', 'xaslib@xrayabsorption.org', affiliation='IXAS')
+person = db.set_person_password('xaslib@xrayabsorption.org',
+                                'Re3{t_Th1s_P@ssw0rd!')
+email  = db.get_person('xaslib@xrayabsorption.org').email
 
 datadir = 'data'
 n = 0
-files = glob.glob("%s/*.xdi"  % datadir)
-files.sort()
-for f in files:
+for f in sorted(glob.glob("%s/*.xdi"  % datadir)):
     if 'nonxafs' in f or 'upload' in f:
         continue
-    n = n + 1
     db.add_xdifile(f, person=email)
-    if n > 12:
-        break
+    print("added ", f)
+    n += 1
+print("'%s' has %d spectra" % (dbname, n))
