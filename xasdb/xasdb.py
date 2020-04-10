@@ -410,12 +410,22 @@ class XASDataLibrary(object):
                 query = query.filter(getattr(table.c, key)==val)
         return query.all()
 
-    def get_facility(self, just_one=False, **kws):
+    def get_facility(self,  **kws):
         """return facility or list of facilities"""
 
         out = self.filtered_query('facility', **kws)
         if len(out) > 1:
             return out
+        return None_or_one(out)
+
+    def get_facilities(self, orderby='id'):
+        """return facility or list of facilities"""
+
+        tab = self.tables['facility']
+        query = apply_orderby(tab.select(), tab, orderby)
+        return query.execute().fetchall()
+
+        out = self.filtered_query('facility')
 
         return None_or_one(out)
 
