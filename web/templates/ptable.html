@@ -2,11 +2,14 @@
 {% block body %}
 
 <p> <div class=subtitle>Select Absorbing Element to list spectra:</div>
+
+
+
 </p>
 
 <div class=body>
-<form action="action"  method="post">
-
+<form action="filter"  method="post">
+<input type=hidden name=elem value={{elem}}>
 <table> <tr><td rowspan=10>
 
 <table class=ptable cellpadding=0 cellspacing=0 border=0><tr>
@@ -16,7 +19,13 @@
 </tr><tr>
 <td class=elem width=30><a href="{{url_for('elem')}}/Li">Li</a></td>
 <td class=elem width=30><a href="{{url_for('elem')}}/Be">Be</a></td>
-<td colspan=10></td>
+<td colspan=2></td>
+<td colspan=6 class=elem>
+<a href="{{url_for('elem')}}/All">Show All Spectra</a>
+</td>
+<td colspan=2></td>
+
+
 <td class=elem width=30><a href="{{url_for('elem')}}/B ">B </a></td>
 <td class=elem width=30><a href="{{url_for('elem')}}/C ">C </a></td>
 <td class=elem width=30><a href="{{url_for('elem')}}/N ">N </a></td>
@@ -130,31 +139,60 @@
 </table>
 
 </td></tr>
-<tr><td width=5%> </td><td colspan=2>Limit Selection by Requiring</td></tr>
-<tr><td width=5%> </td><td colspan=2>Text in Name or Comments, Edge, or Beamline</td></tr>
-<tr><td width=5%> </td><td>Text:</td>
-<td><input size=50 type=text name=searchword> </td>
-</tr>
-<tr><td></td><td>Edge</td>
-    <td><select  name='edge' style="width: 100px;">
+<tr><td width=5%> </td><td colspan=2>
+Filter Spectra by Requiring Edge, Beamline, Rating
+</td></tr>
+<tr><td width=5%> </td><td colspan=2>
+Measurement Mode, or Text in Name or Comment
+</td></tr>
+<tr><td></td><td>Edge: </td>
+    <td><select  name='edge' style="width: 200px;">
      {% for e in edges %}
        <option value={{e.id}}
-            {% if e.id == 0 %} selected=1 {% endif %} >
+            {% if e.id == edge_id %} selected=1 {% endif %} >
         {{ e.name }}</option>
      {% endfor %}
      </select>
      </td></tr>
 
-
-<tr><td></td><td>Beamline</td>
-    <td><select  name='beamline' style="width: 250px;">
+<tr><td></td><td>Beamline: </td>
+    <td><select  name='beamline' style="width: 200px;">
 	{% for bl in beamlines %}
 	    <option value={{bl.id}}
-	      {% if bl.id == 0 %} selected=1 {% endif %} >
+	      {% if bl.id == beamline_id %} selected=1 {% endif %} >
               {{ bl.name }}</option>
 	{% endfor %}
      </select>
+</td></tr>
+
+<tr><td></td><td>Mode: </td>
+    <td><select  name='mode' style="width: 200px;">
+     {% for e in modes %}
+       <option value={{e.id}}
+            {% if e.id == mode_id %} selected=1 {% endif %} >
+        {{ e.name }}</option>
+     {% endfor %}
+     </select>
      </td></tr>
+
+<tr><td></td><td>Rating: </td>
+    <td><select  name='rating' style="width: 200px;">
+         <option value='0' {% if rating_min == '0' %} selected=1 {% endif %} >Any</option>
+         <option value='1' {% if rating_min == '1' %} selected=1 {% endif %} >1 or higher</option>
+         <option value='2' {% if rating_min == '2' %} selected=1 {% endif %} >2 or higher</option>
+         <option value='3' {% if rating_min == '3' %} selected=1 {% endif %} >3 or higher</option>
+         <option value='4' {% if rating_min == '4' %} selected=1 {% endif %} >4 or higher</option>
+         <option value='5' {% if rating_min == '5' %} selected=1 {% endif %} >5</option>
+
+        </select>
+   </td></tr>
+
+
+<tr><td width=5%> </td><td>Text:</td>
+<td><input size=40 type=text name=searchphrase value={{ searchword }}></td></tr>
+<tr><td width=5%> </td><td colspan=2>
+<input class='submitbutton' type=submit value='Apply Filter'</div>
+</td></tr>
 </table>
 </form>
 
@@ -166,13 +204,17 @@
    {% if elem is not none %}
       No spectra found for {{ elem }}
    {% endif %}
+   {% if ntotal > nspectra %}  (filtered from {{ ntotal }}) {% endif %}
 {% else %}
    {% if nspectra == 1 %}
-      {{ nspectra }} spectrum for {{ elem }}:
+      {{ nspectra }} spectrum for {{ elem }}
    {% else %}
-      {{ nspectra }} spectra for {{ elem }}:
+      {{ nspectra }} spectra for {{ elem }}
    {% endif %}
-   <p>
+   {% if ntotal > nspectra %}  (filtered from {{ ntotal }}) {% endif %}
+<p>
+Click on Heading Label to toggle sorting:
+
    <table cellspacing=5 cellpadding=2>
      <tr>
        <td><a href="{{url_for('elem')}}/{{elem}}/name/{{reverse}}">
@@ -185,7 +227,8 @@
 	   &nbsp; Rating &nbsp;</a></td>
      </tr>
    {% for spec in spectra %}
-	<tr class={{ loop.cycle('odd', 'even') }}>
+        <tr class={{ loop.cycle('odd', 'even') }}>
+
 	<td> &nbsp; &nbsp; <a href="{{url_for('spectrum', spid= spec.id)}}"> {{ spec.name }}</a></td>
 	<td> &nbsp; {{ spec.edge }} </td>
 	<td> &nbsp; {{ spec.beamline_desc }} </td>
