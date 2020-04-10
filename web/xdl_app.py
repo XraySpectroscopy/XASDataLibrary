@@ -19,12 +19,11 @@ from xasdb import (connect_xasdb, fmttime, valid_score, unique_name)
 from xafs_preedge import (preedge, edge_energies)
 
 from utils import (random_string, multiline_text, session_init,
-                   session_clear, parse_spectrum,
-                   spectrum_ratings, suite_ratings,
-                   spectra_for_suite, beamline_for_spectrum,
+                   session_clear, parse_spectrum, spectrum_ratings,
+                   suite_ratings, spectra_for_suite, beamline_for_spectrum,
                    spectra_for_beamline, get_element_list,
-                   get_energy_units_list, get_edge_list,
-                   get_beamline_list, get_sample_list, get_rating,
+                   get_energy_units_list, get_edge_list, get_beamline_list,
+                   get_mode_list, get_sample_list, get_rating,
                    allowed_filename, get_fullpath, pathjoin)
 
 
@@ -40,20 +39,20 @@ app.config.from_object(__name__)
 app.config['MAX_CONTENT_LENGTH'] = 32 * 1024 * 1024
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
-
 db = connect_xasdb(DBNAME, **DBCONN)
 
 EDGES  = get_edge_list(db, with_any=False)
 ELEMS  = get_element_list(db)
 EUNITS = get_energy_units_list(db)
-BLINES = get_beamline_list(db)
+BLINES = get_beamline_list(db, orderby='name')
+MODES  = get_mode_list(db)
 SAMPLES = get_sample_list(db)
 
 ANY_ELEMS  = get_element_list(db, with_any=True)
 ANY_EDGES  = get_edge_list(db, with_any=True)
-ANY_BLINES = get_beamline_list(db, with_any=True)
+ANY_BLINES = get_beamline_list(db, with_any=True, orderby='name')
+ANY_MODES  = get_mode_list(db, with_any=True)
 
-print(ANY_BLINES[:5])
 
 def send_confirm_email(person, hash, style='new'):
     """send email with account confirmation/reset link"""
@@ -322,19 +321,38 @@ def user():
     return render_template('userprofile.html', error=error, email=email,
                            name=name, affiliation=affiliation)
 
-@app.route('/elem')
-@app.route('/elem/<elem>')
-@app.route('/elem/<elem>/<orderby>')
-@app.route('/elem/<elem>/<orderby>/<reverse>')
+@app.route('/elem', methods=['GET', 'POST'])
+@app.route('/elem/', methods=['GET', 'POST'])
+@app.route('/elem/<elem>', methods=['GET', 'POST'])
+@app.route('/elem/<elem>/<orderby>',  methods=['GET', 'POST'])
+@app.route('/elem/<elem>/<orderby>/<reverse>', methods=['GET', 'POST'])
 def elem(elem=None, orderby=None, reverse=0):
     session_init(session, db)
     dbspectra = []
-    if orderby is None: orderby = 'id'
+    sql_orderby = orderby
+    if orderby is None:
+        sql_orderby = 'element_z'
+
+    if elem in ('action', 'filter'):
+        elem = request.form.get('elem')
+
     if elem is not None:
-        try:
-            dbspectra = db.get_spectra(element=elem, orderby=orderby)
-        except:
-            pass
+        if elem.lower() == 'all':
+            try:
+                dbspectra = db.get_spectra(orderby='element_z')
+            except:
+                pass
+        else:
+            try:
+                dbspectra = db.get_spectra(element=elem, orderby=sql_orderby)
+            except:
+                pass
+
+    edge_id = request.form.get('edge', '0')
+    mode_id = request.form.get('mode', '0')
+    beamline_id = request.form.get('beamline', '0')
+    searchword  = request.form.get('searchphrase', '')
+    rating_min  = request.form.get('rating', '0')
 
     reverse = int(reverse)
     if reverse:
@@ -348,7 +366,43 @@ def elem(elem=None, orderby=None, reverse=0):
         edge     = db.get_edge(s.edge_id)
         elem_sym = db.get_element(s.element_z).symbol
         person   = db.get_person(s.person_id)
+        modes    = db.get_spectrum_modes(s.id)
+        rating   = get_rating(s)
         bl_id, bl_desc = beamline_for_spectrum(db, s)
+
+        # filter edge and beamline:
+        if ((edge_id != '0' and int(s.edge_id) != int(edge_id)) or
+            (beamline_id != '0' and int(bl_id) != int(beamline_id))):
+            continue
+        # filter mode
+        if mode_id != '0':
+            mid = int(mode_id)
+            mode_match = any([m[0] == mid for m in modes])
+            if not mode_match:
+                continue
+        # filter rating
+        if rating_min != '0':
+            try:
+                rval = float(rating.split()[0])
+            except:
+                rval = 100.0
+            if (rval-0.01) < int(rating_min):
+                continue
+
+        # filter word
+        if searchword != '':
+            fulldat =  parse_spectrum(s, db)
+            misc = fulldat.get('misc', {})
+            misc = '\n'.join(['%s:%s' % (m['key'], m['val']) for m in misc])
+            if not any((searchword in fulldat.get('spectrum_name', ''),
+                        searchword in fulldat.get('xdi_filename',''),
+                        searchword in fulldat.get('sample_name',''),
+                        searchword in fulldat.get('raw_comments', ''),
+                        searchword in fulldat.get('beamline_desc',''),
+                        searchword in fulldat.get('person_name', ''),
+                        searchword in fulldat.get('person_email',''),
+                        searchword in misc)):
+                continue
 
         spectra.append({'id': s.id,
                         'name': s.name,
@@ -357,16 +411,24 @@ def elem(elem=None, orderby=None, reverse=0):
                         'person_email': person.email,
                         'person_name': person.name,
                         'elem_sym': elem_sym,
-                        'rating': get_rating(s),
+                        'rating': rating,
                         'beamline_desc': bl_desc,
                         'beamline_id': bl_id,
                         })
 
-    return render_template('ptable.html', nspectra=len(dbspectra),
+    return render_template('ptable.html',
+                           ntotal=len(dbspectra),
+                           nspectra=len(spectra),
                            elem=elem, spectra=spectra,
                            reverse=reverse,
-                           edges=ANY_EDGES, beamlines=ANY_BLINES)
-
+                           edges=ANY_EDGES,
+                           modes=ANY_MODES,
+                           beamlines=ANY_BLINES,
+                           edge_id=edge_id,
+                           beamline_id=beamline_id,
+                           mode_id=mode_id,
+                           searchword=searchword,
+                           rating_min=rating_min)
 
 
 @app.route('/all')
@@ -413,72 +475,70 @@ def spectrum(spid=None):
     opts['spectrum_owner'] = (session['person_id'] == "%i" % s.person_id)
     opts['rating'] = get_rating(s)
 
-    modes = db.get_spectrum_mode(spid)
-    if modes is None:
-        modes = 1
-    else:
-        modes = modes[0][1]
-
-    if modes == 1:
-        try:
-            energy = np.array(json.loads(s.energy))
-            i0     = np.array(json.loads(s.i0))
-            itrans = np.array(json.loads(s.itrans))
-            mutrans = -np.log(itrans/i0)
-        except:
-            error = 'Could not extract data from spectrum'
-            return render_template('spectrum.html', **opts)
-    else: #get a fluorescence
-        try:
-            energy = np.array(json.loads(s.energy))
-            i0     = np.array(json.loads(s.i0))
-            ifluor = np.array(json.loads(s.ifluor))
-            mutrans = ifluor/i0
-        except:
-            error = 'Could not extract data from spectrum'
-            return render_template('spectrum.html', **opts)
-
-    murefer = None
-    try:
-        irefer = np.array(json.loads(s.irefer))
-        murefer = -np.log(irefer/itrans)
-    except:
-        pass
-
-
     eunits = opts['energy_units']
     if eunits.startswith('keV'):
         energy = energy /1000.0
     elif eunits.startswith('deg'):
         print('Need to convert angle to energy')
 
-    if modes != 7:
-        group = preedge(energy, mutrans)
-        e0 = group['e0']
     try:
         e0 = edge_energies[int(s.element_z)][str(opts['edge'])]
     except:
         pass
 
-    try:
-        i1 = max(np.where(energy<=e0 - 25)[0])
-    except:
-        i1 = 0
-    i2 = max(np.where(energy<=e0 + 75)[0]) + 1
-    xanes_en = energy[i1:i2] - e0
-
-    if modes !=3:
-        xanes_mu = group['norm'][i1:i2]
+    modes = db.get_spectrum_modes(spid)
+    if modes is None:
+        plot_mode = 'trans'
     else:
-        xanes_mu = mutrans[i1:i2]
+        plot_mode = modes[0][1]
 
+    # now get real data for plotting
+    energy, mudata, murefer = None, None, None
+    try:
+        if plot_mode.startswith('trans'):
+            energy = np.array(json.loads(s.energy))
+            i0     = np.array(json.loads(s.i0))
+            itrans = np.array(json.loads(s.itrans))
+            mudata = -np.log(itrans/i0)
+        else:
+            energy = np.array(json.loads(s.energy))
+            i0     = np.array(json.loads(s.i0))
+            ifluor = np.array(json.loads(s.ifluor))
+            mudata = ifluor/i0
+    except:
+        error = 'Could not extract fluorescence data from spectrum'
+        return render_template('spectrum.html', **opts)
+
+
+    dgroup = preedge(energy, mudata)
+
+    # get reference if possible
+    try:
+        irefer = np.array(json.loads(s.irefer))
+        refmode = s.reference_mode_id
+        refmode = 1 if refmode is None else refmode
+        if refmode == 1:
+            murefer = -np.log(irefer/itrans)
+        else:
+            murefer = irefer/i0
+    except:
+        pass
+
+    try:
+        e1 = max(np.where(energy<=e0 - 25)[0])
+    except:
+        e1 = 0
+    e2 = max(np.where(energy<=e0 + 75)[0]) + 1
+    xanes_en = energy[e1:e2] - e0
+
+    xanes_mu = dgroup['norm'][e1:e2]
     xanes_ref = None
     if murefer is not None:
         rgroup = preedge(energy, murefer)
-        xanes_ref = rgroup['norm'][i1:i2]
+        xanes_ref = rgroup['norm'][e1:e2]
 
     opts['e0'] = '%f' % e0
-    opts['fullfig'] =  make_xafs_plot(energy, mutrans, s.name,
+    opts['fullfig'] =  make_xafs_plot(energy, mudata, s.name,
                                       ylabel='Raw XAFS').decode('UTF-8')
 
     opts['xanesfig'] = make_xafs_plot(xanes_en, xanes_mu, s.name,
@@ -493,7 +553,6 @@ def spectrum(spid=None):
         suites.append({'id': r.suite_id, 'name': st.name})
     opts['nsuites'] = len(suites)
     opts['suites'] = suites
-
     return render_template('spectrum.html', **opts)
 
 @app.route('/showspectrum_rating/<int:spid>')
@@ -1184,7 +1243,7 @@ def submit_upload():
 
         # try:
         opts = parse_spectrum(spectrum, db)
-        print("Parsed to ", spectrum.id, opts)
+        print("UPLOAD: parsed to ", spectrum.id, opts)
 
         # except:
         #    error = "Could not read spectrum from '%s'" % (file.filename)
