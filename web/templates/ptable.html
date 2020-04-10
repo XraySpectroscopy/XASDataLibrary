@@ -1,130 +1,160 @@
 {% extends "layout.html" %}
 {% block body %}
 
-<p> <div class=subtitle> Select Absorbing Element:</div>
+<p> <div class=subtitle>Select Absorbing Element to list spectra:</div>
 </p>
 
 <div class=body>
-
 <form action="action"  method="post">
+
+<table> <tr><td rowspan=10>
+
 <table class=ptable cellpadding=0 cellspacing=0 border=0><tr>
-<th class=elem width=30><a href="{{url_for('elem')}}/H ">H </a></th>
-<th colspan=16></th>
-<th class=elem width=30><a href="{{url_for('elem')}}/He">He</a></th>
+<td class=elem width=30><a href="{{url_for('elem')}}/H ">H </a></td>
+<td colspan=16></td>
+<td class=elem width=30><a href="{{url_for('elem')}}/He">He</a></td>
 </tr><tr>
-<th class=elem width=30><a href="{{url_for('elem')}}/Li">Li</a></th>
-<th class=elem width=30><a href="{{url_for('elem')}}/Be">Be</a></th>
-<th colspan=10></th>
-<th class=elem width=30><a href="{{url_for('elem')}}/B ">B </a></th>
-<th class=elem width=30><a href="{{url_for('elem')}}/C ">C </a></th>
-<th class=elem width=30><a href="{{url_for('elem')}}/N ">N </a></th>
-<th class=elem width=30><a href="{{url_for('elem')}}/O ">O </a></th>
-<th class=elem width=30><a href="{{url_for('elem')}}/F ">F </a></th>
-<th class=elem width=30><a href="{{url_for('elem')}}/Ne">Ne</a></th>
+<td class=elem width=30><a href="{{url_for('elem')}}/Li">Li</a></td>
+<td class=elem width=30><a href="{{url_for('elem')}}/Be">Be</a></td>
+<td colspan=10></td>
+<td class=elem width=30><a href="{{url_for('elem')}}/B ">B </a></td>
+<td class=elem width=30><a href="{{url_for('elem')}}/C ">C </a></td>
+<td class=elem width=30><a href="{{url_for('elem')}}/N ">N </a></td>
+<td class=elem width=30><a href="{{url_for('elem')}}/O ">O </a></td>
+<td class=elem width=30><a href="{{url_for('elem')}}/F ">F </a></td>
+<td class=elem width=30><a href="{{url_for('elem')}}/Ne">Ne</a></td>
 </tr><tr>
-<th class=elem width=30><a href="{{url_for('elem')}}/Na">Na</a></th>
-<th class=elem width=30><a href="{{url_for('elem')}}/Mg">Mg</a></th>
-<th colspan=10></th>
-<th class=elem width=30><a href="{{url_for('elem')}}/Al">Al</a></th>
-<th class=elem width=30><a href="{{url_for('elem')}}/Si">Si</a></th>
-<th class=elem width=30><a href="{{url_for('elem')}}/P ">P </a></th>
-<th class=elem width=30><a href="{{url_for('elem')}}/S ">S </a></th>
-<th class=elem width=30><a href="{{url_for('elem')}}/Cl">Cl</a></th>
-<th class=elem width=30><a href="{{url_for('elem')}}/Ar">Ar</a></th>
+<td class=elem width=30><a href="{{url_for('elem')}}/Na">Na</a></td>
+<td class=elem width=30><a href="{{url_for('elem')}}/Mg">Mg</a></td>
+<td colspan=10></td>
+<td class=elem width=30><a href="{{url_for('elem')}}/Al">Al</a></td>
+<td class=elem width=30><a href="{{url_for('elem')}}/Si">Si</a></td>
+<td class=elem width=30><a href="{{url_for('elem')}}/P ">P </a></td>
+<td class=elem width=30><a href="{{url_for('elem')}}/S ">S </a></td>
+<td class=elem width=30><a href="{{url_for('elem')}}/Cl">Cl</a></td>
+<td class=elem width=30><a href="{{url_for('elem')}}/Ar">Ar</a></td>
 </tr><tr>
-<th class=elem width=30><a href="{{url_for('elem')}}/K ">K </a></th>
-<th class=elem width=30><a href="{{url_for('elem')}}/Ca">Ca</a></th>
-<th class=elem width=30><a href="{{url_for('elem')}}/Sc">Sc</a></th>
-<th class=elem width=30><a href="{{url_for('elem')}}/Ti">Ti</a></th>
-<th class=elem width=30><a href="{{url_for('elem')}}/V ">V </a></th>
-<th class=elem width=30><a href="{{url_for('elem')}}/Cr">Cr</a></th>
-<th class=elem width=30><a href="{{url_for('elem')}}/Mn">Mn</a></th>
-<th class=elem width=30><a href="{{url_for('elem')}}/Fe">Fe</a></th>
-<th class=elem width=30><a href="{{url_for('elem')}}/Co">Co</a></th>
-<th class=elem width=30><a href="{{url_for('elem')}}/Ni">Ni</a></th>
-<th class=elem width=30><a href="{{url_for('elem')}}/Cu">Cu</a></th>
-<th class=elem width=30><a href="{{url_for('elem')}}/Zn">Zn</a></th>
-<th class=elem width=30><a href="{{url_for('elem')}}/Ga">Ga</a></th>
-<th class=elem width=30><a href="{{url_for('elem')}}/Ge">Ge</a></th>
-<th class=elem width=30><a href="{{url_for('elem')}}/As">As</a></th>
-<th class=elem width=30><a href="{{url_for('elem')}}/Se">Se</a></th>
-<th class=elem width=30><a href="{{url_for('elem')}}/Br">Br</a></th>
-<th class=elem width=30><a href="{{url_for('elem')}}/Kr">Kr</a></th>
+<td class=elem width=30><a href="{{url_for('elem')}}/K ">K </a></td>
+<td class=elem width=30><a href="{{url_for('elem')}}/Ca">Ca</a></td>
+<td class=elem width=30><a href="{{url_for('elem')}}/Sc">Sc</a></td>
+<td class=elem width=30><a href="{{url_for('elem')}}/Ti">Ti</a></td>
+<td class=elem width=30><a href="{{url_for('elem')}}/V ">V </a></td>
+<td class=elem width=30><a href="{{url_for('elem')}}/Cr">Cr</a></td>
+<td class=elem width=30><a href="{{url_for('elem')}}/Mn">Mn</a></td>
+<td class=elem width=30><a href="{{url_for('elem')}}/Fe">Fe</a></td>
+<td class=elem width=30><a href="{{url_for('elem')}}/Co">Co</a></td>
+<td class=elem width=30><a href="{{url_for('elem')}}/Ni">Ni</a></td>
+<td class=elem width=30><a href="{{url_for('elem')}}/Cu">Cu</a></td>
+<td class=elem width=30><a href="{{url_for('elem')}}/Zn">Zn</a></td>
+<td class=elem width=30><a href="{{url_for('elem')}}/Ga">Ga</a></td>
+<td class=elem width=30><a href="{{url_for('elem')}}/Ge">Ge</a></td>
+<td class=elem width=30><a href="{{url_for('elem')}}/As">As</a></td>
+<td class=elem width=30><a href="{{url_for('elem')}}/Se">Se</a></td>
+<td class=elem width=30><a href="{{url_for('elem')}}/Br">Br</a></td>
+<td class=elem width=30><a href="{{url_for('elem')}}/Kr">Kr</a></td>
 </tr><tr>
-<th class=elem width=30><a href="{{url_for('elem')}}/Rb">Rb</a></th>
-<th class=elem width=30><a href="{{url_for('elem')}}/Sr">Sr</a></th>
-<th class=elem width=30><a href="{{url_for('elem')}}/Y ">Y </a></th>
-<th class=elem width=30><a href="{{url_for('elem')}}/Zr">Zr</a></th>
-<th class=elem width=30><a href="{{url_for('elem')}}/Nb">Nb</a></th>
-<th class=elem width=30><a href="{{url_for('elem')}}/Mo">Mo</a></th>
-<th class=elem width=30><a href="{{url_for('elem')}}/Tc">Tc</a></th>
-<th class=elem width=30><a href="{{url_for('elem')}}/Ru">Ru</a></th>
-<th class=elem width=30><a href="{{url_for('elem')}}/Rh">Rh</a></th>
-<th class=elem width=30><a href="{{url_for('elem')}}/Pd">Pd</a></th>
-<th class=elem width=30><a href="{{url_for('elem')}}/Ag">Ag</a></th>
-<th class=elem width=30><a href="{{url_for('elem')}}/Cd">Cd</a></th>
-<th class=elem width=30><a href="{{url_for('elem')}}/In">In</a></th>
-<th class=elem width=30><a href="{{url_for('elem')}}/Sn">Sn</a></th>
-<th class=elem width=30><a href="{{url_for('elem')}}/Sb">Sb</a></th>
-<th class=elem width=30><a href="{{url_for('elem')}}/Te">Te</a></th>
-<th class=elem width=30><a href="{{url_for('elem')}}/I ">I </a></th>
-<th class=elem width=30><a href="{{url_for('elem')}}/Xe">Xe</a></th>
+<td class=elem width=30><a href="{{url_for('elem')}}/Rb">Rb</a></td>
+<td class=elem width=30><a href="{{url_for('elem')}}/Sr">Sr</a></td>
+<td class=elem width=30><a href="{{url_for('elem')}}/Y ">Y </a></td>
+<td class=elem width=30><a href="{{url_for('elem')}}/Zr">Zr</a></td>
+<td class=elem width=30><a href="{{url_for('elem')}}/Nb">Nb</a></td>
+<td class=elem width=30><a href="{{url_for('elem')}}/Mo">Mo</a></td>
+<td class=elem width=30><a href="{{url_for('elem')}}/Tc">Tc</a></td>
+<td class=elem width=30><a href="{{url_for('elem')}}/Ru">Ru</a></td>
+<td class=elem width=30><a href="{{url_for('elem')}}/Rh">Rh</a></td>
+<td class=elem width=30><a href="{{url_for('elem')}}/Pd">Pd</a></td>
+<td class=elem width=30><a href="{{url_for('elem')}}/Ag">Ag</a></td>
+<td class=elem width=30><a href="{{url_for('elem')}}/Cd">Cd</a></td>
+<td class=elem width=30><a href="{{url_for('elem')}}/In">In</a></td>
+<td class=elem width=30><a href="{{url_for('elem')}}/Sn">Sn</a></td>
+<td class=elem width=30><a href="{{url_for('elem')}}/Sb">Sb</a></td>
+<td class=elem width=30><a href="{{url_for('elem')}}/Te">Te</a></td>
+<td class=elem width=30><a href="{{url_for('elem')}}/I ">I </a></td>
+<td class=elem width=30><a href="{{url_for('elem')}}/Xe">Xe</a></td>
 </tr><tr>
-<th class=elem width=30><a href="{{url_for('elem')}}/Cs">Cs</a></th>
-<th class=elem width=30><a href="{{url_for('elem')}}/Ba">Ba</a></th>
-<th class=elem width=30><a href="{{url_for('elem')}}/La">La</a></th>
-<th class=elem width=30><a href="{{url_for('elem')}}/Hf">Hf</a></th>
-<th class=elem width=30><a href="{{url_for('elem')}}/Ta">Ta</a></th>
-<th class=elem width=30><a href="{{url_for('elem')}}/W ">W </a></th>
-<th class=elem width=30><a href="{{url_for('elem')}}/Re">Re</a></th>
-<th class=elem width=30><a href="{{url_for('elem')}}/Os">Os</a></th>
-<th class=elem width=30><a href="{{url_for('elem')}}/Ir">Ir</a></th>
-<th class=elem width=30><a href="{{url_for('elem')}}/Pt">Pt</a></th>
-<th class=elem width=30><a href="{{url_for('elem')}}/Au">Au</a></th>
-<th class=elem width=30><a href="{{url_for('elem')}}/Hg">Hg</a></th>
-<th class=elem width=30><a href="{{url_for('elem')}}/Tl">Tl</a></th>
-<th class=elem width=30><a href="{{url_for('elem')}}/Pb">Pb</a></th>
-<th class=elem width=30><a href="{{url_for('elem')}}/Bi">Bi</a></th>
-<th class=elem width=30><a href="{{url_for('elem')}}/Po">Po</a></th>
-<th class=elem width=30><a href="{{url_for('elem')}}/At">At</a></th>
-<th class=elem width=30><a href="{{url_for('elem')}}/Rn">Rn</a></th>
+<td class=elem width=30><a href="{{url_for('elem')}}/Cs">Cs</a></td>
+<td class=elem width=30><a href="{{url_for('elem')}}/Ba">Ba</a></td>
+<td class=elem width=30><a href="{{url_for('elem')}}/La">La</a></td>
+<td class=elem width=30><a href="{{url_for('elem')}}/Hf">Hf</a></td>
+<td class=elem width=30><a href="{{url_for('elem')}}/Ta">Ta</a></td>
+<td class=elem width=30><a href="{{url_for('elem')}}/W ">W </a></td>
+<td class=elem width=30><a href="{{url_for('elem')}}/Re">Re</a></td>
+<td class=elem width=30><a href="{{url_for('elem')}}/Os">Os</a></td>
+<td class=elem width=30><a href="{{url_for('elem')}}/Ir">Ir</a></td>
+<td class=elem width=30><a href="{{url_for('elem')}}/Pt">Pt</a></td>
+<td class=elem width=30><a href="{{url_for('elem')}}/Au">Au</a></td>
+<td class=elem width=30><a href="{{url_for('elem')}}/Hg">Hg</a></td>
+<td class=elem width=30><a href="{{url_for('elem')}}/Tl">Tl</a></td>
+<td class=elem width=30><a href="{{url_for('elem')}}/Pb">Pb</a></td>
+<td class=elem width=30><a href="{{url_for('elem')}}/Bi">Bi</a></td>
+<td class=elem width=30><a href="{{url_for('elem')}}/Po">Po</a></td>
+<td class=elem width=30><a href="{{url_for('elem')}}/At">At</a></td>
+<td class=elem width=30><a href="{{url_for('elem')}}/Rn">Rn</a></td>
 </tr><tr>
-<th class=elem width=30><a href="{{url_for('elem')}}/Fr">Fr</a></th>
-<th class=elem width=30><a href="{{url_for('elem')}}/Ra">Ra</a></th>
-<th class=elem width=30><a href="{{url_for('elem')}}/Ac">Ac</a></th>
+<td class=elem width=30><a href="{{url_for('elem')}}/Fr">Fr</a></td>
+<td class=elem width=30><a href="{{url_for('elem')}}/Ra">Ra</a></td>
+<td class=elem width=30><a href="{{url_for('elem')}}/Ac">Ac</a></td>
 </tr><tr>
-<th colspan=3></th>
-<th class=elem width=30><a href="{{url_for('elem')}}/Ce">Ce</a></th>
-<th class=elem width=30><a href="{{url_for('elem')}}/Pr">Pr</a></th>
-<th class=elem width=30><a href="{{url_for('elem')}}/Nd">Nd</a></th>
-<th class=elem width=30><a href="{{url_for('elem')}}/Pm">Pm</a></th>
-<th class=elem width=30><a href="{{url_for('elem')}}/Sm">Sm</a></th>
-<th class=elem width=30><a href="{{url_for('elem')}}/Eu">Eu</a></th>
-<th class=elem width=30><a href="{{url_for('elem')}}/Gd">Gd</a></th>
-<th class=elem width=30><a href="{{url_for('elem')}}/Tb">Tb</a></th>
-<th class=elem width=30><a href="{{url_for('elem')}}/Dy">Dy</a></th>
-<th class=elem width=30><a href="{{url_for('elem')}}/Ho">Ho</a></th>
-<th class=elem width=30><a href="{{url_for('elem')}}/Er">Er</a></th>
-<th class=elem width=30><a href="{{url_for('elem')}}/Tm">Tm</a></th>
-<th class=elem width=30><a href="{{url_for('elem')}}/Yb">Yb</a></th>
-<th class=elem width=30><a href="{{url_for('elem')}}/Lu">Lu</a></th>
+<td colspan=3></td>
+<td class=elem width=30><a href="{{url_for('elem')}}/Ce">Ce</a></td>
+<td class=elem width=30><a href="{{url_for('elem')}}/Pr">Pr</a></td>
+<td class=elem width=30><a href="{{url_for('elem')}}/Nd">Nd</a></td>
+<td class=elem width=30><a href="{{url_for('elem')}}/Pm">Pm</a></td>
+<td class=elem width=30><a href="{{url_for('elem')}}/Sm">Sm</a></td>
+<td class=elem width=30><a href="{{url_for('elem')}}/Eu">Eu</a></td>
+<td class=elem width=30><a href="{{url_for('elem')}}/Gd">Gd</a></td>
+<td class=elem width=30><a href="{{url_for('elem')}}/Tb">Tb</a></td>
+<td class=elem width=30><a href="{{url_for('elem')}}/Dy">Dy</a></td>
+<td class=elem width=30><a href="{{url_for('elem')}}/Ho">Ho</a></td>
+<td class=elem width=30><a href="{{url_for('elem')}}/Er">Er</a></td>
+<td class=elem width=30><a href="{{url_for('elem')}}/Tm">Tm</a></td>
+<td class=elem width=30><a href="{{url_for('elem')}}/Yb">Yb</a></td>
+<td class=elem width=30><a href="{{url_for('elem')}}/Lu">Lu</a></td>
 </tr><tr>
-<th colspan=3></th>
-<th class=elem width=30><a href="{{url_for('elem')}}/Th">Th</a></th>
-<th class=elem width=30><a href="{{url_for('elem')}}/Pa">Pa</a></th>
-<th class=elem width=30><a href="{{url_for('elem')}}/U ">U </a></th>
-<th class=elem width=30><a href="{{url_for('elem')}}/Np">Np</a></th>
-<th class=elem width=30><a href="{{url_for('elem')}}/Pu">Pu</a></th>
-<th class=elem width=30><a href="{{url_for('elem')}}/Am">Am</a></th>
-<th class=elem width=30><a href="{{url_for('elem')}}/Cm">Cm</a></th>
-<th class=elem width=30><a href="{{url_for('elem')}}/Bk">Bk</a></th>
-<th class=elem width=30><a href="{{url_for('elem')}}/Cf">Cf</a></th>
-<th class=elem width=30><a href="{{url_for('elem')}}/Es">Es</a></th>
-<th class=elem width=30><a href="{{url_for('elem')}}/Fm">Fm</a></th>
-<th class=elem width=30><a href="{{url_for('elem')}}/Md">Md</a></th>
-<th class=elem width=30><a href="{{url_for('elem')}}/No">No</a></th>
-<th class=elem width=30><a href="{{url_for('elem')}}/Lr">Lr</a></th>
+<td colspan=3></td>
+<td class=elem width=30><a href="{{url_for('elem')}}/Th">Th</a></td>
+<td class=elem width=30><a href="{{url_for('elem')}}/Pa">Pa</a></td>
+<td class=elem width=30><a href="{{url_for('elem')}}/U ">U </a></td>
+<td class=elem width=30><a href="{{url_for('elem')}}/Np">Np</a></td>
+<td class=elem width=30><a href="{{url_for('elem')}}/Pu">Pu</a></td>
+<td class=elem width=30><a href="{{url_for('elem')}}/Am">Am</a></td>
+<td class=elem width=30><a href="{{url_for('elem')}}/Cm">Cm</a></td>
+<td class=elem width=30><a href="{{url_for('elem')}}/Bk">Bk</a></td>
+<td class=elem width=30><a href="{{url_for('elem')}}/Cf">Cf</a></td>
+<td class=elem width=30><a href="{{url_for('elem')}}/Es">Es</a></td>
+<td class=elem width=30><a href="{{url_for('elem')}}/Fm">Fm</a></td>
+<td class=elem width=30><a href="{{url_for('elem')}}/Md">Md</a></td>
+<td class=elem width=30><a href="{{url_for('elem')}}/No">No</a></td>
+<td class=elem width=30><a href="{{url_for('elem')}}/Lr">Lr</a></td>
 </tr><tr>
+</table>
+
+</td></tr>
+<tr><td width=5%> </td><td colspan=2>Limit Selection by Requiring</td></tr>
+<tr><td width=5%> </td><td colspan=2>Text in Name or Comments, Edge, or Beamline</td></tr>
+<tr><td width=5%> </td><td>Text:</td>
+<td><input size=50 type=text name=searchword> </td>
+</tr>
+<tr><td></td><td>Edge</td>
+    <td><select  name='edge' style="width: 100px;">
+     {% for e in edges %}
+       <option value={{e.id}}
+            {% if e.id == 0 %} selected=1 {% endif %} >
+        {{ e.name }}</option>
+     {% endfor %}
+     </select>
+     </td></tr>
+
+
+<tr><td></td><td>Beamline</td>
+    <td><select  name='beamline' style="width: 250px;">
+	{% for bl in beamlines %}
+	    <option value={{bl.id}}
+	      {% if bl.id == 0 %} selected=1 {% endif %} >
+              {{ bl.name }}</option>
+	{% endfor %}
+     </select>
+     </td></tr>
 </table>
 </form>
 
@@ -145,14 +175,14 @@
    <p>
    <table cellspacing=5 cellpadding=2>
      <tr>
-       <th><a href="{{url_for('elem')}}/{{elem}}/name/{{reverse}}">
-	   &nbsp; Name &nbsp;</a></th>
-       <th><a href="{{url_for('elem')}}/{{elem}}/edge/{{reverse}}">
-	   &nbsp; Edge &nbsp;</a></th>
-       <th><a href="{{url_for('elem')}}/{{elem}}/beamline/{{reverse}}">
-	   &nbsp; Beamline &nbsp;</a></th>
-       <th><a href="{{url_for('elem')}}/{{elem}}/rating_summary/{{reverse}}">
-	   &nbsp; Rating &nbsp;</a></th>
+       <td><a href="{{url_for('elem')}}/{{elem}}/name/{{reverse}}">
+	   &nbsp; Name &nbsp;</a></td>
+       <td><a href="{{url_for('elem')}}/{{elem}}/edge/{{reverse}}">
+	   &nbsp; Edge &nbsp;</a></td>
+       <td><a href="{{url_for('elem')}}/{{elem}}/beamline/{{reverse}}">
+	   &nbsp; Beamline &nbsp;</a></td>
+       <td><a href="{{url_for('elem')}}/{{elem}}/rating_summary/{{reverse}}">
+	   &nbsp; Rating &nbsp;</a></td>
      </tr>
    {% for spec in spectra %}
 	<tr class={{ loop.cycle('odd', 'even') }}>

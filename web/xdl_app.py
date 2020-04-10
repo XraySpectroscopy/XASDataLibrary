@@ -43,6 +43,17 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 db = connect_xasdb(DBNAME, **DBCONN)
 
+EDGES  = get_edge_list(db, with_any=False)
+ELEMS  = get_element_list(db)
+EUNITS = get_energy_units_list(db)
+BLINES = get_beamline_list(db)
+SAMPLES = get_sample_list(db)
+
+ANY_ELEMS  = get_element_list(db, with_any=True)
+ANY_EDGES  = get_edge_list(db, with_any=True)
+ANY_BLINES = get_beamline_list(db, with_any=True)
+
+print(ANY_BLINES[:5])
 
 def send_confirm_email(person, hash, style='new'):
     """send email with account confirmation/reset link"""
@@ -353,7 +364,9 @@ def elem(elem=None, orderby=None, reverse=0):
 
     return render_template('ptable.html', nspectra=len(dbspectra),
                            elem=elem, spectra=spectra,
-                           reverse=reverse)
+                           reverse=reverse,
+                           edges=ANY_EDGES, beamlines=ANY_BLINES)
+
 
 
 @app.route('/all')
@@ -383,7 +396,8 @@ def all():
                         })
 
     return render_template('ptable.html', nspectra=len(dbspectra),
-                           elem='All Elements', spectra=spectra)
+                           elem='All Elements', spectra=spectra,
+                           edges=ANY_EDGES, beamlines=ANY_BLINES)
 
 @app.route('/spectrum/')
 @app.route('/spectrum/<int:spid>')
@@ -392,7 +406,8 @@ def spectrum(spid=None):
     s  = db.get_spectrum(spid)
     if s is None:
         error = 'Could not find Spectrum #%i' % spid
-        return render_template('ptable.html', error=error)
+        return render_template('ptable.html', error=error,
+                               edges=ANY_EDGES, beamlines=ANY_BLINES)
 
     opts = parse_spectrum(s, db)
     opts['spectrum_owner'] = (session['person_id'] == "%i" % s.person_id)
@@ -487,7 +502,8 @@ def showspectrum_rating(spid=None):
     s  = db.get_spectrum(spid)
     if s is None:
         error = 'Could not find Spectrum #%i' % spid
-        return render_template('ptable.html', error=error)
+        return render_template('ptable.html', error=error,
+                               edges=ANY_EDGES, beamlines=ANY_BLINES)
 
     opts = parse_spectrum(s, db)
     ratings = []
@@ -511,7 +527,8 @@ def submit_spectrum_edits():
     error=None
     if session['username'] is None:
         error='must be logged in to edit spectrum'
-        return render_template('ptable.html', error=error)
+        return render_template('ptable.html', error=error,
+                               edges=ANY_EDGES, beamlines=ANY_BLINES)
     spid = 0
     if request.method == 'POST':
         spid  = int(request.form['spectrum'])
@@ -534,21 +551,22 @@ def edit_spectrum(spid=None):
     error=None
     if session['username'] is None:
         error='must be logged in to edit spectrum'
-        return render_template('ptable.html',
-                               error=error)
+        return render_template('ptable.html', error=error,
+                               edges=ANY_EDGES, beamlines=ANY_BLINES)
 
     s  = db.get_spectrum(spid)
     if s is None:
         error = 'Could not find Spectrum #%i' % spid
-        return render_template('ptable.html', error=error)
+        return render_template('ptable.html', error=error,
+                               edges=ANY_EDGES, beamlines=ANY_BLINES)
 
     opts = parse_spectrum(s, db)
     return render_template('edit_spectrum.html', error=error,
                            elems=get_element_list(db),
                            eunits=get_energy_units_list(db),
-                           edges=get_edge_list(db),
-                           beamlines=get_beamline_list(db),
-                           samples=get_sample_list(db),
+                           edges=EDGES,
+                           beamlines=BLINES,
+                           samples=SAMPLES,
                            **opts)
 
 
@@ -621,7 +639,8 @@ def rate_spectrum(spid=None):
     s  = db.get_spectrum(spid)
     if s is None:
         error = 'Could not find Spectrum #%i' % spid
-        return render_template('ptable', error=error)
+        return render_template('ptable', error=error,
+                               edges=ANY_EDGES, beamlines=ANY_BLINES)
 
     opts = parse_spectrum(s, db)
     score = 3
@@ -706,7 +725,8 @@ def showsuite_rating(stid=None):
             stname, notes, _pid = st.name, st.notes, st.person_id
     if stname is None:
         error = 'Could not find Suite #%i' % stid
-        return render_template('ptable.html', error=error)
+        return render_template('ptable.html', error=error,
+                               edges=ANY_EDGES, beamlines=ANY_BLINES)
 
     ratings = []
     for score, review, dtime, pid in suite_ratings(db, stid):
@@ -732,7 +752,8 @@ def add_spectrum_to_suite(spid=None):
     s  = db.get_spectrum(spid)
     if s is None:
         error = 'Could not find Spectrum #%i' % spid
-        return render_template('ptable', error=error)
+        return render_template('ptable', error=error,
+                               edges=ANY_EDGES, beamlines=ANY_BLINES)
 
     suites = []
     for st in db.filtered_query('suite'):
@@ -775,7 +796,8 @@ def rawfile(spid, fname):
     s  = db.get_spectrum(spid)
     if s is None:
         error = 'Could not find Spectrum #%i' % spid
-        return render_template('ptable.html', error=error)
+        return render_template('ptable.html', error=error,
+                               edges=ANY_EDGES, beamlines=ANY_BLINES)
     return Response(s.filetext, mimetype='text/plain')
 
 
@@ -875,7 +897,8 @@ def edit_suite(stid=None):
     error=None
     if session['username'] is None:
         error='must be logged in to edit suite'
-        return render_template('ptable.html', error=error)
+        return render_template('ptable.html', error=error,
+                               edges=ANY_EDGES, beamlines=ANY_BLINES)
 
     st = db.filtered_query('suite', id=stid)[0]
     name, notes, person_id = st.name, st.notes, st.person_id
@@ -896,7 +919,8 @@ def submit_suite_edits():
     error=None
     if session['username'] is None:
         error='must be logged in to edit suite'
-        return render_template('ptable.html', error=error)
+        return render_template('ptable.html', error=error,
+                               edges=ANY_EDGES, beamlines=ANY_BLINES)
     if request.method == 'POST':
         stid  = int(request.form['suite'])
         db.update('suite', stid,
@@ -918,7 +942,9 @@ def sample(sid=None):
     session_init(session, db)
     samples = []
     opts = {}
-    for sdat in get_sample_list(db):
+    global SAMPLES
+    SAMPLES = get_sample_list(db)
+    for sdat in SAMPLES:
         if int(sid) == int(sdat['id']):
             opts = sdat
     return render_template('sample.html', sid=sid, **opts)
@@ -929,10 +955,13 @@ def edit_sample(sid=None):
     error=None
     if session['username'] is None:
         error='must be logged in to edit sample'
-        return render_template('ptable.html', error=error)
+        return render_template('ptable.html', error=error,
+                               edges=ANY_EDGES, beamlines=ANY_BLINES)
 
     opts = {}
-    for sdat in get_sample_list(db):
+    global SAMPLES
+    SAMPLES = get_sample_list(db)
+    for sdat in SAMPLES:
         if int(sid) == int(sdat['id']):
             opts = sdat
     return render_template('edit_sample.html', sid=sid, **opts)
@@ -943,7 +972,8 @@ def submit_sample_edits():
     error=None
     if session['username'] is None:
         error='must be logged in to edit sample'
-        return render_template('ptable.html', error=error)
+        return render_template('ptable.html', error=error,
+                               edges=ANY_EDGES, beamlines=ANY_BLINES)
     sid = 0
     if request.method == 'POST':
         sid  = request.form['sample_id']
@@ -996,7 +1026,7 @@ def beamlines(blid=None, orderby='id', reverse=0):
 def beamline(blid=None):
     session_init(session, db)
     beamlines = []
-    for _bldat in get_beamline_list(db):
+    for _bldat in BLINES:
         if _bldat['id'] == "%i" % blid:
             bldat = _bldat
             break
@@ -1097,7 +1127,8 @@ def add_citation(spid=None):
     error=None
     if session['username'] is None:
         error='must be logged in to add citation for spectrum'
-        return redirect(url_for('ptable',  error=error))
+        return redirect(url_for('ptable',  error=error,
+                                edges=ANY_EDGES, beamlines=ANY_BLINES))
 
     return render_template('add_citation.html', spid=spid)
 
@@ -1124,6 +1155,7 @@ def submit_upload():
         pid    = request.form['person']
         pemail = db.get_person(int(pid)).email
         file = request.files['file']
+        fname = request.files['filename']
         spectrum = None
         file_ok = False
         if file and allowed_filename(file.filename):
@@ -1145,7 +1177,6 @@ def submit_upload():
                 error = 'Could not find uploaded Spectrum #%d (%s)' % (sid, fullpath)
                 return render_template('upload.html', error=error)
 
-        print("SUBMIT UPLOAD ", spectrum, db)
         if spectrum is None:
             error = "File '%s' not found or not suppported type" %  (file.filename)
             return render_template('upload.html', error=error)
@@ -1161,6 +1192,7 @@ def submit_upload():
         return redirect(url_for('spectrum', spid=spectrum.id, error=error))
     return render_template('upload.html', error='upload error')
 
+## <input type="checkbox" name="check1" value="c1">Value 1<br>
 
 if __name__ == "__main__":
     app.jinja_env.cache = {}
