@@ -64,7 +64,7 @@ class InitialData:
              ["raman", "non-resonant X-ray inelastic scattering"],
              ["xeol", "visible or uv light emission"],
              ["electron emission", "emitted electrons from sample"],
-             ["fluorescence, unitstep", "X-ray fluorescence, normalized"]]
+             ]
 
     facilities = [
         ['SSRL',     'US',       'Palo Alto',          'Stanford Synchrotron Radiation Laboratory', 'SLAC'],
@@ -429,7 +429,6 @@ def  make_newdb(dbname, server= 'sqlite', user='',
                                 PointerCol('person'),
                                 PointerCol('edge'),
                                 PointerCol('element', keyid='z'),
-                                PointerCol('mode'),
                                 PointerCol('sample'),
                                 PointerCol('beamline'),
                                 PointerCol('citation'),
