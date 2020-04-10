@@ -46,7 +46,7 @@
 	  {% for bl in beamlines %}
 	    <option value={{bl.id}} s
 	      {% if bl.id == beamline_id  %} selected=1 {% endif %} >
-	      {{ bl.name }} @ {{bl.fac_name}} </option>
+                  {{ bl.name }}</option>
 	  {% endfor %}
 	  </select>
 	</td></tr>
