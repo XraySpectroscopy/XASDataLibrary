@@ -413,8 +413,7 @@ def elem(elem=None, orderby=None, reverse=0):
                         'elem_sym': elem_sym,
                         'rating': rating,
                         'beamline_desc': bl_desc,
-                        'beamline_id': bl_id,
-                        })
+                        'beamline_id': bl_id })
 
     return render_template('ptable.html',
                            ntotal=len(dbspectra),
@@ -1134,7 +1133,6 @@ def add_beamline():
 
 
 
-
 @app.route('/add_facility')
 @app.route('/add_facility', methods=['GET', 'POST'])
 def add_facility():
@@ -1166,7 +1164,17 @@ def add_facility():
 def facilities():
     session_init(session, db)
     error=None
+    facilities = db.get_facilities(orderby='country')
+    return render_template('facilities.html', error=error,
+                           facilities=facilities)
+
+@app.route('/edit_facility/<int:fid>')
+def edit_facility(fid=None):
+    session_init(session, db)
+    error=None
     facilities = db.filtered_query('facility')
+    print("Facilities ", facilities)
+
     return render_template('facilities.html', error=error,
                            facilities=facilities)
 
@@ -1214,7 +1222,7 @@ def submit_upload():
         pid    = request.form['person']
         pemail = db.get_person(int(pid)).email
         file = request.files['file']
-        fname = request.files['filename']
+        fname = request.form['spectrum_name']
         spectrum = None
         file_ok = False
         if file and allowed_filename(file.filename):
