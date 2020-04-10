@@ -434,6 +434,10 @@ class XASDataLibrary(object):
         """return list of elements z, name, symbol"""
         return self.filtered_query('element')
 
+    def get_modes(self):
+        """return list of measurement modes"""
+        return self.filtered_query('mode')
+
     def get_edge(self, val, key='name'):
         """return edge by name  or id"""
         if isinstance(val, int):
@@ -842,15 +846,35 @@ class XASDataLibrary(object):
         "get all ratings for a spectrum"
         raise NotImplementedError
 
-    def set_spectrum_mode(self, spectrum_id, mode_id):
-        """set a mode for a spectrum"""
-        self.addrow('spectrum_mode',
-                     spectrum_id=spectrum_id, mode_id=mode_id)
+    def set_spectrum_modes(self, spectrum_id, mode_ids):
+        """set modes for a spectrum
+        either a single mode or a list of modes
+        """
+        table = self.tables['spectrum_mode']
+        table.delete().where(table.c.spectrum_id==spectrum_id).execute()
 
-    def get_spectrum_mode(self,id):
-        """get mode for a spectrum"""
+        tinsert = table.insert()
+        if isinstance(mode_ids, int):
+            tinsert.execute(spectrum_id=spectrum_id, mode_id=mode_ids)
+        else:
+            for mid in mode_ids:
+                tinsert.execute(spectrum_id=spectrum_id, mode_id=mid)
+        self.set_mod_time()
+        self.session.commit()
+
+
+    def get_spectrum_modes(self,id):
+        """get modes for a spectrum"""
+        modenames = {}
+        for row in self.tables['mode'].select().execute().fetchall():
+            modenames[row.id] = row.name
+
         tab = self.tables['spectrum_mode']
-        return tab.select().where(tab.c.spectrum_id == id).execute().fetchall()
+        out = []
+        for row in  tab.select().where(tab.c.spectrum_id == id).execute().fetchall():
+            out.append((row.mode_id, modenames[row.mode_id]))
+        return out
+
 
     def get_spectrum(self, id):
         """ get spectrum by id"""
@@ -955,22 +979,22 @@ class XASDataLibrary(object):
             i0 = xfile.i0
 
         #
-        modes = []
+        _modes = []
         ifluor = itrans = irefer = None
         if hasattr(xfile, 'itrans'):
             itrans = xfile.itrans
-            modes.append('transmission')
+            _modes.append('transmission')
         elif hasattr(xfile, 'i1'):
             itrans = xfile.i1
-            modes.append('transmission')
+            _modes.append('transmission')
 
         if hasattr(xfile, 'ifluor'):
             ifluor= xfile.ifluor
-            modes.append('fluorescence')
+            _modes.append('fluorescence')
 
         elif hasattr(xfile, 'ifl'):
             ifluor= xfile.ifl
-            modes.append('fluorescence')
+            _modes.append('fluorescence')
 
         # special case: mutrans given,
         # itrans not available,
@@ -980,20 +1004,19 @@ class XASDataLibrary(object):
             if not hasattr(xfile, 'i0'):
                 i0 = np.ones(len(xfile.mutrans))*1.0
                 itrans = np.exp(-xfile.mutrans)
-            modes.append('transmission')
+            _modes.append('transmission')
 
         if (hasattr(xfile, 'mufluor') and
             not hasattr(xfile, 'ifluor')):
             if not hasattr(xfile, 'i0'):
                 i0 = np.ones(len(xfile.mufluor))*1.0
                 ifluor = xfile.mufluor
-            modes.append('fluorescence')
+            _modes.append('fluorescence')
 
-
-        if (hasattr(xfile, 'munorm')):
-            i0 = np.ones(len(xfile.munorm))*1.0
-            ifluor = xfile.munorm
-            modes.append('fluorescence, unitstep')
+        # not get modes without duplicates
+        modes = []
+        for m in ('transmission', 'fluorescence'):
+            if m in _modes: modes.append(m)
 
         refer_used = 0
         if hasattr(xfile, 'irefer'):
@@ -1063,7 +1086,6 @@ class XASDataLibrary(object):
         if sample_name not in (None, 'unknown'):
             spectrum_name = "%s [%s]" % (spectrum_name, sample_name)
 
-        # print(spectrum_name,modes)
         spec  = self.add_spectrum(spectrum_name, d_spacing=d_spacing,
                                   collection_date=c_date, person=person_id,
                                   beamline=beamline_name, edge=edge, element=element,
@@ -1077,11 +1099,9 @@ class XASDataLibrary(object):
                                   reference_sample=sample_ref_id)
 
 
-        modes_map = {}
+        mode_ids = []
         for row in self.tables['mode'].select().execute().fetchall():
-            modes_map[row.name] = row.id
-        for mode in modes:
-            mode_id = modes_map.get(mode, None)
-            if mode_id is not None:
-                self.set_spectrum_mode(spec.id, mode_id)
+            if row.name in modes:
+                mode_ids.append(row.id)
+        self.set_spectrum_modes(spec.id, mode_ids)
         return spec.id
