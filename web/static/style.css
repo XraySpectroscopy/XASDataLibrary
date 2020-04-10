@@ -80,3 +80,36 @@ h2 {font:bold 18px verdana,arial,sans-serif;color:#044484;font-weight:bold;}
     font: bold 17px arial, sans-serif;
     text-shadow:none;
 }
+
+.formsubmit input[type=submit] {background: #FE8;
+    color: red;
+    border-style: outset;
+    border-color: #FD0;
+    height: 30px;
+    width: 100px;
+    font: bold 17px arial, sans-serif;
+    text-shadow:none;
+}
+
+
+#submitbutton {background: #FAFAFE0;
+	       color: blue;
+	       border-color: #D0D080;
+	       border-style: outset;
+	       border-radius: 4px;
+	       font-size: 16px;
+	      }
+
+#fileinput {background: #FEFEFE;
+	     color: blue;
+	     border-color: #FEFEFE;
+	     border-radius: 4px;
+	     font-size: 16px;
+	    }
+
+#fileinput.button {background: #FEFEFE;
+		   color: blue;
+		   border-color: #FEFEFE;
+		   border-radius: 4px;
+		   font-size: 16px;
+	    }
