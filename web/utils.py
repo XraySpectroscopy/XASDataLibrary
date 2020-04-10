@@ -28,7 +28,6 @@ def allowed_filename(filename):
             len(filename) > 4 and
             filename.rsplit('.', 1)[1].lower() == 'xdi')
 
-
 def make_secret_key():
     "make a secret key for web app"
     f = open('secret.py', 'w')
@@ -58,6 +57,8 @@ def random_string(n):
     return ''.join([printable[randrange(10, 36)] for i in range(n)])
 
 def multiline_text(s):
+    if isinstance(s, bytes):
+        s = s.decode('utf-8')
     if '\n' in s:
         return text('%s' % (s.replace('\n', '<br>')))
 
@@ -76,8 +77,10 @@ def get_rating(item):
         rating = 'No ratings'
     return rating
 
-def get_element_list(db):
+def get_element_list(db, with_any=True):
     l = []
+    if with_any:
+        l.append({'z':'0', 'symbol': 'Any', 'name': 'Any'})
     for r in db.get_elements():
         l.append({'z': '%d' % r.z, 'symbol': r.symbol, 'name': r.name})
     return l
@@ -88,14 +91,20 @@ def get_energy_units_list(db):
         l.append({'id': '%d' % r.id, 'units': r.units})
     return l
 
-def get_edge_list(db):
+def get_edge_list(db, with_any=False):
     l = []
+    if with_any:
+        l.append({'id': '0', 'name': 'Any'})
     for r in db.get_edges():
         l.append({'id': '%d' % r.id, 'name': r.name})
     return l
 
-def get_beamline_list(db, orderby='id'):
+def get_beamline_list(db, orderby='id', with_any=False):
     l = []
+    if with_any:
+        l.append({'id': '0', 'name': 'Any', 'notes': '',
+                  'xray_source':'', 'fac_name': '', 'fac_loc': ''})
+
     for r in db.get_beamlines(orderby=orderby):
         fac  = db.filtered_query('facility', id=r.facility_id)[0]
         loc = fac.country
@@ -292,7 +301,6 @@ def parse_spectrum(s, db):
             'energy_units': eunits,
             'raw_comments': s.comments,
             'comments': multiline_text(s.comments),
-            # 'comments': s.comments, # .decode("utf-8"),
             'beamline_id': beamline_id,
             'beamline_desc': beamline_desc,
             'citation_id': citation_id,
