@@ -192,7 +192,8 @@ def beamline_for_spectrum(db, s, notes=None):
         blid = s.beamline_id
         bl   = db.filtered_query('beamline', id=blid)[0]
         fac  = db.filtered_query('facility', id=bl.facility_id)[0]
-        desc = '%s @ %s ' % (bl.name, fac.name)
+        # desc = '%s @ %s ' % (bl.name, fac.name)
+        desc = bl.name
     if (blid is None or blid < 0) and (notes is not None):
         blid = -1
         tname = notes.get('beamline', {}).get('name', None)
