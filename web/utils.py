@@ -85,6 +85,14 @@ def get_element_list(db, with_any=True):
         l.append({'z': '%d' % r.z, 'symbol': r.symbol, 'name': r.name})
     return l
 
+def get_mode_list(db, with_any=True):
+    l = []
+    if with_any:
+        l.append({'id':'0', 'name': 'Any', 'notes': 'Any'})
+    for r in db.get_modes():
+        l.append({'id': '%d' % r.id, 'name': r.name, 'notes': r.notes})
+    return l
+
 def get_energy_units_list(db):
     l = []
     for r in db.filtered_query('energy_units'):
@@ -292,6 +300,9 @@ def parse_spectrum(s, db):
             val = dict_repr(val).strip()
         if len(val) > 1:
             misc.append({'key': "# %s" % key.title(), 'val': val})
+
+    if s.comments is None:
+        s.comments = ''
 
     return {'spectrum_id': s.id,
             'spectrum_name': s.name,
