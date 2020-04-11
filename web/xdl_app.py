@@ -62,7 +62,7 @@ def send_confirm_email(person, hash, style='new'):
         Someone (hopefully you) asked to reset your account for the XAS Spectra Library.
 
         To change your passowrd, please follow this link:
-               %s/newpassword/%i/%s
+               %s/newpassword/%d/%s
 
         Thank you.
 
@@ -74,7 +74,7 @@ def send_confirm_email(person, hash, style='new'):
         An account at the XAS Spectra Library has been created for %s, but not yet confirmed.
 
         To confirm this account, please follow this link:
-           %s/confirmaccount/%i/%s
+           %s/confirmaccount/%d/%s
 
         Thank you.
 
@@ -263,6 +263,8 @@ def login():
     if request.method == 'POST':
         email = request.form['email']
         password = request.form['password']
+
+        print("Login ", email, password, type(email), type(password))
         person = db.get_person(email)
         session['person_id'] = "-1"
         if person is None:
@@ -272,7 +274,7 @@ def login():
         elif not db.test_person_password(email, password):
             error = 'Invalid password'
         else:
-            session['person_id'] = "%i" % person.id
+            session['person_id'] = "%d" % person.id
             session['username'] = request.form['email']
     if session['username'] is not None:
         return redirect(url_for('elem'))
@@ -433,32 +435,8 @@ def elem(elem=None, orderby=None, reverse=0):
 @app.route('/all')
 @app.route('/all/')
 def all():
-    session_init(session, db)
-    spectra = []
-    dbspectra = db.get_spectra()
-    for s in dbspectra:
-        edge     = db.get_edge(s.edge_id)
-        elem_sym = db.get_element(s.element_z).symbol
-        elem     = s.element_z
-        person   = db.get_person(s.person_id)
+    return redirect(url_for('elem/All', error=error))
 
-        bl_id, bl_desc = beamline_for_spectrum(db, s)
-
-        spectra.append({'id': s.id,
-                        'name': s.name,
-                        'element': elem,
-                        'edge': edge.name,
-                        'person_email': person.email,
-                        'person_name': person.name,
-                        'elem_sym': elem_sym,
-                        'rating': get_rating(s),
-                        'beamline_desc': bl_desc,
-                        'beamline_id': bl_id,
-                        })
-
-    return render_template('ptable.html', nspectra=len(dbspectra),
-                           elem='All Elements', spectra=spectra,
-                           edges=ANY_EDGES, beamlines=ANY_BLINES)
 
 @app.route('/spectrum/')
 @app.route('/spectrum/<int:spid>')
@@ -466,12 +444,11 @@ def spectrum(spid=None):
     session_init(session, db)
     s  = db.get_spectrum(spid)
     if s is None:
-        error = 'Could not find Spectrum #%i' % spid
-        return render_template('ptable.html', error=error,
-                               edges=ANY_EDGES, beamlines=ANY_BLINES)
+        error = 'Could not find Spectrum #%d' % spid
+        return redirect(url_for('elem', error=error))
 
     opts = parse_spectrum(s, db)
-    opts['spectrum_owner'] = (session['person_id'] == "%i" % s.person_id)
+    opts['spectrum_owner'] = (session['person_id'] == "%d" % s.person_id)
     opts['rating'] = get_rating(s)
 
     eunits = opts['energy_units']
@@ -559,9 +536,8 @@ def showspectrum_rating(spid=None):
     session_init(session, db)
     s  = db.get_spectrum(spid)
     if s is None:
-        error = 'Could not find Spectrum #%i' % spid
-        return render_template('ptable.html', error=error,
-                               edges=ANY_EDGES, beamlines=ANY_BLINES)
+        return redirect(url_for('elem',
+                                error='Could not find Spectrum #%d' % spid))
 
     opts = parse_spectrum(s, db)
     ratings = []
@@ -584,9 +560,8 @@ def submit_spectrum_edits():
     session_init(session, db)
     error=None
     if session['username'] is None:
-        error='must be logged in to edit spectrum'
-        return render_template('ptable.html', error=error,
-                               edges=ANY_EDGES, beamlines=ANY_BLINES)
+        return redirect(url_for('elem',
+                                error='must be logged in to edit spectrum'))
     spid = 0
     if request.method == 'POST':
         spid  = int(request.form['spectrum'])
@@ -608,15 +583,13 @@ def edit_spectrum(spid=None):
     session_init(session, db)
     error=None
     if session['username'] is None:
-        error='must be logged in to edit spectrum'
-        return render_template('ptable.html', error=error,
-                               edges=ANY_EDGES, beamlines=ANY_BLINES)
-
+        return redirect(url_for('elem',
+                                error='must be logged in to edit spectrum'))
     s  = db.get_spectrum(spid)
     if s is None:
-        error = 'Could not find Spectrum #%i' % spid
-        return render_template('ptable.html', error=error,
-                               edges=ANY_EDGES, beamlines=ANY_BLINES)
+        return redirect(url_for('elem',
+                                error = 'Could not find Spectrum #%d' % spid))
+
 
     opts = parse_spectrum(s, db)
     return render_template('edit_spectrum.html', error=error,
@@ -696,9 +669,9 @@ def rate_spectrum(spid=None):
     pid = int(session['person_id'])
     s  = db.get_spectrum(spid)
     if s is None:
-        error = 'Could not find Spectrum #%i' % spid
-        return render_template('ptable', error=error,
-                               edges=ANY_EDGES, beamlines=ANY_BLINES)
+
+        return redirect(url_for('elem',
+                                error='Could not find Spectrum #%d' % spid))
 
     opts = parse_spectrum(s, db)
     score = 3
@@ -782,7 +755,7 @@ def showsuite_rating(stid=None):
         if st.id == stid:
             stname, notes, _pid = st.name, st.notes, st.person_id
     if stname is None:
-        error = 'Could not find Suite #%i' % stid
+        error = 'Could not find Suite #%d' % stid
         return render_template('ptable.html', error=error,
                                edges=ANY_EDGES, beamlines=ANY_BLINES)
 
@@ -809,7 +782,7 @@ def add_spectrum_to_suite(spid=None):
 
     s  = db.get_spectrum(spid)
     if s is None:
-        error = 'Could not find Spectrum #%i' % spid
+        error = 'Could not find Spectrum #%d' % spid
         return render_template('ptable', error=error,
                                edges=ANY_EDGES, beamlines=ANY_BLINES)
 
@@ -853,7 +826,7 @@ def rawfile(spid, fname):
     session_init(session, db)
     s  = db.get_spectrum(spid)
     if s is None:
-        error = 'Could not find Spectrum #%i' % spid
+        error = 'Could not find Spectrum #%d' % spid
         return render_template('ptable.html', error=error,
                                edges=ANY_EDGES, beamlines=ANY_BLINES)
     return Response(s.filetext, mimetype='text/plain')
@@ -987,7 +960,7 @@ def submit_suite_edits():
 
         for spec in spectra_for_suite(db, stid):
             spid = int(spec['spectrum_id'])
-            key = 'spec_%i' % spid
+            key = 'spec_%d' % spid
             if key not in request.form:
                 db.remove_spectrum_from_suite(stid, spid)
         time.sleep(0.25)
@@ -1041,15 +1014,9 @@ def submit_sample_edits():
         prep = request.form['preparation']
         formula = request.form['formula']
         source = request.form['material_source']
-        # xtal_format = request.form['xtal_format']
-        # xtal_data   = request.form['xtal_data']
 
-        db.update('sample', int(sid),
-                  person=pid,
-                  name=name,
-                  notes=notes,
-                  formula=formula,
-                  material_source=source,
+        db.update('sample', int(sid), person=pid, name=name, notes=notes,
+                  formula=formula, material_source=source,
                   preparation=prep)
         time.sleep(0.25)
     return redirect(url_for('sample', sid=sid, error=error))
@@ -1057,10 +1024,9 @@ def submit_sample_edits():
 @app.route('/beamlines')
 @app.route('/beamlines/<orderby>')
 @app.route('/beamlines/<orderby>/<reverse>')
-def beamlines(blid=None, orderby='id', reverse=0):
+def beamlines(blid=None, orderby='name', reverse=0):
     session_init(session, db)
     beamlines = []
-
     for bldat in get_beamline_list(db, orderby=orderby):
         blid = bldat['id']
         spectra = spectra_for_beamline(db, blid)
@@ -1085,7 +1051,7 @@ def beamline(blid=None):
     session_init(session, db)
     beamlines = []
     for _bldat in BLINES:
-        if _bldat['id'] == "%i" % blid:
+        if _bldat['id'] == "%d" % blid:
             bldat = _bldat
             break
 
@@ -1140,7 +1106,7 @@ def add_facility():
     error=None
     if session['username'] is None:
         error='must be logged in to add a facility'
-        return redirect(url_for('beamlines', error=error))
+        return redirect(url_for('facilities', error=error))
 
     if request.method == 'POST':
         fac_name = request.form['facility_name']
@@ -1165,6 +1131,8 @@ def facilities():
     session_init(session, db)
     error=None
     facilities = db.get_facilities(orderby='country')
+    user = session['username']
+
     return render_template('facilities.html', error=error,
                            facilities=facilities)
 
@@ -1172,11 +1140,39 @@ def facilities():
 def edit_facility(fid=None):
     session_init(session, db)
     error=None
-    facilities = db.filtered_query('facility')
-    print("Facilities ", facilities)
+    fac = db.get_facility(id=int(fid))
+    return render_template('edit_facility.html', error=error,
+                           fac=fac, person_id=session['person_id'])
 
-    return render_template('facilities.html', error=error,
-                           facilities=facilities)
+
+@app.route('/submit_facility_edits', methods=['GET', 'POST'])
+def submit_facility_edits():
+    session_init(session, db)
+    error=None
+    if session['username'] is None:
+        return redirect(url_for('elem',
+                                error='must be logged in to edit facility'))
+
+    fid = 0
+    print("Facility edits ", request.form)
+    fid  = int(request.form.get('facility_id', -1))
+    if fid < 0:
+        return redirect(url_for('elem',
+                                error='could not edit facility'))
+
+    if request.method == 'POST':
+        print(' -> update', fid, request.form['city'])
+        o = db.update('facility', fid,
+                      name=request.form['name'],
+                      fullname=request.form['fullname'],
+                      laboratory=request.form['laboratory'],
+                      city=request.form['city'],
+                      country=request.form['country'])
+        print("Done ", o)
+        time.sleep(0.25)
+
+    return redirect(url_for('facilities', error=error))
+
 
 @app.route('/citation')
 @app.route('/citation/<int:cid>')
