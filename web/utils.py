@@ -126,6 +126,18 @@ def get_beamline_list(db, orderby='id', with_any=False):
                   'fac_loc': loc})
     return l
 
+def get_facilities(db):
+    l = []
+    for r in db.filtered_query('facility'):
+        l.append({'id': '%d' % r.id, 'name': r.name,
+                  'fullname': r.fullname, 'notes': r.notes,
+                  'city': r.city,
+                  'country': r.country,
+                  'material_source': r.material_source})
+    return l
+
+
+
 def get_sample_list(db):
     l = []
     for r in db.filtered_query('sample'):
@@ -200,6 +212,7 @@ def beamline_for_spectrum(db, s, notes=None):
         if tname is not None:
             desc = "%s -- may be '%s'" % (desc, tname)
     return '%d' % blid, desc
+
 
 def citation_for_spectrum(db, s, notes=None):
     "return id, desc for citation of a spectrum"
