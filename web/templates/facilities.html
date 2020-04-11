@@ -1,7 +1,22 @@
 {% extends "layout.html" %}
 {% block body %}
 
-<p> <div class=subtitle>Facilities</div>
+<div class=subtitle> Facilities:
+
+{% if session.username is not none %}
+  &nbsp;   &nbsp;
+  <a href="{{ url_for('add_facility') }}"> [add a facility] </a>
+{% endif %}
+
+&nbsp;   &nbsp;
+
+<a href="{{ url_for('beamlines') }}"> Beamlines </a>
+
+
+</div>
+
+
+
 
 <div class=body>
 <hr>
@@ -15,7 +30,13 @@
   </tr>
   {% for f in facilities %}
   <tr class={{ loop.cycle('odd', 'even') }}>
-    <td>  <a href="{{ url_for('edit_facility', fid=f.id) }}"> {{f.name }} </a></td>
+    <td>
+    {% if session.username is not none %}
+       <a href="{{ url_for('edit_facility', fid=f.id) }}"> {{f.name }}</a>
+    {% else %}
+       {{f.name }}
+    {% endif %}
+    </td>
     <td> {{f.fullname }} </td>
     <td>  &nbsp; {{f.laboratory}}  &nbsp; </td>
     <td>  &nbsp; {{f.city}}  &nbsp; </td>

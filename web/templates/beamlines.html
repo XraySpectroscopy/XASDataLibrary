@@ -1,16 +1,22 @@
 {% extends "layout.html" %}
 {% block body %}
 
-<div class=subtitle> Beamlines
+<div class=subtitle> Beamlines:
+
 
 {% if session.username is not none %}
   &nbsp;   &nbsp;
   <a href="{{ url_for('add_beamline') }}"> [add a beamline] </a>
-  &nbsp;   &nbsp;
-  <a href="{{ url_for('add_facility') }}"> [add a facility] </a>
 {% endif %}
 
+&nbsp;   &nbsp;
+
+<a href="{{ url_for('facilities') }}"> Facilities </a>
+
+
 </div>
+
+
 
 <div class=body>
 <hr>
@@ -19,11 +25,15 @@
 {% else %}
    <table cellspacing=3 cellpadding=1>
     <tr><th>Beamline</th>
-<th> # Spectra</th> <th>Facility Location</th></tr>
+    <th> # Spectra</th>
+    <th>Facility</th>
+    <th>Location</th>
+    </tr>
    {% for bl in beamlines %}
        <tr class={{ loop.cycle('odd', 'even') }}>
        <td>  <a href="{{ url_for('beamline', blid=bl.id)}}"> {{bl.name}} </a></td>
 	<td>  &nbsp; {{bl.nspectra}}  &nbsp;</td>
+	<td>  &nbsp; {{bl.fac_name}}  &nbsp;</td>
 	<td>  &nbsp; {{bl.fac_loc}}</td></tr>
    {% endfor %}
    </table>
