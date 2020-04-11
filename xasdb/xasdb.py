@@ -546,7 +546,7 @@ class XASDataLibrary(object):
         """return list of people"""
         return self.filtered_query('person')
 
-    def set_person_password(self, email, password):
+    def set_person_password(self, email, password, auto_confirm=False):
         """ set secure password for person"""
         salt   = b64encode(os.urandom(24))
         result = b64encode(pbkdf2_hmac(PW_ALGOR, password.encode('utf-8'),
@@ -554,16 +554,19 @@ class XASDataLibrary(object):
         hash = '$'.join((PW_ALGOR, '%8.8d'%PW_NITER, salt.decode('utf-8'),
                          result.decode('utf-8')))
         table = self.tables['person']
-        table.update(whereclause=text("email='%s'" % email)).execute(password=hash)
+        ewhere = text("email='%s'" % email)
+        confirmed = 'true' if auto_confirm else 'false'
+        table.update(whereclause=ewhere).execute(password=hash,
+                                                 confirmed=confirmed)
 
     def test_person_password(self, email, password):
         """test password for person, returns True if valid"""
-
         table = self.tables['person']
         row  = table.select(table.c.email==email).execute().fetchone()
         try:
             algor, niter, salt, hash_stored = row.password.split('$')
         except:
+            print("Fetch stored hash failed" )
             algor, niter, salt, hash_stored = PW_ALGOR, PW_NITER, '_nul_', '%bad%'
         hash_test = b64encode(pbkdf2_hmac(algor, password.encode('utf-8'),
                                           salt.encode('utf-8'),
@@ -731,6 +734,7 @@ class XASDataLibrary(object):
         table = self.tables[tablename]
         if use_id:
             where = "id='%d'" % where
+
         table.update(whereclause=text(where)).execute(**kws)
         self.set_mod_time()
         self.session.commit()
