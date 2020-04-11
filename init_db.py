@@ -21,7 +21,8 @@ print( 'Verified that database %s can be accessed.' % dbname)
 
 db.add_person('xaslib admin', 'xaslib@xrayabsorption.org', affiliation='IXAS')
 person = db.set_person_password('xaslib@xrayabsorption.org',
-                                'Re3{t_Th1s_P@ssw0rd!')
+                                'b@d_p@ssw0rd!',
+                                auto_confirm=True)
 email  = db.get_person('xaslib@xrayabsorption.org').email
 
 datadir = 'data'
