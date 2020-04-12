@@ -12,7 +12,9 @@
     <tr><td>Name:</td><td>
 	<input size=60 type=text name=name value='{{spectrum_name|safe}}'></td></tr>
     <tr><td> Mono d-spacing: </td><td>
-	<input size=10 type=text name=d_spacing value={{d_spacing}}> &#197; </td></tr>
+	<input size=20 type=text name=d_spacing value={{d_spacing}}> &#197; </td></tr>
+    <tr><td> Energy Resolution: </td><td>
+	<input size=20 type=text name=e_resolution value={{e_resolution}}>  </td></tr>
     <tr><td> Element: </td><td>
 	<select name='elem' style="width: 100px;">
 	  {% for el in elems %}
