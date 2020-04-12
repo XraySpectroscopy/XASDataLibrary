@@ -291,8 +291,6 @@ class XASDataLibrary(object):
                                                     port, dbname))
 
         self.session = sessionmaker(bind=self.engine)()
-        self.query   = self.session.query
-
         self.metadata =  MetaData(self.engine)
         try:
             self.metadata.reflect()
@@ -370,7 +368,7 @@ class XASDataLibrary(object):
     def set_info(self, key, value):
         """set key / value in the info table"""
         table = self.tables['info']
-        vals  = self.query(table).filter(Info.key==key).all()
+        vals  = self.fquery('info', key=key)
         if len(vals) < 1:
             # none found -- insert
             table.insert().execute(key=key, value=value)
@@ -391,20 +389,20 @@ class XASDataLibrary(object):
         self.set_mod_time()
         self.session.commit()
 
-    def filtered_query(self, tablename, **kws):
+    def fquery(self, tablename, **kws):
         """
-        return query of table with any equality filter on columns
+        return filtered query of table with any equality filter on columns
 
         examples:
 
-        >>> db.filtered_query('element', z=30)
-        >>> db.filtered_query('spectrum', person_id=3)
+        >>> db.fquery('element', z=30)
+        >>> db.fquery('spectrum', person_id=3)
 
         will return all rows from table
 
         """
         table = self.tables[tablename]
-        query = self.query(table)
+        query = self.session.query(table)
         for key, val in kws.items():
             if key in table.c and val is not None:
                 query = query.filter(getattr(table.c, key)==val)
@@ -413,7 +411,7 @@ class XASDataLibrary(object):
     def get_facility(self,  **kws):
         """return facility or list of facilities"""
 
-        out = self.filtered_query('facility', **kws)
+        out = self.fquery('facility', **kws)
         if len(out) > 1:
             return out
         return None_or_one(out)
@@ -425,7 +423,7 @@ class XASDataLibrary(object):
         query = apply_orderby(tab.select(), tab, orderby)
         return query.execute().fetchall()
 
-        out = self.filtered_query('facility')
+        out = self.fquery('facility')
 
         return None_or_one(out)
 
@@ -436,35 +434,34 @@ class XASDataLibrary(object):
             key = 'z'
         elif len(val) > 2:
             key = 'name'
-        args = {}
-        args[key] = val
-        return None_or_one(self.filtered_query('element', **args))
+        kws = {key: val}
+        return None_or_one(self.fquery('element', **kws))
 
     def get_elements(self):
         """return list of elements z, name, symbol"""
-        return self.filtered_query('element')
+        return self.fquery('element')
 
     def get_modes(self):
         """return list of measurement modes"""
-        return self.filtered_query('mode')
+        return self.fquery('mode')
 
     def get_edge(self, val, key='name'):
         """return edge by name  or id"""
         if isinstance(val, int):
             key = 'id'
         kws = {key: val}
-        return None_or_one(self.filtered_query('edge', **kws))
+        return None_or_one(self.fquery('edge', **kws))
 
     def get_edges(self):
         """return list of edges"""
-        return self.filtered_query('edge')
+        return self.fquery('edge')
 
     def get_beamline(self, val, key='name'):
         """return beamline by name  or id"""
         if isinstance(val, int):
             key = 'id'
         kws = {key: val}
-        return None_or_one(self.filtered_query('beamline', **kws))
+        return None_or_one(self.fquery('beamline', **kws))
 
     def add_energy_units(self, units, notes=None, **kws):
         """add Energy Units: units required
@@ -474,7 +471,7 @@ class XASDataLibrary(object):
 
     def get_sample(self, sid):
         """return sample by id"""
-        return None_or_one(self.filtered_query('sample', id=sid))
+        return None_or_one(self.fquery('sample', id=sid))
 
     def add_mode(self, name, notes='', **kws):
         """add collection mode: name required
@@ -539,12 +536,12 @@ class XASDataLibrary(object):
             key = 'id'
         kws = {key: val}
 
-        return None_or_one(self.filtered_query('person', **kws),
+        return None_or_one(self.fquery('person', **kws),
                            "expected 1 or None person")
 
     def get_persons(self, **kws):
         """return list of people"""
-        return self.filtered_query('person')
+        return self.fquery('person')
 
     def set_person_password(self, email, password, auto_confirm=False):
         """ set secure password for person"""
@@ -797,7 +794,7 @@ class XASDataLibrary(object):
         kws['person_id'] = person
         kws['edge_id'] = self.get_edge(edge).id
         kws['element_z'] = self.get_element(element).z
-        kws['energy_units_id'] = self.filtered_query('energy_units', name=energy_units)[0].id
+        kws['energy_units_id'] = self.fquery('energy_units', name=energy_units)[0].id
 
         kws['sample_id'] = sample
         kws['citation_id'] = citation
@@ -805,8 +802,7 @@ class XASDataLibrary(object):
         kws['reference_mode_id'] = reference_mode
 
         self.addrow('spectrum', name=name, **kws)
-        table = self.tables['spectrum']
-        return self.query(table).filter(table.c.name == name).one()
+        return self.fquery('spectrum', name=name)[0]
 
 
     def get_beamlines(self, facility=None, orderby='id'):
@@ -841,7 +837,7 @@ class XASDataLibrary(object):
 
     def guess_beamline(self, name, facility=None):
         """return best guess of beamline by name"""
-        bline = None_or_one(self.filtered_query('beamline', name=name))
+        bline = None_or_one(self.fquery('beamline', name=name))
         if bline is not None:
             return bline
         candidates = self.get_beamlines(facility=facility)
@@ -851,14 +847,22 @@ class XASDataLibrary(object):
                 return b
         return None
 
-
-    def get_suite_ratings(self, spectrum):
+    def get_suite_ratings(self, suite):
         "get all ratings for a suite"
-        raise NotImplementedError
+        if hasattr(suite, 'id') and hasattr(spectrum, 'ratings_summary'):
+            sid = suite.id
+        else:
+            sid = suite
+        return db.fquery('suite_rating', suite_id=sid)
+
 
     def get_spectrum_ratings(self, spectrum):
         "get all ratings for a spectrum"
-        raise NotImplementedError
+        if hasattr(spectrum, 'id') and hasattr(spectrum, 'itrans'):
+            sid = spectrum.id
+        else:
+            sid = spectrum
+        return db.fquery('spectrum_rating', spectrum_id=sid)
 
     def set_spectrum_modes(self, spectrum_id, mode_ids):
         """set modes for a spectrum
@@ -1075,22 +1079,18 @@ class XASDataLibrary(object):
                             preparation=prep, notes=notes)
 
             stab = self.tables['sample']
-            sample = self.query(stab).filter(stab.c.name==sample_name).all()
-            # if len(sample) > 1:
-                # print( 'Warning: multiple (%d) samples name %s' % (len(sample), sample_name))
-            sample = sample[0]
+            sample = self.fquery('sample', name=sample_name)[0]
 
             sample_id = sample.id
             sample_ref_id = None
             if 'reference' in sattrs:
                 rname = sattrs['reference']
                 note = "reference for '%s', uploaded %s" % (fname, now)
-                try:
-                    rsample = self.query(stab).filter(stab.c.name==rname).one()
-                except:
+                rsample =  None_or_one(self.fquery('sample', name=rname))
+                if rsample is None:
                     self.add_sample(rname, person_id, formula='',
                                     preparation='', notes=notes)
-                    rsample = self.query(stab).filter(stab.c.name==rname).one()
+                    rsample = None_or_one(self.fquery('sample', name=rname))
                 sample_ref_id = rsample.id
 
 
