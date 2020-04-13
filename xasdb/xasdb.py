@@ -719,8 +719,6 @@ class XASDataLibrary(object):
         for attr in ('person', 'sample', 'citation', 'reference_mode'):
             kws['%s_id' % attr] = dlocal.get(attr, '')
 
-        print("Add Spectrum ",  kws['reference_sample'])
-
         # dates
         if submission_date is None:
             submission_date = datetime.now()
