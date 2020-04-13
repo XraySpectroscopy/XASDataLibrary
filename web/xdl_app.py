@@ -19,10 +19,10 @@ from xasdb import (connect_xasdb, fmttime, valid_score, unique_name, None_or_one
 from xafs_preedge import (preedge, edge_energies)
 
 from utils import (row2dict, random_string, multiline_text, session_init,
-                   parse_spectrum, spectrum_ratings,
-                   spectra_for_suite, beamline_for_spectrum,
-                   spectra_for_beamline, get_beamline_list, get_rating,
-                   allowed_filename, get_fullpath, pathjoin)
+                   parse_spectrum, spectrum_ratings, spectra_for_suite,
+                   beamline_for_spectrum, spectra_for_beamline,
+                   get_beamline_list, get_rating, allowed_filename,
+                   get_fullpath, pathjoin)
 
 
 # sys.path.insert(0, '/home/newville/XASDB_Secrets')
@@ -507,6 +507,7 @@ def spectrum(spid=None):
         suites.append({'id': r.suite_id, 'name': st.name})
     opts['nsuites'] = len(suites)
     opts['suites'] = suites
+
     return render_template('spectrum.html', **opts)
 
 @app.route('/showspectrum_rating/<int:spid>')
@@ -519,7 +520,7 @@ def showspectrum_rating(spid=None):
 
     opts = parse_spectrum(s, db)
     ratings = []
-    for row in db.spectrum_ratings(spid):
+    for row in db.get_spectrum_ratings(spid):
         person = db.get_person(row.person_id)
         ratings.append({'score': row.score,
                         'review': multiline_text(row.comments),
