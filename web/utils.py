@@ -246,14 +246,6 @@ def parse_spectrum(s, db):
             if isinstance(sample_name, dict):
                 sample_name = dict_repr(sample_name)
 
-    # reference sample
-    refer_id = '-1'
-    refer_name = ''
-    if s.reference_id is not None:
-        rsample = db.fquery('sample', id=s.reference_id)[0]
-        refer_id = s.reference_id
-        refer_name = rsample.name
-
     mononame = 'unknown'
     if 'mono' in notes:
         if 'name' in notes['mono']:
@@ -279,6 +271,7 @@ def parse_spectrum(s, db):
 
     return {'spectrum_id': s.id,
             'spectrum_name': s.name,
+            'description': s.description,
             'elem_sym': elem.symbol,
             'elem_name': elem.name,
             'edge': edge.name,
@@ -294,12 +287,12 @@ def parse_spectrum(s, db):
             'mononame': mononame,
             'd_spacing': d_spacing,
             'misc': misc,
+            'temperature': s.temperature,
             'sample_id':   sample_id,
             'sample_name':  sample_name,
             'sample_form':  sample_form,
             'sample_prep':  sample_prep,
-            'refer_id': "%d" % int(refer_id),
-            'refer_name': refer_name,
+            'reference_sample': s.reference_sample,
             'person_email': person.email,
             'person_name': person.name,
             'upload_date': fmttime(s.submission_date),

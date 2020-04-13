@@ -36,6 +36,7 @@
 	     {{ spectrum_name }}.xdi </a>
     </td>
 
+<tr><td> Short Description: </td> <td> {{ description  }} </td></tr>
 <tr><td width=25%> Ratings: </td>
     <td> <a href="{{url_for('showspectrum_rating', spid=spectrum_id)}}"> {{ rating }} </a>
     </td></tr>
@@ -50,26 +51,24 @@
   {% endif %}
 </td></tr>
 
-
-<tr><td> Absorption Edge: </td>
-      <td> <a href="{{url_for('elem')}}/{{elem_sym}}">{{ elem_sym }}</a> {{ edge }} edge  </td></tr>
-
-
+<tr><td> Absorption Edge:  </td> <td> <a href="{{url_for('elem')}}/{{elem_sym}}">{{ elem_sym }}</a> {{ edge }} edge  </td></tr>
 <tr><td> Measurement Mode: </td> <td> {{ mode  }} </td></tr>
+<tr><td> Energy Units:    </td> <td>  {{energy_units}}  </td></tr>
+<tr><td> Mono d-spacing:  </td> <td>  {{d_spacing}} &#197; ({{mononame}})   </td></tr>
+<tr><td> Energy Resolution: </td> <td>  {{energy_resolution}}   </td></tr>
 
-<tr><td> Sample Name:  </td> <td> <a href="{{url_for('sample', sid=sample_id)}}"> {{sample_name}} </a></td></tr>
-
-<tr><td> Sample Prep:     </td> <td>  {{sample_prep}}   </td></tr>
-
-<tr><td> Reference Sample: </td> <td>
-    {% if  refer_id != '-1' %} <a href="{{url_for('sample', sid=refer_id)}}"> {{refer_name}} </a>
-    {% else %}  no reference used {% endif %}  </td></tr>
-
-<tr><td> Beamline:        </td> <td>
+<tr><td> Sample Name:      </td> <td> <a href="{{url_for('sample', sid=sample_id)}}"> {{sample_name}} </a></td></tr>
+<tr><td> Sample Prep:      </td> <td> {{sample_prep}}   </td></tr>
+<tr><td> Reference Sample: </td> <td> {{reference_sample}} </td></tr>
+<tr><td> Beamline:         </td> <td>
     {% if  beamline_id != '-1' %}
 	<a href="{{url_for('beamline')}}/{{beamline_id}}"> {{ beamline_desc }}</a> &nbsp; &nbsp;
     {% else %} {{ beamline_desc }} &nbsp; &nbsp;
     {% endif %} </td></tr>
+<tr><td> Date Measured:   </td> <td>  {{collection_date}}     </td></tr>
+<tr><td> Date Uploaded:   </td>
+	  <td>  {{upload_date}}, {{ person_name }} ({{ person_email }})    </td></tr>
+
 <tr><td> Citation:        </td> <td>
     {% if  citation_id != '-1' %}
        <a href="{{url_for('citation')}}/{{citation_id}}"> {{ citation_name }}</a> &nbsp; &nbsp;
@@ -80,13 +79,6 @@
        {% endif %}
     {% endif %} </td></tr>
 
-<tr><td> Energy Units:    </td> <td>  {{energy_units}}  </td></tr>
-<tr><td> Mono d-spacing:  </td> <td>  {{d_spacing}} &#197; ({{mononame}})   </td></tr>
-<tr><td> Energy Resolution: </td> <td>  {{energy_resolution}}   </td></tr>
-
-<tr><td> Date Measured:   </td> <td>  {{collection_date}}     </td></tr>
-<tr><td> Date Uploaded:   </td>
-	  <td>  {{upload_date}}, {{ person_name }} ({{ person_email }})    </td></tr>
 <tr><td> User Comments:   </td>  <td>   {{ comments|safe }} </td></tr>
 <tr><td colspan=2> <hr> </td></tr>
 <tr><td colspan=2> &nbsp;&nbsp;&nbsp; <i>unsorted file headers:</i> </td></tr>
