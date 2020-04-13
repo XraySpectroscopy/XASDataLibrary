@@ -222,7 +222,7 @@ def parse_spectrum(s, db):
     edge   = db.get_edge(s.edge_id)
     elem   = db.get_element(s.element_z)
     person = db.get_person(s.person_id)
-    modes  = db.get_spectrum_modes(s.id)
+    mode   = db.get_mode(s.id)
     eunits = db.fquery('energy_units', id=s.energy_units_id)[0].units
     d_spacing = '%f'% s.d_spacing
     notes =  json.loads(s.notes)
@@ -277,14 +277,6 @@ def parse_spectrum(s, db):
     if eresolution is None:
         eresolution = 'nominal'
 
-    modenames = [m[1] for m  in modes]
-    if len(modenames) == 0:
-        modes = MODES[0]
-    elif len(modenames) == 1:
-        modes = modes[0]
-    else:
-        modes = ', '.join(modenames)
-
     return {'spectrum_id': s.id,
             'spectrum_name': s.name,
             'elem_sym': elem.symbol,
@@ -292,7 +284,7 @@ def parse_spectrum(s, db):
             'edge': edge.name,
             'energy_units': eunits,
             'energy_resolution': eresolution,
-            'modes': modes,
+            'mode': mode,
             'raw_comments': s.comments,
             'comments': multiline_text(s.comments),
             'beamline_id': beamline_id,

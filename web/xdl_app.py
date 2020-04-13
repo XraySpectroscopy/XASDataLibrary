@@ -39,8 +39,8 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 db = connect_xasdb(DBNAME, **DBCONN)
 
-ANY_EDGES  = ['Any'] + [e[1] for e in db.get_edges()]
-ANY_MODES  = ['Any'] + [e[1] for e in db.get_modes()]
+ANY_EDGES  = ['Any'] + [e.name for e in db.get_edges()]
+ANY_MODES  = ['Any'] + [e.name for e in db.get_modes()]
 
 def send_confirm_email(person, hash, style='new'):
     """send email with account confirmation/reset link"""
@@ -338,7 +338,7 @@ def elem(elem=None, orderby=None, reverse=0):
                 pass
 
     edge_filter = request.form.get('edge_filter', ANY_EDGES[0])
-    mode_filter = request.form.get('mode_filter', 'Any')
+    mode_filter = request.form.get('mode_filter', ANY_MODES[0])
     beamline_id = request.form.get('beamline', '0')
     searchword  = request.form.get('searchphrase', '')
     rating_min  = request.form.get('rating', '0')
@@ -352,10 +352,10 @@ def elem(elem=None, orderby=None, reverse=0):
 
     spectra = []
     for s in dbspectra:
-        edge     = db.get_edge(s.edge_id)[1]
+        edge     = db.get_edge(s.edge_id).name
         elem_sym = db.get_element(s.element_z).symbol
         person   = db.get_person(s.person_id)
-        modes    = db.get_spectrum_modes(s.id)
+        mode     = db.get_mode(s.mode_id)
 
         rating   = get_rating(s)
         bl_id, bl_desc = beamline_for_spectrum(db, s)
@@ -363,7 +363,7 @@ def elem(elem=None, orderby=None, reverse=0):
         # filter edge, beamline, and modes:
         if ((edge_filter not in (edge, ANY_EDGES[0])) or
             (beamline_id != '0' and int(bl_id) != int(beamline_id)) or
-            (mode_filter != 'Any' and mode_filter not in modes)):
+            (mode_filter not in (mode, ANY_MODES[0]))):
             continue
 
         # filter rating
@@ -444,11 +444,7 @@ def spectrum(spid=None):
     except:
         pass
 
-    modes = db.get_spectrum_modes(spid)
-    if modes is None:
-        plot_mode = 'trans'
-    else:
-        plot_mode = modes[0][1]
+    plot_mode = mode = db.get_mode(spid)
 
     # now get real data for plotting
     energy, mudata, murefer = None, None, None
@@ -548,23 +544,19 @@ def submit_spectrum_edits():
     if request.method == 'POST':
         spid  = int(request.form['spectrum'])
         edge_id = ANY_EDGES.index(request.form['edge'])
+        mode_id = ANY_MODES.index(request.form['mode'])
+
         db.update('spectrum', int(spid),
                   name=request.form['name'],
                   comments=request.form['comments'],
                   d_spacing=float(request.form['d_spacing']),
                   energy_resolution=request.form['e_resolution'],
-                  edge_id=edge_id,
+                  edge_id=edge_id, mode_id=mode_id,
                   beamline_id= int(request.form['beamline']),
                   sample_id= int(request.form['sample']),
                   energy_units_id=int(request.form['energy_units']))
 
-        mode = request.form['mode']
-        if mode not in ANY_MODES[1:]:
-            mode = ANY_MODES[1]
-
-        db.set_spectrum_modes(spid, [ANY_MODES.index(mode)])
         time.sleep(0.25)
-
     return redirect(url_for('spectrum', spid=spid, error=error))
 
 @app.route('/edit_spectrum/<int:spid>')
@@ -579,15 +571,14 @@ def edit_spectrum(spid=None):
         return redirect(url_for('elem',
                                 error = 'Could not find Spectrum #%d' % spid))
 
-
     opts = parse_spectrum(s, db)
     return render_template('edit_spectrum.html', error=error,
-                           elems=get_element_list(db),
-                           eunits=get_energy_units_list(db),
+                           elems=db.fquery('element'),
+                           eunits=db.fquery('energy_units'),
                            edges=ANY_EDGES[1:],
                            beamlines=get_beamline_list(db, with_any=False, orderby='name'),
                            samples=db.fquery('sample'),
-                           modenames=ANY_MODES[1:],
+                           modes=ANY_MODES[1:],
                            **opts)
 
 
