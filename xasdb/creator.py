@@ -428,6 +428,7 @@ def  make_newdb(dbname, server= 'sqlite', user='',
                                 PointerCol('energy_units'),
                                 PointerCol('person'),
                                 PointerCol('edge'),
+                                PointerCol('mode'),
                                 PointerCol('element', keyid='z'),
                                 PointerCol('sample'),
                                 PointerCol('beamline'),
@@ -466,11 +467,6 @@ def  make_newdb(dbname, server= 'sqlite', user='',
                            IntCol('id', primary_key=True),
                            PointerCol('suite') ,
                            PointerCol('spectrum'))
-
-    spectrum_mode = Table('spectrum_mode', metadata,
-                          IntCol('id', primary_key=True),
-                          PointerCol('mode') ,
-                          PointerCol('spectrum'))
 
     spectrum_ligand = Table('spectrum_ligand', metadata,
                            IntCol('id', primary_key=True),

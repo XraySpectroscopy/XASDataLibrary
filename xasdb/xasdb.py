@@ -259,10 +259,6 @@ class Spectrum(_BaseTable):
     "spectra table"
     pass
 
-class Spectrum_Mode(_BaseTable):
-    "spectra table"
-    pass
-
 
 class XASDataLibrary(object):
     """full interface to XAS Spectral Library"""
@@ -309,54 +305,6 @@ class XASDataLibrary(object):
             logger = logging.getLogger('sqlalchemy.engine')
             logger.addHandler(logging.FileHandler(self.logfile))
 
-        mappers = """
-        mapper(Info,             tables['info'])
-        mapper(Sample,           tables['sample'])
-        mapper(Spectrum_Rating,  tables['spectrum_rating'])
-        mapper(Spectrum_Ligand,  tables['spectrum_ligand'])
-        mapper(Spectrum_Mode,    tables['spectrum_mode'])
-        mapper(Suite_Rating,     tables['suite_rating'])
-        mapper(EnergyUnits,      tables['energy_units'])
-        mapper(Spectrum,         tables['spectrum'])
-
-        relate = relationship
-
-        mapper(Mode, tables['mode'],
-               properties={'spectrum': relate(Spectrum, backref='mode',
-                                        secondary=tables['spectrum_mode'])})
-
-        mapper(Edge, tables['edge'],
-               properties={'spectrum': relate(Spectrum, backref='edge')})
-
-        mapper(Element, tables['element'],
-               properties={'spectrum': relate(Spectrum, backref='element')})
-
-        mapper(Beamline, tables['beamline'],
-               properties={'spectrum': relate(Spectrum, backref='beamline')})
-
-        mapper(Citation, tables['citation'],
-               properties={'spectrum': relate(Spectrum, backref='citation')})
-
-        mapper(Ligand,   tables['ligand'],
-               properties={'spectrum': relate(Spectrum, backref='ligand',
-                                              secondary=tables['spectrum_ligand'])})
-
-        mapper(Crystal_Structure,   tables['crystal_structure'],
-               properties={'samples': relate(Sample, backref='structure')})
-
-        mapper(Facility, tables['facility'],
-               properties={'beamlines': relate(Beamline, backref='facility')})
-
-        mapper(Person,   tables['person'],
-               properties={'suites': relate(Suite, backref='person'),
-                           'samples': relate(Sample, backref='person'),
-                           'spectrum': relate(Spectrum, backref='person')})
-
-        mapper(Suite,   tables['suite'],
-        properties={'spectrum': relate(Spectrum, backref='suite',
-                                        secondary=tables['spectrum_suite'])})
-
-        """
 
 
     def close(self):
@@ -444,6 +392,7 @@ class XASDataLibrary(object):
     def get_modes(self):
         """return list of measurement modes"""
         return self.fquery('mode')
+
 
     def get_edge(self, val, key='name'):
         """return edge by name  or id"""
@@ -738,13 +687,13 @@ class XASDataLibrary(object):
 
     def add_spectrum(self, name, notes='', d_spacing=-1, energy_notes='',
                      i0_notes='', itrans_notes='', ifluor_notes='',
-                     irefer_notes='', submission_date=None,
+                     irefer_notes='', submission_date=None, mode='transmission',
                      collection_date=None, temperature='', energy=None,
                      i0=None, itrans=None, ifluor=None, irefer=None,
                      energy_stderr=None, i0_stderr=None,
                      itrans_stderr=None, ifluor_stderr=None,
                      irefer_stderr=None, energy_units=None, person=None,
-                     edge=None, element=None, sample=None, beamline=None,
+                     edge='K', element=None, sample=None, beamline=None,
                      data_format=None, citation=None, reference_used=0,
                      reference_mode=None, reference_sample=None, **kws):
 
@@ -793,6 +742,7 @@ class XASDataLibrary(object):
             kws['beamline_id'] = bline.id
         kws['person_id'] = person
         kws['edge_id'] = self.get_edge(edge).id
+        kws['mode_id'] = self.fquery('mode', name=mode)[0].id
         kws['element_z'] = self.get_element(element).z
         kws['energy_units_id'] = self.fquery('energy_units', name=energy_units)[0].id
 
@@ -864,34 +814,39 @@ class XASDataLibrary(object):
             sid = spectrum
         return db.fquery('spectrum_rating', spectrum_id=sid)
 
-    def set_spectrum_modes(self, spectrum_id, mode_ids):
-        """set modes for a spectrum
-        either a single mode or a list of modes
-        """
-        table = self.tables['spectrum_mode']
-        table.delete().where(table.c.spectrum_id==spectrum_id).execute()
-
-        tinsert = table.insert()
-        if isinstance(mode_ids, int):
-            tinsert.execute(spectrum_id=spectrum_id, mode_id=mode_ids)
-        else:
-            for mid in mode_ids:
-                tinsert.execute(spectrum_id=spectrum_id, mode_id=mid)
-        self.set_mod_time()
-        self.session.commit()
+    def get_mode(self, spectrum_id):
+        """return name of mode for a spectrum"""
+        spect = self.fquery('spectrum', id=spectrum_id)[0]
+        return self.fquery('mode', id=spect.mode_id)[0].name
 
 
-    def get_spectrum_modes(self,id):
-        """get modes for a spectrum"""
-        modenames = {}
-        for row in self.tables['mode'].select().execute().fetchall():
-            modenames[row.id] = row.name
-
-        tab = self.tables['spectrum_mode']
-        out = []
-        for row in  tab.select().where(tab.c.spectrum_id == id).execute().fetchall():
-            out.append(modenames[row.mode_id])
-        return out
+# def set_spectrum_mode(self, spectrum_id, mode):
+#         """set mode for a spectrum
+#         """
+#         mode_ids = {}
+#         for row in self.fquery('mode'):
+#             mode_ids[row.name] = row.id
+#
+#         mode_id = 0 if mode not in mode_ids else mode_ids[mode]
+#
+#         table = self.tables['spectrum_mode']
+#         table.delete().where(table.c.spectrum_id==spectrum_id).execute()
+#
+#         table.insert().execute(spectrum_id=spectrum_id, mode_id=mode_id)
+#         self.set_mod_time()
+#         self.session.commit()
+#
+#
+#     def get_spectrum_mode(self, spectrum_id):
+#         """get mode for a spectrum"""
+#         mode_names = {}
+#         for row in self.fquery('mode'):
+#             mode_names[row.id] = row.name
+#         row = None_or_one(self.fquery('spectrum_mode', spectrum_id=spectrum_id))
+#
+#         mode_id = 0 if row is None else row.mode_id
+#         print("G: Mode", row, mode_id, mode_names)
+#         return mode_names[mode_id]
 
 
     def get_spectrum(self, id):
@@ -997,22 +952,20 @@ class XASDataLibrary(object):
             i0 = xfile.i0
 
         #
-        _modes = []
+        mode = 'transmission'
         ifluor = itrans = irefer = None
         if hasattr(xfile, 'itrans'):
             itrans = xfile.itrans
-            _modes.append('transmission')
         elif hasattr(xfile, 'i1'):
             itrans = xfile.i1
-            _modes.append('transmission')
 
         if hasattr(xfile, 'ifluor'):
             ifluor= xfile.ifluor
-            _modes.append('fluorescence')
+            mode = 'fluorescence'
 
         elif hasattr(xfile, 'ifl'):
             ifluor= xfile.ifl
-            _modes.append('fluorescence')
+            mode = 'fluorescence'
 
         # special case: mutrans given,
         # itrans not available,
@@ -1022,19 +975,14 @@ class XASDataLibrary(object):
             if not hasattr(xfile, 'i0'):
                 i0 = np.ones(len(xfile.mutrans))*1.0
                 itrans = np.exp(-xfile.mutrans)
-            _modes.append('transmission')
+            mode = 'transmission'
 
         if (hasattr(xfile, 'mufluor') and
             not hasattr(xfile, 'ifluor')):
             if not hasattr(xfile, 'i0'):
                 i0 = np.ones(len(xfile.mufluor))*1.0
                 ifluor = xfile.mufluor
-            _modes.append('fluorescence')
-
-        # not get modes without duplicates
-        modes = []
-        for m in ('transmission', 'fluorescence'):
-            if m in _modes: modes.append(m)
+            mode = 'fluorescence'
 
         refer_used = 0
         if hasattr(xfile, 'irefer'):
@@ -1100,22 +1048,15 @@ class XASDataLibrary(object):
         if sample_name not in (None, 'unknown'):
             spectrum_name = "%s [%s]" % (spectrum_name, sample_name)
 
-        spec  = self.add_spectrum(spectrum_name, d_spacing=d_spacing,
+        spec = self.add_spectrum(spectrum_name, d_spacing=d_spacing,
                                   collection_date=c_date, person=person_id,
-                                  beamline=beamline_name, edge=edge, element=element,
+                                  beamline=beamline_name, edge=edge,
+                                  element=element, mode=mode,
                                   energy=energy, energy_units=en_units,
                                   i0=i0,itrans=itrans, ifluor=ifluor,
-                                  irefer=irefer,
-                                  sample=sample_id,
-                                  comments=comments,
-                                  notes=notes,
+                                  irefer=irefer, sample=sample_id,
+                                  comments=comments, notes=notes,
                                   filetext=filetext,
                                   reference_sample=sample_ref_id)
 
-
-        mode_ids = []
-        for row in self.tables['mode'].select().execute().fetchall():
-            if row.name in modes:
-                mode_ids.append(row.id)
-        self.set_spectrum_modes(spec.id, mode_ids)
         return spec.id
