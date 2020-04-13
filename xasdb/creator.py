@@ -403,6 +403,7 @@ def  make_newdb(dbname, server= 'sqlite', user='',
 
     spectrum = NamedTable('spectrum', metadata, name_unique=False,
                           cols=[StrCol('energy'),
+                                StrCol('description'),
                                 StrCol('i0'),
                                 StrCol('itrans'),
                                 StrCol('ifluor'),
