@@ -22,11 +22,12 @@
 """
 from ._version import __version__
 
-from .xasdb import (isXASDataLibrary, XASDataLibrary, XASDBException,
-                    Info, Mode, Facility, Beamline, EnergyUnits, Edge,
-                    Element, Ligand, Citation,
-                    Person, Spectrum_Rating, Suite_Rating, Suite,
-                    Sample, Spectrum, fmttime, valid_score, unique_name)
+from .xasdb import (isXASDataLibrary, XASDataLibrary, XASDBException, Info,
+                    Mode, Facility, Beamline, EnergyUnits, Edge, Element,
+                    Ligand, Citation, Person, Spectrum_Rating,
+                    Suite_Rating, Suite, Sample, Spectrum, fmttime,
+                    valid_score, unique_name, None_or_one)
+
 
 from .creator import make_newdb
 
