@@ -890,7 +890,7 @@ class XASDataLibrary(object):
         tab = self.tables['spectrum_mode']
         out = []
         for row in  tab.select().where(tab.c.spectrum_id == id).execute().fetchall():
-            out.append((row.mode_id, modenames[row.mode_id]))
+            out.append(modenames[row.mode_id])
         return out
 
 
