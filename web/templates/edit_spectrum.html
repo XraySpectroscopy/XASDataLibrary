@@ -11,10 +11,6 @@
     <tr><td colspan=2> <hr> </td></tr>
     <tr><td>Name:</td><td>
 	<input size=60 type=text name=name value='{{spectrum_name|safe}}'></td></tr>
-    <tr><td> Mono d-spacing: </td><td>
-	<input size=20 type=text name=d_spacing value={{d_spacing}}> &#197; </td></tr>
-    <tr><td> Energy Resolution: </td><td>
-	<input size=20 type=text name=e_resolution value={{e_resolution}}>  </td></tr>
     <tr><td> Element: </td><td>
 	<select name='elem' style="width: 100px;">
 	  {% for el in elems %}
@@ -26,10 +22,8 @@
     </td></tr>
     <tr><td> Edge:  </td><td>
 	<select  name='edge' style="width: 100px;">
-	  {% for e in edges %}
-	   <option value={{e.id}}
-	    {% if e.name == edge %} selected=1 {% endif %} >
-	   {{ e.name }}</option>
+	  {% for ename in edges %}
+	   <option value={{ename}} {% if ename==edge %} selected=1 {% endif %} > {{ ename }}</option>
 	  {% endfor %}
 	  </select>
 	</td></tr>
@@ -42,6 +36,17 @@
 	  {% endfor %}
 	  </select>
 	</td></tr>
+    <tr><td> Measurement Mode:  </td><td>
+         <select  name='mode' style="width: 100px;">
+	  {% for mname in modes %}
+             <option value={{mname}} {% if mname==mode %} selected=1 {% endif %} > {{ mname }}</option>
+	  {% endfor %}
+	  </select>
+	</td></tr>
+    <tr><td> Mono d-spacing: </td><td>
+	<input size=20 type=text name=d_spacing value={{d_spacing}}> &#197; </td></tr>
+    <tr><td> Energy Resolution: </td><td>
+	<input size=20 type=text name=e_resolution value={{e_resolution}}> (description) </td></tr>
 
     <tr><td> Beamline: </td><td>
 	<select  name='beamline' style="width: 350px;">

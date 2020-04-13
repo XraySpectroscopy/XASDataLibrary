@@ -146,11 +146,9 @@ Filter Spectra by Requiring Edge, Beamline, Rating
 Measurement Mode, or Text in Name or Comment
 </td></tr>
 <tr><td></td><td>Edge: </td>
-    <td><select  name='edge' style="width: 200px;">
-     {% for e in edges %}
-       <option value={{e.id}}
-            {% if e.id == edge_id %} selected=1 {% endif %} >
-        {{ e.name }}</option>
+    <td><select  name='edge_filter' style="width: 200px;">
+     {% for ename in edges %}
+      <option value={{ename}} {% if ename==edge_filter %} selected=1 {% endif %} > {{ ename }}</option>
      {% endfor %}
      </select>
      </td></tr>
@@ -165,12 +163,10 @@ Measurement Mode, or Text in Name or Comment
      </select>
 </td></tr>
 
-<tr><td></td><td>Mode: </td>
-    <td><select  name='mode' style="width: 200px;">
-     {% for e in modes %}
-       <option value={{e.id}}
-            {% if e.id == mode_id %} selected=1 {% endif %} >
-        {{ e.name }}</option>
+<tr><td></td><td>Measurement Mode: </td>
+    <td><select  name='mode_filter' style="width: 200px;">
+     {% for mname in modes %}
+       <option value={{mname}} {% if mname==mode_filter %} selected=1 {% endif %} > {{ mname }}</option>
      {% endfor %}
      </select>
      </td></tr>
