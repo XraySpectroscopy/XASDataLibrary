@@ -34,7 +34,7 @@ PW_NITER = 200000
 def isXASDataLibrary(dbname):
     """test if a file is a valid XAS Data Library file:
        must be a sqlite db file, with tables named
-          'info', 'spectra', 'sample', 'element' and 'energy_units'
+          'info', 'spectra', 'element' and 'energy_units'
        the 'element' table must have more than 90 rows and the
        'info' table must have an entries named 'version' and 'create_date'
     """
@@ -48,7 +48,6 @@ def isXASDataLibrary(dbname):
 
     if ('info' in metadata.tables and
         'spectra' in metadata.tables and
-        'sample' in metadata.tables and
         'element' in metadata.tables and
         'energy_units' in metadata.tables):
 
@@ -156,6 +155,7 @@ class _BaseTable(object):
         fields = ['%s' % getattr(self, 'name', 'UNNAMED')]
         return "<%s(%s)>" % (name, ', '.join(fields))
 
+
 class Info(_BaseTable):
     "general information table (versions, etc)"
     def __repr__(self):
@@ -258,7 +258,6 @@ class Sample(_BaseTable):
 class Spectrum(_BaseTable):
     "spectra table"
     pass
-
 
 class XASDataLibrary(object):
     """full interface to XAS Spectral Library"""
@@ -553,17 +552,10 @@ class XASDataLibrary(object):
             is_confirmed = True
         return is_confirmed
 
-    def add_sample(self, name, person_id, notes='', **kws):
-        """add sample: name required
-        returns Sample instance"""
-
-        kws['name'] = name
-        kws['person_id'] = person_id
-        kws['notes'] = notes
-        #if crystal_structure is not None:
-        #    kws['crystal_structure_id'] = crystal_structure
-        tab = self.tables['sample']
-        tab.insert().execute(**kws)
+    def add_sample(self, name, person_id, **kws):
+        "add sample: name required returns sample id"
+        kws.update({'name': name, 'person_id': person_id})
+        self.tables['sample'].insert().execute(**kws)
 
     def add_suite(self, name, notes='', person_id=None, **kws):
         """add suite: name required
@@ -812,41 +804,12 @@ class XASDataLibrary(object):
             sid = spectrum.id
         else:
             sid = spectrum
-        return db.fquery('spectrum_rating', spectrum_id=sid)
+        return self.fquery('spectrum_rating', spectrum_id=sid)
 
     def get_mode(self, spectrum_id):
         """return name of mode for a spectrum"""
         spect = self.fquery('spectrum', id=spectrum_id)[0]
         return self.fquery('mode', id=spect.mode_id)[0].name
-
-
-# def set_spectrum_mode(self, spectrum_id, mode):
-#         """set mode for a spectrum
-#         """
-#         mode_ids = {}
-#         for row in self.fquery('mode'):
-#             mode_ids[row.name] = row.id
-#
-#         mode_id = 0 if mode not in mode_ids else mode_ids[mode]
-#
-#         table = self.tables['spectrum_mode']
-#         table.delete().where(table.c.spectrum_id==spectrum_id).execute()
-#
-#         table.insert().execute(spectrum_id=spectrum_id, mode_id=mode_id)
-#         self.set_mod_time()
-#         self.session.commit()
-#
-#
-#     def get_spectrum_mode(self, spectrum_id):
-#         """get mode for a spectrum"""
-#         mode_names = {}
-#         for row in self.fquery('mode'):
-#             mode_names[row.id] = row.name
-#         row = None_or_one(self.fquery('spectrum_mode', spectrum_id=spectrum_id))
-#
-#         mode_id = 0 if row is None else row.mode_id
-#         print("G: Mode", row, mode_id, mode_names)
-#         return mode_names[mode_id]
 
 
     def get_spectrum(self, id):
@@ -912,7 +875,7 @@ class XASDataLibrary(object):
         query = apply_orderby(query, tab, orderby)
         return query.execute().fetchall()
 
-    def add_xdifile(self, fname, person=None, create_sample=True, **kws):
+    def add_xdifile(self, fname, person=None, **kws):
         try:
             fh  = open(fname, 'r')
             filetext  = fh.read()
@@ -984,12 +947,12 @@ class XASDataLibrary(object):
                 ifluor = xfile.mufluor
             mode = 'fluorescence'
 
-        refer_used = 0
+        reference_used = 0
         if hasattr(xfile, 'irefer'):
-            refer_used = 1
+            refererence_used = 1
             irefer= xfile.irefer
         elif hasattr(xfile, 'i2'):
-            refer_used = 1
+            refererence_used = 1
             irefer= xfile.i2
 
         en_units = 'eV'
@@ -1005,58 +968,62 @@ class XASDataLibrary(object):
         else:
             person_id = self.get_person(person).id
 
-        sample_id = None
-        if create_sample:
-            try:
-                sattrs  = xfile.attrs['sample'].decode('utf-8')
-            except:
-                sattrs = {'name': 'unknown',
-                          'prep': 'unknown'}
-
-            formula, prep, notes = '', '', ''
-            notes = "sample for '%s', uploaded %s" % (fname, now)
-            if 'name' in sattrs:
-                sample_name = sattrs.pop('name')
-            if 'prep' in sattrs:
-                prep = sattrs.pop('prep')
-            if 'formula' in sattrs:
-                formula = sattrs.pop('formula')
-            if len(sattrs) > 0:
-                notes  = '%s\n%s' % (notes, json_encode(sattrs))
-            self.add_sample(sample_name, person_id, formula=formula,
-                            preparation=prep, notes=notes)
-
-            stab = self.tables['sample']
-            sample = self.fquery('sample', name=sample_name)[0]
-
-            sample_id = sample.id
-            sample_ref_id = None
-            if 'reference' in sattrs:
-                rname = sattrs['reference']
-                note = "reference for '%s', uploaded %s" % (fname, now)
-                rsample =  None_or_one(self.fquery('sample', name=rname))
-                if rsample is None:
-                    self.add_sample(rname, person_id, formula='',
-                                    preparation='', notes=notes)
-                    rsample = None_or_one(self.fquery('sample', name=rname))
-                sample_ref_id = rsample.id
-
-
         beamline = None
+        temperature = None
+        reference_sample = None
+        sample_id = refsample_id = 0
+        if 'sample' in xfile.attrs:
+            sample_attrs  = xfile.attrs['sample']
+            if 'temperature' in sample_attrs:
+                temperature = sample_attrs['temperature']
+            if 'name' in sample_attrs:
+                sample_name = sample_attrs.pop('name')
+
+            if 'reference' in sample_attrs:
+                reference_sample = sample_attrs.pop('reference')
+
+            notes = "sample for '%s', uploaded %s" % (fname, now)
+            sample_kws = {}
+            for attr in ('preparation', 'formula'):
+                shortname = attr[:4]
+                if shortname in sample_attrs:
+                    sample_kws[attr] = sample_attrs.pop(shortname)
+                elif attr in sample_attrs:
+                    sample_kws[attr] = sample_attrs.pop(attr)
+
+            if len(sample_attrs) > 0:
+                sample_notes = '%s\n%s' % (notes, json_encode(sample_attrs))
+            self.add_sample(sample_name, person_id, notes=sample_notes, **sample_kws)
+
+            sample_id = self.fquery('sample', name=sample_name, notes=sample_notes)[0].id
+#
+#             sample_id = sample.id
+#             sample_ref_id = None
+#  a           if 'reference' in sattrs:
+#                 rname = sattrs['reference']
+#                 note = "reference for '%s', uploaded %s" % (fname, now)
+#                 rsample =  None_or_one(self.fquery('sample', name=rname))
+#                 if rsample is None:
+#                     self.add_sample(rname, person_id, formula='',
+#                                     preparation='', notes=notes)
+#                     rsample = None_or_one(self.fquery('sample', name=rname))
+#                 sample_ref_id = rsample.id
+#
+
+
         beamline_name  = xfile.attrs['beamline']['name']
         notes = json_encode(xfile.attrs)
-        if sample_name not in (None, 'unknown'):
-            spectrum_name = "%s [%s]" % (spectrum_name, sample_name)
 
         spec = self.add_spectrum(spectrum_name, d_spacing=d_spacing,
-                                  collection_date=c_date, person=person_id,
-                                  beamline=beamline_name, edge=edge,
-                                  element=element, mode=mode,
-                                  energy=energy, energy_units=en_units,
-                                  i0=i0,itrans=itrans, ifluor=ifluor,
-                                  irefer=irefer, sample=sample_id,
-                                  comments=comments, notes=notes,
-                                  filetext=filetext,
-                                  reference_sample=sample_ref_id)
+                                 collection_date=c_date, person=person_id,
+                                 beamline=beamline_name, edge=edge,
+                                 element=element, mode=mode,
+                                 energy=energy, energy_units=en_units,
+                                 i0=i0,itrans=itrans, ifluor=ifluor,
+                                 irefer=irefer, sample=sample_id,
+                                 comments=comments, notes=notes,
+                                 filetext=filetext, reference=refsample_id,
+                                 reference_used=reference_used,
+                                 temperature=temperature)
 
         return spec.id
