@@ -22,12 +22,15 @@
 {% if nbeamlines == 0 %}
       No beamlines defined.
 {% else %}
+
+Click on heading labels to toggle sorting:
+
    <table cellspacing=3 cellpadding=1>
    <tr>
-<th><a href="{{url_for('beamlines')}}/name/{{reverse}}">  &nbsp; Beamline &nbsp;</a></th>
+<th><a href="{{url_for('beamlines')}}/name/{{reverse}}">      &nbsp; Beamline &nbsp;</a></th>
 <th><a href="{{url_for('beamlines')}}/nickname/{{reverse}}">  &nbsp; Nickname &nbsp;</a></th>
-<th><a href="{{url_for('beamlines')}}/nspectra/{{reverse}}">  &nbsp; # Spectra &nbsp;</a></th>
-<th><a href="{{url_for('beamlines')}}/facility/{{reverse}}">  &nbsp; Facility &nbsp;</a></th>
+<th><a href="{{url_for('beamlines')}}/nspectra/{{reverse}}">  &nbsp; #Spectra &nbsp;</a></th>
+<th><a hred="{{url_for('beamlines')}}/facility/{{reverse}}">  &nbsp; Facility &nbsp;</a></th>
 <th> Location </th>    </tr>
    {% for bl in beamlines %}
        <tr class={{ loop.cycle('odd', 'even') }}>
