@@ -216,6 +216,8 @@ click on heading labels to toggle sorting:
      <tr>
        <td><a href="{{url_for('elem')}}/{{elem}}/name/{{reverse}}">
 	   &nbsp; Name &nbsp;</a></td>
+       <td width=25%><a href="{{url_for('elem')}}/{{elem}}/description/{{reverse}}">
+	   &nbsp; Description &nbsp;</a></td>
        <td><a href="{{url_for('elem')}}/{{elem}}/edge/{{reverse}}">
 	   &nbsp; Edge &nbsp;</a></td>
        <td><a href="{{url_for('elem')}}/{{elem}}/beamline/{{reverse}}">
@@ -227,8 +229,9 @@ click on heading labels to toggle sorting:
         <tr class={{ loop.cycle('odd', 'even') }}>
 
 	<td> &nbsp; &nbsp; <a href="{{url_for('spectrum', spid= spec.id)}}"> {{ spec.name }}</a></td>
+        <td> &nbsp; {{ spec.description }} </td>
 	<td> &nbsp; {{ spec.edge }} </td>
-	<td> &nbsp; {{ spec.beamline_desc }} </td>
+        <td> &nbsp; {{ spec.beamline_desc }} </td>
 	<td> &nbsp; {{ spec.rating }} </td>
    </tr>
    {% endfor %}

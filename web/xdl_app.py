@@ -382,6 +382,7 @@ def elem(elem=None, orderby=None, reverse=0):
             misc = '\n'.join(['%s:%s' % (m['key'], m['val']) for m in misc])
             if not any((searchword in fulldat.get('spectrum_name', ''),
                         searchword in fulldat.get('xdi_filename',''),
+                        searchword in fulldat.get('description', ''),
                         searchword in fulldat.get('sample_name',''),
                         searchword in fulldat.get('raw_comments', ''),
                         searchword in fulldat.get('beamline_desc',''),
@@ -389,9 +390,9 @@ def elem(elem=None, orderby=None, reverse=0):
                         searchword in fulldat.get('person_email',''),
                         searchword in misc)):
                 continue
-
         spectra.append({'id': s.id,
                         'name': s.name,
+                        'description': s.description,
                         'element': elem,
                         'edge': edge,
                         'person_email': person.email,
@@ -549,12 +550,15 @@ def submit_spectrum_edits():
 
         db.update('spectrum', int(spid),
                   name=request.form['name'],
+                  description=request.form['description'],
                   comments=request.form['comments'],
                   d_spacing=float(request.form['d_spacing']),
                   energy_resolution=request.form['e_resolution'],
                   edge_id=edge_id, mode_id=mode_id,
                   beamline_id= int(request.form['beamline']),
                   sample_id= int(request.form['sample']),
+                  reference_sampled=request.form['reference_sample'],
+
                   energy_units_id=int(request.form['energy_units']))
 
         time.sleep(0.25)
@@ -573,14 +577,14 @@ def edit_spectrum(spid=None):
                                 error = 'Could not find Spectrum #%d' % spid))
 
     opts = parse_spectrum(s, db)
+    beamlines = get_beamline_list(db, with_any=False, orderby='name')
     return render_template('edit_spectrum.html', error=error,
                            elems=db.fquery('element'),
                            eunits=db.fquery('energy_units'),
                            edges=ANY_EDGES[1:],
-                           beamlines=get_beamline_list(db, with_any=False, orderby='name'),
+                           beamlines=beamlines,
                            samples=db.fquery('sample'),
-                           modes=ANY_MODES[1:],
-                           **opts)
+                           modes=ANY_MODES[1:], **opts)
 
 
 @app.route('/delete_spectrum/<int:spid>')

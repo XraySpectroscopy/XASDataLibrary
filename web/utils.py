@@ -232,12 +232,12 @@ def parse_spectrum(s, db):
 
     try:
         sample = db.fquery('sample', id=s.sample_id)[0]
-        sample_id = '%d'% s.sample_id
+        sample_id = s.sample_id
         sample_name = sample.name
         sample_form = sample.formula
         sample_prep = sample.preparation
     except:
-        sample_id  = '-1'
+        sample_id  = 0
         sample_name = 'unknown'
         sample_form = 'unknown'
         sample_prep = 'unknown'
