@@ -449,8 +449,10 @@ class XASDataLibrary(object):
         """add beamline by name, with facility:
                facility= Facility instance or id
                returns Beamline instance"""
-        return self.addrow('beamline', name=name, xray_source=xray_source,
-                            notes=notes, facility_id=facility_id, **kws)
+        self.addrow('beamline', name=name, xray_source=xray_source,
+                    notes=notes, facility_id=facility_id, **kws)
+        return None_or_one(self.fquery('beamline', name=name, xray_source=xray_source,
+                                       notes=notes, facility_id=facility_id, **kws))
 
     def add_citation(self, name, **kws):
         """add literature citation: name required
