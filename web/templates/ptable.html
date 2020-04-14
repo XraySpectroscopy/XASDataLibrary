@@ -210,20 +210,20 @@ Measurement Mode, or Text in Name or Comment
    {% if ntotal > nspectra %}  (filtered from {{ ntotal }}) {% endif %}
 
 &nbsp;&nbsp; - &nbsp;
-click on heading labels to toggle sorting:
+Click on heading labels to toggle sorting:
 
    <table cellspacing=5 cellpadding=2>
      <tr>
-       <td><a href="{{url_for('elem')}}/{{elem}}/name/{{reverse}}">
-	   &nbsp; Name &nbsp;</a></td>
-       <td width=25%><a href="{{url_for('elem')}}/{{elem}}/description/{{reverse}}">
-	   &nbsp; Description &nbsp;</a></td>
-       <td><a href="{{url_for('elem')}}/{{elem}}/edge/{{reverse}}">
-	   &nbsp; Edge &nbsp;</a></td>
-       <td><a href="{{url_for('elem')}}/{{elem}}/beamline/{{reverse}}">
-	   &nbsp; Beamline &nbsp;</a></td>
-       <td><a href="{{url_for('elem')}}/{{elem}}/rating_summary/{{reverse}}">
-	   &nbsp; Rating &nbsp;</a></td>
+       <th><a href="{{url_for('elem')}}/{{elem}}/name/{{reverse}}">
+	   &nbsp; Name &nbsp;</a></th>
+       <th width=25%><a href="{{url_for('elem')}}/{{elem}}/description/{{reverse}}">
+	   &nbsp; Description &nbsp;</a></th>
+       <th><a href="{{url_for('elem')}}/{{elem}}/edge/{{reverse}}">
+	   &nbsp; Edge &nbsp;</a></th>
+       <th><a href="{{url_for('elem')}}/{{elem}}/beamline/{{reverse}}">
+	   &nbsp; Beamline &nbsp;</a></th>
+       <th><a href="{{url_for('elem')}}/{{elem}}/rating_summary/{{reverse}}">
+	   &nbsp; Rating &nbsp;</a></th>
      </tr>
    {% for spec in spectra %}
         <tr class={{ loop.cycle('odd', 'even') }}>
