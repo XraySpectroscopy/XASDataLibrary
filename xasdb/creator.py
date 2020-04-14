@@ -216,7 +216,7 @@ class InitialData:
 
         ['ALBA CLAESS', 'ALBA', 'CLAESS', '2.4 - 65'],
         ['ANKA INE', 'ANKA', 'INE', '2.1 - 26'],
-        ['ANKA SUL-X', 'ANKA', ' SUL-X', '1.5 - 22'],
+        ['ANKA SUL-X', 'ANKA', 'SUL-X', '1.5 - 22'],
         ['ANKA XAS', 'ANKA', 'XAS', '2.4 - 25'],
         ['DAFNE DXR-1', 'DAFNE', 'DXR-1', '1.3 - 3'],
         ['DLS B18', 'DLS', 'Core XAFS', '2 - 35'],
