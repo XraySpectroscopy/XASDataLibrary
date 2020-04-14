@@ -20,6 +20,7 @@ from xafs_preedge import (preedge, edge_energies)
 
 from utils import (row2dict, random_string, multiline_text, session_init,
                    parse_spectrum, spectrum_ratings, spectra_for_suite,
+                   spectra_for_citation,
                    beamline_for_spectrum, spectra_for_beamline,
                    get_beamline_list, get_rating, allowed_filename,
                    get_fullpath, pathjoin)
@@ -92,6 +93,16 @@ def notify_account_creation(person):
     s.sendmail(ADMIN_EMAIL, (person.email, ), fullmsg)
     s.quit()
 
+def sendback(backto='elem', error=None, **kws):
+    """handles common redirects with error message"""
+    return redirect(url_for(backto, error=error, **kws))
+
+def needslogin(backto='elem', error=None, **kws):
+    """handles common 'must be logged in XXXX' redirect"""
+    if error is None:
+        error = ''
+    error = 'must be logged in %s' % error
+    return sendback(backto=backto, error=error, **kws)
 
 
 @app.route('/favicon.ico')
@@ -107,11 +118,13 @@ def page_not_found(error):
 @app.route('/clear')
 def clear():
     session_init(session, db)
-    return redirect(url_for('elem'))
+    return sendback()
 
+@app.route('/browse')
 @app.route('/')
 def index():
-    return redirect(url_for('elem'))
+    session_init(session, db)
+    return sendback()
 
 @app.route('/create_account/')
 @app.route('/create_account', methods=['GET', 'POST'])
@@ -264,7 +277,7 @@ def login():
             session['person_id'] = "%d" % person.id
             session['username'] = request.form['email']
     if session['username'] is not None:
-        return redirect(url_for('elem'))
+        return sendback()
     else:
         return render_template('login.html', error=error)
 
@@ -275,7 +288,7 @@ def logout():
     session['username'] = None
     session['person_id'] = '-1'
     flash('You have been logged out')
-    return redirect(url_for('elem'))
+    return sendback()
 
 @app.route('/user')
 @app.route('/user', methods=['GET', 'POST'])
@@ -310,7 +323,7 @@ def user():
     return render_template('userprofile.html', error=error, email=email,
                            name=name, affiliation=affiliation)
 
-@app.route('/elem', methods=['GET', 'POST'])
+@app.route('/elem/', methods=['GET', 'POST'])
 @app.route('/elem/', methods=['GET', 'POST'])
 @app.route('/elem/<elem>', methods=['GET', 'POST'])
 @app.route('/elem/<elem>/<orderby>',  methods=['GET', 'POST'])
@@ -418,8 +431,7 @@ def elem(elem=None, orderby=None, reverse=0):
 @app.route('/all')
 @app.route('/all/')
 def all():
-    return redirect(url_for('elem/All', error=error))
-
+    return redirect(url_for('/All', error=error))
 
 @app.route('/spectrum/')
 @app.route('/spectrum/<int:spid>')
@@ -427,10 +439,10 @@ def spectrum(spid=None):
     session_init(session, db)
     s  = db.get_spectrum(spid)
     if s is None:
-        error = 'Could not find Spectrum #%d' % spid
-        return redirect(url_for('elem', error=error))
+        return sendbac(error='Could not find Spectrum #%d' % spid)
 
     opts = parse_spectrum(s, db)
+
     opts['spectrum_owner'] = (session['person_id'] == "%d" % s.person_id)
     opts['rating'] = get_rating(s)
 
@@ -508,7 +520,6 @@ def spectrum(spid=None):
         suites.append({'id': r.suite_id, 'name': st.name})
     opts['nsuites'] = len(suites)
     opts['suites'] = suites
-
     return render_template('spectrum.html', **opts)
 
 @app.route('/showspectrum_rating/<int:spid>')
@@ -516,8 +527,7 @@ def showspectrum_rating(spid=None):
     session_init(session, db)
     s  = db.get_spectrum(spid)
     if s is None:
-        return redirect(url_for('elem',
-                                error='Could not find Spectrum #%d' % spid))
+        return sendback(error='Could not find Spectrum #%d' % spid)
 
     opts = parse_spectrum(s, db)
     ratings = []
@@ -540,8 +550,8 @@ def submit_spectrum_edits():
     session_init(session, db)
     error=None
     if session['username'] is None:
-        return redirect(url_for('elem',
-                                error='must be logged in to edit spectrum'))
+        needslogin(error='to edit spectrum')
+
     spid = 0
     if request.method == 'POST':
         spid  = int(request.form['spectrum'])
@@ -569,12 +579,11 @@ def edit_spectrum(spid=None):
     session_init(session, db)
     error=None
     if session['username'] is None:
-        return redirect(url_for('elem',
-                                error='must be logged in to edit spectrum'))
+        needslogin(error='to edit spectrum')
+
     s  = db.get_spectrum(spid)
     if s is None:
-        return redirect(url_for('elem',
-                                error = 'Could not find Spectrum #%d' % spid))
+        return sendback(error='Could not find Spectrum #%d' % spid)
 
     opts = parse_spectrum(s, db)
     beamlines = get_beamline_list(db, with_any=False, orderby='name')
@@ -593,8 +602,7 @@ def delete_spectrum(spid, ask=1):
     session_init(session, db)
     error=None
     if session['username'] is None:
-        error='must be logged in to delete a spectrum'
-        return redirect(url_for('elem', error=error))
+        return needslogin(error='to delete a spectrum')
 
     spect_name = db.fquery('spectrum', id=spid)[0].name
     if ask != 0:
@@ -606,7 +614,7 @@ def delete_spectrum(spid, ask=1):
         db.del_spectrum(spid)
         time.sleep(1)
         flash('Deleted spectrum %s' % spect_name)
-    return redirect(url_for('elem', error=error))
+    return sendback(error=error)
 
 
 @app.route('/submit_spectrum_rating', methods=['GET', 'POST'])
@@ -655,9 +663,7 @@ def rate_spectrum(spid=None):
     pid = int(session['person_id'])
     s  = db.get_spectrum(spid)
     if s is None:
-
-        return redirect(url_for('elem',
-                                error='Could not find Spectrum #%d' % spid))
+        return sendback(error='Could not find Spectrum #%d' % spid)
 
     opts = parse_spectrum(s, db)
     score = 3
@@ -767,7 +773,7 @@ def add_spectrum_to_suite(spid=None):
     s  = db.get_spectrum(spid)
     if s is None:
         error = 'Could not find Spectrum #%d' % spid
-        return redirect(url_for('elem', error=error))
+        return redirect(url_for('/', error=error))
 
     suites = []
     for st in db.fquery('suite'):
@@ -966,7 +972,7 @@ def edit_sample(sid=None):
     error=None
     if session['username'] is None:
         error='must be logged in to edit sample'
-        return redirect(url_for('elem', error=error))
+        return redirect(url_for('/', error=error))
 
     opts = {}
     for sdat in get_sample_list(db):
@@ -980,7 +986,7 @@ def submit_sample_edits():
     error=None
     if session['username'] is None:
         error='must be logged in to edit sample'
-        return render_template('elem', error=error)
+        return render_template('/', error=error)
 
     sid = 0
     if request.method == 'POST':
@@ -999,46 +1005,69 @@ def submit_sample_edits():
     return redirect(url_for('sample', sid=sid, error=error))
 
 @app.route('/beamlines')
+@app.route('/beamlines/')
+@app.route('/beamlines/<int:blid>')
 @app.route('/beamlines/<orderby>')
 @app.route('/beamlines/<orderby>/<reverse>')
 def beamlines(blid=None, orderby='name', reverse=0):
     session_init(session, db)
+    kws = {'orderby': orderby}
     beamlines = []
-    for bldat in get_beamline_list(db, orderby=orderby):
-        blid = bldat['id']
+    for bldat in db.fquery('beamline', **kws):
+        blid = bldat.id
+        fac = db.fquery('facility', id=bldat.facility_id)[0]
+        loc = fac.country
+        if fac.city is not None and len(fac.city) > 0:
+            loc = "%s, %s" % (fac.city, fac.country)
+
         spectra = spectra_for_beamline(db, blid)
-        opts = {'nspectra': len(spectra), 'spectra': spectra}
-        opts.update(bldat)
-        beamlines.append(opts)
+        beamlines.append({'id': blid, 'name': bldat.name,
+                          'nickname': bldat.nickname,
+                          'facility': fac.name,
+                          'facility_id': fac.id,
+                          'location': loc,
+                          'nspectra': len(spectra),
+                          'spectra': spectra})
+
+    if orderby in ('name', 'nickname', 'nspectra', 'facility'):
+        beamlines = sorted(beamlines, key=lambda k: k[orderby])
 
     reverse = int(reverse)
-    if reverse:
+    if reverse != 0:
         beamlines.reverse()
-        reverse = 0
-    else:
-        reverse = 1
-
     return render_template('beamlines.html',
                            nbeamlines=len(beamlines),
-                           beamlines=beamlines, reverse=reverse)
+                           beamlines=beamlines,
+                           reverse=(0 if reverse else 1))
 
-@app.route('/beamline')
+@app.route('/beamline/')
 @app.route('/beamline/<int:blid>')
 def beamline(blid=None):
     session_init(session, db)
-    beamlines = []
-    for _bldat in get_beamline_list(db, orderby='name'):
-        if _bldat['id'] == "%d" % blid:
-            bldat = _bldat
-            break
+    if blid is None:
+        return sendback('beamlines')
+    bldat = None_or_one(db.fquery('beamline', id=blid))
+    if bldat is None:
+        return sendback('beamlines', error='Beamline #%d not found' % blid)
+
+    fac = db.fquery('facility', id=bldat.facility_id)[0]
+    loc = fac.country
+    if fac.city is not None and len(fac.city) > 0:
+        loc = "%s, %s" % (fac.city, fac.country)
 
     spectra = spectra_for_beamline(db, blid)
-    opts = {'nspectra': len(spectra), 'spectra': spectra}
-    opts.update(bldat)
-    beamlines.append(opts)
+    beamlines = [{'id': blid,
+                  'name': bldat.name,
+                  'nickname': bldat.nickname,
+                  'facility': fac.name,
+                  'facility_id': fac.id,
+                  'location': loc,
+                  'nspectra': len(spectra),
+                  'spectra': spectra}]
 
-    return render_template('beamlines.html',
-                           nbeamlines=len(beamlines), beamlines=beamlines)
+    return render_template('beamlines.html', nbeamlines=1,
+                           beamlines=beamlines, reverse=0)
+
 
 @app.route('/add_beamline')
 @app.route('/add_beamline', methods=['GET', 'POST'])
@@ -1047,7 +1076,7 @@ def add_beamline():
     error=None
     if session['username'] is None:
         error='must be logged in to add a beamline'
-        return redirect(url_for('beamlines', error=error))
+        return redirect(url_for('beamline', error=error))
 
     if request.method == 'POST':
         bl_name = request.form['beamline_name']
@@ -1062,11 +1091,10 @@ def add_beamline():
         except:
             error = 'a beamline named %s exists'
 
-        db.add_beamline(bl_name, notes=notes, xray_source=source,
-                        facility_id=fac_id)
-
-        time.sleep(1)
-        return redirect(url_for('beamlines', error=error))
+        bl = db.add_beamline(bl_name, notes=notes, xray_source=source,
+                             facility_id=fac_id)
+        time.sleep(0.25)
+        return redirect(url_for('beamline', blid=bl.id, error=error))
     else:
         return render_template('add_beamline.html', error=error,
                                facilities=db.get_facilities(orderby='country'))
@@ -1115,14 +1143,14 @@ def submit_facility_edits():
     session_init(session, db)
     error=None
     if session['username'] is None:
-        return redirect(url_for('elem',
+        return redirect(url_for('/',
                                 error='must be logged in to edit facility'))
 
     fid = 0
     # print("Facility edits ", request.form)
     fid  = int(request.form.get('facility_id', -1))
     if fid < 0:
-        return redirect(url_for('elem',
+        return redirect(url_for('/',
                                 error='could not edit facility'))
 
     if request.method == 'POST':
@@ -1140,12 +1168,27 @@ def submit_facility_edits():
 
 
 @app.route('/citation')
+@app.route('/citation/')
 @app.route('/citation/<int:cid>')
-def citation(blid=None):
+def citation(cid=None):
     session_init(session, db)
-    spectra = spectra_for_citation(db, cid)
-    opts = {'nspectra': len(spectra), 'spectra': spectra}
-    return render_template('citations.html', ncitations=1, **opts)
+    kws = {}
+    if cid is not None:
+        kws['id'] = cid
+
+    citations = []
+    for cit in db.fquery('citation', **kws):
+        person_id = cit.person_id
+        person_email = db.get_person(person_id).email
+        spectra = spectra_for_citation(db, cid)
+        is_owner = (int(session['person_id']) == int(person_id))
+        citations.append({'id': cid, 'person_email': person_email,
+                          'person_id':person_id, 'citation': cit,
+                          'is_owner': is_owner, 'nspectra': len(spectra),
+                          'spectra':spectra})
+
+    return render_template('citations.html', ncitations=len(citations), citations=citations)
+
 
 
 @app.route('/add_citation')
@@ -1157,7 +1200,34 @@ def add_citation(spid=None):
         error='must be logged in to add citation for spectrum'
         return redirect(url_for('citation',  error=error))
 
-    return render_template('add_citation.html', spid=spid)
+    pid = int(session['person_id'])
+    return render_template('add_citation.html', person_id=pid, spectrum_id=spid,
+                           authors='')
+
+@app.route('/submit_citation_edits', methods=['GET', 'POST'])
+def submit_citation_edits():
+    session_init(session, db)
+    error=None
+    if session['username'] is None:
+        error='must be logged in to edit suite'
+        return redirect(url_for('suites', error=error))
+
+    if request.method == 'POST':
+        print("Citation Edits ", request.form)
+        cid  = request.form['citation']
+#         db.update('suite', stid,
+#                   name=request.form['name'],
+#                   notes=request.form['comments'])
+#
+#         for spec in spectra_for_suite(db, stid):
+#             spid = int(spec['spectrum_id'])
+#             key = 'spec_%d' % spid
+#             if key not in request.form:
+#                db.remove_spectrum_from_suite(stid, spid)
+        time.sleep(0.25)
+        return redirect(url_for('citation', cid=cid, error=error))
+    return redirect(url_for('citation', error=error))
+
 
 
 @app.route('/upload')
@@ -1165,8 +1235,7 @@ def add_citation(spid=None):
 def upload():
     session_init(session, db)
     if session['username'] is None:
-        error='must be logged in to submit a spectrum'
-        return redirect(url_for('elem', error=error))
+        return needslogin(error='to submit a spectrum')
     return render_template('upload.html',
                            person_id=session['person_id'])
 
@@ -1175,8 +1244,7 @@ def submit_upload():
     session_init(session, db)
     error=None
     if session['username'] is None:
-        error='must be logged in to submit a spectrum'
-        return redirect(url_for('elem', error=error))
+        return needslogin(error='to submit a spectrum')
 
     if request.method == 'POST':
         pid    = request.form['person']
@@ -1211,8 +1279,6 @@ def submit_upload():
 
         # try:
         opts = parse_spectrum(spectrum, db)
-        print("UPLOAD: parsed to ", spectrum.id, opts)
-
         # except:
         #    error = "Could not read spectrum from '%s'" % (file.filename)
         #    return render_template('upload.html', error=error)
