@@ -17,24 +17,25 @@
 </div>
 
 
-
 <div class=body>
 <hr>
 {% if nbeamlines == 0 %}
       No beamlines defined.
 {% else %}
    <table cellspacing=3 cellpadding=1>
-    <tr><th>Beamline</th>
-    <th> # Spectra</th>
-    <th>Facility</th>
-    <th>Location</th>
-    </tr>
+   <tr>
+<th><a href="{{url_for('beamlines')}}/name/{{reverse}}">  &nbsp; Beamline &nbsp;</a></th>
+<th><a href="{{url_for('beamlines')}}/nickname/{{reverse}}">  &nbsp; Nickname &nbsp;</a></th>
+<th><a href="{{url_for('beamlines')}}/nspectra/{{reverse}}">  &nbsp; # Spectra &nbsp;</a></th>
+<th><a href="{{url_for('beamlines')}}/facility/{{reverse}}">  &nbsp; Facility &nbsp;</a></th>
+<th> Location </th>    </tr>
    {% for bl in beamlines %}
        <tr class={{ loop.cycle('odd', 'even') }}>
        <td>  <a href="{{ url_for('beamline', blid=bl.id)}}"> {{bl.name}} </a></td>
+	<td>  &nbsp; {{bl.nickname}}  &nbsp;</td>
 	<td>  &nbsp; {{bl.nspectra}}  &nbsp;</td>
-	<td>  &nbsp; {{bl.fac_name}}  &nbsp;</td>
-	<td>  &nbsp; {{bl.fac_loc}}</td></tr>
+	<td>  &nbsp; {{bl.facility}}  &nbsp;</td>
+	<td>  &nbsp; {{bl.location}}</td></tr>
    {% endfor %}
    </table>
    {% if nbeamlines == 1 %}
