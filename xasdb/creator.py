@@ -390,7 +390,8 @@ def  make_newdb(dbname, server= 'sqlite', user='',
                         cols=[StrCol('name', nullable=False),
                               StrCol('password'),
                               StrCol('affiliation'),
-                              StrCol('confirmed')])
+                              StrCol('confirmed'),
+                              IntCol('admin_level')])
 
     citation = NamedTable('citation', metadata,
                           cols=[StrCol('journal'),
@@ -399,7 +400,9 @@ def  make_newdb(dbname, server= 'sqlite', user='',
                                 StrCol('volume'),
                                 StrCol('pages'),
                                 StrCol('year'),
-                                StrCol('doi')])
+                                StrCol('doi'),
+                                PointerCol('person'),
+                                ])
 
     sample = NamedTable('sample', metadata, name_unique=False,
                         cols=[StrCol('formula'),
