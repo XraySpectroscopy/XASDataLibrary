@@ -1,31 +1,43 @@
 {% extends "layout.html" %}
 {% block body %}
 
-<div class=subtitle Add a Citation </div>
+<div class=subtitle> Add a Citation
+
+&nbsp;   &nbsp;
+
+<a href="{{ url_for('citation') }}"> Citations </a>
+
+</div>
+
 <div class=body>
 
-<p> A Citation is published document used to describe the XAS
-  spectrum or where the spectrum was used in an analysis.
-  Please check for
-  existing citations
-  to avoid duplication.<p>
+A Citation is published document used to describe the XAS spectrum or where
+the spectrum was used in an analysis.  Please check for existing citations
+to avoid duplication.
+
+<p>
 
 {% if session.username is not none %}
 
-<form action="{{ url_for('add_citation') }}" method=post>
-    <table>
-      <tr><td>Name:</td>
-	  <td><input size=40 type=text name=beamline_name></td></tr>
-      <tr><td>Notes:</td>
-	  <td><input size=40 type=text name=notes></td></tr>
-      <tr><td>X-ray Source:</td>
-	   <td><input size=40 type=text name=xray_source></td></tr>
-      <tr><td>Facility:</td>
-	  <td> <select id='fac_id' name='fac_id'>
-	  {% for fac in facilities %}
-	    <option value={{fac.id}}> {{fac.name}}</option>
-	  {% endfor %}
-	      </select> </td></tr>
+<form action="{{ url_for('submit_citation_edits') }}" method=post>
+     <table>
+      <input type=hidden name=person value={{person_id}}>
+      <input type=hidden name=spectrum value={{spectrum_id}}>
+      <input type=hidden name=citation value={{citation_id}}>
+      <tr><td>Authors:</td>
+	  <td><textarea cols=100 rows=3 type=text name=authors> {{authors|safe}}</textarea></td></tr>
+      <tr><td>Title:</td>
+          <td><textarea cols=100 rows=3 type=text name=title> {{title|safe}}</textarea></td></tr>
+      <tr><td>Journal:</td>
+	   <td><input size=80 type=text name=journal value={{journal|safe}}></td></tr>
+      <tr><td>Volume:</td>
+	   <td><input size=40 type=text name=volume value={{volume|safe}}></td></tr>
+      <tr><td>Pages:</td>
+	   <td><input size=40 type=text name=pages value={{pages|safe}}></td></tr>
+      <tr><td>Year:</td>
+	   <td><input size=40 type=text name=year value={{year|safe}}></td></tr>
+      <tr><td>DOI:</td>
+	   <td><input size=80 type=text name=doi value={{doi|safe}}></td></tr>
       <tr><td><input type=submit value=submit></td><td></td></tr>
     </table>
 </form>
