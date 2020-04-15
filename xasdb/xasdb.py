@@ -332,9 +332,10 @@ class XASDataLibrary(object):
     def addrow(self, tablename, **kws):
         """add generic row"""
         table = self.tables[tablename]
-        table.insert().execute(**kws)
+        out = table.insert().execute(**kws)
         self.set_mod_time()
         self.session.commit()
+        return out.lastrowid
 
     def fquery(self, tablename, **kws):
         """
@@ -415,7 +416,7 @@ class XASDataLibrary(object):
         """add Energy Units: units required
         notes  optional
         returns EnergyUnits instance"""
-        self.addrow('energy_units', units=units, notes=notes, **kws)
+        return self.addrow('energy_units', units=units, notes=notes, **kws)
 
     def get_sample(self, sid):
         """return sample by id"""
@@ -449,10 +450,8 @@ class XASDataLibrary(object):
         """add beamline by name, with facility:
                facility= Facility instance or id
                returns Beamline instance"""
-        self.addrow('beamline', name=name, xray_source=xray_source,
-                    notes=notes, facility_id=facility_id, **kws)
-        return None_or_one(self.fquery('beamline', name=name, xray_source=xray_source,
-                                       notes=notes, facility_id=facility_id, **kws))
+        return self.addrow('beamline', name=name, xray_source=xray_source,
+                           notes=notes, facility_id=facility_id, **kws)
 
     def add_citation(self, name, **kws):
         """add literature citation: name required
@@ -473,12 +472,13 @@ class XASDataLibrary(object):
         """add person: arguments are
         name, email with affiliation and password optional
         returns Person instance"""
-        person = self.addrow('person', email=email, name=name,
+        person_id = self.addrow('person', email=email, name=name,
                              affiliation=affiliation,
                              confirmed=con, **kws)
 
         if password is not None:
             self.set_person_password(email, password)
+        return person_id
 
     def get_person(self, val, key='email'):
         """get person by email"""
@@ -744,10 +744,7 @@ class XASDataLibrary(object):
         kws['mode_id'] = self.fquery('mode', name=mode)[0].id
         kws['element_z'] = self.get_element(element).z
         kws['energy_units_id'] = self.fquery('energy_units', name=energy_units)[0].id
-
-        self.addrow('spectrum', name=name, **kws)
-        return self.fquery('spectrum', name=name)[0]
-
+        return self.addrow('spectrum', name=name, **kws)
 
     def get_beamlines(self, facility=None, orderby='id'):
         """get all beamlines for a facility
@@ -1009,7 +1006,7 @@ class XASDataLibrary(object):
         beamline_name  = xfile.attrs['beamline']['name']
         notes = json_encode(xfile.attrs)
 
-        spec = self.add_spectrum(spectrum_name, description=description,
+        return self.add_spectrum(spectrum_name, description=description,
                                  d_spacing=d_spacing, collection_date=c_date,
                                  person=person_id, beamline=beamline_name,
                                  edge=edge, element=element, mode=mode,
@@ -1021,5 +1018,3 @@ class XASDataLibrary(object):
                                  reference_sample=reference_sample,
                                  reference_mode=reference_mode,
                                  temperature=temperature)
-
-        return spec.id
