@@ -18,13 +18,11 @@ from flask import (Flask, request, session, redirect, url_for,
 from xasdb import (connect_xasdb, fmttime, valid_score, unique_name, None_or_one)
 from xafs_preedge import (preedge, edge_energies)
 
-from utils import (row2dict, random_string, multiline_text, session_init,
+from utils import (row2dict, multiline_text, session_init,
                    parse_spectrum, spectrum_ratings, spectra_for_suite,
-                   spectra_for_citation,
-                   beamline_for_spectrum, spectra_for_beamline,
-                   get_beamline_list, get_rating, allowed_filename,
-                   get_fullpath, pathjoin)
-
+                   spectra_for_citation, beamline_for_spectrum,
+                   spectra_for_beamline, get_beamline_list, get_rating,
+                   allowed_filename, get_fullpath, pathjoin)
 
 # sys.path.insert(0, '/home/newville/XASDB_Secrets')
 
@@ -1187,7 +1185,8 @@ def citation(cid=None):
                           'is_owner': is_owner, 'nspectra': len(spectra),
                           'spectra':spectra})
 
-    return render_template('citations.html', ncitations=len(citations), citations=citations)
+    return render_template('citations.html', citation_id=cid,
+                           ncitations=len(citations), citations=citations)
 
 
 
@@ -1214,16 +1213,22 @@ def submit_citation_edits():
 
     if request.method == 'POST':
         print("Citation Edits ", request.form)
-        cid  = request.form['citation']
-#         db.update('suite', stid,
-#                   name=request.form['name'],
-#                   notes=request.form['comments'])
-#
-#         for spec in spectra_for_suite(db, stid):
-#             spid = int(spec['spectrum_id'])
-#             key = 'spec_%d' % spid
-#             if key not in request.form:
-#                db.remove_spectrum_from_suite(stid, spid)
+        form = {k: v for k, v in request.form.items()}
+        person_id   = form.pop('person_id')
+        citation_id = form.pop('citation_id')
+        spectrum_id = form.pop('spectrum_id')
+        name = form.pop('name')
+        try:
+            cid  = int(citation_id)
+        except:
+            cid = None
+
+        if cid is None: # new citation
+            cid = db.add_citation(name=name, **form)
+        else:
+            db.update('citation', cid, use_id=True, name=name, **form)
+
+        print("Need to resolve Citation " , cid, spectrum_id)
         time.sleep(0.25)
         return redirect(url_for('citation', cid=cid, error=error))
     return redirect(url_for('citation', error=error))
