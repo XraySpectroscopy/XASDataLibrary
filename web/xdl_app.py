@@ -18,11 +18,11 @@ from flask import (Flask, request, session, redirect, url_for,
 from xasdb import (connect_xasdb, fmttime, valid_score, unique_name, None_or_one)
 from xafs_preedge import (preedge, edge_energies)
 
-from utils import (row2dict, multiline_text, session_init,
-                   parse_spectrum, spectrum_ratings, spectra_for_suite,
-                   spectra_for_citation, beamline_for_spectrum,
-                   spectra_for_beamline, get_beamline_list, get_rating,
-                   allowed_filename, get_fullpath, pathjoin)
+from utils import (row2dict, multiline_text, session_init, parse_spectrum,
+                   spectrum_ratings, spectra_for_suite,
+                   spectra_for_citation, spectra_for_beamline,
+                   get_beamline_list, get_rating, allowed_filename,
+                   get_fullpath, pathjoin)
 
 # sys.path.insert(0, '/home/newville/XASDB_Secrets')
 
@@ -40,6 +40,8 @@ db = connect_xasdb(DBNAME, **DBCONN)
 
 ANY_EDGES  = ['Any'] + [e.name for e in db.get_edges()]
 ANY_MODES  = ['Any'] + [e.name for e in db.get_modes()]
+
+INCLUDED_ELEMS = db.included_elements()
 
 def send_confirm_email(person, hash, style='new'):
     """send email with account confirmation/reset link"""
@@ -366,10 +368,10 @@ def elem(elem=None, orderby=None, reverse=0):
         edge     = db.get_edge(s.edge_id).name
         elem_sym = db.get_element(s.element_z).symbol
         person   = db.get_person(s.person_id)
-        mode     = db.get_mode(s.mode_id)
+        mode     = db.get_spectrum_mode(s.mode_id)
 
         rating   = get_rating(s)
-        bl_id, bl_desc = beamline_for_spectrum(db, s)
+        bl_id, bl_desc = db.get_spectrum_beamline(s.id)
 
         # filter edge, beamline, and modes:
         if ((edge_filter not in (edge, ANY_EDGES[0])) or
@@ -423,7 +425,8 @@ def elem(elem=None, orderby=None, reverse=0):
                            beamlines=get_beamline_list(db, with_any=True, orderby='name'),
                            beamline_id=beamline_id,
                            searchword=searchword,
-                           rating_min=rating_min)
+                           rating_min=rating_min,
+                           included_elems=INCLUDED_ELEMS)
 
 
 @app.route('/all')
@@ -455,7 +458,7 @@ def spectrum(spid=None):
     except:
         pass
 
-    plot_mode = mode = db.get_mode(spid)
+    plot_mode = mode = db.get_spectrum_mode(spid)
 
     # now get real data for plotting
     energy, mudata, murefer = None, None, None
