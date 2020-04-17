@@ -28,6 +28,8 @@ try:
 except ImportError:
     from larch.io import XDIFile
 
+from .creator import InitialData
+
 PW_ALGOR = 'sha512'
 PW_NITER = 200000
 
@@ -355,6 +357,25 @@ class XASDataLibrary(object):
             if key in table.c and val is not None:
                 query = query.filter(getattr(table.c, key)==val)
         return query.all()
+
+    def included_elements(self, retval='symbol'):
+        """return a list of elements with one or more spectra"""
+        zvals = []
+        for s in self.fquery('spectrum'):
+            ez = s.element_z
+            if ez not in zvals:
+                zvals.append(ez)
+        out = []
+        for z, atsym, name in InitialData.elements:
+            if z in  zvals:
+                val = z
+                if retval == 'symbol':
+                    val = atsym
+                elif retval ==  'name':
+                    val = name
+                out.append(val)
+        return out
+
 
     def get_facility(self,  **kws):
         """return facility or list of facilities"""
@@ -796,7 +817,6 @@ class XASDataLibrary(object):
             sid = suite
         return db.fquery('suite_rating', suite_id=sid)
 
-
     def get_spectrum_ratings(self, spectrum):
         "get all ratings for a spectrum"
         if hasattr(spectrum, 'id') and hasattr(spectrum, 'itrans'):
@@ -805,11 +825,25 @@ class XASDataLibrary(object):
             sid = spectrum
         return self.fquery('spectrum_rating', spectrum_id=sid)
 
-    def get_mode(self, spectrum_id):
+    def get_spectrum_mode(self, spectrum_id):
         """return name of mode for a spectrum"""
         spect = self.fquery('spectrum', id=spectrum_id)[0]
         return self.fquery('mode', id=spect.mode_id)[0].name
 
+    def get_spectrum_beamline(self, spectrum_id):
+        "return id, desc for beamline for aa spectrum"
+        blid, desc  = -1, 'unknown'
+        spect = None_or_one(self.fquery('spectrum', id=spectrum_id))
+        if spect is not None:
+            bl = self.fquery('beamline', id=spect.beamline_id)[0]
+            if bl is not None:
+                blid = bl.id
+                desc = bl.name
+        if (blid is None or blid < 0) and (spect.notes is not None):
+            tname = spect.notes.get('beamline', {}).get('name', None)
+            if tname is not None:
+                desc = "may be '%s'" % (desc, tname)
+        return '%d' % blid, desc
 
     def get_spectrum(self, id):
         """ get spectrum by id"""
