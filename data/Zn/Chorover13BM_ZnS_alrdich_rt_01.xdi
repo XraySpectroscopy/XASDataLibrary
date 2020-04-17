@@ -9,7 +9,7 @@
 # Facility.Name:  APS
 # Beamline.Name:  13-BM-D
 # Beamline.xray_source:  bending magnet
-# Mono.dspacing:  3.13555
+# Mono.d_spacing:  3.13555
 # Mono.name: Si 111
 # Beamline.Storage_Ring_Current: 99.6899 || S:SRcurrentAI.VAL
 # Beamline.FOE_Mono_angle_readback: 12.0630 || 13BMA:m17.RBV
