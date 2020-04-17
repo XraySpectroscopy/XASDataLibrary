@@ -152,13 +152,12 @@ def get_spectrum_suites(db, sid):
 
 def beamline_for_spectrum(db, s, notes=None):
     "return id, desc for beamline of a spectrum"
-    blid  = -1
-    desc = 'unknown'
+    blid, desc  = -1, 'unknown'
+
     if s.beamline_id is not None:
         blid = s.beamline_id
         bl   = db.fquery('beamline', id=blid)[0]
         fac  = db.fquery('facility', id=bl.facility_id)[0]
-        # desc = '%s @ %s ' % (bl.name, fac.name)
         desc = bl.name
     if (blid is None or blid < 0) and (notes is not None):
         blid = -1
@@ -222,7 +221,7 @@ def parse_spectrum(s, db):
     edge   = db.get_edge(s.edge_id)
     elem   = db.get_element(s.element_z)
     person = db.get_person(s.person_id)
-    mode   = db.get_mode(s.id)
+    mode   = db.get_spectrum_mode(s.id)
     eunits = db.fquery('energy_units', id=s.energy_units_id)[0].units
     d_spacing = '%f'% s.d_spacing
     notes =  json.loads(s.notes)
