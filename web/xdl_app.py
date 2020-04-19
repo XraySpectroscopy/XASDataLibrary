@@ -42,6 +42,7 @@ ANY_EDGES  = ['Any'] + [e.name for e in db.get_edges()]
 ANY_MODES  = ['Any'] + [e.name for e in db.get_modes()]
 
 INCLUDED_ELEMS = db.included_elements()
+SPECTRA_COUNT = len(db.get_spectra())
 
 def send_confirm_email(person, hash, style='new'):
     """send email with account confirmation/reset link"""
@@ -356,13 +357,6 @@ def elem(elem=None, orderby=None, reverse=0):
     searchword  = request.form.get('searchphrase', '')
     rating_min  = request.form.get('rating', '0')
 
-    reverse = int(reverse)
-    if reverse:
-        dbspectra.reverse()
-        reverse = 0
-    else:
-        reverse = 1
-
     spectra = []
     for s in dbspectra:
         edge     = db.get_edge(s.edge_id).name
@@ -415,6 +409,15 @@ def elem(elem=None, orderby=None, reverse=0):
                         'beamline_desc': bl_desc,
                         'beamline_id': bl_id })
 
+    reverse = int(reverse)
+    if reverse:
+        spectra.reverse()
+        reverse = 0
+    else:
+        reverse = 1
+
+
+
     return render_template('ptable.html',
                            ntotal=len(dbspectra),
                            nspectra=len(spectra),
@@ -426,7 +429,9 @@ def elem(elem=None, orderby=None, reverse=0):
                            beamline_id=beamline_id,
                            searchword=searchword,
                            rating_min=rating_min,
+                           spectra_count=SPECTRA_COUNT,
                            included_elems=INCLUDED_ELEMS)
+
 
 
 @app.route('/all')

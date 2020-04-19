@@ -1,10 +1,8 @@
 {% extends "layout.html" %}
 {% block body %}
 
-<p> <div class=subtitle>Select Absorbing Element to list spectra:</div>
-
-
-
+<p> <div class=subtitle>Select Absorbing Element
+({{ spectra_count }} spectra, {{ included_elems|length }} elements): </div>
 </p>
 
 <div class=body>
@@ -12,9 +10,7 @@
 <input type=hidden name=elem value={{elem}}>
 <table> <tr><td rowspan=10>
 
-<table class=ptable cellpadding=0 cellspacing=0 border=0><tr>
-
-
+<table class="ptable" cellspacing=0 cellpadding=0><tr>
 <td class=elem width=30> {%if 'H' in included_elems %} <a href="{{url_for('elem')}}/H">H </a> {%else%} H {%endif%}</td>
 <td colspan=16></td>
 <td class=elem width=30> {%if 'He' in included_elems %} <a href="{{url_for('elem')}}/He">He </a> {%else%} He {%endif%}</td>
@@ -22,10 +18,9 @@
 <td class=elem width=30> {%if 'Li' in included_elems %} <a href="{{url_for('elem')}}/Li">Li </a> {%else%} Li {%endif%}</td>
 <td class=elem width=30> {%if 'Be' in included_elems %} <a href="{{url_for('elem')}}/Be">Be </a> {%else%} Be {%endif%}</td>
 <td colspan=2></td>
-<td colspan=6 class=elem>
+<td colspan=8 class=elem>
 <a href="{{url_for('elem')}}/All">Show All Spectra</a>
 </td>
-<td colspan=2></td>
 <td class=elem width=30> {%if 'B'  in included_elems %} <a href="{{url_for('elem')}}/B ">B </a> {%else%} B {%endif%}</td>
 <td class=elem width=30> {%if 'C'  in included_elems %} <a href="{{url_for('elem')}}/C">C </a> {%else%} C {%endif%}</td>
 <td class=elem width=30> {%if 'N'  in included_elems %} <a href="{{url_for('elem')}}/N">N </a> {%else%} N {%endif%}</td>
@@ -118,7 +113,7 @@
 <td class=elem width=30> {%if 'Er' in included_elems %} <a href="{{url_for('elem')}}/Er">Er </a> {%else%} Er {%endif%}</td>
 <td class=elem width=30> {%if 'Tm' in included_elems %} <a href="{{url_for('elem')}}/Tm">Tm </a> {%else%} Tm {%endif%}</td>
 <td class=elem width=30> {%if 'Yb' in included_elems %} <a href="{{url_for('elem')}}/Yb">Yb </a> {%else%} Yb {%endif%}</td>
-<td class=elem width=30> {%if 'Lu' in included_elems %} <a href="{{url_for('elem')}}/Lu">Lu </a> {%else%} Lu {%endif%}</td>
+<td class=elem width=30> {%if 'Lu' in included_elems %} <a href="{{url_for('elem')}}/Lu">Lu </a> {%else%} Lu {%endif%}</td><td></td>
 
 </tr><tr>
 <td colspan=3></td>
@@ -135,16 +130,16 @@
 <td class=elem width=30> {%if 'Fm' in included_elems %} <a href="{{url_for('elem')}}/Fm">Fm </a> {%else%} Fm {%endif%}</td>
 <td class=elem width=30> {%if 'Md' in included_elems %} <a href="{{url_for('elem')}}/Md">Md </a> {%else%} Md {%endif%}</td>
 <td class=elem width=30> {%if 'No' in included_elems %} <a href="{{url_for('elem')}}/No">No </a> {%else%} No {%endif%}</td>
-<td class=elem width=30> {%if 'Lr' in included_elems %} <a href="{{url_for('elem')}}/Lr">Lr </a> {%else%} Lr {%endif%}</td>
+<td class=elem width=30> {%if 'Lr' in included_elems %} <a href="{{url_for('elem')}}/Lr">Lr </a> {%else%} Lr {%endif%}</td><td></td>
 </tr><tr>
 </table>
 
 </td></tr>
 <tr><td width=5%> </td><td colspan=2>
-Filter Spectra by Requiring Edge, Beamline, Rating
+Filter Spectra by Edge, Beamline, Measurement Mode,
 </td></tr>
 <tr><td width=5%> </td><td colspan=2>
-Measurement Mode, or Text in Name or Comment
+Rating, or Required Text in Name, Comment, or other field:
 </td></tr>
 <tr><td></td><td>Edge: </td>
     <td><select  name='edge_filter' style="width: 200px;">
@@ -185,8 +180,8 @@ Measurement Mode, or Text in Name or Comment
    </td></tr>
 
 
-<tr><td width=5%> </td><td>Text:</td>
-<td><input size=40 type=text name=searchphrase value={{ searchword }}></td></tr>
+<tr><td width=5%> </td><td>Required Text:</td>
+<td><input size=35 type=text name=searchphrase value={{ searchword }}></td></tr>
 <tr><td width=5%> </td><td colspan=2>
 <input class='submitbutton' type=submit value='Apply Filter'</div>
 </td></tr>
@@ -197,18 +192,18 @@ Measurement Mode, or Text in Name or Comment
 <div class=spectra>
 <hr>
 
-{% if nspectra == 0 %}
+{% if spectra|count == 0 %}
    {% if elem is not none %}
       No spectra found for {{ elem }}
    {% endif %}
-   {% if ntotal > nspectra %}  (filtered from {{ ntotal }}) {% endif %}
+   {% if ntotal > spectra|count %}  (filtered from {{ ntotal }}) {% endif %}
 {% else %}
-   {% if nspectra == 1 %}
-      {{ nspectra }} spectrum for {{ elem }}
+   {% if spectra|count == 1 %}
+      {{ spectra|count }} spectrum for {{ elem }}
    {% else %}
-      {{ nspectra }} spectra for {{ elem }}
+      {{ spectra|count }} spectra for {{ elem }}
    {% endif %}
-   {% if ntotal > nspectra %}  (filtered from {{ ntotal }}) {% endif %}
+   {% if ntotal > spectra|count %}  (filtered from {{ ntotal }}) {% endif %}
 
 &nbsp;&nbsp; - &nbsp;
 Click on heading labels to toggle sorting:
