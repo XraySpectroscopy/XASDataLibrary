@@ -2,24 +2,23 @@
 from setuptools import setup
 import os
 
-version = '0.1'
-with open(os.path.join('xasdb', '_version.py')) as fh:
+version = '0.2'
+with open(os.path.join('xaslib', '_version.py')) as fh:
     for line in fh.readlines():
         line = line[:-1].strip()
         if line.startswith('__version'):
             words = line.split('=') + [' ', ' ']
             version = words[1].strip().replace("'", '').replace('"', '')
 
-#
 
-setup(name = 'xasdb',
+setup(name='xaslib',
       version = version,
-      author = 'Matthew Newville',
+      author       = 'Matthew Newville',
       author_email = 'newville@cars.uchicago.edu',
-      url     = 'http://xas.org/XasDataLibrary',
-      license = 'Public Domain',
-      description = 'x-ray absorption spectra library',
-      install_requires=('sqlalchemy', 'numpy', 'scipy'),
-      package_dir = {'xasdb': 'xasdb'},
-      packages = ['xasdb','xasdb.wx']
+      url          = 'https://xrayabsorption.org/xaslib',
+      license      = 'Public Domain',
+      description  = 'X-ray Absorption Spectra Data Library',
+      install_requires=('sqlalchemy', 'numpy', 'scipy', 'xraydb'),
+      package_dir = {'xaslib': 'xaslib'},
+      packages = ['xaslib','xaslib.web']
 )

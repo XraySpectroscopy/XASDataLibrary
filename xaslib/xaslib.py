@@ -84,7 +84,7 @@ def unique_name(name, namelist, maxcount=100, msg='spectrum'):
         count += 1
         if count > maxcount:
             msg = "a %s named '%s' already exists"  % (msg, name)
-            raise XASDBException(msg)
+            raise XASLibException(msg)
         name = "%s (%d)" % (basename, count)
     return name
 
@@ -113,7 +113,7 @@ def None_or_one(val, msg='Expected 1 or None result'):
     elif len(val) == 0:
         return None
     else:
-        raise XASDBException(msg)
+        raise XASLibException(msg)
 
 def apply_orderby(q, tab, orderby=None):
     """apply an order_by to a query to sort results"""
@@ -141,8 +141,8 @@ def slow_string_compare(a, b):
     return isgood == 0
 
 
-class XASDBException(Exception):
-    """XAS DB Access Exception: General Errors"""
+class XASLibException(Exception):
+    """XAS Library Exception: General Errors"""
     def __init__(self, msg):
         Exception.__init__(self)
         self.msg = msg
@@ -292,7 +292,7 @@ class XASDataLibrary(object):
         try:
             self.metadata.reflect()
         except:
-            raise XASDBException('%s is not a valid database' % dbname)
+            raise XASLibException('%s is not a valid database' % dbname)
 
         tables = self.tables = self.metadata.tables
 
@@ -718,7 +718,7 @@ class XASDataLibrary(object):
         spectrum_names = [s.name for s in stab.select().execute()]
 
         if name in spectrum_names:
-            raise XASDBException("A spectrum named '%s' already exists" % name)
+            raise XASLibException("A spectrum named '%s' already exists" % name)
 
         if description is None:
             description = name

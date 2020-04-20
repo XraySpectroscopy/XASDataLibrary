@@ -1,5 +1,5 @@
 """
-   x-ray absorption spectra database
+   xaslin: X-ray Absorption Spectra Library
 
 
 == License:
@@ -11,18 +11,19 @@
    Public Domain.  This work is published from: United States.
 
 == Authors:
-   Though copyright is waived, the authors of this code are:
-      Matthew Newville <newville@cars.uchicago.edu>
-           CARS, University of Chicago
+   Though copyright is waived, the primary authors of this code are:
+   Matthew Newville <newville@cars.uchicago.edu>, University of Chicago
+   Bruce Ravel <bruce.ravel@nist.gov>, NIST
 
 == Overview:
-   The xasdb module provides a python interface to the XAFS Database,
-   an SQLite tool for organizing XAS spectra.
+   The xaslib module provides data and a python interface to a
+   relational database (using either SQLite or Postgresql)
+   of experimental X-ray Absorption Spectra
 
 """
 from ._version import __version__
 
-from .xasdb import (isXASDataLibrary, XASDataLibrary, XASDBException, Info,
+from .xalib import (isXASDataLibrary, XASDataLibrary, XASDBException, Info,
                     Mode, Facility, Beamline, EnergyUnits, Edge, Element,
                     Ligand, Citation, Person, Spectrum_Rating,
                     Suite_Rating, Suite, Sample, Spectrum, fmttime,
@@ -31,15 +32,15 @@ from .xasdb import (isXASDataLibrary, XASDataLibrary, XASDBException, Info,
 
 from .creator import make_newdb
 
-def create_xasdb(dbname, server='sqlite', user='',
-              password='', port=5432, host=''):
+def create_xaslib(dbname='xaslib.db', server='sqlite', user='',
+                  password='', port=5432, host=''):
     """create a new XAS Data Library"""
     return make_newdb(dbname,
                       server=server, user=user,
                       password=password, port=port, host=host)
 
-def connect_xasdb(dbname, server='sqlite', user='',
-            password='', port=5432, host=''):
+def connect_xaslib(dbname='xaslib.db', server='sqlite', user='',
+                  password='', port=5432, host=''):
     """connect to a XAS Data Library"""
     return XASDataLibrary(dbname,
                           server=server, user=user,

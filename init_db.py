@@ -5,18 +5,18 @@
 import sys
 import os
 import glob
-import xasdb
+import xaslib
 import sqlalchemy
 
-dbname = sys.argv[1] if len(sys.argv) > 1 else 'xastest.db'
+dbname = sys.argv[1] if len(sys.argv) > 1 else 'xaslib.db'
 
 if os.path.exists(dbname):
     os.unlink(dbname)
 
-xasdb.create_xasdb(dbname)
+xaslib.create_xaslib(dbname)
 print( 'Created database %s' % dbname)
 
-db = xasdb.connect_xasdb(dbname)
+db = xaslib.connect_xaslib(dbname)
 print( 'Verified that database %s can be accessed.' % dbname)
 
 db.add_person('xaslib admin', 'xaslib@xrayabsorption.org', affiliation='IXAS')
