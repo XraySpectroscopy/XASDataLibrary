@@ -1,0 +1,18 @@
+{% extends "layout.html" %}
+{% block body %}
+
+<div class=subtitle> Ratings for Suite:  {{ suite_name }}</div>
+
+<div class=body>
+<p>{{ suite_notes}} </p>
+<hr>
+
+{% for r in ratings %}
+  <p>  Score: {{r.score}}  <p>
+  &nbsp;&nbsp;  <i> {{r.person_name}} ({{r.person_email}})
+  &nbsp;&nbsp; {{r.date}} </i> <p>
+  {{r.review|safe}}
+  <hr>
+{% endfor %}
+</div>
+{% endblock %}

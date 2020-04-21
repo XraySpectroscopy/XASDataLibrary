@@ -1,0 +1,56 @@
+<!doctype html>
+<title>X-ray Absorption Data Library</title>
+<link rel=stylesheet type=text/css href="{{ url_for('static',filename='style.css') }}">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<style>
+@import url(http://fonts.googleapis.com/css?family=Roboto:500,100,300,700,400);
+div.stars {width: 175px;  display: inline-block;}
+input.star {display: none;}
+label.star {float: right;   padding: 5px;  font-size: 18px;  color: #646464;  transition: all .2s;}
+input.star:checked ~ label.star:before {  content: '\f005';  color: #E9B530;  transition: all .2s;}
+input.star-5:checked ~ label.star:before { color: #E9B530;   text-shadow: 0 0 1px #A39420;}
+label.star:hover {transform: scale(1.00);  text-shadow: 0 0 0px #E9B530;}
+label.star:before {content: '\f006';  font-family: FontAwesome;}
+</style>
+
+
+<script async="async" type="text/javascript"
+src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+
+<div class=topbar>
+    <table cellpadding=1 width=100%>
+      <tr><td width=35% padding=5 align=left>  X-ray Absorption Data Library  </td>
+	  <td width=65% align=right>
+	    {% if session.username == none %}
+	       <a href="{{ url_for('login') }}">Log In</a>
+	       <a href="{{ url_for('create_account') }}">Create Account</a>
+	    {% else %}
+	       <a href="{{ url_for('logout') }}">Log Out</a>
+	    {% endif %}
+            <a href="{{ url_for('about') }}"> About </a>
+	</td>
+      </tr>
+    </table>
+</div>
+
+<div class=tab>
+  <ul class=tabmenu>
+    <li> <a href="{{ url_for('elem') }}"> Browse By Element </a> </li>
+    <li> <a href="{{ url_for('suites') }}"> Browse By Suite </a> </li>
+    <li> <a href="{{ url_for('beamlines') }}"> Browse By Beamline </a> </li>
+    {% if session.username != none %}
+    <li> <a href="{{ url_for('upload') }}"> Upload Data</a></li>
+    {% endif %}
+  </ul>
+</div>
+
+{% if error %}
+      <p class=error><strong>Error:</strong> {{ error }}</p>
+  {% endif %}
+{% for message in get_flashed_messages() %}
+    <div class=warning>{{ message }}</div>
+{% endfor %}
+
+{% block body %}
+{% endblock %}

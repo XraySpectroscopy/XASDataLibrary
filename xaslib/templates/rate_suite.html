@@ -1,0 +1,53 @@
+{% extends "layout.html" %}
+{% block body %}
+
+<div class=subtitle> Suite: {{suite_name}} </div>
+<div class=body>
+
+{% if session.username is not none %}
+
+
+<form action="{{ url_for('submit_suite_rating') }}" method=post>
+    <input type=hidden name=person     value={{person_id}}>
+    <input type=hidden name=suite      value={{suite_id}}>
+    <input type=hidden name=suite_name value={{suite_name}}>
+
+<table>
+<tr><td>Rating:</td>
+<td align='left'>
+    <div class='stars'>
+    <input class="star star-5" id="star-5" type="radio" name='score' value='5' {% if score == '5' %} checked {% endif %}/>
+    <label class="star star-5" for="star-5"></label>
+
+    <input class="star star-4" id="star-4" type="radio" name='score' value='4' {% if score == '4' %} checked {% endif %}/>
+    <label class="star star-4" for="star-4"></label>
+
+    <input class="star star-3" id="star-3" type="radio" name='score' value='3' {% if score == '3' %} checked {% endif %}/>
+    <label class="star star-3" for="star-3"></label>
+
+    <input class="star star-2" id="star-2" type="radio" name='score' value='2' {% if score == '2' %} checked {% endif %}/>
+    <label class="star star-2" for="star-2"></label>
+
+    <input class="star star-1" id="star-1" type="radio" name='score' value='1' {% if score == '1' %} checked {% endif %}/>
+    <label class="star star-1" for="star-1"></label>
+    </div>
+
+</td>
+<td align='right'>
+    <div class='formsubmit'>
+      <input class='formsubmit.input.submit' type="submit" name="submit" value="Submit" />
+    </div>
+</td></tr>
+<tr><td>Review:</td><td></td></tr>
+<tr><td colspan=3><textarea cols=120 rows=20 type=text name=review>{{review|safe}}
+</textarea></td></tr>
+</table>
+</form>
+</div>
+
+
+{% else %}
+You must be logged in to rate a suite.
+{% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,38 @@
+{% extends "layout.html" %}
+{% block body %}
+
+<div class=subtitle> Citations
+
+{% if session.username is not none %}
+  &nbsp;   &nbsp;
+  <a href="{{ url_for('add_citation') }}"> [add a citationy] </a>
+{% endif %}
+</div>
+
+<div class=body>
+<hr>
+{% if ncitations == 0 %}
+      No citations defined.
+{% else %}
+   <table cellspacing=3 cellpadding=1>
+     <tr>
+       <th>Name</th>
+       <th># Spectra</th>
+       <th> DOI </th>
+       <th> Journal, Volume, Pages, Year </th>
+       <th> Authors</th> <th> Title</th> </tr>
+   {% for c in citations %}
+       <tr class={{ loop.cycle('odd', 'even') }}>
+	 <td>  <a href="{{ url_for('citation', cd=c.id)}}"> {{c.name}} </a></td>
+	 <td>  &nbsp; {{c.nspectra}}  &nbsp;</td>
+	 <td>  &nbsp; {{c.doi}}  &nbsp; </td>
+	 <td>  &nbsp; {{c.journal}}, {{c.volume}},  {{c.pages}}, {{c.year}}  &nbsp; </td>
+	 <td>  &nbsp; {{c.authors}}</td>
+	 <td>  &nbsp; {{c.title}}</td>
+       </tr>
+   {% endfor %}
+   </table>
+{% endif %}
+
+</div>
+{% endblock %}
