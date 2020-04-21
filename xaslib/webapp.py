@@ -27,14 +27,13 @@ from .webutils import (row2dict, multiline_text, parse_spectrum,
 from .webplot import make_xafs_plot
 
 
-# sys.path.insert(0, '/home/newville/XASDB_Secarets')
 db = None
-
-
 app = Flask('xaslib', static_folder='static')
 app.config.from_object(__name__)
 
 ANY_EDGES = ANY_MODES = INCLUDED_ELEMS = SPECTRA_COUNT = None
+
+EMAIL_MSG = "From: {mailfrom:s}\r\nTo: {mailto:s}\r\nSubject: {subject:s}\r\n{message:s}\n"
 
 def session_init(session, force_refresh=False):
     global db, app, ANY_EDGES, ANY_MODES, INCLUDED_ELEMS, SPECTRA_COUNT
@@ -42,7 +41,6 @@ def session_init(session, force_refresh=False):
         session['username'] = None
     if 'person_id' not in session:
         session['person_id'] = "-1"
-
     if db is None and 'DBNAME' in app.config:
         conn = app.config.get('DBCONN', {})
         db = connect_xaslib(app.config['DBNAME'], **conn)
@@ -60,32 +58,35 @@ def send_confirm_email(person, hash, style='new'):
     """send email with account confirmation/reset link"""
 
     subject = "XAS Library Account Password Reset"
+    base_url = app.config['BASE_URL']
+    admin_email = app.config['ADMIN_EMAIL']
     message = """
         Someone (hopefully you) asked to reset your account for the XAS Spectra Library.
 
         To change your passowrd, please follow this link:
-               %s/newpassword/%d/%s
+               {base_url:s}/newpassword/{person_id:d}/{hash:s}
 
         Thank you.
 
-""" % (BASE_URL, person.id, hash)
+""".format(base_url=base_url, person_id=person.id, hash=hash)
 
     if style == 'new':
         subject = "XAS Library Account Confirmation"
         message = """
-        An account at the XAS Spectra Library has been created for %s, but not yet confirmed.
+        An account at the XAS Spectra Library has been created for {name:s}, but not yet confirmed.
 
         To confirm this account, please follow this link:
-           %s/confirmaccount/%d/%s
+               {base_url:s}/confirmpassword/{person_id:d}/{hash:s}
 
         Thank you.
 
-""" % (person.name, BASE_URL, person.id, hash)
+""".format(base_url=base_url, person_id=person.id, hash=hash, name=person.name)
 
-    fullmsg   = "From: %s\r\nTo: %s\r\nSubject: %s\r\n%s\n" % (ADMIN_EMAIL, person.email,
-                                                               subject, message)
-    s  = smtplib.SMTP('localhost')
-    s.sendmail(ADMIN_EMAIL, (person.email, ), fullmsg)
+    fullmsg = EMAIL_MSG.format(mailfrom=admin_email, mailto=person.email,
+                               subject=subject, message=message)
+
+    s = smtplib.SMTP('localhost')
+    s.sendmail(admin_email, (person.email, ), fullmsg)
     s.quit()
 
 def notify_account_creation(person):
@@ -94,16 +95,14 @@ def notify_account_creation(person):
     subject = "XAS Library Account created"
     message = """
         An account on the XAS Spectra Library was created for user:
-          email= %s
-          name = %s
-""" % (person.email, person.name)
+          email= {email:s}
+          name = {mame:s}
+""".format(email=person.email, name=person.name)
 
-    fullmsg   = "From: %s\r\nTo: %s\r\nSubject: %s\r\n%s\n" % (ADMIN_EMAIL,
-                                                               ADMIN_EMAIL,
-                                                               subject,
-                                                               message)
-    s  = smtplib.SMTP('localhost')
-    s.sendmail(ADMIN_EMAIL, (person.email, ), fullmsg)
+    fullmsg = EMAIL_MSG.format(mailfrom=admin_email, mailto=admin_email,
+                               subject=subject, message=message)
+    s = smtplib.SMTP('localhost')
+    s.sendmail(admin_email, (person.email, ), fullmsg)
     s.quit()
 
 def sendback(backto='elem', error=None, **kws):
@@ -692,7 +691,8 @@ def rate_spectrum(spid=None):
             review =  _r
     spid = s.id
     spname = s.name
-
+    if isinstance(score, (int, float)):
+        score= '%d' % score
     return render_template('rate_spectrum.html', error=error,
                            spectrum_id=spid, spectrum_name=spname,
                            person_id=pid, score=score, review=review)
