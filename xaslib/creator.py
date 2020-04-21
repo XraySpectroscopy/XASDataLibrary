@@ -9,9 +9,12 @@ import shutil
 from datetime import datetime
 
 from sqlalchemy.orm import sessionmaker, create_session
-from sqlalchemy import MetaData, create_engine, \
-     Table, Column, Integer, Float, String, Text, DateTime, ForeignKey
+from sqlalchemy import (MetaData, create_engine, Table, Column, Integer,
+                        Float, String, Text, DateTime, ForeignKey)
+
 from sqlalchemy.pool import SingletonThreadPool
+
+from . import initialdata
 
 def PointerCol(name, other=None, keyid='id', **kws):
     "pointer column"
@@ -47,284 +50,10 @@ def NamedTable(tablename, metadata, keyid='id', nameid='name',
         args.extend(cols)
     return Table(tablename, metadata, *args)
 
-class InitialData:
-    info    = [["version", "1.2.0"],
-               ["create_date", '<now>'],
-               ["modify_date", '<now>']]
 
-    e_units = [["eV", "electronVolts"],
-               ["keV", "kiloelectronVolts"],
-               ["degrees","angle in degrees for Bragg monochromator.  Needs mono d_spacing"] ]
-
-    modes = [["transmission", "transmission intensity through sample"],
-             ["fluorescence", "X-ray fluorescence (non-specified)"],
-             ["fluorescence, total yield", "X-ray fluorescence, no energy analysis"],
-             ["fluorescence, energy analyzed", "X-ray fluorescence with an energy dispersive detector"],
-             ["herfd", "high-energy resolution fluorescence, with a crystal analyzer"],
-             ["raman", "non-resonant X-ray inelastic scattering"],
-             ["xeol", "visible or uv light emission"],
-             ["electron emission", "emitted electrons from sample"],
-             ]
-
-    facilities = [
-        ['SSRL',     'US',       'Palo Alto',          'Stanford Synchrotron Radiation Laboratory', 'SLAC'],
-        ['NSLS',     'US',       'Upton',              'National Synchrotron Light Source', 'BNL'],
-        ['NSLS-II',  'US',       'Upton',              'National Synchrotron Light Source II', 'BNL'],
-        ['APS',      'US',       'Argonne',            'Advanced Photon Source', 'ANL'],
-        ['ALS',      'US',       'Berkeley',           'Advanced Light Source', 'LBNL'],
-        ['CAMD',     'US',       'Baton Rouge',        'Center for Advanced Microstructures and Devices', 'Louisiana State U'],
-        ['CHESS',    'US',       'Ithaca',             'Cornell High Energy Synchrotron Source', 'Cornell U'],
-        ['CLS',      'Canada',   'Saskatoon',          'Canadian Light Source', 'U Saskatchewan'],
-        ['LNLS',     'Brasil',   'Campinas',           'Laboratório Nacional de Luz Síncrotron', 'CNPEM'],
-
-        ['DLS',      'UK',       'Didcot',             'Diamond Light Source', ''],
-        ['SRS',      'UK',       'Cheshire',           'Synchrotron Radiation Source', 'Daresbury Laboratory'],
-
-        ['ESRF',     'France',   'Grenoble',           'European Synchrotron Radiation Facility', ''],
-        ['SOLEIL',   'France',   'GIF-sur-YVETTE',     'Synchrotron SOLEIL', '' ],
-        ['ALBA',     'Spain',    'Barcelona',          'ALBA', ''],
-        ['ANKA',     'Germany',  'Karlsruhe',          'Angstromquelle Karlsruhe', ''],
-        ['BESSY II', 'Germany',  'Berlin',             'Berliner Elektronenspeicherring-Gesellschaft für Synchrotronstrahlun', 'Helmholtz-Zentrum Berlin'],
-        ['DAFNE',    'Italy',    'Frascati',           'DAFNE-Light','  Laboratori Nazionali di Frascati'],
-        ['DELSY',    'Russia',   'Dubna',              'Dubna Electron Synchrotron', ''],
-        ['SLS',      'Switzerland', 'Villingen',       'Swiss Light Source', ''],
-        ['ELETTRA',  'Italy',    'Trieste',            'Elettra Synchrotron Light Laboratory', ''],
-        ['DORIS III','Germany',  'Hamburg',            'DORIS III', 'DESY'],
-        ['PETRA III','Germany',  'Hamburg',            'PETRA III', 'DESY'],
-        ['MAX IV',   'Sweden',   'Lund',               '', ' MAX-lab'],
-        ['SLRI',     'Thailand', 'Nakhon Ratchasima',  'Synchrotron Light Research Institute', 'Siam Photon'],
-        ['PF',       'Japan',    'Tsukuba',            'Photon Factory', 'KEK'],
-        ['AS',       'Australia', 'Victoria',          'Australia Synchrotron', ''],
-        ['SESAME',   'Jordan',   'Allaan',             'Synchrotron-light for Experimental Science and Applications in the Middle East', ''],
-        ['INDUS-2',  'India',    'Indore',             '', ''],
-        ['BSRF',     'China',    'Beijing',            'Beijing Synchrotron Radiation Facility', ''],
-        ['NSRL',     'China',    'Hfei',               'National Synchrotron Radiation Laboratory', ''],
-        ['NSRRC',    'Taiwan',   'Hsinshu',            'National Synchrotron Radiation Research Center', ''],
-        ['PLS',      'Korea',    'Pohang',             'Pohang Light Source',  ''],
-        ['SPring-8', 'Japan',    'Hyogo',              'SPring-8',  'RIKEN'],
-        ['SSLS',     'Singapore',  '',                 'Singapore Synchrotron Light Source',  ''],
-        ['SSRC',     'Russia',   'Novosibirsk',        'Siberian Synchrotron Research Centre', ''],
-        ['SSRF',     'China',    'Shangai',            'Shanghai Synchrotron Radiation Facility',  ''],
-        ]
-
-
-    beamlines = [
-        ['ALS 10.3.2', 'ALS', '10.3.2', '2.5 - 17'],
-        ['APS 10-BM-B', 'APS', 'MRCAT', '3 - 200'],
-        ['APS 10-ID-B', 'APS', 'MRCAT', '4.3- 90'],
-        ['APS 11-ID-D', 'APS', '11-ID-D', '4 - 40'],
-        ['APS 12-BM-B', 'APS', '12-BM-B', '4.5 - 24'],
-        ['APS 13-BM-D', 'APS', 'GSECARS', '4.5 - 70'],
-        ['APS 13-ID-C,D', 'APS', 'GSECARS', '4 - 45'],
-        ['APS 13-ID-E', 'APS', 'GSECARS', '2.4 - 26'],
-        ['APS 16-BM-D', 'APS', 'HPCAT', '6 - 70'],
-        ['APS 18-ID-D', 'APS', 'BIOCAT', '3.5 - 35'],
-        ['APS 2-ID-D', 'APS', '2-ID-D', '5 - 30'],
-        ['APS 20-BM-B', 'APS', '20-BM-B', '2.7- 30'],
-        ['APS 20-ID-B,C', 'APS', '20-ID-B,C', '3 - 50'],
-        ['APS 4-ID-C', 'APS', '4-ID-C', '0.5 - 3'],
-        ['APS 4-ID-D', 'APS', '4-ID-D', '0.5 - 50'],
-        ['APS 5-BM-D', 'APS', 'DNDCAT', '4.5 - 80'],
-        ['APS 7-ID-B,C,D', 'APS', '7-ID-B,C,D', '6 - 21'],
-        ['APS 9-BM-B,C', 'APS', '9-BM-B,C', '2.1 - 23'],
-
-        ['CAMD DCM', 'CAMD', 'DCM', '0.9 - 20'],
-        ['CLS HXMA', 'CLS', 'HXMA', '5 - 40'],
-        ['CLS REIXS', 'CLS', 'REIXS', '0.08 - 2'],
-        ['CLS SGM', 'CLS', 'SGM', '0.25 - 2'],
-        ['CLS SXRMB', 'CLS', 'SXRMB', '1.7 - 10'],
-        ['CLS VESPERS', 'CLS', 'VESPERS', '6 - 30'],
-        ['LNLS DXAS', 'LNLS', 'DXAS', '5 - 14'],
-        ['LNLS XAFS1', 'LNLS', 'XAFS1', '4 -24'],
-        ['LNLS XAFS2', 'LNLS', 'XAFS2', '4 - 17'],
-
-        ['NSLS X10C', 'NSLS', 'X10C', '4 - 24'],
-        ['NSLS X11A', 'NSLS', 'X11A', '4.5 - 40'],
-        ['NSLS X11B', 'NSLS', 'X11B', '5 - 23'],
-        ['NSLS X15B', 'NSLS', 'X15B', '1.2 - 8'],
-        ['NSLS X18B', 'NSLS', 'X18B', '4.8 - 40'],
-        ['NSLS X19A', 'NSLS', 'X19A', '2.1 - 17'],
-        ['NSLS X23A2', 'NSLS', 'X23A2', '4.7 - 30'],
-        ['NSLS X24A', 'NSLS', 'X24A', '1.8 - 6'],
-        ['NSLS X3B', 'NSLS', 'X3B', '3.8-13.3'],
-
-        ['NSLS-II 4-BM', 'NSLS-II', 'XFM', '2.05 - 23'],
-        ['NSLS-II 5-ID', 'NSLS-II', 'SRX', '4.5 - 20'],
-        ['NSLS-II 6-BM', 'NSLS-II', 'BMM', '4.5 - 23'],
-        ['NSLS-II 7-BM', 'NSLS-II', 'QAS', '4.7 - 31'],
-        ['NSLS-II 7-ID', 'NSLS-II', 'SST', '0.1 - 7.5'],
-        ['NSLS-II 8-BM', 'NSLS-II', 'TES', '1.6 - 5.0'],
-        ['NSLS-II 8-ID', 'NSLS-II', 'ISS', '4.8 - 31'],
-
-        ['SSRL 10-1', 'SSRL', '10-1', '0.25 - 1.2'],
-        ['SSRL 10-2a', 'SSRL', '10-2a', '4.5 - 45'],
-        ['SSRL 11-2', 'SSRL', '11-2', '4.5 - 37'],
-        ['SSRL 13-2', 'SSRL', '13-2', '0.25 - 1.1'],
-        ['SSRL 14-3', 'SSRL', '14-3', '2 - 5'],
-        ['SSRL 2-3', 'SSRL', '2-3', '4.5 - 24'],
-        ['SSRL 4-1', 'SSRL', '4-1', '5.5 - 38'],
-        ['SSRL 4-3', 'SSRL', '4-3', '2.4 - 14'],
-        ['SSRL 6-2a', 'SSRL', '6-2a', '2.3 - 17'],
-        ['SSRL 7-3', 'SSRL', '7-3', '4.6 - 37'],
-        ['SSRL 8-2', 'SSRL', '8-2', '0.1 - 1.3'],
-        ['SSRL 9-3', 'SSRL', '9-3', '5 - 30'],
-
-        ['AS XAS', 'AS', 'XAS', '4 - 50'],
-
-        ['BSRF 4W1B', 'BSRF', '4W1B', '4 - 22'],
-
-        ['NSRL U19', 'NSRL', 'U19', '0.01 - 0.2'],
-        ['NSRL U7C', 'NSRL', 'U7C', '4 - 13'],
-        ['NSRRC BL01C1', 'NSRRC', 'BL01C1', '6 - 33'],
-        ['NSRRC BL16A1', 'NSRRC', 'BL16A1', '2 - 8'],
-        ['NSRRC BL17C1', 'NSRRC', 'BL17C1', '4.8 - 14.2'],
-
-        ['PF AR-NW10A', 'PF', 'AR-NW10A', '8 - 42'],
-        ['PF AR-NW14A', 'PF', 'AR-NW14A', '5 - 20'],
-        ['PF AR-NW2A', 'PF', 'AR-NW2A', '5 - 20'],
-        ['PF BL-11A', 'PF', 'BL-11A', '0.07 - 1.9'],
-        ['PF BL-11B', 'PF', 'BL-11B', '1.7 - 5'],
-        ['PF BL-12C', 'PF', 'BL-12C', '6 - 23'],
-        ['PF BL-27B', 'PF', 'BL-27B', '4 - 20'],
-        ['PF BL-2A', 'PF', 'BL-2A', '1.7 - 5'],
-        ['PF BL-2C', 'PF', 'BL-2C', '0.25 - 1.5'],
-        ['PF BL-4A', 'PF', 'BL-4A', '4 - 20'],
-        ['PF BL-7A', 'PF', 'BL-7A', '0.1 - 1.5'],
-        ['PF BL-7C', 'PF', 'BL-7C', '4 - 20'],
-        ['PF BL-9A', 'PF', 'BL-9A', '2.1 - 15'],
-        ['PF BL-9C', 'PF', 'BL-9C', '4 - 23'],
-
-        ['PLS 10B', 'PLS', '10B', '3.5 - 16'],
-        ['PLS 3C1', 'PLS', '3C1', '2.3 - 32'],
-        ['PLS 7C1', 'PLS', '7C1', '5 - 30'],
-        ['PLS 8C1', 'PLS', '8C1', '3 - 22'],
-        ['SESAME A1', 'SESAME', 'A1', '3 - 30'],
-        ['SLRI BL4', 'SLRI', 'BL4', '2.5 - 8'],
-        ['SLRI BL8', 'SLRI', 'BL8', '1.25 - 10'],
-        ['SPring-8 BL01B1', 'SPring-8', 'BL01B1', '3.8 - 113'],
-        ['SPring-8 BL14B2', 'SPring-8', 'BL14B2', '3.8 - 72'],
-        ['SPring-8 BL28B2', 'SPring-8', 'BL28B2', '8 - 40'],
-        ['SPring-8 BL37XU', 'SPring-8', 'BL37XU', '5 - 37'],
-        ['SPring-8 BL39XU', 'SPring-8', 'BL39XU', '5 - 38'],
-        ['SPring-8 BL40XU', 'SPring-8', 'BL40XU', '8 - 17'],
-
-        ['SSLS XDD', 'SSLS', 'XDD', '2.3 - 10'],
-        ['SSRC EXAFS', 'SSRC', 'EXAFS', '.'],
-        ['SSRC Soft EXAFS', 'SSRC', 'Soft EXAFS', '.'],
-        ['SSRF BL08U1-A', 'SSRF', 'BL08U1-A', '0.25 - 2'],
-        ['SSRF BL14W1', 'SSRF', 'BL14W1', '3.5 - 50'],
-
-        ['ALBA CLAESS', 'ALBA', 'CLAESS', '2.4 - 65'],
-        ['ANKA INE', 'ANKA', 'INE', '2.1 - 26'],
-        ['ANKA SUL-X', 'ANKA', 'SUL-X', '1.5 - 22'],
-        ['ANKA XAS', 'ANKA', 'XAS', '2.4 - 25'],
-        ['DAFNE DXR-1', 'DAFNE', 'DXR-1', '1.3 - 3'],
-        ['DLS B18', 'DLS', 'Core XAFS', '2 - 35'],
-        ['DLS I06', 'DLS', 'Nanoscience', '0.1 - 2'],
-        ['DLS I09', 'DLS', 'Surface & Interface Structural Analysis', '0.15 - 2.1 or 2 - 20'],
-        ['DLS I10', 'DLS', 'BLADE', '0.4 - 2'],
-        ['DLS I18', 'DLS', 'Microfocus spectroscopy', '2 - 20'],
-        ['DLS I20', 'DLS', 'LOLA: X-ray spectroscopy', '4 - 34'],
-
-        ['ELETTRA ALOISA', 'ELETTRA', 'ALOISA', '0.12 - 2'],
-        ['ELETTRA BACH', 'ELETTRA', 'BACH', '0.035 - 1.6'],
-        ['ELETTRA BEAR', 'ELETTRA', 'BEAR', '0.004 - 1.4'],
-        ['ELETTRA POLAR', 'ELETTRA', 'POLAR', '0.005 - 1'],
-        ['ELETTRA TWINMIC', 'ELETTRA', 'TWINMIC', '0.25 - 2'],
-        ['ELETTRA XAFS', 'ELETTRA', 'XAFS', '2.3 - 25'],
-        ['ESRF BM2', 'ESRF', 'D2AM', '5 - 25'],
-        ['ESRF BM20', 'ESRF', 'ROBL', '6 - 33'],
-        ['ESRF BM23', 'ESRF', 'BM23', '5 - 75'],
-        ['ESRF BM25A', 'ESRF', 'SPLINE', '5 - 45'],
-        ['ESRF BM26A', 'ESRF', 'DUBBLE', '4 - 40'],
-        ['ESRF BM30B', 'ESRF', 'FAME', '4 - 40'],
-        ['ESRF BM8', 'ESRF', 'GILDA', '5 - 85'],
-        ['ESRF ID08', 'ESRF', 'ID08', '0.4 - 1.5'],
-        ['ESRF ID12', 'ESRF', 'ID12', '2.0 - 20'],
-        ['ESRF ID21', 'ESRF', 'ID21', '0.2 - 8'],
-        ['ESRF ID22', 'ESRF', 'ID22', '6.5 - 18'],
-        ['ESRF ID24', 'ESRF', 'ID24', '5 - 28'],
-        ['ESRF ID26', 'ESRF', 'ID26', '2.4 - 27'],
-
-        ['MAX IV I811', 'MAX IV', 'I811', '2.3 - 20'],
-        ['PETRA III P04', 'PETRA III', 'Variable polarization XUV', '0.25 - 3'],
-        ['PETRA III P06', 'PETRA III', 'Hard X-ray micro-nano probe', '2.4 - 50'],
-        ['SLS MicroXAS', 'SLS', 'MicroXAS', '5 - 20'],
-        ['SLS SuperXAS', 'SLS', 'SuperXAS', '4.5 - 35'],
-        ['SOLEIL DIFFABS', 'SOLEIL', 'DIFFABS', '3 - 23'],
-        ['SOLEIL LUCIA', 'SOLEIL', 'LUCIA', '0.8 - 8'],
-        ['SOLEIL ODE', 'SOLEIL', 'ODE', '3.5 - 25'],
-        ['SOLEIL PROXIMA 1', 'SOLEIL', 'PROXIMA 1', '5 - 15'],
-        ['SOLEIL SAMBA', 'SOLEIL', 'SAMBA', '4 - 40'],
-        ]
-
-
-    edges = [["K",    "1s"],
-             ["L3",   "2p3/2"],
-             ["L2",   "2p1/2"],
-             ["L1",   "2s"],
-             ["M4,5", "3d3/2,5/2"]]
-
-    elements = [[1,  "H",  "hydrogen"],     [2,  "He", "helium"],
-                [3,  "Li", "lithium"],      [4,  "Be", "beryllium"],
-                [5,  "B",  "boron"],        [6,  "C",  "carbon"],
-                [7,  "N",  "nitrogen"],     [8,  "O",  "oxygen"],
-                [9,  "F",  "fluorine"],     [10, "Ne", "neon"],
-                [11, "Na", "sodium"],       [12, "Mg", "magnesium"],
-                [13, "Al", "aluminum"],     [14, "Si", "silicon"],
-                [15, "P",  "phosphorus"],   [16, "S",  "sulfur"],
-                [17, "Cl", "chlorine"],     [18, "Ar", "argon"],
-                [19, "K",  "potassium"],    [20, "Ca", "calcium"],
-                [21, "Sc", "scandium"],     [22, "Ti", "titanium"],
-                [23, "V",  "vanadium"],     [24, "Cr", "chromium"],
-                [25, "Mn", "manganese"],    [26, "Fe", "iron"],
-                [27, "Co", "cobalt"],       [28, "Ni", "nickel"],
-                [29, "Cu", "copper"],       [30, "Zn", "zinc"],
-                [31, "Ga", "gallium"],      [32, "Ge", "germanium"],
-                [33, "As", "arsenic"],      [34, "Se", "selenium"],
-                [35, "Br", "bromine"],      [36, "Kr", "krypton"],
-                [37, "Rb", "rubidium"],     [38, "Sr", "strontium"],
-                [39, "Y",  "yttrium"],      [40, "Zr", "zirconium"],
-                [41, "Nb", "niobium"],      [42, "Mo", "molybdenum"],
-                [43, "Tc", "technetium"],   [44, "Ru", "ruthenium"],
-                [45, "Rh", "rhodium"],      [46, "Pd", "palladium"],
-                [47, "Ag", "silver"],       [48, "Cd", "cadmium"],
-                [49, "In", "indium"],       [50, "Sn", "tin"],
-                [51, "Sb", "antimony"],     [52, "Te", "tellurium"],
-                [53, "I",  "iodine"],       [54, "Xe", "xenon"],
-                [55, "Cs", "cesium"],       [56, "Ba", "barium"],
-                [57, "La", "lanthanum"],    [58, "Ce", "cerium"],
-                [59, "Pr", "praseodymium"], [60, "Nd", "neodymium"],
-                [61, "Pm", "promethium"],   [62, "Sm", "samarium"],
-                [63, "Eu", "europium"],     [64, "Gd", "gadolinium"],
-                [65, "Tb", "terbium"],      [66, "Dy", "dysprosium"],
-                [67, "Ho", "holmium"],      [68, "Er", "erbium"],
-                [69, "Tm", "thulium"],      [70, "Yb", "ytterbium"],
-                [71, "Lu", "lutetium"],     [72, "Hf", "hafnium"],
-                [73, "Ta", "tantalum"],     [74, "W",  "tungsten"],
-                [75, "Re", "rhenium"],      [76, "Os", "osmium"],
-                [77, "Ir", "iridium"],      [78, "Pt", "platinum"],
-                [79, "Au", "gold"],         [80, "Hg", "mercury"],
-                [81, "Tl", "thallium"],     [82, "Pb", "lead"],
-                [83, "Bi", "bismuth"],      [84, "Po", "polonium"],
-                [85, "At", "astatine"],     [86, "Rn", "radon"],
-                [87, "Fr","francium"],      [88, "Ra", "radium"],
-                [89, "Ac", "actinium"],     [90, "Th", "thorium"],
-                [91, "Pa", "protactinium"], [92, "U",  "uranium"],
-                [93, "Np", "neptunium"],    [94, "Pu", "plutonium"],
-                [95, "Am", "americium"],    [96, "Cm", "curium"],
-                [97, "Bk", "berkelium"],    [98, "Cf", "californium"],
-                [99, "Es", "einsteinium"],  [100,"Fm", "fermium"],
-                [101,"Md", "mendelevium"],  [102,"No", "nobelium"],
-                [103,"Lw", "lawerencium"],  [104,"Rf", "rutherfordium"],
-                [105,'Ha', "dubnium"],      [106,"Sg", "seaborgium"],
-                [107,"Bh", "bohrium"],      [108,"Hs", "hassium"],
-                [109,"Mt", "meitnerium"],   [110,"Ds", "darmstadtium"],
-                [111,"Rg", "roentgenium"],  [112,"Cn", "copernicium"] ]
-
-def  make_newdb(dbname, server= 'sqlite', user='',
+def create_xaslib(dbname, server= 'sqlite', user='',
                 password='',  host='', port=None):
-    """create initial xafs data library.  server can be
+    """create and initialize a new XAS data library.  server can be
     'sqlite' or 'postgresql'
     """
     if server.startswith('sqlit'):
@@ -487,24 +216,24 @@ def  make_newdb(dbname, server= 'sqlite', user='',
     metadata.create_all()
     session = sessionmaker(bind=engine)()
 
-    for z, sym, name  in InitialData.elements:
+    for z, sym, name  in initialdata.elements:
         element.insert().execute(z=z, symbol=sym,  name=name)
 
-    for units, notes  in InitialData.e_units:
+    for units, notes  in initialdata.e_units:
         energy_units.insert().execute(units=units, notes=notes)
 
-    for name, level in InitialData.edges:
+    for name, level in initialdata.edges:
         edge.insert().execute(name=name, level=level)
 
-    for name, notes in InitialData.modes:
+    for name, notes in initialdata.modes:
         mode.insert().execute(name=name, notes=notes)
 
-    for name, country, city, fullname, lab in InitialData.facilities:
+    for name, country, city, fullname, lab in initialdata.facilities:
         facility.insert().execute(name=name, country=country, city=city,
                                   fullname=fullname, laboratory=lab)
 
     session.commit()
-    for name, fac_name, nickname, erange in InitialData.beamlines:
+    for name, fac_name, nickname, erange in initialdata.beamlines:
         fac_id = None
         f = facility.select(facility.c.name==fac_name).execute().fetchall()
         if len(f) > 0:
@@ -513,7 +242,7 @@ def  make_newdb(dbname, server= 'sqlite', user='',
                                   energy_range=erange, facility_id=fac_id)
 
     now = datetime.isoformat(datetime.now())
-    for key, value in InitialData.info:
+    for key, value in initialdata.info:
         if value == '<now>':
             value = now
         info.insert().execute(key=key, value=value)
@@ -540,13 +269,3 @@ def backup_versions(fname, max=10):
                 shutil.move(fb0, fb1)
         print(' %s -> %s.1 ' % (fname, fname))
         shutil.move(fname, "%s.1" % fname)
-
-
-if __name__ == '__main__':
-    dbname = 'example.xdl'
-    if os.path.exists(dbname):
-        backup_versions(dbname)
-
-    make_newdb(dbname, server='sqlite')
-    print('''%s  created and initialized.''' % dbname)
-    dumpsql(dbname)

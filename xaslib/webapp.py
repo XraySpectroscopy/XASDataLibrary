@@ -15,34 +15,46 @@ from flask import (Flask, request, session, redirect, url_for,
                    abort, render_template, flash, Response,
                    send_from_directory)
 
-from xasdb import (connect_xasdb, fmttime, valid_score, unique_name, None_or_one)
-from xafs_preedge import (preedge, edge_energies)
+from .xaslib import connect_xaslib, fmttime, valid_score, unique_name, None_or_one
+from .xafs_preedge import preedge, edge_energies
 
-from utils import (row2dict, multiline_text, session_init, parse_spectrum,
-                   spectrum_ratings, spectra_for_suite,
-                   spectra_for_citation, spectra_for_beamline,
-                   get_beamline_list, get_rating, allowed_filename,
-                   get_fullpath, pathjoin)
+from .webutils import (row2dict, multiline_text, parse_spectrum,
+                       spectrum_ratings, spectra_for_suite,
+                       spectra_for_citation, spectra_for_beamline,
+                       get_beamline_list, get_rating, allowed_filename,
+                       get_fullpath, pathjoin)
 
-# sys.path.insert(0, '/home/newville/XASDB_Secrets')
+from .webplot import make_xafs_plot
 
-from xasdb_config import (SECRET_KEY, DBNAME, DBCONN, PORT, DEBUG,
-                          UPLOAD_FOLDER, LOCAL_ONLY, ADMIN_EMAIL, BASE_URL)
 
-from plot import make_xafs_plot
+# sys.path.insert(0, '/home/newville/XASDB_Secarets')
+db = None
+
 
 app = Flask('xaslib', static_folder='static')
 app.config.from_object(__name__)
-app.config['MAX_CONTENT_LENGTH'] = 32 * 1024 * 1024
-app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
-db = connect_xasdb(DBNAME, **DBCONN)
+ANY_EDGES = ANY_MODES = INCLUDED_ELEMS = SPECTRA_COUNT = None
 
-ANY_EDGES  = ['Any'] + [e.name for e in db.get_edges()]
-ANY_MODES  = ['Any'] + [e.name for e in db.get_modes()]
+def session_init(session, force_refresh=False):
+    global db, app, ANY_EDGES, ANY_MODES, INCLUDED_ELEMS, SPECTRA_COUNT
+    if 'username' not in session:
+        session['username'] = None
+    if 'person_id' not in session:
+        session['person_id'] = "-1"
 
-INCLUDED_ELEMS = db.included_elements()
-SPECTRA_COUNT = len(db.get_spectra())
+    if db is None and 'DBNAME' in app.config:
+        conn = app.config.get('DBCONN', {})
+        db = connect_xaslib(app.config['DBNAME'], **conn)
+        force_refresh = True
+
+    if force_refresh:
+        print("Refreshing session ", db)
+        ANY_EDGES  = ['Any'] + [e.name for e in db.get_edges()]
+        ANY_MODES  = ['Any'] + [e.name for e in db.get_modes()]
+        INCLUDED_ELEMS = db.included_elements()
+        SPECTRA_COUNT = len(db.get_spectra())
+
 
 def send_confirm_email(person, hash, style='new'):
     """send email with account confirmation/reset link"""
@@ -118,19 +130,19 @@ def page_not_found(error):
 
 @app.route('/clear')
 def clear():
-    session_init(session, db)
+    session_init(session)
     return sendback()
 
 @app.route('/browse')
 @app.route('/')
 def index():
-    session_init(session, db)
+    session_init(session)
     return sendback()
 
 @app.route('/create_account/')
 @app.route('/create_account', methods=['GET', 'POST'])
 def create_account():
-    session_init(session, db)
+    session_init(session)
     error = None
     if request.method == 'POST':
         email = request.form['email']
@@ -172,7 +184,7 @@ def create_account():
 @app.route('/password_reset_request/')
 @app.route('/password_reset_request', methods=['GET', 'POST'])
 def password_reset_request():
-    session_init(session, db)
+    session_init(session)
     error = None
     if request.method == 'POST':
         email = request.form['email']
@@ -192,7 +204,7 @@ def password_reset_request():
 
 @app.route('/newpassword/<pid>/<hash>')
 def newpassword(pid='-1', hash=''):
-    session_init(session, db)
+    session_init(session)
     if pid > 0 and len(hash) > 8:
         pid = int(pid)
         person = db.get_person(pid, key='id')
@@ -203,7 +215,7 @@ def newpassword(pid='-1', hash=''):
 
 @app.route('/setnewpassword/', methods=['GET', 'POST'])
 def setnewpassword(pid='-1', hash=''):
-    session_init(session, db)
+    session_init(session)
 
     if request.method == 'POST':
 
@@ -233,7 +245,7 @@ def setnewpassword(pid='-1', hash=''):
 
 @app.route('/confirmaccount/<pid>/<hash>')
 def confirmaccount(pid='-1', hash=''):
-    session_init(session, db)
+    session_init(session)
     error = 'Could not confirm an account with that information'
     if pid > 0 and len(hash) > 8:
         pid = int(pid)
@@ -258,7 +270,7 @@ def confirmaccount(pid='-1', hash=''):
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
-    session_init(session, db)
+    session_init(session)
     error = None
     session['username'] = None
     if request.method == 'POST':
@@ -285,7 +297,7 @@ def login():
 
 @app.route('/logout')
 def logout():
-    session_init(session, db)
+    session_init(session)
     session['username'] = None
     session['person_id'] = '-1'
     flash('You have been logged out')
@@ -295,7 +307,7 @@ def logout():
 @app.route('/user', methods=['GET', 'POST'])
 def user():
     # show the user profile for that user
-    session_init(session, db)
+    session_init(session)
     error = None
     if request.method == 'POST':
         email = request.form['email']
@@ -330,7 +342,7 @@ def user():
 @app.route('/elem/<elem>/<orderby>',  methods=['GET', 'POST'])
 @app.route('/elem/<elem>/<orderby>/<reverse>', methods=['GET', 'POST'])
 def elem(elem=None, orderby=None, reverse=0):
-    session_init(session, db)
+    session_init(session)
     dbspectra = []
     sql_orderby = orderby
     if orderby is None:
@@ -442,7 +454,7 @@ def all():
 @app.route('/spectrum/')
 @app.route('/spectrum/<int:spid>')
 def spectrum(spid=None):
-    session_init(session, db)
+    session_init(session)
     s  = db.get_spectrum(spid)
     if s is None:
         return sendbac(error='Could not find Spectrum #%d' % spid)
@@ -530,7 +542,7 @@ def spectrum(spid=None):
 
 @app.route('/showspectrum_rating/<int:spid>')
 def showspectrum_rating(spid=None):
-    session_init(session, db)
+    session_init(session)
     s  = db.get_spectrum(spid)
     if s is None:
         return sendback(error='Could not find Spectrum #%d' % spid)
@@ -553,7 +565,7 @@ def showspectrum_rating(spid=None):
 
 @app.route('/submit_spectrum_edits', methods=['GET', 'POST'])
 def submit_spectrum_edits():
-    session_init(session, db)
+    session_init(session)
     error=None
     if session['username'] is None:
         needslogin(error='to edit spectrum')
@@ -582,7 +594,7 @@ def submit_spectrum_edits():
 
 @app.route('/edit_spectrum/<int:spid>')
 def edit_spectrum(spid=None):
-    session_init(session, db)
+    session_init(session)
     error=None
     if session['username'] is None:
         needslogin(error='to edit spectrum')
@@ -605,7 +617,7 @@ def edit_spectrum(spid=None):
 @app.route('/delete_spectrum/<int:spid>')
 @app.route('/delete_spectrum/<int:spid>/ask=<int:ask>')
 def delete_spectrum(spid, ask=1):
-    session_init(session, db)
+    session_init(session)
     error=None
     if session['username'] is None:
         return needslogin(error='to delete a spectrum')
@@ -625,7 +637,7 @@ def delete_spectrum(spid, ask=1):
 
 @app.route('/submit_spectrum_rating', methods=['GET', 'POST'])
 def submit_spectrum_rating(spid=None):
-    session_init(session, db)
+    session_init(session)
     error=None
 
     if session['username'] is None:
@@ -660,7 +672,7 @@ def submit_spectrum_rating(spid=None):
 @app.route('/rate_spectrum/')
 @app.route('/rate_spectrum/<int:spid>')
 def rate_spectrum(spid=None):
-    session_init(session, db)
+    session_init(session)
     error=None
     if session['username'] is None:
         error='must be logged in to rate spectrum'
@@ -688,7 +700,7 @@ def rate_spectrum(spid=None):
 
 @app.route('/submit_suite_rating', methods=['GET', 'POST'])
 def submit_suite_rating(spid=None):
-    session_init(session, db)
+    session_init(session)
     error=None
 
     if session['username'] is None:
@@ -722,7 +734,7 @@ def submit_suite_rating(spid=None):
 @app.route('/rate_suite/')
 @app.route('/rate_suite/<int:stid>')
 def rate_suite(stid=None):
-    session_init(session, db)
+    session_init(session)
     error=None
     if session['username'] is None:
         error='must be logged in to rate suite'
@@ -747,7 +759,7 @@ def rate_suite(stid=None):
 
 @app.route('/showsuite_rating/<int:stid>')
 def showsuite_rating(stid=None):
-    session_init(session, db)
+    session_init(session)
 
     st = None_or_onw(db.fquery('suite'))
     if st is None:
@@ -770,7 +782,7 @@ def showsuite_rating(stid=None):
 
 @app.route('/add_spectrum_to_suite/<int:spid>')
 def add_spectrum_to_suite(spid=None):
-    session_init(session, db)
+    session_init(session)
     error=None
     if session['username'] is None:
         error='must be logged in to add spectrum to suite'
@@ -791,7 +803,7 @@ def add_spectrum_to_suite(spid=None):
 
 @app.route('/submit_spectrum_to_suite', methods=['GET', 'POST'])
 def submit_spectrum_to_suite():
-    session_init(session, db)
+    session_init(session)
     error=None
     if session['username'] is None:
         error='must be logged in to add spectrum to a suite'
@@ -818,7 +830,7 @@ def submit_spectrum_to_suite():
 
 @app.route('/rawfile/<int:spid>/<fname>')
 def rawfile(spid, fname):
-    session_init(session, db)
+    session_init(session)
     s  = db.get_spectrum(spid)
     if s is None:
         error = 'Could not find Spectrum #%d' % spid
@@ -842,7 +854,7 @@ def doc(page='index.html'):
 @app.route('/suites/')
 @app.route('/suites/<int:stid>')
 def suites(stid=None):
-    session_init(session, db)
+    session_init(session)
     suites = []
     if stid is None:
         for st in db.fquery('suite'):
@@ -874,7 +886,7 @@ def suites(stid=None):
 @app.route('/add_suite')
 @app.route('/add_suite', methods=['GET', 'POST'])
 def add_suite():
-    session_init(session, db)
+    session_init(session)
     error=None
     if session['username'] is None:
         error='must be logged in to add a suite'
@@ -900,7 +912,7 @@ def add_suite():
 @app.route('/delete_suite/<int:stid>')
 @app.route('/delete_suite/<int:stid>/ask=<int:ask>')
 def delete_suite(stid, ask=1):
-    session_init(session, db)
+    session_init(session)
     error=None
     if session['username'] is None:
         error='must be logged in to delete a suite'
@@ -919,7 +931,7 @@ def delete_suite(stid, ask=1):
 
 @app.route('/edit_suite/<int:stid>')
 def edit_suite(stid=None):
-    session_init(session, db)
+    session_init(session)
     error=None
     if session['username'] is None:
         error='must be logged in to edit suite'
@@ -940,7 +952,7 @@ def edit_suite(stid=None):
 
 @app.route('/submit_suite_edits', methods=['GET', 'POST'])
 def submit_suite_edits():
-    session_init(session, db)
+    session_init(session)
     error=None
     if session['username'] is None:
         error='must be logged in to edit suite'
@@ -964,7 +976,7 @@ def submit_suite_edits():
 
 @app.route('/sample/<int:sid>')
 def sample(sid=None):
-    session_init(session, db)
+    session_init(session)
     samples = []
     opts = {}
     sdat = None_or_one(db.fquery('sample', id=sid))
@@ -974,7 +986,7 @@ def sample(sid=None):
 
 @app.route('/edit_sample/<int:sid>')
 def edit_sample(sid=None):
-    session_init(session, db)
+    session_init(session)
     error=None
     if session['username'] is None:
         error='must be logged in to edit sample'
@@ -988,7 +1000,7 @@ def edit_sample(sid=None):
 
 @app.route('/submit_sample_edits', methods=['GET', 'POST'])
 def submit_sample_edits():
-    session_init(session, db)
+    session_init(session)
     error=None
     if session['username'] is None:
         error='must be logged in to edit sample'
@@ -1016,7 +1028,7 @@ def submit_sample_edits():
 @app.route('/beamlines/<orderby>')
 @app.route('/beamlines/<orderby>/<reverse>')
 def beamlines(blid=None, orderby='name', reverse=0):
-    session_init(session, db)
+    session_init(session)
     kws = {'orderby': orderby}
     beamlines = []
     for bldat in db.fquery('beamline', **kws):
@@ -1049,7 +1061,7 @@ def beamlines(blid=None, orderby='name', reverse=0):
 @app.route('/beamline/')
 @app.route('/beamline/<int:blid>')
 def beamline(blid=None):
-    session_init(session, db)
+    session_init(session)
     if blid is None:
         return sendback('beamlines')
     bldat = None_or_one(db.fquery('beamline', id=blid))
@@ -1078,7 +1090,7 @@ def beamline(blid=None):
 @app.route('/add_beamline')
 @app.route('/add_beamline', methods=['GET', 'POST'])
 def add_beamline():
-    session_init(session, db)
+    session_init(session)
     error=None
     if session['username'] is None:
         error='must be logged in to add a beamline'
@@ -1109,7 +1121,7 @@ def add_beamline():
 @app.route('/add_facility')
 @app.route('/add_facility', methods=['GET', 'POST'])
 def add_facility():
-    session_init(session, db)
+    session_init(session)
     error=None
     if session['username'] is None:
         error='must be logged in to add a facility'
@@ -1132,13 +1144,13 @@ def add_facility():
 @app.route('/facilities')
 @app.route('/facilities/')
 def facilities():
-    session_init(session, db)
+    session_init(session)
     return render_template('facilities.html', error=None,
                            facilities=db.get_facilities(orderby='country'))
 
 @app.route('/edit_facility/<int:fid>')
 def edit_facility(fid=None):
-    session_init(session, db)
+    session_init(session)
     return render_template('edit_facility.html', error=None,
                            fac = db.get_facility(id=int(fid)),
                            person_id=session['person_id'])
@@ -1146,7 +1158,7 @@ def edit_facility(fid=None):
 
 @app.route('/submit_facility_edits', methods=['GET', 'POST'])
 def submit_facility_edits():
-    session_init(session, db)
+    session_init(session)
     error=None
     if session['username'] is None:
         return redirect(url_for('/',
@@ -1177,7 +1189,7 @@ def submit_facility_edits():
 @app.route('/citation/')
 @app.route('/citation/<int:cid>')
 def citation(cid=None):
-    session_init(session, db)
+    session_init(session)
     kws = {}
     if cid is not None:
         kws['id'] = cid
@@ -1201,7 +1213,7 @@ def citation(cid=None):
 @app.route('/add_citation')
 @app.route('/add_citation', methods=['GET', 'POST'])
 def add_citation(spid=None):
-    session_init(session, db)
+    session_init(session)
     error=None
     if session['username'] is None:
         error='must be logged in to add citation for spectrum'
@@ -1213,7 +1225,7 @@ def add_citation(spid=None):
 
 @app.route('/submit_citation_edits', methods=['GET', 'POST'])
 def submit_citation_edits():
-    session_init(session, db)
+    session_init(session)
     error=None
     if session['username'] is None:
         error='must be logged in to edit suite'
@@ -1246,7 +1258,7 @@ def submit_citation_edits():
 @app.route('/upload')
 @app.route('/upload/')
 def upload():
-    session_init(session, db)
+    session_init(session)
     if session['username'] is None:
         return needslogin(error='to submit a spectrum')
     return render_template('upload.html',
@@ -1254,7 +1266,7 @@ def upload():
 
 @app.route('/submit_upload', methods=['GET', 'POST'])
 def submit_upload():
-    session_init(session, db)
+    session_init(session)
     error=None
     if session['username'] is None:
         return needslogin(error='to submit a spectrum')
@@ -1298,7 +1310,6 @@ def submit_upload():
         return redirect(url_for('spectrum', spid=spectrum.id, error=error))
     return render_template('upload.html', error='upload error')
 
-## <input type="checkbox" name="check1" value="c1">Value 1<br>
 
 if __name__ == "__main__":
     app.jinja_env.cache = {}

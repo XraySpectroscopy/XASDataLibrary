@@ -28,7 +28,7 @@ try:
 except ImportError:
     from larch.io import XDIFile
 
-from .creator import InitialData
+from . import initialdata
 
 PW_ALGOR = 'sha512'
 PW_NITER = 200000
@@ -366,7 +366,7 @@ class XASDataLibrary(object):
             if ez not in zvals:
                 zvals.append(ez)
         out = []
-        for z, atsym, name in InitialData.elements:
+        for z, atsym, name in initialdata.elements:
             if z in  zvals:
                 val = z
                 if retval == 'symbol':
@@ -1052,3 +1052,12 @@ class XASDataLibrary(object):
                                  reference_sample=reference_sample,
                                  reference_mode=reference_mode,
                                  temperature=temperature)
+
+
+
+def connect_xaslib(dbname, server='sqlite', user='', password='',
+                   port=5432, host=''):
+    """connect to a XAS Data Library"""
+    return XASDataLibrary(dbname,
+                          server=server, user=user,
+                          password=password, port=port, host=host)

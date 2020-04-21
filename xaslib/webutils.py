@@ -14,7 +14,7 @@ try:
 except ImportError:
     from werkzeug import secure_filename
 
-from xasdb import fmttime
+from .xaslib import fmttime
 
 def pathjoin(*args):
     return path.join(*args)

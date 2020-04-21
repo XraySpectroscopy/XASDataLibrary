@@ -23,25 +23,12 @@
 """
 from ._version import __version__
 
-from .xalib import (isXASDataLibrary, XASDataLibrary, XASDBException, Info,
-                    Mode, Facility, Beamline, EnergyUnits, Edge, Element,
-                    Ligand, Citation, Person, Spectrum_Rating,
-                    Suite_Rating, Suite, Sample, Spectrum, fmttime,
-                    valid_score, unique_name, None_or_one)
+from .xaslib import isXASDataLibrary, XASDataLibrary, connect_xaslib
+from .creator import create_xaslib
+from .webapp import app
 
 
-from .creator import make_newdb
-
-def create_xaslib(dbname='xaslib.db', server='sqlite', user='',
-                  password='', port=5432, host=''):
-    """create a new XAS Data Library"""
-    return make_newdb(dbname,
-                      server=server, user=user,
-                      password=password, port=port, host=host)
-
-def connect_xaslib(dbname='xaslib.db', server='sqlite', user='',
-                  password='', port=5432, host=''):
-    """connect to a XAS Data Library"""
-    return XASDataLibrary(dbname,
-                          server=server, user=user,
-                          password=password, port=port, host=host)
+# Info, Mode, Facility, Beamline, EnergyUnits, Edge,
+# Element, Ligand, Citation, Person, Spectrum_Rating,
+# Suite_Rating, Suite, Sample, Spectrum, fmttime,
+# valid_score, unique_name, None_or_one)
