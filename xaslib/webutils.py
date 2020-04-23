@@ -14,6 +14,8 @@ try:
 except ImportError:
     from werkzeug import secure_filename
 
+from xraydb import guess_edge
+
 from .xaslib import fmttime
 
 def pathjoin(*args):
@@ -299,3 +301,69 @@ def parse_spectrum(s, db):
             'xdi_filename': "%s.xdi" % (s.name.strip()),
             'fullfig': None,
             'xanesfig': None}
+
+
+def guess_metadata(dgroup):
+    """guess some metadata from data groupo headers and array labels"""
+
+    alabels = ['None'] + dgroup.array_labels
+    labels = {'en':alabels[1], 'i0':alabels[2],
+              'it':alabels[3], 'if':'None', 'ir':'None'}
+
+    e0 = None
+    for lab in alabels:
+        llab = lab.lower()
+        if  'ener' in llab:
+            labels['en'] = lab
+        if 'i0' in llab or 'imon' in llab:
+            labels['i0'] = lab
+        if 'it' in llab or 'i1' in llab:
+            labels['it'] = lab
+        if 'if' in llab or 'fl' in llab:
+            labels['if'] = lab
+        if 'iref' in llab or 'i2' in llab:
+            labels['ir'] = lab
+
+    out = {'labels': labels,
+           'has_reference': labels['ir'] is not 'None'}
+
+    for line in dgroup.header:
+        line  = line[:-1].strip()
+        if len(line) < 4:
+            continue
+        if line[0] in '#*%;!':
+            line = line[1:].strip()
+        line = line.replace('||', ':').replace('=', ':').replace('#', ':')
+        words = line.split(':')
+        if len(words) > 1:
+            key = words[0].strip().lower()
+            val = words[1].strip()
+            if 'e0' in key:
+                e0 = val.split()[0]
+            if 'elem' in key:
+                if 'edge' in key:
+                    out['elem_sym'] = val
+                elif 'edge' in key:
+                    out['edge'] = val
+            if 'mono' in key:
+                if 'name' in key:
+                    out['mono_name'] = val
+                elif 'spac' in key:
+                    out['d_spacing'] = val.split()[0]
+            if 'sample' in key:
+                if 'name' in key:
+                    out['sample_name'] = val
+                elif 'prep' in key:
+                    out['sample_prep'] = val
+                elif 'form' in key:
+                    out['sample_form'] = val
+
+    if e0 is not None and out.get('elem_sym', None) is None:
+        try:
+            elem, edge = guess_edge(float(e0))
+        except:
+            elem, edge = None, None
+        if elem is not None:
+            out['elem_sym'] = elem
+            out['edge'] = edge
+    return out
