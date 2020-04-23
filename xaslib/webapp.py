@@ -16,13 +16,16 @@ from flask import (Flask, request, session, redirect, url_for,
                    send_from_directory)
 
 from .xaslib import connect_xaslib, fmttime, valid_score, unique_name, None_or_one
-from .xafs_preedge import preedge, edge_energies
+from .initialdata import edge_energies
+from larch.io import read_ascii
+from larch.xafs.pre_edge import preedge
+# from .xafs_preedge import preedge
 
 from .webutils import (row2dict, multiline_text, parse_spectrum,
                        spectrum_ratings, spectra_for_suite,
                        spectra_for_citation, spectra_for_beamline,
-                       get_beamline_list, get_rating, allowed_filename,
-                       get_fullpath, pathjoin)
+                       get_beamline_list, get_rating, get_fullpath,
+                       guess_metadata, pathjoin, secure_filename)
 
 from .webplot import make_xafs_plot
 
@@ -276,7 +279,6 @@ def login():
         email = request.form['email']
         password = request.form['password']
 
-        print("Login ", email, password, type(email), type(password))
         person = db.get_person(email)
         session['person_id'] = "-1"
         if person is None:
@@ -493,9 +495,7 @@ def spectrum(spid=None):
         error = 'Could not extract fluorescence data from spectrum'
         return render_template('spectrum.html', **opts)
 
-
     dgroup = preedge(energy, mudata)
-
     # get reference if possible
     try:
         irefer = np.array(json.loads(s.irefer))
@@ -604,7 +604,8 @@ def edit_spectrum(spid=None):
 
     opts = parse_spectrum(s, db)
     beamlines = get_beamline_list(db, with_any=False, orderby='name')
-    return render_template('edit_spectrum.html', error=error,
+    return render_template('edit_spectrum.html',
+                           error=error,
                            elems=db.fquery('element'),
                            eunits=db.fquery('energy_units'),
                            edges=ANY_EDGES[1:],
@@ -1165,21 +1166,18 @@ def submit_facility_edits():
                                 error='must be logged in to edit facility'))
 
     fid = 0
-    # print("Facility edits ", request.form)
     fid  = int(request.form.get('facility_id', -1))
     if fid < 0:
         return redirect(url_for('/',
                                 error='could not edit facility'))
 
     if request.method == 'POST':
-        print(' -> update', fid, request.form['city'])
         o = db.update('facility', fid,
                       name=request.form['name'],
                       fullname=request.form['fullname'],
                       laboratory=request.form['laboratory'],
                       city=request.form['city'],
                       country=request.form['country'])
-        print("Done ", o)
         time.sleep(0.25)
 
     return redirect(url_for('facilities', error=error))
@@ -1264,6 +1262,90 @@ def upload():
     return render_template('upload.html',
                            person_id=session['person_id'])
 
+
+@app.route('/edit_upload', methods=['GET', 'POST'])
+def edit_upload():
+    session_init(session)
+    error = None
+    if session['username'] is None:
+        return needslogin(error='to submit a spectrum')
+    if request.method == 'POST':
+        pid    = request.form['person']
+        person = db.get_person(int(pid))
+        file = request.files['file']
+        fname =  secure_filename(file.filename)
+        if file:
+            fullpath = get_fullpath(file, app.config['UPLOAD_FOLDER'])
+            try:
+                file.save(fullpath)
+            except IOError:
+                return render_template('upload.html',
+                                       person_id=session['person_id'],
+                                       error='Could not save uploaded file (%s)' % (file))
+
+            time.sleep(0.50)
+            try:
+                dgroup = read_ascii(fullpath)
+            except:
+                return render_template('upload.html',
+                                       person_id=session['person_id'],
+                                       error='Could not read uploaded file (%s)' % (file))
+
+            filename = dgroup.filename
+            narrays, npts = dgroup.data.shape
+
+            array_labels = ['None'] + dgroup.array_labels
+            if len(array_labels) < 3:
+                array_labels.extend(['None', 'None'])
+
+            labels = {'en':array_labels[1], 'i0':array_labels[2],
+                      'i1':array_labels[3], 'if':'None', 'ir':'None'}
+
+            opts = dict(person_id=pid, filename=fname, error=error,
+                        description = '{} uploaded {}'.format(fname, fmttime()),
+                        mode='transmission',
+                        e_resolution='nominal',
+                        beamline_id=-1, sample_id=0, reference_sample='',
+                        person_email=person.email, person_name=person.name,
+                        upload_date=fmttime(), labels=labels,
+                        elem_sym='Cu', edge='K', energy_units='eV',
+                        d_spacing=-1, mono_name='', sample_name='',
+                        sample_form='', sample_prep='',
+                        array_labels=array_labels, narrays=narrays,
+                        npts=npts, header=dgroup.header)
+
+            opts.update(**guess_metadata(dgroup))
+
+            gen_monos = ('None',
+                         'generic Si(111)',
+                         'generic Si(220)',
+                         'generic Si(311)')
+
+            ref_format_choices = ('no reference spectra',
+                                  'transmission, downstream of i1',
+                                  'flouresence,  upstream of sample',
+                                  'flouresence,  downstream of i1')
+
+            opts['ref_choice'] = ref_format_choices[0]
+            if opts['has_reference']:
+                opts['ref_choice'] = ref_format_choices[1]
+
+            beamlines = get_beamline_list(db, with_any=False, orderby='name')
+            opts.update(dict(elems=db.fquery('element'),
+                             eunits=db.fquery('energy_units'),
+                             edges=ANY_EDGES[1:],
+                             beamlines=beamlines,
+                             samples=db.fquery('sample'),
+                             modes=ANY_MODES[1:],
+                             gen_monos=gen_monos,
+                             ref_format_choices=ref_format_choices))
+
+            return render_template('edit_uploadspectrum.html', **opts)
+
+    return render_template('upload.html',
+                           person_id=session['person_id'],
+                           error='upload error (method?)')
+
 @app.route('/submit_upload', methods=['GET', 'POST'])
 def submit_upload():
     session_init(session)
@@ -1274,41 +1356,15 @@ def submit_upload():
     if request.method == 'POST':
         pid    = request.form['person']
         pemail = db.get_person(int(pid)).email
-        file = request.files['file']
-        fname = request.form['spectrum_name']
-        spectrum = None
-        file_ok = False
-        if file and allowed_filename(file.filename):
-            fullpath = get_fullpath(file, UPLOAD_FOLDER)
-            try:
-                file.save(fullpath)
-                file_ok = True
-            except IOError:
-                pass
+        print("Submit Upload ", request.form)
 
-            if file_ok:
-                time.sleep(0.50)
-                sid = db.add_xdifile(fullpath, person=pemail, create_sample=True)
-                time.sleep(0.50)
-                db.session.commit()
+        # sid = db.add_xdifile(fullpath, person=pemail, create_sample=True)
+        # time.sleep(0.50)
+        # db.session.commit()
+        # spectrum  = db.get_spectrum(sid)
 
-            spectrum  = db.get_spectrum(sid)
-            if spectrum is None:
-                error = 'Could not find uploaded Spectrum #%d (%s)' % (sid, fullpath)
-                return render_template('upload.html', error=error)
-
-        if spectrum is None:
-            error = "File '%s' not found or not suppported type" %  (file.filename)
-            return render_template('upload.html', error=error)
-
-
-        # try:
-        opts = parse_spectrum(spectrum, db)
-        # except:
-        #    error = "Could not read spectrum from '%s'" % (file.filename)
-        #    return render_template('upload.html', error=error)
-        return redirect(url_for('spectrum', spid=spectrum.id, error=error))
-    return render_template('upload.html', error='upload error')
+    return render_template('upload.html',
+                           person_id=session['person_id'])
 
 
 if __name__ == "__main__":
