@@ -4,37 +4,45 @@
 <div class=subtitle> Upload XDI Spectra</div>
 <div class=body>
 
-Note: The uploaded file must
-be a valid
-XAS-Data-Interchange (XDI) file,
-and have an extension of '.xdi'.
+Uploaded files must be an ASCII file no larger than 16Mb with data arranged
+a table with columns for indivdual arrays, each row representing a
+different energy point.  Only the first 16 columns will be accessible, and
+these must include columns for Energy or Monochramator Angle, and arrays
+such as I0, ITRANS, MUTRANS, IFLUOR, MUFLUOR to idenitify the MU data.  You
+will be asked to select columns and fill in values for some metadata
+including:
 
-<p>
-For a detailed description, see <a href='https://github.com/XraySpectroscopy/XAS-Data-Interchange/blob/master/specification/spec.md'>
-  XAS Data Interchange Specification</a>. <br>
+<ul>
+  <li> Sample Name
+  <li> Absorbing Element and Edge
+  <li> Monochromator d-spacing or nominal reflecting cut
+  <li> Energy units
+  <li> Beamline
+  <li> Measurement Mode
+</ul>
 
-For example files, see
+<p> For example files, see example data files at
+
 <a href='https://github.com/XraySpectroscopy/XAS-Data-Interchange/tree/master/data'>
-  Example XDI data</a>  and the files available from this library.
+Example XDI data</a> and
+
+<a href='https://github.com/XraySpectroscopy/XAS-Data-Interchange/tree/master/data'>
+Example XDI data</a> and
+<a href='https://github.com/XraySpectroscopy/XASDataLibrary/tree/master/data'>
+Initial X-ray Absorption Data</a>.
+
+<p> For a detailed description of XDI files, see <a
+href='https://github.com/XraySpectroscopy/XAS-Data-Interchange/blob/master/specification/spec.md'>
+XAS Data Interchange Specification</a>. <br>
+
 
 </p>
 
-<form action="{{ url_for('submit_upload') }}"
+<form action="{{ url_for('edit_upload') }}"
     method=post enctype=multipart/form-data>
 <input type=hidden name=person value={{person_id}}>
 
-<table>
-<tr><td>XDI Data File: </td>
-<td><input id=fileinput type=file name=file>
-</td>
-</tr>
-<tr><td>Spectrum Name: </td>
-<td><input size=60 type=text name=spectrum_name> </td>
-</tr>
-<tr><td colspan=2>
-<input class='submitbutton' type=submit value=Upload></div>
-</td></tr>
-</table>
+Data File: <input type=file name=file> <input type=submit value="Upload to Edit">
 </form>
 
 </div>
