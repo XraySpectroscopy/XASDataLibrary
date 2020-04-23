@@ -97,19 +97,16 @@ h2 {font:bold 18px verdana,arial,sans-serif;color:#044484;font-weight:bold;}
 	       border-color: #D0D080;
 	       border-style: outset;
 	       border-radius: 4px;
-	       font-size: 16px;
 	      }
 
 #fileinput {background: #FEFEFE;
 	     color: blue;
 	     border-color: #FEFEFE;
 	     border-radius: 4px;
-	     font-size: 16px;
 	    }
 
 #fileinput.button {background: #FEFEFE;
 		   color: blue;
 		   border-color: #FEFEFE;
 		   border-radius: 4px;
-		   font-size: 16px;
 	    }
