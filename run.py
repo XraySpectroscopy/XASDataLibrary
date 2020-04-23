@@ -8,6 +8,7 @@ from xaslib import app
 # Note: Change This Key, used for Flask cookies
 # SECRET_KEY = 'xaslib_'+base64.b64encode(os.urandom(32))[:16]
 SECRET_KEY = 'xaslib_secret_key_0hrZzetj5rDDSQXv'
+DEBUG = True
 
 PORT = 7112
 cnf = app.config
@@ -20,7 +21,7 @@ cnf['UPLOAD_FOLDER'] = '/tmp/xaslib_uploads'
 cnf['MAX_CONTENT_LENGTH'] = 33554432
 
 app.jinja_env.cache = {}
-
+app.debug  = True
 app.secret_key = SECRET_KEY
 
 app.run(port=PORT)
