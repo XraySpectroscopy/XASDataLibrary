@@ -908,7 +908,7 @@ class XASDataLibrary(object):
         query = apply_orderby(query, tab, orderby)
         return query.execute().fetchall()
 
-    def add_xdifile(self, fname, person=None, **kws):
+    def add_xdifile(self, fname, person=None, reuse_sample=True, **kws):
         try:
             fh  = open(fname, 'r')
             filetext  = fh.read()
@@ -1027,9 +1027,15 @@ class XASDataLibrary(object):
 
             if len(sample_attrs) > 0:
                 sample_notes = '%s\n%s' % (sample_notes, json_encode(sample_attrs))
-            self.add_sample(sample_name, person_id, notes=sample_notes, **sample_kws)
-
-            sample_id = self.fquery('sample', name=sample_name, notes=sample_notes)[0].id
+            if reuse_sample:
+                srow = self.fquery('sample', name=sample_name, person_id=person_id)
+                if len(srow) > 0:
+                    sample_id = srow[0].id
+            if sample_id == 0:
+                self.add_sample(sample_name, person_id, notes=sample_notes,
+                                **sample_kws)
+                sample_id = self.fquery('sample', name=sample_name,
+                                        notes=sample_notes)[0].id
 
         if reference_used:
             if reference_sample is None:
