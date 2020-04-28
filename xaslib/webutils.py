@@ -304,11 +304,12 @@ def parse_spectrum(s, db):
 
 
 def guess_metadata(dgroup):
-    """guess some metadata from data groupo headers and array labels"""
+    """guess some metadata from data group headers and array labels"""
 
     alabels = ['None'] + dgroup.array_labels
-    labels = {'en':alabels[1], 'i0':alabels[2],
-              'it':alabels[3], 'if':'None', 'ir':'None'}
+
+    labels = {'en':'None', 'i0':'None', 'it':'None',
+              'if':'None', 'ir':'None'}
 
     e0 = None
     for lab in alabels:
@@ -317,18 +318,18 @@ def guess_metadata(dgroup):
             labels['en'] = lab
         if 'i0' in llab or 'imon' in llab:
             labels['i0'] = lab
-        if 'it' in llab or 'i1' in llab:
+        if 'it' in llab or 'i1' in llab or 'mut' in llab:
             labels['it'] = lab
-        if 'if' in llab or 'fl' in llab:
+        if 'if' in llab or 'fl' in llab or 'muf' in llab:
             labels['if'] = lab
-        if 'iref' in llab or 'i2' in llab:
+        if 'iref' in llab or 'i2' in llab or 'mur' in llab:
             labels['ir'] = lab
 
     out = {'labels': labels,
            'has_reference': labels['ir'] is not 'None'}
 
     for line in dgroup.header:
-        line  = line[:-1].strip()
+        line  = line.strip()
         if len(line) < 4:
             continue
         if line[0] in '#*%;!':
@@ -341,7 +342,7 @@ def guess_metadata(dgroup):
             if 'e0' in key:
                 e0 = val.split()[0]
             if 'elem' in key:
-                if 'edge' in key:
+                if 'sym' in key:
                     out['elem_sym'] = val
                 elif 'edge' in key:
                     out['edge'] = val
