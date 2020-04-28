@@ -1,24 +1,22 @@
 {% extends "layout.html" %}
 {% block body %}
 
-<p> <div class=subtitle> Sample</div>
-
-<div class=body>
-<hr>
+<p> <div class=subtitle> Sample:
 
 {% if session.username is not none %}
   &nbsp;   &nbsp;
   <a href="{{url_for('edit_sample', sid=sid)}}"> [edit this sample] </a>
 {% endif %}
-<p>
+
+</div>
+<div class=body>
 
 
 <table>
-<tr><td colspan=2> <hr> </td></tr>
-<td width=25%> Name: </td> <td>  {{name}} </td></tr>
-<td width=25%> Formula: </td> <td>  {{formula}} </td></tr>
-<td width=25%> Notes: </td> <td>  {{notes}} </td></tr>
-<td width=25%> Preparation: </td> <td>  {{preparation}} </td></tr>
+<tr><td width=25%> Name: </td> <td>  {{name}} </td></tr>
+<tr><td width=25%> Formula: </td> <td>  {{formula}} </td></tr>
+<tr><td width=25%> Notes: </td> <td>  {{notes}} </td></tr>
+<tr><td width=25%> Preparation: </td> <td>  {{preparation}} </td></tr>
 </table>
 
 

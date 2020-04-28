@@ -1,13 +1,12 @@
 {% extends "layout.html" %}
 {% block body %}
 
-<div class=subtitle> Edit Spectrum for Uploading: </div>
+<div class=subtitle>Verify Upload: </div>
 
 <div class=body style="overflow: hidden;">
 <div style="width:60%; float: left;">
-<form action="/verify_upload" method=post>
-<input type=hidden name=person_id value={{person_id}}>
-<input type=hidden name=fullpath value={{fullpath}}>
+<form action="/submit_upload" method=post>
+<input type=hidden name=person value={{person_id}}>
 <table border=0>
 
 <tr><td colspan=2>
@@ -65,7 +64,7 @@ Uploaded File: {{filename}} has {{narrays}} array columns with {{npts}} data poi
     <option value={{a}} {% if a == labels['ir'] %} selected=1 {% endif %} >{{ a }}</option>
 {% endfor %}
 </select>
-&nbsp; <input type="checkbox"  name="is_murefer"> mu_refer (no I_refef)? </input>
+&nbsp; <input type="checkbox"  name="is_murefer"> mu_refer (no I_ref)? </input>
 </td></tr>
 
 <td> Reference Style: </td><td><select name='ref_format' style="width: 250px;">
@@ -75,7 +74,7 @@ Uploaded File: {{filename}} has {{narrays}} array columns with {{npts}} data poi
 </select>
 </td></tr>
 
-<tr><td> Element: </td><td><select name='elem_sym' style="width: 100px;">
+<tr><td> Element: </td><td><select name='elem' style="width: 100px;">
 {% for el in elems %}
     <option value={{el.z}} {% if el.symbol == elem_sym %} selected=1 {% endif %}>{{ el.symbol }}</option>
 {% endfor %}
@@ -100,7 +99,7 @@ Uploaded File: {{filename}} has {{narrays}} array columns with {{npts}} data poi
 <input size=15 type=text name=d_spacing value={{d_spacing}}> &#197;  &nbsp; Or use Mono:
 <select  name='mono_name' style="width: 100px;">
 {% for mname in gen_monos %}
-    <option value="{{ mname }}" > {{ mname }}</option>
+    <option value={{mname}} > {{ mname }}</option>
 {% endfor %}
 </select>
 </td></tr>
@@ -116,16 +115,8 @@ Uploaded File: {{filename}} has {{narrays}} array columns with {{npts}} data poi
 </select>
 </td></tr>
 
-<tr><td> Sample: </td><td><select  name='sample' style="width: 300px;">
-{% for sm in samples %}
-    <option value={{sm.id}} {% if sm.id == sample_id  %} selected=1 {% endif %}> {{ sm.name }} </option>
-{% endfor %}
-</select>
-{% if session.username is not none %}
-&nbsp;   &nbsp;
-<a href="{{url_for('edit_sample', sid=sample_id)}}"> [edit this sample] </a>
-&nbsp; &nbsp;
-{% endif %}
+<tr><td> Sample: </td><td> something
+
 </td></tr>
 
 <tr><td> Reference Sample: </td><td>
@@ -140,8 +131,8 @@ Uploaded File: {{filename}} has {{narrays}} array columns with {{npts}} data poi
 
 </div>
 <div style="width: 40%; float: right;">
- <i>Header from data file </i> <p>
-<font size=-2>{% for a in header %} {{ a }} <br> {%endfor%}</font>
+ <i>Plot of mu goes here: </i> <p>
+
 </div>
 </div>
 {% endblock %}

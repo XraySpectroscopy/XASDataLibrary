@@ -4,6 +4,18 @@
 <div class=subtitle> Upload XDI Spectra</div>
 <div class=body>
 
+<p>  Select a data file to add to the X-ray Absorption Data Library: <p>
+
+<form action="{{ url_for('edit_upload') }}"
+    method=post enctype=multipart/form-data>
+<input type=hidden name=person value={{person_id}}>
+
+Data File: <input type=file name=file> <input type=submit value="Upload to Edit">
+</form>
+
+<p>
+<hr>
+
 Uploaded files must be an ASCII file no larger than 16Mb with data arranged
 a table with columns for indivdual arrays, each row representing a
 different energy point.  Only the first 16 columns will be accessible, and
@@ -31,19 +43,11 @@ Example XDI data</a> and
 <a href='https://github.com/XraySpectroscopy/XASDataLibrary/tree/master/data'>
 Initial X-ray Absorption Data</a>.
 
-<p> For a detailed description of XDI files, see <a
+<br> For a detailed description of XDI files, see <a
 href='https://github.com/XraySpectroscopy/XAS-Data-Interchange/blob/master/specification/spec.md'>
 XAS Data Interchange Specification</a>. <br>
 
-
-</p>
-
-<form action="{{ url_for('edit_upload') }}"
-    method=post enctype=multipart/form-data>
-<input type=hidden name=person value={{person_id}}>
-
-Data File: <input type=file name=file> <input type=submit value="Upload to Edit">
-</form>
+<hr>
 
 </div>
 
