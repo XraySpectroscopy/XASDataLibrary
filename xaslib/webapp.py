@@ -19,6 +19,7 @@ from .xaslib import connect_xaslib, fmttime, valid_score, unique_name, None_or_o
 from .initialdata import edge_energies
 from larch.io import read_ascii
 from larch.xafs.pre_edge import preedge
+from larch.utils.jsonutils import encode4js, decode4js
 # from .xafs_preedge import preedge
 
 from .webutils import (row2dict, multiline_text, parse_spectrum,
@@ -994,9 +995,9 @@ def edit_sample(sid=None):
         return redirect(url_for('/', error=error))
 
     opts = {}
-    for sdat in get_sample_list(db):
-        if int(sid) == int(sdat['id']):
-            opts = sdat
+    sdat = None_or_one(db.fquery('sample', id=sid))
+    if sdat is not None:
+        opts = row2dict(sdat)
     return render_template('edit_sample.html', sid=sid, **opts)
 
 @app.route('/submit_sample_edits', methods=['GET', 'POST'])
@@ -1259,6 +1260,9 @@ def upload():
     session_init(session)
     if session['username'] is None:
         return needslogin(error='to submit a spectrum')
+    # clear upload data
+    session['upload_datagroup'] = None
+    session['upload_fullpath'] = None
     return render_template('upload.html',
                            person_id=session['person_id'])
 
@@ -1301,11 +1305,14 @@ def edit_upload():
             labels = {'en':array_labels[1], 'i0':array_labels[2],
                       'i1':array_labels[3], 'if':'None', 'ir':'None'}
 
-            opts = dict(person_id=pid, filename=fname, error=error,
-                        description = '{} uploaded {}'.format(fname, fmttime()),
+            desc = '{} uploaded  {}'.format(fname, fmttime())
+
+            opts = dict(person_id=pid, filename=fname,
+                        fullpath=fullpath,
+                        error=error, description =desc,
                         mode='transmission',
-                        e_resolution='nominal',
-                        beamline_id=-1, sample_id=0, reference_sample='',
+                        e_resolution='nominal', beamline_id=-1,
+                        sample_id=0, reference_sample='',
                         person_email=person.email, person_name=person.name,
                         upload_date=fmttime(), labels=labels,
                         elem_sym='Cu', edge='K', energy_units='eV',
@@ -1346,6 +1353,23 @@ def edit_upload():
                            person_id=session['person_id'],
                            error='upload error (method?)')
 
+@app.route('/verify_upload', methods=['GET', 'POST'])
+def verify_upload():
+    session_init(session)
+    error=None
+    if session['username'] is None:
+        return needslogin(error='to submit a spectrum')
+
+    if request.method == 'POST':
+
+        print("Verify Upload: ", request.form)
+        # pid    = request.form['person']
+        # pemail = db.get_person(int(pid)).email
+        # print("Person ", pid, pemail)
+
+    return render_template('verify_uploadspectrum.html',
+                           **request.form)
+
 @app.route('/submit_upload', methods=['GET', 'POST'])
 def submit_upload():
     session_init(session)
@@ -1358,6 +1382,7 @@ def submit_upload():
         pemail = db.get_person(int(pid)).email
         print("Submit Upload ", request.form)
 
+
         # sid = db.add_xdifile(fullpath, person=pemail, create_sample=True)
         # time.sleep(0.50)
         # db.session.commit()
@@ -1365,6 +1390,8 @@ def submit_upload():
 
     return render_template('upload.html',
                            person_id=session['person_id'])
+
+
 
 
 if __name__ == "__main__":
