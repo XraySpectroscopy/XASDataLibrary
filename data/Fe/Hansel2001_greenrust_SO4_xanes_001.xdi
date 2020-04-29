@@ -4,7 +4,7 @@
 # Column.3: i0
 # Scan.end_time: 2001-12-20 19:06:23
 # Scan.start_time: 2001-12-20 19:02:41
- Element.symbol:  Fe
+# Element.symbol:  Fe
 # Element.edge:  K
 # Mono.d_spacing:  3.13555
 # Mono.name: Si 111
