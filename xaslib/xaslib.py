@@ -28,6 +28,8 @@ try:
 except ImportError:
     from larch.io import XDIFile
 
+from larch.utils import debugtime
+
 from . import initialdata
 
 PW_ALGOR = 'sha512'
@@ -331,12 +333,13 @@ class XASDataLibrary(object):
                 whereclause=text("key='modify_date'"))
         self.update_mod_time.execute(value=fmttime())
 
-    def addrow(self, tablename, **kws):
+    def addrow(self, tablename, commit=True, **kws):
         """add generic row"""
         table = self.tables[tablename]
         out = table.insert().execute(**kws)
         self.set_mod_time()
-        self.session.commit()
+        if commit:
+            self.session.commit()
         return out.lastrowid
 
     def fquery(self, tablename, **kws):
@@ -577,8 +580,7 @@ class XASDataLibrary(object):
 
     def add_sample(self, name, person_id, **kws):
         "add sample: name required returns sample id"
-        kws.update({'name': name, 'person_id': person_id})
-        self.tables['sample'].insert().execute(**kws)
+        return self.addrow('sample', name=name, person_id=person_id, **kws)
 
     def add_suite(self, name, notes='', person_id=None, **kws):
         """add suite: name required
@@ -686,7 +688,6 @@ class XASDataLibrary(object):
         stab.update(whereclause=text("id='%d'" % spectrum_id)).execute(rating_summary=rating)
 
 
-
     def update(self, tablename, where, use_id=True, **kws):
         """update a row (by id) in a table (by name) using keyword args
         db.update('spectrum', 5, **kws)
@@ -710,7 +711,8 @@ class XASDataLibrary(object):
                      irefer_stderr=None, energy_notes='', i0_notes='',
                      itrans_notes='', ifluor_notes='', irefer_notes='',
                      submission_date=None, collection_date=None, person=None,
-                     sample=None, beamline=None, citation=None, **kws):
+                     sample=None, beamline=None, citation=None,
+                     commit=True, **kws):
 
         """add spectrum: name required
         returns Spectrum instance"""
@@ -765,7 +767,8 @@ class XASDataLibrary(object):
         kws['mode_id'] = self.fquery('mode', name=mode)[0].id
         kws['element_z'] = self.get_element(element).z
         kws['energy_units_id'] = self.fquery('energy_units', name=energy_units)[0].id
-        return self.addrow('spectrum', name=name, **kws)
+
+        return self.addrow('spectrum', name=name, commit=commit, **kws)
 
     def get_beamlines(self, facility=None, orderby='id'):
         """get all beamlines for a facility
@@ -908,7 +911,8 @@ class XASDataLibrary(object):
         query = apply_orderby(query, tab, orderby)
         return query.execute().fetchall()
 
-    def add_xdifile(self, fname, person=None, reuse_sample=True, **kws):
+    def add_xdifile(self, fname, person=None, reuse_sample=True,
+                    commit=True, **kws):
         try:
             fh  = open(fname, 'r')
             filetext  = fh.read()
@@ -919,7 +923,6 @@ class XASDataLibrary(object):
 
         xfile = XDIFile(fname)
         path, fname = os.path.split(fname)
-
         now = fmttime()
 
         spectrum_name = fname
@@ -1032,10 +1035,8 @@ class XASDataLibrary(object):
                 if len(srow) > 0:
                     sample_id = srow[0].id
             if sample_id == 0:
-                self.add_sample(sample_name, person_id, notes=sample_notes,
-                                **sample_kws)
-                sample_id = self.fquery('sample', name=sample_name,
-                                        notes=sample_notes)[0].id
+                sample_id = self.add_sample(sample_name, person_id,
+                                            notes=sample_notes, **sample_kws)
 
         if reference_used:
             if reference_sample is None:
@@ -1045,7 +1046,6 @@ class XASDataLibrary(object):
 
         beamline_name  = xfile.attrs['beamline']['name']
         notes = json_encode(xfile.attrs)
-
         return self.add_spectrum(spectrum_name, description=description,
                                  d_spacing=d_spacing, collection_date=c_date,
                                  person=person_id, beamline=beamline_name,
@@ -1057,7 +1057,8 @@ class XASDataLibrary(object):
                                  filetext=filetext,
                                  reference_sample=reference_sample,
                                  reference_mode=reference_mode,
-                                 temperature=temperature)
+                                 temperature=temperature,
+                                 commit=commit)
 
 
 
