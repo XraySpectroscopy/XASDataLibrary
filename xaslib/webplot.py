@@ -25,21 +25,22 @@ def make_xafs_plot(x, y, title, xlabel='Energy (eV)', ylabel='mu', x0=None,
     axes.set_xlabel(xlabel, fontproperties=mpl_lfont)
     axes.set_ylabel(ylabel, fontproperties=mpl_lfont)
     axes.plot(x, y, linewidth=3.5)
+    ymin, ymax = min(y), max(y)
     if x0 is not None:
         axes.axvline(0, ymin=min(y), ymax=max(y),
                      linewidth=2, color='#CCBBDD', zorder=-10)
 
-        if ref_mu is not None:
-            axes.plot(x, ref_mu, linewidth=4, zorder=-5, color='#AA4444')
-            title = "%s (%s)" % (title, ref_name)
-        # ymax = (0.7*max(y) + 0.3 * min(y))
-        # axes.text(-25.0, ymax, "%.1f eV" % x0, fontproperties=mpl_lfont)
+    if ref_mu is not None:
+        axes.plot(x, ref_mu, linewidth=4, zorder=-5, color='#AA4444')
+        ymin = min(ymin, min(ref_mu))
+        ymax = max(ymax, max(ref_mu))
+        title = "%s (%s)" % (title, ref_name)
 
     xrange = max(x)-min(x)
-    yrange = max(y)-min(y)
+    yrange = ymax - ymin
 
     axes.set_xlim((min(x)-xrange*0.05, max(x)+xrange*0.05), emit=True)
-    axes.set_ylim((min(y)-yrange*0.05, max(y)+yrange*0.05), emit=True)
+    axes.set_ylim((ymin-yrange*0.05, ymax+yrange*0.05), emit=True)
     axes.set_title(title, fontproperties=mpl_lfont)
 
     figdata = io.BytesIO()
