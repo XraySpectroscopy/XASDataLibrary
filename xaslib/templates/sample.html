@@ -13,11 +13,23 @@
 
 
 <table>
-<tr><td width=25%> Name: </td> <td>  {{name}} </td></tr>
-<tr><td width=25%> Formula: </td> <td>  {{formula}} </td></tr>
-<tr><td width=25%> Notes: </td> <td>  {{notes}} </td></tr>
-<tr><td width=25%> Preparation: </td> <td>  {{preparation}} </td></tr>
+<tr><td width=12%> Name: </td> <td>  {{name}} </td></tr>
+<tr><td width=12%> Formula: </td> <td>  {{formula}} </td></tr>
+<tr><td width=12%> Notes: </td> <td>  {{notes}} </td></tr>
+<tr><td width=12%> Preparation: </td> <td>  {{preparation}} </td></tr>
 </table>
+
+<hr>
+
+{% if spectra|count == 0 %}
+    No spectra use this sample.
+{% else %}
+    This sample is used by the following Spectra:<p>
+    {% for s in spectra %}
+ &nbsp; &nbsp;
+<a href="{{url_for('spectrum', spid=s.id)}}"> {{ s.name }}</a> &nbsp; &nbsp; <br>
+     {% endfor %}
+{% endif %}
 
 
 </div>
