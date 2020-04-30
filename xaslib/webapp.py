@@ -109,11 +109,11 @@ def notify_account_creation(person):
     s.sendmail(admin_email, (person.email, ), fullmsg)
     s.quit()
 
-def sendback(backto='elem', error=None, **kws):
+def sendback(backto='show_error', error='', **kws):
     """handles common redirects with error message"""
     return redirect(url_for(backto, error=error, **kws))
 
-def needslogin(backto='elem', error=None, **kws):
+def needslogin(backto='show_error', error='', **kws):
     """handles common 'must be logged in XXXX' redirect"""
     if error is None:
         error = ''
@@ -178,7 +178,7 @@ def create_account():
                     person = db.get_person(email)
                     send_confirm_email(person, hash, style='new')
                     return render_template('confirmation_email_sent.html',
-                                       email=email, error=error)
+                                       email=email)
 
     return render_template('create_account.html', error=error)
 
@@ -338,7 +338,15 @@ def user():
     return render_template('userprofile.html', error=error, email=email,
                            name=name, affiliation=affiliation)
 
-@app.route('/elem/', methods=['GET', 'POST'])
+@app.route('/show_error',         methods=['GET', 'POST'])
+@app.route('/show_error/',        methods=['GET', 'POST'])
+@app.route('/show_error/<error>', methods=['GET', 'POST'])
+def show_error(error=''):
+    session_init(session)
+    return render_template('layout.html', error=error)
+
+
+@app.route('/elem', methods=['GET', 'POST'])
 @app.route('/elem/', methods=['GET', 'POST'])
 @app.route('/elem/<elem>', methods=['GET', 'POST'])
 @app.route('/elem/<elem>/<orderby>',  methods=['GET', 'POST'])
@@ -430,8 +438,6 @@ def elem(elem=None, orderby=None, reverse=0):
     else:
         reverse = 1
 
-
-
     return render_template('ptable.html',
                            ntotal=len(dbspectra),
                            nspectra=len(spectra),
@@ -447,11 +453,12 @@ def elem(elem=None, orderby=None, reverse=0):
                            included_elems=INCLUDED_ELEMS)
 
 
-
 @app.route('/all')
 @app.route('/all/')
+@app.route('/All')
+@app.route('/All/')
 def all():
-    return redirect(url_for('/All', error=error))
+    return redirect(url_for('elem', elem='All'))
 
 @app.route('/spectrum/')
 @app.route('/spectrum/<int:spid>')
@@ -459,10 +466,9 @@ def spectrum(spid=None):
     session_init(session)
     s  = db.get_spectrum(spid)
     if s is None:
-        return sendbac(error='Could not find Spectrum #%d' % spid)
+        return sendback(error='no spectrum #%d found' % spid)
 
     opts = parse_spectrum(s, db)
-
     opts['spectrum_owner'] = (session['person_id'] == "%d" % s.person_id)
     opts['rating'] = get_rating(s)
 
@@ -497,12 +503,13 @@ def spectrum(spid=None):
         return render_template('spectrum.html', **opts)
 
     dgroup = preedge(energy, mudata)
+
     # get reference if possible
     try:
         irefer = np.array(json.loads(s.irefer))
         refmode = s.reference_mode_id
         refmode = 1 if refmode is None else refmode
-        if refmode == 1:
+        if refmode.startswith('trans'):
             murefer = -np.log(irefer/itrans)
         else:
             murefer = irefer/i0
@@ -514,7 +521,7 @@ def spectrum(spid=None):
     except:
         e1 = 0
     e2 = max(np.where(energy<=e0 + 75)[0]) + 1
-    xanes_en = energy[e1:e2] - e0
+    xanes_en = energy[e1:e2]
 
     xanes_mu = dgroup['norm'][e1:e2]
     xanes_ref = None
@@ -527,9 +534,9 @@ def spectrum(spid=None):
                                       ylabel='Raw XAFS').decode('UTF-8')
 
     opts['xanesfig'] = make_xafs_plot(xanes_en, xanes_mu, s.name,
-                                      xlabel='Energy-%.1f (eV)' % e0,
+                                      xlabel='Energy (eV)',
                                       ylabel='Normalized XANES',
-                                      x0=e0, ref_mu=xanes_ref,
+                                      ref_mu=xanes_ref,
                                       ref_name='with reference').decode('UTF-8')
 
     suites = []
@@ -545,7 +552,7 @@ def showspectrum_rating(spid=None):
     session_init(session)
     s  = db.get_spectrum(spid)
     if s is None:
-        return sendback(error='Could not find Spectrum #%d' % spid)
+        return sendback('spectrum', error='Could not find Spectrum #%d' % spid)
 
     opts = parse_spectrum(s, db)
     ratings = []
@@ -601,7 +608,7 @@ def edit_spectrum(spid=None):
 
     s  = db.get_spectrum(spid)
     if s is None:
-        return sendback(error='Could not find Spectrum #%d' % spid)
+        return redirect(url_for('elem', error='Could not find Spectrum #%d' % spid))
 
     opts = parse_spectrum(s, db)
     beamlines = get_beamline_list(db, with_any=False, orderby='name')
@@ -979,12 +986,42 @@ def submit_suite_edits():
 @app.route('/sample/<int:sid>')
 def sample(sid=None):
     session_init(session)
-    samples = []
-    opts = {}
+    sdat = None_or_one(db.fquery('sample', id=sid))
+    if sdat is None:
+        return sendback(error='no sample #%d found' % sid)
+
+    opts = row2dict(sdat)
+    opts['spectra'] = db.fquery('spectrum', sample_id=sid)
+    return render_template('sample.html', sid=sid, **opts)
+
+@app.route('/new_sample/<int:spid>')
+def new_sample(spid=None):
+    session_init(session)
+    error = None
+    if session['username'] is None:
+        error='must be logged in to create a sample'
+        return redirect(url_for('spectrum', spid=spid, error=error))
+
+    sid = db.add_sample('New Sample', session['person_id'])
+    if spid is not None:
+        db.update('spectrum', spid, use_id=True, sample_id=sid)
+    return redirect(url_for('edit_sample', sid=sid, error=error))
+
+
+@app.route('/select_spectrum_sample/<int:spid>/<int:sid>')
+def select_spectrum_sample(spid=None, sid=None):
+    session_init(session)
+    error=None
+    if session['username'] is None:
+        error='must be logged in to edit sample'
+        return redirect(url_for('spectrum', spid=spid, error=error))
+
+    opts = {'spectra': db.fquery('spectrum', sample_id=sid)}
     sdat = None_or_one(db.fquery('sample', id=sid))
     if sdat is not None:
         opts = row2dict(sdat)
-    return render_template('sample.html', sid=sid, **opts)
+    return render_template('edit_sample.html', sid=sid,
+                           spid=spid, **opts)
 
 @app.route('/edit_sample/<int:sid>')
 def edit_sample(sid=None):
@@ -994,10 +1031,13 @@ def edit_sample(sid=None):
         error='must be logged in to edit sample'
         return redirect(url_for('/', error=error))
 
-    opts = {}
     sdat = None_or_one(db.fquery('sample', id=sid))
-    if sdat is not None:
-        opts = row2dict(sdat)
+    if sdat is None:
+        error='Cannot find sample to edit'
+        return redirect(url_for('/', error=error))
+
+    opts = row2dict(sdat)
+    opts['spectra'] = db.fquery('spectrum', sample_id=sid)
     return render_template('edit_sample.html', sid=sid, **opts)
 
 @app.route('/submit_sample_edits', methods=['GET', 'POST'])
