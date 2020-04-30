@@ -51,24 +51,21 @@
   {% endif %}
 </td></tr>
 
-<tr><td> Absorption Edge:  </td> <td> <a href="{{url_for('elem')}}/{{elem_sym}}">{{ elem_sym }}</a> {{ edge }} edge  </td></tr>
-<tr><td> Measurement Mode: </td> <td> {{ mode  }} </td></tr>
-<tr><td> Energy Units:    </td> <td>  {{energy_units}}  </td></tr>
-<tr><td> Mono d-spacing:  </td> <td>  {{d_spacing}} &#197; ({{mononame}})   </td></tr>
-<tr><td> Energy Resolution: </td> <td>  {{energy_resolution}}   </td></tr>
-
-<tr><td> Sample Name:      </td> <td> <a href="{{url_for('sample', sid=sample_id)}}"> {{sample_name}} </a></td></tr>
-<tr><td> Sample Prep:      </td> <td> {{sample_prep}}   </td></tr>
-<tr><td> Reference Sample: </td> <td> {{reference_sample}} </td></tr>
+<tr><td> Absorption Edge:   </td> <td> <a href="{{url_for('elem')}}/{{elem_sym}}">{{ elem_sym }}</a> {{ edge }} edge  </td></tr>
+<tr><td> Measurement Mode:  </td> <td> {{ mode  }} </td></tr>
 <tr><td> Beamline:         </td> <td>
     {% if  beamline_id != '-1' %}
 	<a href="{{url_for('beamline')}}/{{beamline_id}}"> {{ beamline_desc }}</a> &nbsp; &nbsp;
     {% else %} {{ beamline_desc }} &nbsp; &nbsp;
     {% endif %} </td></tr>
-<tr><td> Date Measured:   </td> <td>  {{collection_date}}     </td></tr>
-<tr><td> Date Uploaded:   </td>
-	  <td>  {{upload_date}}, {{ person_name }} ({{ person_email }})    </td></tr>
+<tr><td> Mono d-spacing:    </td> <td> {{ d_spacing }} &#197; ({{mononame}})   </td></tr>
+<tr><td> Energy Units:      </td> <td> {{ energy_units }}  </td></tr>
+<tr><td> Energy Resolution: </td> <td> {{ energy_resolution }}   </td></tr>
 
+<tr><td></td></tr>
+<tr><td> Sample Name:      </td> <td> <a href="{{url_for('sample', sid=sample_id)}}"> {{sample_name}} </a> {{sample_prep}} </td></tr>
+<tr><td> Reference Sample: </td> <td> {{reference_sample}} </td></tr>
+<tr><td></td></tr>
 <tr><td> Citation:        </td> <td>
     {% if  citation_id != '-1' %}
        <a href="{{url_for('citation')}}/{{citation_id}}"> {{ citation_name }}</a> &nbsp; &nbsp;
@@ -77,7 +74,11 @@
 	 <a href="{{url_for('add_citation')}}"> [add citation] </a>
        {% else %} {{ citation_name }} &nbsp; &nbsp;
        {% endif %}
-    {% endif %} </td></tr>
+{% endif %} </td></tr>
+<tr><td></td></tr>
+<tr><td> Date Measured:   </td> <td>  {{collection_date}}     </td></tr>
+<tr><td> Date Uploaded:   </td> <td>  {{upload_date}}, {{ person_name }} ({{ person_email }})    </td></tr>
+
 
 <tr><td> User Comments:   </td>  <td>   {{ comments|safe }} </td></tr>
 <tr><td colspan=2> <hr> </td></tr>
