@@ -8,9 +8,9 @@
 
 <form action="{{ url_for('edit_upload') }}"
     method=post enctype=multipart/form-data>
-<input type=hidden name=person value={{person_id}}>
+<input type=hidden name=person_id value={{person_id}}>
 
-Data File: <input type=file name=file> <input type=submit value="Upload to Edit">
+Data File: <input type=file name=filename> <input type=submit value="Upload to Edit">
 </form>
 
 <p>

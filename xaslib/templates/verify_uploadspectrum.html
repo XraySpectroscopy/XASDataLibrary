@@ -6,7 +6,7 @@
 <div class=body style="overflow: hidden;">
 <div style="width:60%; float: left;">
 <form action="/submit_upload" method=post>
-<input type=hidden name=person value={{person_id}}>
+<input type=hidden name=person_id value={{person_id}}>
 <table border=0>
 
 <tr><td colspan=2>
@@ -34,7 +34,6 @@ Uploaded File: {{filename}} has {{narrays}} array columns with {{npts}} data poi
 {% endfor %}
 </select>
 </td></tr>
-
 
 <td>I0 Column: </td><td><select name='i0_array' style="width: 250px;">
 {% for a in array_labels %}
@@ -67,16 +66,17 @@ Uploaded File: {{filename}} has {{narrays}} array columns with {{npts}} data poi
 &nbsp; <input type="checkbox"  name="is_murefer"> mu_refer (no I_ref)? </input>
 </td></tr>
 
-<td> Reference Style: </td><td><select name='ref_format' style="width: 250px;">
-{% for a in ref_format_choices %}
-    <option value={{a}} {% if a == ref_choice %} selected=1 {% endif %} > {{ a }}</option>
+<td> Reference Mode: </td><td><select name='ref_mode' style="width: 250px;">
+{% for a in ref_modes %}
+    <option value={{a}} {% if a == ref_mode %} selected=1 {% endif %} > {{ a }}</option>
 {% endfor %}
 </select>
 </td></tr>
 
-<tr><td> Element: </td><td><select name='elem' style="width: 100px;">
+
+<tr><td> Element: </td><td><select name='elem_sym' style="width: 100px;">
 {% for el in elems %}
-    <option value={{el.z}} {% if el.symbol == elem_sym %} selected=1 {% endif %}>{{ el.symbol }}</option>
+    <option value={{el.symbol}} {% if el.symbol == elem_sym %} selected=1 {% endif %}>{{ el.symbol }}</option>
 {% endfor %}
 </select>
 </td></tr>
@@ -90,7 +90,7 @@ Uploaded File: {{filename}} has {{narrays}} array columns with {{npts}} data poi
 
 <tr><td> Energy Units:  </td><td><select  name='energy_units' style="width: 100px;">
 {% for e in eunits %}
-    <option value={{e.id}} {% if e.name == energy_units %} selected=1 {% endif %} > {{ e.units }}</option>
+    <option value={{e}} {% if e == energy_units %} selected=1 {% endif %} > {{e}} </option>
 {% endfor %}
 </select>
 </td></tr>
@@ -99,7 +99,7 @@ Uploaded File: {{filename}} has {{narrays}} array columns with {{npts}} data poi
 <input size=15 type=text name=d_spacing value={{d_spacing}}> &#197;  &nbsp; Or use Mono:
 <select  name='mono_name' style="width: 100px;">
 {% for mname in gen_monos %}
-    <option value={{mname}} > {{ mname }}</option>
+    <option value="{{ mname }}"{% if mname == mono_name  %} selected=1 {% endif %} > {{ mname }}</option>
 {% endfor %}
 </select>
 </td></tr>
@@ -110,7 +110,7 @@ Uploaded File: {{filename}} has {{narrays}} array columns with {{npts}} data poi
 
 <tr><td> Beamline: </td><td><select  name='beamline' style="width: 300px;">
 {% for bl in beamlines %}
-    <option value={{bl.id}} {% if bl.id == beamline_id  %} selected=1 {% endif %} > {{ bl.name }}</option>
+    <option value="{{bl}}" {% if bl == beamline %} selected=1 {% endif %} > {{bl}}</option>
 {% endfor %}
 </select>
 </td></tr>
