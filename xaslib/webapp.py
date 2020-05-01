@@ -386,9 +386,13 @@ def elem(elem=None, orderby=None, reverse=0):
     if orderby is None:
         sql_orderby = 'element_z'
 
-    if elem in ('action', 'filter'):
-        elem = request.form.get('elem')
+    if elem == 'filter':
+        if 'All Spectra' in request.form.get('submit'):
+            elem = 'all'
+        else:
+            elem = request.form.get('elem')
 
+    print("ELEM " , elem)
     if elem is not None:
         if elem.lower() == 'all':
             try:
