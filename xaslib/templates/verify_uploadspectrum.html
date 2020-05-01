@@ -5,7 +5,8 @@
 
 <div class=body style="overflow: hidden;">
 <div style="width:60%; float: left;">
-<form action="/submit_upload" method=post>
+
+<form action="/submit_upload" method=post id="submitform">
 <input type=hidden name=person_id value={{person_id}}>
 <table border=0>
 
@@ -125,13 +126,17 @@ Uploaded File: {{filename}} has {{narrays}} array columns with {{npts}} data poi
 <tr><td> User Comment: </td><td>
 <textarea cols=50  rows=4 type=text name=comments>{{raw_comments}}</textarea></td></tr>
 <tr><td colspan=2> <hr> </td></tr>
-<tr><td><input type=submit value=Continue></td><td></td></tr>
+<tr><td><input type=submit name=submit value=Cancel></td><td></td></tr>
+<tr><td><input type=submit name=submit value="Finish Upload"></td><td></td></tr>
 </table>
 </form>
 
 </div>
 <div style="width: 40%; float: right;">
  <i>Plot of mu goes here: </i> <p>
+
+<img width=375 src="data:image/png;base64,{{ mufig|safe }}">
+
 
 </div>
 </div>

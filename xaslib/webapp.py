@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+import os
 import sys
 import time
 
@@ -35,12 +36,35 @@ db = None
 app = Flask('xaslib', static_folder='static')
 app.config.from_object(__name__)
 
-ANY_EDGES = ANY_MODES = INCLUDED_ELEMS = SPECTRA_COUNT = None
+ANY_EDGES = ANY_MODES = SAMPLES_OR_NEW = INCLUDED_ELEMS = SPECTRA_COUNT = None
+ALL_ELEMS = EN_UNITS = None
+
 
 EMAIL_MSG = "From: {mailfrom:s}\r\nTo: {mailto:s}\r\nSubject: {subject:s}\r\n{message:s}\n"
 
+GENERIC_MONOS = ('None', 'generic Si(111)',
+                 'generic Si(220)', 'generic Si(311)')
+
+def get_mono_d_spacing(name):
+    name = name.lower().replace('(', '').replace(')', '').replace(' ', '')
+    if 'si111' in name:
+        return 3.1355893
+    if 'si220' in name:
+        return 1.9201484
+    if 'si311' in name:
+        return 1.6375081
+    return -1.0
+
+
+REFERENCE_MODES = ('no reference spectra',
+                   'transmission, downstream of i1',
+                   'flouresence,  upstream of sample',
+                   'flouresence,  downstream of i1')
+
+
 def session_init(session, force_refresh=False):
-    global db, app, ANY_EDGES, ANY_MODES, INCLUDED_ELEMS, SPECTRA_COUNT
+    global db, app, ANY_EDGES, ANY_MODES, SAMPLES_OR_NEW
+    global INCLUDED_ELEMS, SPECTRA_COUNT, ALL_ELEMS, EN_UNITS
     if 'username' not in session:
         session['username'] = None
     if 'person_id' not in session:
@@ -54,8 +78,12 @@ def session_init(session, force_refresh=False):
         print("Refreshing session ", db)
         ANY_EDGES  = ['Any'] + [e.name for e in db.get_edges()]
         ANY_MODES  = ['Any'] + [e.name for e in db.get_modes()]
+        SAMPLES_OR_NEW  = [(0, '<Create New Sample>')] + [(s.id, s.name) for s in db.fquery('sample')]
+
         INCLUDED_ELEMS = db.included_elements()
         SPECTRA_COUNT = len(db.get_spectra())
+        ALL_ELEMS  = db.fquery('element')
+        EN_UNITS = [e.units for e in db.fquery('energy_units')]
 
 
 def send_confirm_email(person, hash, style='new'):
@@ -109,7 +137,7 @@ def notify_account_creation(person):
     s.sendmail(admin_email, (person.email, ), fullmsg)
     s.quit()
 
-def sendback(backto='show_error', error='', **kws):
+def sendback(backto='show_error', error=None, **kws):
     """handles common redirects with error message"""
     return redirect(url_for(backto, error=error, **kws))
 
@@ -140,7 +168,7 @@ def clear():
 @app.route('/')
 def index():
     session_init(session)
-    return sendback()
+    return sendback('elem')
 
 @app.route('/create_account/')
 @app.route('/create_account', methods=['GET', 'POST'])
@@ -612,13 +640,14 @@ def edit_spectrum(spid=None):
 
     opts = parse_spectrum(s, db)
     beamlines = get_beamline_list(db, with_any=False, orderby='name')
+    # print("SAMPLES ", len(SAMPLES_OR_NEW))
     return render_template('edit_spectrum.html',
                            error=error,
                            elems=db.fquery('element'),
                            eunits=db.fquery('energy_units'),
                            edges=ANY_EDGES[1:],
                            beamlines=beamlines,
-                           samples=db.fquery('sample'),
+                           samples=SAMPLES_OR_NEW,
                            modes=ANY_MODES[1:], **opts)
 
 
@@ -1307,16 +1336,72 @@ def upload():
                            person_id=session['person_id'])
 
 
+def parse_datagroup(dgroup, fname, fullpath, pid, form=None):
+    person = db.get_person(int(pid))
+    filename = dgroup.filename
+    narrays, npts = dgroup.data.shape
+
+    array_labels = ['None'] + dgroup.array_labels
+    if len(array_labels) < 3:
+        array_labels.extend(['None', 'None'])
+
+    labels = {'en':array_labels[1], 'i0':array_labels[2],
+              'i1':array_labels[3], 'if':'None', 'ir':'None'}
+
+    desc = '{} uploaded  {}'.format(fname, fmttime())
+
+    beamlines = [b['name'] for b in get_beamline_list(db, with_any=False, orderby='name')]
+    opts = dict(elems=ALL_ELEMS,
+                eunits=EN_UNITS,
+                edges=ANY_EDGES[1:],
+                beamlines=beamlines,
+                samples=SAMPLES_OR_NEW,
+                modes=ANY_MODES[1:],
+                gen_monos=GENERIC_MONOS,
+                ref_modes=REFERENCE_MODES,
+                ref_mode=REFERENCE_MODES[0])
+
+    opts.update(dict(person_id=pid,
+                     filename=fname,
+                     fullpath=fullpath,
+                     error=None,
+                     description=desc,
+                     mode='transmission',
+                     e_resolution='nominal',
+                     beamline=beamlines[0],
+                     reference_sample='',
+                     person_email=person.email,
+                     person_name=person.name,
+                     upload_date=fmttime(),
+                     labels=labels,
+                     elem_sym='Cu',
+                     edge='K',
+                     energy_units='eV',
+                     d_spacing='-1',
+                     mono_name='',
+                     sample=0,
+                     array_labels=array_labels,
+                     narrays=narrays,
+                     npts=npts,
+                     header=dgroup.header))
+
+    opts.update(**guess_metadata(dgroup))
+    if opts['has_reference']:
+        opts['ref_choice'] = REFERENCE_MODES[1]
+
+    return opts
+
+
 @app.route('/edit_upload', methods=['GET', 'POST'])
 def edit_upload():
     session_init(session)
-    error = None
+    error =     None
     if session['username'] is None:
         return needslogin(error='to submit a spectrum')
     if request.method == 'POST':
-        pid    = request.form['person']
+        pid    = request.form['person_id']
         person = db.get_person(int(pid))
-        file = request.files['file']
+        file = request.files['filename']
         fname =  secure_filename(file.filename)
         if file:
             fullpath = get_fullpath(file, app.config['UPLOAD_FOLDER'])
@@ -1331,67 +1416,16 @@ def edit_upload():
             try:
                 dgroup = read_ascii(fullpath)
             except:
-                return render_template('upload.html',
-                                       person_id=session['person_id'],
-                                       error='Could not read uploaded file (%s)' % (file))
+                return render_template('upload.html', person_id=pid,
+                                       error='Could not read uploaded file (%s)' % (fname))
 
-            filename = dgroup.filename
-            narrays, npts = dgroup.data.shape
-
-            array_labels = ['None'] + dgroup.array_labels
-            if len(array_labels) < 3:
-                array_labels.extend(['None', 'None'])
-
-            labels = {'en':array_labels[1], 'i0':array_labels[2],
-                      'i1':array_labels[3], 'if':'None', 'ir':'None'}
-
-            desc = '{} uploaded  {}'.format(fname, fmttime())
-
-            opts = dict(person_id=pid, filename=fname,
-                        fullpath=fullpath,
-                        error=error, description =desc,
-                        mode='transmission',
-                        e_resolution='nominal', beamline_id=-1,
-                        sample_id=0, reference_sample='',
-                        person_email=person.email, person_name=person.name,
-                        upload_date=fmttime(), labels=labels,
-                        elem_sym='Cu', edge='K', energy_units='eV',
-                        d_spacing=-1, mono_name='', sample_name='',
-                        sample_form='', sample_prep='',
-                        array_labels=array_labels, narrays=narrays,
-                        npts=npts, header=dgroup.header)
-
-            opts.update(**guess_metadata(dgroup))
-
-            gen_monos = ('None',
-                         'generic Si(111)',
-                         'generic Si(220)',
-                         'generic Si(311)')
-
-            ref_format_choices = ('no reference spectra',
-                                  'transmission, downstream of i1',
-                                  'flouresence,  upstream of sample',
-                                  'flouresence,  downstream of i1')
-
-            opts['ref_choice'] = ref_format_choices[0]
-            if opts['has_reference']:
-                opts['ref_choice'] = ref_format_choices[1]
-
-            beamlines = get_beamline_list(db, with_any=False, orderby='name')
-            opts.update(dict(elems=db.fquery('element'),
-                             eunits=db.fquery('energy_units'),
-                             edges=ANY_EDGES[1:],
-                             beamlines=beamlines,
-                             samples=db.fquery('sample'),
-                             modes=ANY_MODES[1:],
-                             gen_monos=gen_monos,
-                             ref_format_choices=ref_format_choices))
-
+            opts = parse_datagroup(dgroup, fname, fullpath, pid)
             return render_template('edit_uploadspectrum.html', **opts)
 
     return render_template('upload.html',
                            person_id=session['person_id'],
                            error='upload error (method?)')
+
 
 @app.route('/verify_upload', methods=['GET', 'POST'])
 def verify_upload():
@@ -1400,15 +1434,44 @@ def verify_upload():
     if session['username'] is None:
         return needslogin(error='to submit a spectrum')
 
-    if request.method == 'POST':
+    if request.method != 'POST':
+        return sendback('upload', error='verify must use POST')
 
-        print("Verify Upload: ", request.form)
-        # pid    = request.form['person']
-        # pemail = db.get_person(int(pid)).email
-        # print("Person ", pid, pemail)
+    pid    = request.form['person_id']
+    person = db.get_person(int(pid))
 
-    return render_template('verify_uploadspectrum.html',
-                           **request.form)
+    fullpath = request.form.get('fullpath', None)
+    if fullpath is None or not os.path.exists(fullpath):
+        return sendback('upload', error='cannot locate file (%s)' % fullpath)
+    dname, fname =  os.path.split(fullpath)
+    fname = secure_filename(fname)
+    try:
+        dgroup = read_ascii(fullpath)
+    except:
+        return render_template('upload.html', person_id=pid,
+                               error='Could not read uploaded file (%s)' % (fname))
+
+    opts = parse_datagroup(dgroup, fname, fullpath, pid)
+    for key, val in request.form.items():
+        opts[key] = val
+    print("Verify Upload: ", request.form)
+    if int(opts['d_spacing']) < 0 :
+        opts['d_spacing'] = "%.5f" % get_mono_d_spacing(opts['mono_name'])
+    print("Verify ", dgroup)
+    print("Verify ", dir(dgroup))
+
+    mode = request.form['mode'].lower()
+    energy = getattr(dgroup, request.form['energy_array'])
+    i0   = getattr(dgroup, request.form['i0_array'], None)
+    if mode.startswith('trans'):
+        mu = getattr(dgroup, request.form['it_array'], None)
+        if mu is not None and i0 is not None:
+            mu = -np.log(mu/i0)
+
+    opts['mufig'] =  make_xafs_plot(energy, mu, fname, ylabel=mode).decode('UTF-8')
+
+    return render_template('verify_uploadspectrum.html', **opts)
+
 
 @app.route('/submit_upload', methods=['GET', 'POST'])
 def submit_upload():
@@ -1418,7 +1481,7 @@ def submit_upload():
         return needslogin(error='to submit a spectrum')
 
     if request.method == 'POST':
-        pid    = request.form['person']
+        pid    = request.form['person_id']
         pemail = db.get_person(int(pid)).email
         print("Submit Upload ", request.form)
 
