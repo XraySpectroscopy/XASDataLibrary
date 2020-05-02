@@ -392,7 +392,6 @@ def elem(elem=None, orderby=None, reverse=0):
         else:
             elem = request.form.get('elem')
 
-    print("ELEM " , elem)
     if elem is not None:
         if elem.lower() == 'all':
             try:
@@ -644,7 +643,7 @@ def edit_spectrum(spid=None):
 
     opts = parse_spectrum(s, db)
     beamlines = get_beamline_list(db, with_any=False, orderby='name')
-    # print("SAMPLES ", len(SAMPLES_OR_NEW))
+
     return render_template('edit_spectrum.html',
                            error=error,
                            elems=db.fquery('element'),

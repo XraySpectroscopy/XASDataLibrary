@@ -2,17 +2,18 @@
 {% block body %}
 
 <div class=subtitle>Edit Spectrum:  {{ spectrum_name }}</div>
-<div class=body>
 
+<div class=body style="overflow: hidden;">
+<div style="width:60%; float: left;">
 <form action="{{ url_for('submit_spectrum_edits') }}" method=post>
   <input type=hidden name=person value={{person_id}}>
   <input type=hidden name=spectrum value={{spectrum_id}}>
   <table>
     <tr><td colspan=2> <hr> </td></tr>
     <tr><td>Name:</td><td>
-	<input size=60 type=text name=name value='{{spectrum_name|safe}}'></td></tr>
+	<input size=50 type=text name=name value='{{spectrum_name|safe}}'></td></tr>
     <tr><td>Description:</td><td>
-	<input size=60 type=text name=description value='{{description|safe}}'></td></tr>
+	<input size=50 type=text name=description value='{{description|safe}}'></td></tr>
     <tr><td> Element: </td><td>
 	<select name='elem' style="width: 100px;">
 	  {% for el in elems %}
@@ -30,14 +31,14 @@
 	  </select>
 </td></tr>
     <tr><td> Measurement Mode:  </td><td>
-         <select  name='mode' style="width: 300px;">
+         <select  name='mode' style="width: 250px;">
 	  {% for mname in modes %}
              <option value={{mname}} {% if mname==mode %} selected=1 {% endif %} > {{ mname }}</option>
 	  {% endfor %}
 	  </select>
 </td></tr>
 <tr><td> Beamline: </td><td>
-<select  name='beamline' style="width: 300px;">
+<select  name='beamline' style="width: 250px;">
 	  {% for bl in beamlines %}
 	    <option value={{bl.id}} s
 	      {% if bl.id == beamline_id  %} selected=1 {% endif %} >
@@ -61,15 +62,14 @@
 </td></tr>
 
     <tr><td> Energy Resolution: </td><td>
-	<input size=60 type=text name=e_resolution value={{e_resolution}}> </td></tr>
+	<input size=50 type=text name=e_resolution value={{e_resolution}}> </td></tr>
 
 
     <tr><td> Sample: </td><td>
-	<select  name='sample' style="width: 300px;">
+	<select  name='sample' style="width: 250px;">
 	  {% for sm in samples %}
-	   <option value={{sm.id}}
-	      {% if sm.id == sample_id  %} selected=1 {% endif %} >
-	  {{ sm.name }} </option>
+	   <option value={{sm[0] }}
+	      {% if sm[0] == sample_id  %} selected=1 {% endif %} >  {{ sm[1] }} </option>
 	  {% endfor %}
 	</select>
 	{% if session.username is not none %}
@@ -80,11 +80,10 @@
 	    &nbsp; &nbsp;
         {% endif %}
 
-
-      </td></tr>
+    </td></tr>
 
     <tr><td> Reference Sample: </td><td>
-	<input size=20 type=text name=reference_sample value={{reference_sample}}>  </td></tr>
+	<input size=50 type=text name=reference_sample value={{reference_sample}}>  </td></tr>
     <tr><td> User Comment: </td><td>
 	<textarea cols=45  rows=10 type=text name=comments>{{raw_comments}}</textarea></td></tr>
   <tr><td colspan=2> <hr> </td></tr>
@@ -92,4 +91,12 @@
     </table>
 </form>
 </div>
+
+<div style="width: 40%; float: right;">
+ <i>Header from data file </i> <p>
+<font size=-2>{% for a in header %} {{ a }} <br> {%endfor%}</font>
+</div>
+</div>
+
+
 {% endblock %}

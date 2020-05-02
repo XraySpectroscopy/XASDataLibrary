@@ -270,6 +270,11 @@ def parse_spectrum(s, db):
     if eresolution is None:
         eresolution = 'nominal'
 
+    header = []
+    for tline in s.filetext.split('\n'):
+        if tline.startswith('#'):
+            header.append(tline)
+
     return {'spectrum_id': s.id,
             'spectrum_name': s.name,
             'description': s.description,
@@ -281,6 +286,7 @@ def parse_spectrum(s, db):
             'mode': mode,
             'raw_comments': s.comments,
             'comments': multiline_text(s.comments),
+            'header': header,
             'beamline_id': beamline_id,
             'beamline_desc': beamline_desc,
             'citation_id': citation_id,
