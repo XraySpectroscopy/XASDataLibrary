@@ -2,7 +2,7 @@
 # Column.1: energy eV
 # Column.2: i0
 # Column.3: itrans
-# Beamline.name: GSECARS 13BM-D
+# Beamline.name: APS 13-BM-D
 # Beamline.notes: vert slits = 2mm (at 45m)
 # Beamline.collimation: none
 # Beamline.focusing: no

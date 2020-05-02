@@ -2,7 +2,7 @@
 # Column.1: energy eV
 # Column.2: i0
 # Column.3: itrans
-# Beamline.name: APS 13ID
+# Beamline.name: APS 13-ID-C
 # Beamline.notes: vert slits = 0.3mm
 # Detector.I0: N2 10cm
 # Detector.I1: N2 10cm
@@ -440,4 +440,3 @@
     8929.7680  120401.700000  39456.099642
     8936.5920  119721.700000  39526.098794
     8943.4350  120500.700000  40055.098230
-

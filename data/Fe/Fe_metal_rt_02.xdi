@@ -2,7 +2,7 @@
 # Column.1: energy eV
 # Column.2: i0
 # Column.3: itrans
-# Beamline.name: APS 20BM
+# Beamline.name: APS 20-BM-B
 # Beamline.notes: vert slits = unknown
 # Detector.I0: N2 15cm
 # Detector.I1: N2 15cm
@@ -435,4 +435,3 @@
     8077.9096  612869.690000  126353.639187
     8083.7785  613343.250000  127212.272769
     8085.7927  613264.880000  127395.554311
-

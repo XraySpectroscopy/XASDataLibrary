@@ -759,9 +759,13 @@ class XASDataLibrary(object):
             kws[attr] = val
 
         # more complicated foreign keys, pointers to other tables
+
         bline = self.guess_beamline(beamline)
         if bline is not None:
             kws['beamline_id'] = bline.id
+
+        if bline is None:
+            print("Add Spectrum : No beamline found = ",name,  beamline)
 
         kws['edge_id'] = self.get_edge(edge).id
         kws['mode_id'] = self.fquery('mode', name=mode)[0].id
@@ -810,7 +814,25 @@ class XASDataLibrary(object):
         for b in candidates:
             if lname in b.name.lower() or lname in b.nickname.lower():
                 return b
+
+        if '(' in lname:
+            lname = lname.split('(')[0].strip()
+        for b in candidates:
+            if lname in b.name.lower() or lname in b.nickname.lower():
+                return b
+
+        # this is  comment
+
+        lname = lname.lower().replace('-', '').replace('_', '').replace(' ', '').replace('&', '')
+
+        for b in candidates:
+            bnx = b.name.lower().replace('-', '').replace('_', '').replace(' ', '')
+            bn2 = b.nickname.lower().replace('-', '').replace('_', '').replace(' ', '')
+            if lname in b.name.lower() or lname in b.nickname.lower():
+                return b
+
         return None
+
 
     def get_suite_ratings(self, suite):
         "get all ratings for a suite"

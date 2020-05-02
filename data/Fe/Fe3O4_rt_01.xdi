@@ -2,7 +2,7 @@
 # Column.1: energy eV
 # Column.2: i0
 # Column.3: itrans
-# Beamline.name: GSECARS 13BM
+# Beamline.name: APS 13-BM-D
 # Beamline.notes: vert slits = 2mm (at 45m)
 # Detector.I0: N2 15cm
 # Detector.I1: N2 15cm
@@ -371,4 +371,3 @@
     7957.8470  305752.800000  152684.500226
     7963.5370  305612.800000  153931.500457
     7969.2470  305998.800000  155167.500275
-
