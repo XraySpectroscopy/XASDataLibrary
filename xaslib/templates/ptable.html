@@ -183,8 +183,10 @@ Rating, or Required Text in Name, Comment, or other field:
 <tr><td width=5%> </td><td>Required Text:</td>
 <td><input size=35 type=text name=searchphrase value={{ searchword }}></td></tr>
 <tr><td width=5%> </td><td colspan=2>
-<input class='submitbutton' type=submit name=submit value='Filter Current Selections'>
 <input class='submitbutton' type=submit name=submit value='Search All Spectra'>
+{% if spectra|count != 0 %}
+<input class='submitbutton' type=submit name=submit value='Filter Current Selections'>
+{% endif %}
 </div>
 </td></tr>
 </table>
