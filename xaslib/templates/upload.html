@@ -1,16 +1,15 @@
 {% extends "layout.html" %}
 {% block body %}
 
-<div class=subtitle> Upload XDI Spectra</div>
+<div class=subtitle> Upload XAS Spectra to the X-ray Absorption Data Library: </div>
 <div class=body>
-
-<p>  Select a data file to add to the X-ray Absorption Data Library: <p>
 
 <form action="{{ url_for('edit_upload') }}"
     method=post enctype=multipart/form-data>
-<input type=hidden name=person_id value={{person_id}}>
+  <input type=hidden name=person_id value={{person_id}}>
 
-Data File: <input type=file name=filename> <input type=submit value="Upload to Edit">
+  Select a data file:   <input type=file name=filename>
+  <input type=submit   value="Edit and Verify">
 </form>
 
 <p>
@@ -66,7 +65,7 @@ Some additional notes:
       <b>I_reference</b>, or <b>mu_referencee</b>.  Note that the reference
       channel can either be in transmission (with reference sample after the
       <b>I_transmission</b>, so that <b>mu_reference =	-log(I_reference/I_transmission)</b>
-      or in fluorescence (ELF) mode, so that <b>mu_reference = I_reference/I_0</b>
+      or in fluorescence (ELF) mode, so that <b>mu_reference = I_reference/I_0</b>.
 
 
 </ol>
