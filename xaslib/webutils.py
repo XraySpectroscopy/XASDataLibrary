@@ -18,6 +18,13 @@ from xraydb import guess_edge
 
 from .xaslib import fmttime
 
+import numpy as np
+import scipy.constants as consts
+
+PLANCK_HC = 1.e10 * consts.Planck * consts.c / consts.e
+def mono_deg2ev(angle, d_spacing):
+    return PLANCK_HC / (2*d_spacing*np.sin(angle*np.pi/180))
+
 def pathjoin(*args):
     return path.join(*args)
 
@@ -314,25 +321,27 @@ def guess_metadata(dgroup):
 
     alabels = ['None'] + dgroup.array_labels
 
-    labels = {'en':'None', 'i0':'None', 'it':'None',
-              'if':'None', 'ir':'None'}
+    out = {'en_arrayname':'None',
+           'i0_arrayname':'None',
+           'it_arrayname':'None',
+           'if_arrayname':'None',
+           'ir_arrayname':'None'}
 
     e0 = None
     for lab in alabels:
         llab = lab.lower()
         if  'ener' in llab:
-            labels['en'] = lab
+            out['en_arrayname'] = lab
         if 'i0' in llab or 'imon' in llab:
-            labels['i0'] = lab
+            out['i0_arrayname'] = lab
         if 'it' in llab or 'i1' in llab or 'mut' in llab:
-            labels['it'] = lab
+            out['it_arrayname'] = lab
         if 'if' in llab or 'fl' in llab or 'muf' in llab:
-            labels['if'] = lab
+            out['if_arrayname'] = lab
         if 'iref' in llab or 'i2' in llab or 'mur' in llab:
-            labels['ir'] = lab
+            out['ir_arrayname'] = lab
 
-    out = {'labels': labels,
-           'has_reference': labels['ir'] is not 'None'}
+    out['has_reference'] = out['ir_arrayname'] is not 'None'
 
     for line in dgroup.header:
         line  = line.strip()
