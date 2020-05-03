@@ -27,7 +27,8 @@ from .webutils import (row2dict, multiline_text, parse_spectrum,
                        spectrum_ratings, spectra_for_suite,
                        spectra_for_citation, spectra_for_beamline,
                        get_beamline_list, get_rating, get_fullpath,
-                       guess_metadata, pathjoin, secure_filename)
+                       guess_metadata, pathjoin, secure_filename,
+                       mono_deg2ev)
 
 from .webplot import make_xafs_plot
 
@@ -1377,7 +1378,11 @@ def parse_datagroup(dgroup, fname, fullpath, pid, form=None):
                      person_email=person.email,
                      person_name=person.name,
                      upload_date=fmttime(),
-                     labels=labels,
+                     en_arrayname=array_labels[1],
+                     i0_arrayname=array_labels[2],
+                     it_arrayname=array_labels[3],
+                     if_arrayname='None',
+                     ir_arrayname='None',
                      elem_sym='Cu',
                      edge='K',
                      energy_units='eV',
@@ -1424,11 +1429,102 @@ def edit_upload():
                                        error='Could not read uploaded file (%s)' % (fname))
 
             opts = parse_datagroup(dgroup, fname, fullpath, pid)
+            print("Edit Upload Arrays: ", opts['en_arrayname'],
+                  opts['i0_arrayname'], opts['it_arrayname'],  opts['if_arrayname'],
+                  opts['ir_arrayname'])
+
             return render_template('edit_uploadspectrum.html', **opts)
 
     return render_template('upload.html',
                            person_id=session['person_id'],
                            error='upload error (method?)')
+
+
+def verify_uploaded_data(form):
+    pid    = form['person_id']
+    person = db.get_person(int(pid))
+
+    fullpath = form.get('fullpath', None)
+    if fullpath is None or not os.path.exists(fullpath):
+        return {'verify_read': 'nofile', 'pid': pid, 'fname': fullpath}
+
+    dname, fname =  os.path.split(fullpath)
+    fname = secure_filename(fname)
+    try:
+        dgroup = read_ascii(fullpath)
+    except:
+        return {'verirfy_read': 'noread', 'pid': pid, 'fname': fname}
+
+    opts = parse_datagroup(dgroup, fname, fullpath, pid)
+    for key, val in form.items():
+        opts[key] = val
+
+    print("Opts Arrays: ", opts['en_arrayname'], opts['i0_arrayname'], opts['it_arrayname'])
+
+    opts['verify_read'] = 'OK'
+    opts['verify_ok']   = 1
+    opts['verify_messages']   = []
+    opts['verify_errors']   = []
+
+
+    if float(opts['d_spacing']) < 0 :
+        opts['d_spacing'] = "%.5f" % get_mono_d_spacing(opts['mono_name'])
+
+    if float(opts['d_spacing']) < 0.0:
+        opts['verify_ok']  = 0
+        opts['verify_errors'].append('d-spacing for mono cannot be < 0')
+
+    mode = form['mode'].lower()
+    print("upload data ", mode, 'is_mutrans' in form, 'is_mufluor' in form)
+
+    energy = getattr(dgroup, form['en_arrayname'])
+    if opts['energy_units'].lower().startswith('kev'):
+        energy = 1000.0 * energy
+    elif opts['energy_units'].lower().startswith('deg') and float(opts['d_spacing']) > 0.0:
+        energy = mono_deg2ev(energy, float(opts['d_spacing']))
+
+
+    i0 = getattr(dgroup, form['i0_arrayname'], None)
+    if mode.startswith('trans'):
+        mu = getattr(dgroup, form['it_arrayname'], None)
+        if 'is_mutrans' not in form and mu is not None and i0 is not None:
+            mu = -np.log(mu/i0)
+    else:
+        mu = getattr(dgroup, form['if_arrayname'], None)
+        if 'is_mufluor' not in form and mu is not None and i0 is not None:
+            mu = mu/i0
+
+    try:
+        opts['mufig'] =  make_xafs_plot(energy, mu, fname, ylabel=mode).decode('UTF-8')
+    except:
+        opts['mufig'] =  'noplot'
+        opts['verify_ok']  = 0
+        opts['verify_errors'].append('could not plot data -- arrays must not be correct')
+
+    pgroup = preedge(energy, mu)
+
+    opts['verify_edge_energy'] = "%.2f" % pgroup['e0']
+    opts['verify_edge_step']   = "%10.5g" % pgroup['edge_step']
+    opts['verify_edge_range']  = "[%10.5g, %10.5g]" % (min(energy), max(energy))
+
+    elem_z = elem_syms.index(opts['elem_sym'])
+    nominal_e0 = edge_energies[elem_z][opts['edge']]
+
+    e0msg = "%sEdge energy appears %s for %s %s edge (expected %.2f)"
+    if abs(pgroup['e0'] - nominal_e0) > 200:
+        opts['verify_ok']  = 0
+        opts['verify_errors'].append(e0msg % ('', 'too far off', opts['elem_sym'],
+                                                opts['edge'], nominal_e0))
+
+    elif abs(pgroup['e0'] - nominal_e0) > 25:
+        opts['verify_messages'].append(e0msg % ('Warnig: ',
+                                                'a little off', opts['elem_sym'],
+                                                opts['edge'], nominal_e0))
+
+    if opts['verify_ok']  == 1:
+        opts['verify_messages'].append('Data looks OK for upload')
+    return opts
+
 
 
 @app.route('/verify_upload', methods=['GET', 'POST'])
@@ -1439,68 +1535,16 @@ def verify_upload():
         return needslogin(error='to submit a spectrum')
 
     if request.method != 'POST':
-        return sendback('upload', error='verify must use POST')
+        return sendback('upload', error='upload must use POST')
 
-    pid    = request.form['person_id']
-    person = db.get_person(int(pid))
+    opts = verify_uploaded_data(request.form)
+    if opts['verify_read'] != 'OK':
+        error = 'cannot locate file (%s)' % opts['fname']
+        if opts['verify_error'] == 'noread':
+            error = 'Could not read uploaded file (%s)' % (opts['fname'])
+        return sendback('upload', error=error, person_id=opts['pid'])
 
-    fullpath = request.form.get('fullpath', None)
-    if fullpath is None or not os.path.exists(fullpath):
-        return sendback('upload', error='cannot locate file (%s)' % fullpath)
-    dname, fname =  os.path.split(fullpath)
-    fname = secure_filename(fname)
-    try:
-        dgroup = read_ascii(fullpath)
-    except:
-        return render_template('upload.html', person_id=pid,
-                               error='Could not read uploaded file (%s)' % (fname))
-
-    opts = parse_datagroup(dgroup, fname, fullpath, pid)
-    for key, val in request.form.items():
-        opts[key] = val
-    print("Verify Upload: ", request.form)
-    if int(opts['d_spacing']) < 0 :
-        opts['d_spacing'] = "%.5f" % get_mono_d_spacing(opts['mono_name'])
-    print("Verify ", dgroup)
-    print("Verify ", dir(dgroup))
-
-    mode = request.form['mode'].lower()
-    energy = getattr(dgroup, request.form['energy_array'])
-    i0   = getattr(dgroup, request.form['i0_array'], None)
-    if mode.startswith('trans'):
-        mu = getattr(dgroup, request.form['it_array'], None)
-        if mu is not None and i0 is not None:
-            mu = -np.log(mu/i0)
-
-    opts['mufig'] =  make_xafs_plot(energy, mu, fname, ylabel=mode).decode('UTF-8')
-
-    pgroup = preedge(energy, mu)
-
-    opts['verify_edge_energy'] = "%.2f" % pgroup['e0']
-    opts['verify_edge_step']   = "%10.5g" % pgroup['edge_step']
-    opts['verify_edge_range']  = "[%10.5g, %10.5g]" % (min(energy), max(energy))
-    opts['verify_ok']   = 1
-    opts['verify_messages']   = []
-
-    elem_z = elem_syms.index(opts['elem_sym'])
-    nominal_e0 = edge_energies[elem_z][opts['edge']]
-    if float(opts['d_spacing']) < 0.0:
-        opts['verify_ok']  = 0
-        opts['verify_messages'].append('d-spacing for mono cannot be < 0')
-
-    e0msg = "Edge energy appears %s for %s '%s' edge (expected %.2f)"
-    if abs(pgroup['e0'] - nominal_e0) > 200:
-        opts['verify_ok']  = 0
-        opts['verify_messages'].append(e0msg % ('very far off', opts['elem_sym'],
-                                                opts['edge'], nominal_e0))
-
-    elif abs(pgroup['e0'] - nominal_e0) > 25:
-        opts['verify_messages'].append(e0msg % ('a little off', opts['elem_sym'],
-                                                opts['edge'], nominal_e0))
-
-    if opts['verify_ok']  == 1:
-        opts['verify_messages'].append('Data looks OK for upload')
-
+    print("-> Verify ", list(opts.keys()))
     return render_template('verify_uploadspectrum.html', **opts)
 
 
@@ -1511,20 +1555,35 @@ def submit_upload():
     if session['username'] is None:
         return needslogin(error='to submit a spectrum')
 
-    if request.method == 'POST':
-        pid    = request.form['person_id']
-        pemail = db.get_person(int(pid)).email
-        print("Submit Upload ", request.form)
+    if request.method != 'POST':
+        return sendback('upload', error='upload must use POST')
 
+
+    pid    = request.form['person_id']
+    pemail = db.get_person(int(pid)).email
+
+    if request.form.get('submit', '').lower().startswith('verify'):
+        opts = verify_uploaded_data(request.form)
+        if opts['verify_read'] != 'OK':
+            error = 'cannot locate file (%s)' % opts['fname']
+            if opts['verify_error'] == 'noread':
+                error = 'Could not read uploaded file (%s)' % (opts['fname'])
+            return sendback('upload', error=error, person_id=opts['pid'])
+
+        return render_template('verify_uploadspectrum.html', **opts)
+
+    else:
+        spid = 1
+
+        opts = verify_uploaded_data(request.form)
+
+        print("Really submit spectrum! ", list(opts.keys()))
 
         # sid = db.add_xdifile(fullpath, person=pemail, create_sample=True)
         # time.sleep(0.50)
         # db.session.commit()
         # spectrum  = db.get_spectrum(sid)
-
-    return render_template('upload.html',
-                           person_id=session['person_id'])
-
+        return redirect(url_for('spectrum', spid=spid, error=error))
 
 
 
