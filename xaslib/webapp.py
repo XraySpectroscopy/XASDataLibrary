@@ -17,7 +17,7 @@ from flask import (Flask, request, session, redirect, url_for,
                    send_from_directory)
 
 from .xaslib import connect_xaslib, fmttime, valid_score, unique_name, None_or_one
-from .initialdata import edge_energies
+from .initialdata import edge_energies, elem_syms
 from larch.io import read_ascii
 from larch.xafs.pre_edge import preedge
 from larch.utils.jsonutils import encode4js, decode4js
@@ -164,11 +164,6 @@ def clear():
     session_init(session)
     return sendback()
 
-@app.route('/browse')
-@app.route('/')
-def index():
-    session_init(session)
-    return sendback('elem')
 
 @app.route('/create_account/')
 @app.route('/create_account', methods=['GET', 'POST'])
@@ -374,7 +369,8 @@ def show_error(error=''):
     return render_template('layout.html', error=error)
 
 
-@app.route('/elem', methods=['GET', 'POST'])
+
+
 @app.route('/elem/', methods=['GET', 'POST'])
 @app.route('/elem/<elem>', methods=['GET', 'POST'])
 @app.route('/elem/<elem>/<orderby>',  methods=['GET', 'POST'])
@@ -484,12 +480,17 @@ def elem(elem=None, orderby=None, reverse=0):
                            included_elems=INCLUDED_ELEMS)
 
 
+
 @app.route('/all')
 @app.route('/all/')
 @app.route('/All')
 @app.route('/All/')
 def all():
     return redirect(url_for('elem', elem='All'))
+
+@app.route('/')
+def index():
+    return redirect(url_for('elem'))
 
 @app.route('/spectrum/')
 @app.route('/spectrum/<int:spid>')
@@ -639,7 +640,7 @@ def edit_spectrum(spid=None):
 
     s  = db.get_spectrum(spid)
     if s is None:
-        return redirect(url_for('elem', error='Could not find Spectrum #%d' % spid))
+        return redirect(url_for('/', error='Could not find Spectrum #%d' % spid))
 
     opts = parse_spectrum(s, db)
     beamlines = get_beamline_list(db, with_any=False, orderby='name')
@@ -1472,6 +1473,33 @@ def verify_upload():
             mu = -np.log(mu/i0)
 
     opts['mufig'] =  make_xafs_plot(energy, mu, fname, ylabel=mode).decode('UTF-8')
+
+    pgroup = preedge(energy, mu)
+
+    opts['verify_edge_energy'] = "%.2f" % pgroup['e0']
+    opts['verify_edge_step']   = "%10.5g" % pgroup['edge_step']
+    opts['verify_edge_range']  = "[%10.5g, %10.5g]" % (min(energy), max(energy))
+    opts['verify_ok']   = 1
+    opts['verify_messages']   = []
+
+    elem_z = elem_syms.index(opts['elem_sym'])
+    nominal_e0 = edge_energies[elem_z][opts['edge']]
+    if float(opts['d_spacing']) < 0.0:
+        opts['verify_ok']  = 0
+        opts['verify_messages'].append('d-spacing for mono cannot be < 0')
+
+    e0msg = "Edge energy appears %s for %s '%s' edge (expected %.2f)"
+    if abs(pgroup['e0'] - nominal_e0) > 200:
+        opts['verify_ok']  = 0
+        opts['verify_messages'].append(e0msg % ('very far off', opts['elem_sym'],
+                                                opts['edge'], nominal_e0))
+
+    elif abs(pgroup['e0'] - nominal_e0) > 25:
+        opts['verify_messages'].append(e0msg % ('a little off', opts['elem_sym'],
+                                                opts['edge'], nominal_e0))
+
+    if opts['verify_ok']  == 1:
+        opts['verify_messages'].append('Data looks OK for upload')
 
     return render_template('verify_uploadspectrum.html', **opts)
 

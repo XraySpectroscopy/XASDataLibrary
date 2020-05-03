@@ -90,19 +90,19 @@ Uploaded File: {{filename}} has {{narrays}} arrays of data with {{npts}} data po
 </td></tr>
 
 <tr><td> Energy Units:  </td><td><select  name='energy_units' style="width: 100px;">
-{% for e in eunits %}
-    <option value={{e}} {% if e == energy_units %} selected=1 {% endif %} > {{e}} </option>
-{% endfor %}
-</select>
+      {% for e in eunits %}
+      <option value={{e}} {% if e == energy_units %} selected=1 {% endif %} > {{e}} </option>
+      {% endfor %}
+    </select>
 </td></tr>
 
 <tr><td> Mono d-spacing: </td><td>
-<input size=15 type=text name=d_spacing value={{d_spacing}}> &#197;  &nbsp; Or use Mono:
-<select  name='mono_name' style="width: 100px;">
-{% for mname in gen_monos %}
-    <option value="{{ mname }}"{% if mname == mono_name  %} selected=1 {% endif %} > {{ mname }}</option>
-{% endfor %}
-</select>
+    <input size=15 type=text name=d_spacing value={{d_spacing}}> &#197;  &nbsp; Or use Mono:
+    <select  name='mono_name' style="width: 100px;">
+      {% for mname in gen_monos %}
+      <option value="{{ mname }}"{% if mname == mono_name  %} selected=1 {% endif %} > {{ mname }}</option>
+      {% endfor %}
+    </select>
 </td></tr>
 
 <tr><td> Energy Resolution: </td><td>
@@ -110,33 +110,36 @@ Uploaded File: {{filename}} has {{narrays}} arrays of data with {{npts}} data po
 </td></tr>
 
 <tr><td> Beamline: </td><td><select  name='beamline' style="width: 300px;">
-{% for bl in beamlines %}
-    <option value="{{bl}}" {% if bl == beamline  %} selected=1 {% endif %} > {{bl}}</option>
-{% endfor %}
-</select>
+      {% for bl in beamlines %}
+      <option value="{{bl}}" {% if bl == beamline  %} selected=1 {% endif %} > {{bl}}</option>
+      {% endfor %}
+    </select>
 </td></tr>
 
 <tr><td> Sample: </td><td><select  name='sample' style="width: 300px;">
-{% for s in samples %}
-    <option value={{s[0]}} {% if s[0] == sample  %} selected=1 {% endif %}> {{ s[1]}} </option>
-{% endfor %}
-</select>
+      {% for s in samples %}
+      <option value={{s[0]}} {% if s[0] == sample  %} selected=1 {% endif %}> {{ s[1]}} </option>
+      {% endfor %}
+    </select>
 </td></tr>
 
+
 <tr><td> Reference Sample: </td><td>
-<input size=50 type=text name=reference_sample value={{reference_sample}}>  </td></tr>
+    <input size=50 type=text name=reference_sample value={{reference_sample}}>  </td></tr>
 
 <tr><td> User Comment: </td><td>
-<textarea cols=50  rows=4 type=text name=comments>{{raw_comments}}</textarea></td></tr>
+    <textarea cols=50  rows=4 type=text name=comments>{{raw_comments}}</textarea></td></tr>
 <tr><td colspan=2> <hr> </td></tr>
-<tr><td><input type=submit value=Continue></td><td></td></tr>
+
+<tr><td><input type=submit name=submit value="Submit for  Verification"></td>
+  <td></td></tr>
 </table>
 </form>
 
 </div>
 <div style="width: 40%; float: right;">
- <i>Header from data file </i> <p>
-<font size=-2>{% for a in header %} {{ a }} <br> {%endfor%}</font>
+  <i>Header from data file </i> <p>
+    <font size=-2>{% for a in header %} {{ a }} <br> {%endfor%}</font>
 </div>
 </div>
 {% endblock %}

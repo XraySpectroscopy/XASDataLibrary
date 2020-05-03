@@ -15,14 +15,65 @@ Data File: <input type=file name=filename> <input type=submit value="Upload to E
 
 <p>
 <hr>
+Notes on Uploading Files: <br>
 
-Uploaded files must be an ASCII file no larger than 16Mb with data arranged
-a table with columns for indivdual arrays, each row representing a
-different energy point.  Only the first 16 columns will be accessible, and
-these must include columns for Energy or Monochramator Angle, and arrays
-such as I0, ITRANS, MUTRANS, IFLUOR, MUFLUOR to idenitify the MU data.  You
-will be asked to select columns and fill in values for some metadata
-including:
+
+<ul>
+  <li> Uploaded files must be an ASCII file no larger than 16Mb with a
+    <b>Header Section</b> followed by a <b>Data Table Section</b>.
+
+  <li> The <b>Header Section</b> contains strings that describe the
+    meta-data for the data file.  Ideally, these will follow the
+    <a href='https://github.com/XraySpectroscopy/XAS-Data-Interchange/blob/master/specification/spec.md'>
+      XAS Data Interchange Specification</a>.
+
+    <li> The <b>Data Table Section</b> contains columns for indvidual
+      arrays.  Columns should be separated or <i>delimited</i> by a
+      combination of spaces, tabs, and commas.  Each line of the file
+      (ending with a Newline and optional Carriage Return character)
+      corresponds to one row of  the Data Table,   representing a different
+      energy point for the data.  Up to 16 columns will be accessible.
+
+</ul>
+
+
+<br>
+Somewhere in the first sixteen columns there <b>Must</b> be columns for
+
+<ol>
+  <li> <b>Energy</b> or <b>Monochromator Angle</b>, either in units of
+    eV,  keV, or degrees.
+
+  <li> Arrays that can be used to build mu(Energy).  These could be columns
+       of <b>I_0</b>, <b>I_transmission</b>, <b>I_fluorescence</b>, or
+       <b>mu_transmission</b>,  <b>mu_fluorescence</b>.  Note that it is
+       OK to have other emission modes than fluorescence -- they will be
+       treated in the same way as fluorescence data.
+
+</ol>
+
+Some additional notes:
+
+<ol>
+  <li>Ideally, the Energy array will be in one of the first few columns of
+    the Data Table and will be strictly increasing. The data will be sorted if
+    it is not.
+
+    <li> Ideally, there will be a separate column of <b>I_0</b>, but this is
+      not required.
+
+    <li> You can include data for a reference channel, either
+      <b>I_reference</b>, or <b>mu_referencee</b>.  Note that the reference
+      channel can either be in transmission (with reference sample after the
+      <b>I_transmission</b>, so that <b>mu_reference =	-log(I_reference/I_transmission)</b>
+      or in fluorescence (ELF) mode, so that <b>mu_reference = I_reference/I_0</b>
+
+
+</ol>
+
+When uploading data, we assume that you understand all of these points. You
+will also be expected to select columns and fill in values for some
+metadata including:
 
 <ul>
   <li> Sample Name
@@ -32,6 +83,12 @@ including:
   <li> Beamline
   <li> Measurement Mode
 </ul>
+
+
+Because uploading file uses finite and non-free computing resources, we
+reserve the right to restrict or remove any data for any reason without
+notice and to ban users who abuse the ability to upload data.
+
 
 <p> For example files, see example data files at
 
