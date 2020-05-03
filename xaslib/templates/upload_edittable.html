@@ -1,0 +1,131 @@
+
+
+<input type=hidden name=person_id value={{person_id}}>
+<input type=hidden name=fullpath value="{{fullpath|safe}}">
+
+<table border=0>
+
+<tr><td colspan=2>
+Uploaded File: {{filename}} has {{narrays}} array columns with {{npts}} data points.
+</td>
+</tr>
+<tr><td colspan=2><hr></td></tr>
+
+<tr><td>Name:</td><td>
+<input  style="width: 350px;" type=text name=filename value='{{filename|safe}}'></td></tr>
+
+<tr><td>Description:</td><td>
+<input style="width: 350px;" type=text name=description value='{{description|safe}}'></td></tr>
+
+<tr><td> Measurement Mode:  </td><td><select  name='mode' style="width: 250px;">
+{% for mname in modes %}
+    <option value={{mname}} {% if mname==mode %} selected=1 {% endif %} > {{ mname }}</option>
+{% endfor %}
+</select>
+</td></tr>
+
+<td>Energy Column: </td><td><select name='en_arrayname' style="width: 250px;">
+{% for a in array_labels %}
+    <option value={{a}} {% if a == en_arrayname %} selected=1 {% endif %} > {{ a }}</option>
+{% endfor %}
+</select>
+</td></tr>
+
+<td>I0 Column: </td><td><select name='i0_arrayname' style="width: 250px;">
+{% for a in array_labels %}
+    <option value={{a}} {% if a == i0_arrayname %} selected=1 {% endif %} > {{ a }}</option>
+{% endfor %}
+</select>
+</td></tr>
+
+<td>Transmission Column: </td><td><select name='it_arrayname' style="width: 250px;">
+{% for a in array_labels %}
+    <option value={{a}} {% if a == it_arrayname %} selected=1 {% endif %} >{{ a }}</option>
+{% endfor %}
+</select>
+&nbsp; <input type="checkbox"  name="is_mutrans" {% if is_mutrans %} checked {% endif %} > mu_trans (not I_trans)? </input>
+</td></tr>
+
+<td> Fluorescence Column: </td><td><select name='if_arrayname' style="width: 250px;">
+{% for a in array_labels %}
+    <option value={{a}} {% if a == if_arrayname %} selected=1 {% endif %} >{{ a }}</option>
+{% endfor %}
+</select>
+&nbsp; <input type="checkbox"  name="is_mufluor" {% if is_mufluor %} checked {% endif %}>  mu_fluor (not I_fluor)? </input>
+</td></tr>
+
+<td> Reference Column: </td><td><select name='ir_arrayname' style="width: 250px;">
+{% for a in array_labels %}
+    <option value={{a}} {% if a == ir_arrayname %} selected=1 {% endif %} >{{ a }}</option>
+{% endfor %}
+</select>
+&nbsp; <input type="checkbox"  name="is_murefer" {% if is_murefer xa%} checked {% endif %}> mu_refer (no I_ref)? </input>
+</td></tr>
+
+<td> Reference Mode: </td><td><select name='ref_mode' style="width: 250px;">
+{% for a in ref_modes %}
+    <option value={{a}} {% if a == ref_mode %} selected=1 {% endif %} > {{ a }}</option>
+{% endfor %}
+</select>
+</td></tr>
+
+
+<tr><td> Element: </td><td><select name='elem_sym' style="width: 100px;">
+{% for el in elems %}
+    <option value={{el.symbol}} {% if el.symbol == elem_sym %} selected=1 {% endif %}>{{ el.symbol }}</option>
+{% endfor %}
+</select>
+</td></tr>
+
+<tr><td> Edge:  </td><td><select  name='edge' style="width: 100px;">
+{% for ename in edges %}
+    <option value={{ename}} {% if ename==edge %} selected=1 {% endif %} > {{ ename }}</option>
+{% endfor %}
+</select>
+</td></tr>
+
+<tr><td> Energy Units:  </td><td><select  name='energy_units' style="width: 100px;">
+{% for e in eunits %}
+    <option value={{e}} {% if e == energy_units %} selected=1 {% endif %} > {{e}} </option>
+{% endfor %}
+</select>
+</td></tr>
+
+<tr><td> Mono d-spacing: </td><td>
+<input size=15 type=text name=d_spacing value={{d_spacing}}> &#197;  &nbsp; Or use Mono:
+<select  name='mono_name' style="width: 100px;">
+{% for mname in gen_monos %}
+    <option value="{{ mname }}"{% if mname == mono_name  %} selected=1 {% endif %} > {{ mname }}</option>
+{% endfor %}
+</select>
+</td></tr>
+
+<tr><td> Energy Resolution: </td><td>
+    <input size=50 type=text name=e_resolution value={{e_resolution}}> </td></tr>
+</td></tr>
+
+<tr><td> Beamline: </td><td><select  name='beamline' style="width: 300px;">
+{% for bl in beamlines %}
+    <option value="{{bl}}" {% if bl == beamline %} selected=1 {% endif %} > {{bl}}</option>
+{% endfor %}
+</select>
+</td></tr>
+
+<tr><td> Sample: </td><td><select  name='sample' style="width: 300px;">
+      {% for s in samples %}
+      <option value={{s[0]}} {% if s[0] == sample  %} selected=1 {% endif %}> {{ s[1]}} </option>
+      {% endfor %}
+    </select>
+</td></tr>
+
+<tr><td> Reference Sample: </td><td>
+<input size=50 type=text name=reference_sample value={{reference_sample}}>  </td></tr>
+
+<tr><td> User Comment: </td><td>
+<textarea cols=50  rows=4 type=text name=comments>{{raw_comments}}</textarea></td></tr>
+<tr><td colspan=2> <hr> </td></tr>
+<tr><td><input type=submit name=submit value="Verify Data"></td>
+  <td>
+    {% if verify_ok %} <input type=submit name=submit value="Confirm and Upload">  {% endif %}
+</td></tr>
+</table>
