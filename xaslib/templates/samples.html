@@ -1,0 +1,34 @@
+{% extends "layout.html" %}
+{% block body %}
+
+<div class=subtitle> Samples:
+
+{% if session.username is not none %}
+  &nbsp;   &nbsp;
+  <a href="{{ url_for('new_sample') }}"> [add a sample] </a>
+{% endif %}
+
+</div>
+
+<div class=body>
+<hr>
+
+Click on heading labels to toggle sorting:
+
+<table cellspacing=3 cellpadding=1>
+  <tr>
+    <th><a href="{{url_for('samples')}}/name/{{reverse}}">      &nbsp; Name &nbsp;</a></th>
+    <th><a href="{{url_for('samples')}}/formula/{{reverse}}">  &nbsp; Formula &nbsp;</a></th>
+    <th><a href="{{url_for('samples')}}/nspectra/{{reverse}}">  &nbsp; #Spectra &nbsp;</a></th>
+  </tr>
+  {% for s in samples %}
+  <tr class={{ loop.cycle('odd', 'even') }}>
+    <td>  <a href="{{ url_for('sample', sid=s.id)}}"> {{s.name}} </a></td>
+    <td>  &nbsp; {{s.formula}}  &nbsp;</td>
+    <td>  &nbsp; {{s.nspectra}}  &nbsp;</td>
+  </tr>
+  {% endfor %}
+</table>
+
+</div>
+{% endblock %}
