@@ -11,6 +11,7 @@
 # Element.symbol:  V
 # Element.edge:  K
 # Sample.name:  V2O3
+# Sample.formula: V2O3
 # Sample.prep:  powder on tape, sample from Alfa Aesar
 # Facility.name:  APS
 # Beamline.name:  13-BM-D
@@ -566,4 +567,3 @@
   6.2912420e+03    2.0000000e+00    9.9448000e+04    3.5976600e+05
   6.2957070e+03    2.0000000e+00    9.9342000e+04    3.6213500e+05
   6.3002280e+03    2.0000000e+00    9.9461000e+04    3.6457100e+05
-

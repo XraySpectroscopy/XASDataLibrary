@@ -14,7 +14,8 @@
 # Facility.Name:  APS
 # Beamline.Name:  13-ID-E
 # Beamline.xray_source:  undulator
-# Sample.name:  Znfoil
+# Sample.name:  Zn foil
+# Sample.formula:  Zn
 # Sample.prep: metal foil
 # Scaler.frequency: 5e+07  ||  13IDE:scaler1.FREQ
 # Scaler.read_delay: 0  ||  13IDE:scaler1.DLY
@@ -593,4 +594,3 @@
    10292.917838    10292.914779    0.5000  57712.049842     2241.849906
    10297.892579    10297.893299    0.5000  57320.049842     2239.849906
    10302.886764    10302.869718    0.5000  57039.049842     2237.849906
-

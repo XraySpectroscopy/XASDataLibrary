@@ -11,6 +11,7 @@
 # Element.symbol:  V
 # Element.edge:  K
 # Sample.name:  V foil
+# Sample.formula:  V
 # Sample.prep:  metal foil, Joe Wong box set
 # Facility.name:  APS
 # Beamline.name:  13-BM-D
@@ -512,4 +513,3 @@
   6.0820390e+03    2.0000000e+00    1.1939500e+05    6.9561000e+04
   6.0859320e+03    2.0000000e+00    1.1974000e+05    7.0238000e+04
   6.0898160e+03    2.0000000e+00    1.1944600e+05    7.0537000e+04
-
