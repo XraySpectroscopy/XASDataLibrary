@@ -28,14 +28,14 @@ Uploaded File: {{filename}} has {{narrays}} array columns with {{npts}} data poi
     &nbsp;    &nbsp;
     <select  name='edge' style="width: 100px;">
 {% for ename in edges %}
-    <option value={{ename}} {% if ename==edge %} selected=1 {% endif %} > {{ ename }}</option>
+    <option value="{{ename}}" {% if ename==edge %} selected=1 {% endif %} > {{ ename }}</option>
 {% endfor %}
 </select>
 </td></tr>
 
 <tr><td> Energy Units:  </td><td><select  name='energy_units' style="width: 100px;">
 {% for e in eunits %}
-    <option value={{e}} {% if e == energy_units %} selected=1 {% endif %} > {{e}} </option>
+    <option value="{{e}}" {% if e == energy_units %} selected=1 {% endif %} > {{e}} </option>
 {% endfor %}
 </select>
 </td></tr>
@@ -62,7 +62,7 @@ Uploaded File: {{filename}} has {{narrays}} array columns with {{npts}} data poi
 </tr>
 
 <tr><td> Energy Resolution: </td><td>
-    <input size=50 type=text name=e_resolution value={{e_resolution}}> </td></tr>
+    <input size=50 type=text name=e_resolution value="{{e_resolution|safe}}"> </td></tr>
 </td></tr>
 
 <tr><td> Beamline: </td><td><select  name='beamline' style="width: 300px;">
@@ -96,7 +96,7 @@ Uploaded File: {{filename}} has {{narrays}} array columns with {{npts}} data poi
 <tr><td> Measurement Mode:  </td><td>
     <select  name='mode' id="mode" style="width: 250px;" onchange="on_DataMode()">
 {% for mname in modes %}
-    <option value={{mname}} {% if mname==mode %} selected=1 {% endif %} > {{ mname }}</option>
+    <option value="{{mname}}" {% if mname==mode %} selected=1 {% endif %} > {{ mname }}</option>
 {% endfor %}
 </select>
 </td></tr>
@@ -152,7 +152,7 @@ Uploaded File: {{filename}} has {{narrays}} array columns with {{npts}} data poi
 <td> Reference Mode: </td>
 <td><select name="ref_mode" id="ref_mode" style="width: 250px;"  onchange="on_ReferMode()">
     {% for a in ref_modes %}
-    <option value={{a}} {% if a == ref_mode %} selected=1 {% endif %} > {{ a }}</option>
+    <option value="{{a}}" {% if a == ref_mode %} selected=1 {% endif %} > {{ a }}</option>
     {% endfor %}
   </select>
 </td></tr>
@@ -160,7 +160,7 @@ Uploaded File: {{filename}} has {{narrays}} array columns with {{npts}} data poi
 <td> Reference Column: </td>
 <td><select name='ir_arrayname' id="ir_arrayname" style="width: 250px;" disabled>
     {% for a in array_labels %}
-    <option value={{a}} {% if a == ir_arrayname %} selected=1 {% endif %} >{{ a }}</option>
+    <option value="{{a}}" {% if a == ir_arrayname %} selected=1 {% endif %} >{{ a }}</option>
     {% endfor %}
   </select>
   &nbsp; <input type="checkbox"  id="is_murefer" name="is_murefer"
@@ -169,38 +169,57 @@ Uploaded File: {{filename}} has {{narrays}} array columns with {{npts}} data poi
 
 <tr><td> Reference Sample: </td><td>
     <input size=50 type=text name="reference_sample" id="reference_sample"
-	   disabled value={{reference_sample}}>
+	   disabled value="{{reference_sample|safe}}">
 </td></tr>
 
 <tr><td></td><td> <hr> </td></tr>
 
 
 <tr><td> Sample Name: </td><td>
-    <input size=50 type=text name="sample_name" id="sample_name"   value={{sample_name}}>
+    <input size=50 type=text name="sample_name" id="sample_name"
+	   value="{{sample_name|safe}}"    {% if sample != 0 %}  disabled {% endif %}   >
 </td></tr>
 
 <tr><td> Sample Fomula: </td><td>
-    <input size=50 type=text name="sample_formula" id="sample_formula"   value={{sample_formula}}>
+    <input size=50 type=text name="sample_formula" id="sample_formula"
+	   value="{{sample_formula|safe}}"    {% if sample != 0 %}  disabled {% endif %}   >
+
 </td></tr>
 
 <tr><td> Sample Preparation: </td><td>
-    <input size=50 type=text name="sample_prep" id="sample_prep"   value={{sample_prep}}>
+    <input size=50 type=text name="sample_prep" id="sample_prep"
+	   value="{{sample_prep|safe}}"   {% if sample != 0 %}  disabled {% endif %}   >
 </td></tr>
 
 <tr><td> Sample Notes: </td><td>
-    <input size=50 type=text name="sample_notes" id="sample_notes"   value={{sample_notes}}>
+    <input size=50 type=text name="sample_notes" id="sample_notes"
+	   value="{{sample_notes|safe}}"   {% if sample != 0 %}  disabled {% endif %}   >
 </td></tr>
 
 
-<tr><td> Use Existing Sample?: </td><td><select  name='sample' style="width: 300px;">
+  <script type="text/javascript">
+    function on_Sample() {
+    var sample = document.getElementById("sample");
+    var dis = true;
+    if (sample.selectedIndex == 0) { dis = false;}
+        document.getElementById("sample_notes").disabled =dis;
+        document.getElementById("sample_prep").disabled = dis;
+        document.getElementById("sample_name").disabled = dis;
+        document.getElementById("sample_formula").disabled = dis;
+    }
+  </script>
+
+
+<tr><td> Use Existing Sample?: </td><td><select  name='sample' id="sample"
+      style="width: 300px;" onchange="on_Sample()">
       {% for s in samples %}
-      <option value={{s[0]}} {% if s[0] == sample  %} selected=1 {% endif %}> {{ s[1]}} </option>
+      <option value="{{s[0]}}" {% if s[0] == sample  %} selected=1 {% endif %}> {{ s[1]}} </option>
       {% endfor %}
     </select>
 </td></tr>
 
 <tr><td> User Comment: </td><td>
-<textarea cols=50  rows=4 type=text name=comments>{{raw_comments}}</textarea></td></tr>
+<textarea cols=50  rows=4 type=text name=comments>{{comments|safe}}</textarea></td></tr>
 <tr><td colspan=2> <hr> </td></tr>
 <tr><td><input type=submit name=submit value="Verify Data"></td>
   <td>
