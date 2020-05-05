@@ -155,18 +155,21 @@ Uploaded File: {{filename}} has {{narrays}} array columns with {{npts}} data poi
 </td></tr>
 
 <td> Reference Column: </td>
-<td><select name='ir_arrayname' id="ir_arrayname" style="width: 250px;" disabled>
+<td><select name='ir_arrayname' id="ir_arrayname" style="width: 250px;"
+	  {% if ref_mode = ref_modes[0] %}  disabled {% endif %} >
     {% for a in array_labels %}
     <option value="{{a}}" {% if a == ir_arrayname %} selected=1 {% endif %} >{{ a }}</option>
     {% endfor %}
   </select>
   &nbsp; <input type="checkbox"  id="is_murefer" name="is_murefer"
-		{% if is_murefer %} checked {% endif %} disabled> mu_refer (no I_ref)? </input>
+		{% if is_murefer %} checked {% endif %}
+		{% if ref_mode = ref_modes[0] %}  disabled {% endif %} >  mu_refer (no I_ref)? </input>
 </td></tr>
 
 <tr><td> Reference Sample: </td><td>
     <input size=50 type=text name="reference_sample" id="reference_sample"
-	   disabled value="{{reference_sample|safe}}">
+	   {% if ref_mode = ref_modes[0] %}  disabled {% endif %}
+	   value="{{reference_sample|safe}}">
 </td></tr>
 
 <tr><td></td><td> <hr> </td></tr>
