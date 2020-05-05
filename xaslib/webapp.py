@@ -1066,6 +1066,7 @@ def new_sample(spid=None):
     sid = db.add_sample('New Sample', session['person_id'])
     if spid is not None:
         db.update('spectrum', spid, use_id=True, sample_id=sid)
+    session_init(session, force_refresh=True)
     return redirect(url_for('edit_sample', sid=sid, error=error))
 
 
@@ -1120,6 +1121,7 @@ def submit_sample_edits():
         db.update('sample', int(sid), person=pid, name=name, notes=notes,
                   formula=formula,  preparation=prep)
         time.sleep(0.25)
+    session_init(session, force_refresh=True)
     return redirect(url_for('sample', sid=sid, error=error))
 
 @app.route('/beamlines')
@@ -1212,6 +1214,7 @@ def add_beamline():
         bl = db.add_beamline(bl_name, notes=notes, xray_source=source,
                              facility_id=fac_id)
         time.sleep(0.25)
+        session_init(session, force_refresh=True)
         return redirect(url_for('beamline', blid=bl.id, error=error))
     else:
         return render_template('add_beamline.html', error=error,
@@ -1235,7 +1238,8 @@ def add_facility():
         except:
             error = 'a facility named %s exists'
         db.add_beamline(fac_name)
-        time.sleep(1)
+        time.sleep(0.25)
+        session_init(session, force_refresh=True)
         return redirect(url_for('facilities', error=error))
     else:
         return render_template('add_facility.html', error=error,
@@ -1535,7 +1539,7 @@ def verify_uploaded_data(form, with_arrays=False):
     # ensure data is ordered by increasing energy:
     en_order = np.argsort(energy)
     if abs(np.diff(en_order) - 1).sum() > 0: # there is some out-of-order data
-        print(" sorting data by energy ")
+        energy = energy[en_order]
         mu = mu[en_order]
         i0 = i0[en_order]
         if itrans is not None:
@@ -1546,6 +1550,7 @@ def verify_uploaded_data(form, with_arrays=False):
             irefer = irefer[en_order]
         if murefer is not None:
             murefer = murefer[en_order]
+
 
     try:
         opts['mufig'] =  make_xafs_plot(energy, mu, fname, ylabel=mode).decode('UTF-8')
@@ -1586,6 +1591,9 @@ def verify_uploaded_data(form, with_arrays=False):
         opts['verify_errors'].append('Edge jump is negative')
     elif pgroup['edge_step'] < 1.e-5:
         opts['verify_messages'].append('Warning: Edge jump looks very small')
+
+    if min(np.diff(energy)) < 0.001:
+        opts['verify_messages'].append('Warning: Energy array has some very small steps')
 
     opts['sample'] = int(opts['sample'])
     if opts['sample'] > 0:
@@ -1670,11 +1678,10 @@ def submit_upload():
         opts = verify_uploaded_data(request.form, with_arrays=True)
         filename = upload2xdi(opts, app.config['UPLOAD_FOLDER'])
 
-        time.sleep(0.250)
-
+        time.sleep(0.25)
         spid = db.add_xdifile(filename, person=pemail, create_sample=True)
-
-        time.sleep(0.250)
+        time.sleep(0.25)
+        session_init(session, force_refresh=True)
 
         return redirect(url_for('spectrum', spid=spid, error=error))
 
