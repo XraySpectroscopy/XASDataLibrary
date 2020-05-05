@@ -37,7 +37,8 @@ db = None
 app = Flask('xaslib', static_folder='static')
 app.config.from_object(__name__)
 
-ANY_EDGES = ANY_MODES = SAMPLES_OR_NEW = INCLUDED_ELEMS = SPECTRA_COUNT = None
+ANY_EDGES = ANY_MODES = ANY_BEAMLINES = SAMPLES_OR_NEW = None
+INCLUDED_ELEMS = SPECTRA_COUNT = None
 ALL_ELEMS = EN_UNITS = None
 
 
@@ -53,7 +54,7 @@ REFERENCE_MODES = ('no reference spectra',
 
 
 def session_init(session, force_refresh=False):
-    global db, app, ANY_EDGES, ANY_MODES, SAMPLES_OR_NEW
+    global db, app, ANY_EDGES, ANY_MODES, ANY_BEAMLINES, SAMPLES_OR_NEW
     global INCLUDED_ELEMS, SPECTRA_COUNT, ALL_ELEMS, EN_UNITS
     if 'username' not in session:
         session['username'] = None
@@ -67,8 +68,12 @@ def session_init(session, force_refresh=False):
     if force_refresh:
         ANY_EDGES  = ['Any'] + [e.name for e in db.get_edges()]
         ANY_MODES  = ['Any'] + [e.name for e in db.get_modes()]
+        ANY_BEAMLINES = ['<Select Beamline>']
+        ANY_BEAMLINES.extend([b['name'] for b in get_beamline_list(db, with_any=False,
+                                                                   orderby='name')])
         SAMPLES_OR_NEW  = [(0, '<Create New Sample>')]
         SAMPLES_OR_NEW.extend( [(s.id, s.name) for s in db.fquery('sample')])
+
 
         INCLUDED_ELEMS = db.included_elements()
         SPECTRA_COUNT = len(db.get_spectra())
@@ -1382,11 +1387,10 @@ def parse_datagroup(dgroup, fname, fullpath, pid, form=None):
 
     desc = '{} uploaded  {}'.format(fname, fmttime())
 
-    beamlines = [b['name'] for b in get_beamline_list(db, with_any=False, orderby='name')]
     opts = dict(elems=ALL_ELEMS,
                 eunits=EN_UNITS,
                 edges=ANY_EDGES[1:],
-                beamlines=beamlines,
+                beamlines=ANY_BEAMLINES,
                 samples=SAMPLES_OR_NEW,
                 modes=ANY_MODES[1:],
                 gen_monos=GENERIC_MONOS,
@@ -1400,7 +1404,7 @@ def parse_datagroup(dgroup, fname, fullpath, pid, form=None):
                      description=desc,
                      mode='transmission',
                      e_resolution='nominal',
-                     beamline=beamlines[0],
+                     beamline=ANY_BEAMLINES[0],
                      reference_sample='',
                      person_email=person.email,
                      person_name=person.name,
@@ -1507,12 +1511,41 @@ def verify_uploaded_data(form, with_arrays=False):
             mu = itrans
         elif itrans is not None and i0 is not None:
             mu = -np.log(itrans/i0)
-    else:
+    elif 'if_arrayname' in form:
         ifluor = getattr(dgroup, form['if_arrayname'], None)
         if 'is_mufluor' not in form:
             mu = ifluor
         elif ifluor is not None and i0 is not None:
             mu = ifluor/i0
+    else:
+        print("Could not get mu array")
+
+    if form['ref_mode'] != REFERENCE_MODES[0]: ## 'no reference'
+        irefer = getattr(dgroup, form['ir_arrayname'], None)
+        if irefer is not None:
+            if 'is_murefer' not in form:
+                murefer = irefer
+            elif form['ref_mode'] != REFERENCE_MODES[1]: ## 'trans'
+                murefer = -log(irefer/itrans)
+            elif form['ref_mode'] != REFERENCE_MODES[2]: ## 'fluor, i0'
+                murefer = irefer/i0
+            elif form['ref_mode'] != REFERENCE_MODES[3]: ## 'fluor, i1'
+                murefer = irefer/itrans
+
+    # ensure data is ordered by increasing energy:
+    en_order = np.argsort(energy)
+    if abs(np.diff(en_order) - 1).sum() > 0: # there is some out-of-order data
+        print(" sorting data by energy ")
+        mu = mu[en_order]
+        i0 = i0[en_order]
+        if itrans is not None:
+            itrans = itrans[en_order]
+        if ifluor is not None:
+            ifluor = ifluor[en_order]
+        if irefer is not None:
+            irefer = irefer[en_order]
+        if murefer is not None:
+            murefer = murefer[en_order]
 
     try:
         opts['mufig'] =  make_xafs_plot(energy, mu, fname, ylabel=mode).decode('UTF-8')
@@ -1520,6 +1553,10 @@ def verify_uploaded_data(form, with_arrays=False):
         opts['mufig'] =  'noplot'
         opts['verify_ok']  = 0
         opts['verify_errors'].append('could not plot data -- arrays must not be correct')
+
+    if opts['beamline'] == ANY_BEAMLINES[0]:
+        opts['verify_ok']  = 0
+        opts['verify_errors'].append('Must select a valid beamline')
 
     try:
         pgroup = preedge(energy, mu)
@@ -1631,20 +1668,14 @@ def submit_upload():
         spid = 1
 
         opts = verify_uploaded_data(request.form, with_arrays=True)
-        print("Really submit spectrum! ", list(opts.keys()))
-
         filename = upload2xdi(opts, app.config['UPLOAD_FOLDER'])
 
-        time.sleep(0.50)
-
-        print("wrote file ", filename)
-        print(' -> add xdifile ')
+        time.sleep(0.250)
 
         spid = db.add_xdifile(filename, person=pemail, create_sample=True)
-        db.session.commit()
-        time.sleep(0.25)
 
-        # spectrum  = db.get_spectrum(sid)
+        time.sleep(0.250)
+
         return redirect(url_for('spectrum', spid=spid, error=error))
 
 
