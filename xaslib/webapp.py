@@ -28,7 +28,7 @@ from .webutils import (row2dict, multiline_text, parse_spectrum,
                        spectra_for_citation, spectra_for_beamline,
                        get_beamline_list, get_rating, get_fullpath,
                        guess_metadata, pathjoin, secure_filename,
-                       mono_deg2ev)
+                       mono_deg2ev, upload2xdi   )
 
 from .webplot import make_xafs_plot
 
@@ -43,18 +43,7 @@ ALL_ELEMS = EN_UNITS = None
 
 EMAIL_MSG = "From: {mailfrom:s}\r\nTo: {mailto:s}\r\nSubject: {subject:s}\r\n{message:s}\n"
 
-GENERIC_MONOS = ('None', 'generic Si(111)',
-                 'generic Si(220)', 'generic Si(311)')
-
-def get_mono_d_spacing(name):
-    name = name.lower().replace('(', '').replace(')', '').replace(' ', '')
-    if 'si111' in name:
-        return 3.1355893
-    if 'si220' in name:
-        return 1.9201484
-    if 'si311' in name:
-        return 1.6375081
-    return -1.0
+GENERIC_MONOS = ('None', 'generic Si(111)', 'generic Si(220)', 'generic Si(311)')
 
 
 REFERENCE_MODES = ('no reference spectra',
@@ -76,10 +65,10 @@ def session_init(session, force_refresh=False):
         force_refresh = True
 
     if force_refresh:
-        print("Refreshing session ", db)
         ANY_EDGES  = ['Any'] + [e.name for e in db.get_edges()]
         ANY_MODES  = ['Any'] + [e.name for e in db.get_modes()]
-        SAMPLES_OR_NEW  = [(0, '<Create New Sample>')] + [(s.id, s.name) for s in db.fquery('sample')]
+        SAMPLES_OR_NEW  = [(0, '<Create New Sample>')]
+        SAMPLES_OR_NEW.extend( [(s.id, s.name) for s in db.fquery('sample')])
 
         INCLUDED_ELEMS = db.included_elements()
         SPECTRA_COUNT = len(db.get_spectra())
@@ -804,7 +793,7 @@ def rate_suite(stid=None):
 def showsuite_rating(stid=None):
     session_init(session)
 
-    st = None_or_onw(db.fquery('suite'))
+    st = None_or_one(db.fquery('suite'))
     if st is None:
         error = 'Could not find Suite #%d' % stid
         return redirect(url_for('suites', error=error))
@@ -1028,6 +1017,39 @@ def sample(sid=None):
     opts['spectra'] = db.fquery('spectrum', sample_id=sid)
     return render_template('sample.html', sid=sid, **opts)
 
+
+@app.route('/samples')
+@app.route('/samples/')
+@app.route('/samples/<int:sid>')
+@app.route('/samples/<orderby>')
+@app.route('/samples/<orderby>/<reverse>')
+def samples(blid=None, orderby='name', reverse=0):
+    session_init(session)
+    kws = {'orderby': orderby}
+    samples = []
+    for sdat in db.fquery('sample', **kws):
+        sid = sdat.id
+        nspectra = len(db.fquery('spectrum', sample_id=sid))
+        formula = sdat.formula
+        if formula in (None, 'None'):
+            formula = 'unknown'
+        samples.append({'id': sid, 'name': sdat.name,
+                        'formula': formula,
+                        'nspectra': nspectra})
+
+    if orderby in ('name', 'formula', 'nspectra'):
+        samples = sorted(samples, key=lambda k: k[orderby])
+
+    reverse = int(reverse)
+    if reverse != 0:
+        samples.reverse()
+
+    return render_template('samples.html', samples=samples,
+                           reverse=(0 if reverse else 1))
+
+
+@app.route('/new_sample')
+@app.route('/new_sample/')
 @app.route('/new_sample/<int:spid>')
 def new_sample(spid=None):
     session_init(session)
@@ -1090,11 +1112,8 @@ def submit_sample_edits():
         notes = request.form['notes']
         prep = request.form['preparation']
         formula = request.form['formula']
-        source = request.form['material_source']
-
         db.update('sample', int(sid), person=pid, name=name, notes=notes,
-                  formula=formula, material_source=source,
-                  preparation=prep)
+                  formula=formula,  preparation=prep)
         time.sleep(0.25)
     return redirect(url_for('sample', sid=sid, error=error))
 
@@ -1347,6 +1366,14 @@ def parse_datagroup(dgroup, fname, fullpath, pid, form=None):
     narrays, npts = dgroup.data.shape
 
     array_labels = ['None'] + dgroup.array_labels
+    if npts > 16384:
+        npts = 16384
+        dgroup.data = dgroup.data[:, :npts]
+    if narrays > 17:
+        narrays = 17
+        array_labels = array_labels[:narrays]
+        dgroup.data = dgroup.data[:narrays, :]
+
     if len(array_labels) < 3:
         array_labels.extend(['None', 'None'])
 
@@ -1429,10 +1456,6 @@ def edit_upload():
                                        error='Could not read uploaded file (%s)' % (fname))
 
             opts = parse_datagroup(dgroup, fname, fullpath, pid)
-            print("Edit Upload Arrays: ", opts['en_arrayname'],
-                  opts['i0_arrayname'], opts['it_arrayname'],  opts['if_arrayname'],
-                  opts['ir_arrayname'])
-
             return render_template('edit_uploadspectrum.html', **opts)
 
     return render_template('upload.html',
@@ -1440,7 +1463,7 @@ def edit_upload():
                            error='upload error (method?)')
 
 
-def verify_uploaded_data(form):
+def verify_uploaded_data(form, with_arrays=False):
     pid    = form['person_id']
     person = db.get_person(int(pid))
 
@@ -1459,24 +1482,16 @@ def verify_uploaded_data(form):
     for key, val in form.items():
         opts[key] = val
 
-    print("Opts Arrays: ", opts['en_arrayname'], opts['i0_arrayname'], opts['it_arrayname'])
-
     opts['verify_read'] = 'OK'
     opts['verify_ok']   = 1
     opts['verify_messages']   = []
     opts['verify_errors']   = []
-
-
-    if float(opts['d_spacing']) < 0 :
-        opts['d_spacing'] = "%.5f" % get_mono_d_spacing(opts['mono_name'])
 
     if float(opts['d_spacing']) < 0.0:
         opts['verify_ok']  = 0
         opts['verify_errors'].append('d-spacing for mono cannot be < 0')
 
     mode = form['mode'].lower()
-    print("upload data ", mode, 'is_mutrans' in form, 'is_mufluor' in form)
-
     energy = getattr(dgroup, form['en_arrayname'])
     if opts['energy_units'].lower().startswith('kev'):
         energy = 1000.0 * energy
@@ -1485,14 +1500,19 @@ def verify_uploaded_data(form):
 
 
     i0 = getattr(dgroup, form['i0_arrayname'], None)
+    itrans = ifluor = irefer = mu = murefer = None
     if mode.startswith('trans'):
-        mu = getattr(dgroup, form['it_arrayname'], None)
-        if 'is_mutrans' not in form and mu is not None and i0 is not None:
-            mu = -np.log(mu/i0)
+        itrans = getattr(dgroup, form['it_arrayname'], None)
+        if 'is_mutrans' in form:
+            mu = itrans
+        elif itrans is not None and i0 is not None:
+            mu = -np.log(itrans/i0)
     else:
-        mu = getattr(dgroup, form['if_arrayname'], None)
-        if 'is_mufluor' not in form and mu is not None and i0 is not None:
-            mu = mu/i0
+        ifluor = getattr(dgroup, form['if_arrayname'], None)
+        if 'is_mufluor' not in form:
+            mu = ifluor
+        elif ifluor is not None and i0 is not None:
+            mu = ifluor/i0
 
     try:
         opts['mufig'] =  make_xafs_plot(energy, mu, fname, ylabel=mode).decode('UTF-8')
@@ -1501,7 +1521,10 @@ def verify_uploaded_data(form):
         opts['verify_ok']  = 0
         opts['verify_errors'].append('could not plot data -- arrays must not be correct')
 
-    pgroup = preedge(energy, mu)
+    try:
+        pgroup = preedge(energy, mu)
+    except:
+        pgroup = {'e0': 0, 'edge_step': 0}
 
     opts['verify_edge_energy'] = "%.2f" % pgroup['e0']
     opts['verify_edge_step']   = "%10.5g" % pgroup['edge_step']
@@ -1517,12 +1540,46 @@ def verify_uploaded_data(form):
                                                 opts['edge'], nominal_e0))
 
     elif abs(pgroup['e0'] - nominal_e0) > 25:
-        opts['verify_messages'].append(e0msg % ('Warnig: ',
+        opts['verify_messages'].append(e0msg % ('Warning: ',
                                                 'a little off', opts['elem_sym'],
                                                 opts['edge'], nominal_e0))
 
-    if opts['verify_ok']  == 1:
+    if pgroup['edge_step'] < -1.e-5:
+        opts['verify_ok']  = 0
+        opts['verify_errors'].append('Edge jump is negative')
+    elif pgroup['edge_step'] < 1.e-5:
+        opts['verify_messages'].append('Warning: Edge jump looks very small')
+
+    opts['sample'] = int(opts['sample'])
+    if opts['sample'] > 0:
+        s = None_or_one(db.fquery('sample', id=opts['sample']))
+        if s is not None:
+            opts['sample_name'] = s.name
+            opts['sample_prep'] = s.preparation
+            opts['sample_notes'] = s.notes.replace('\n', ', ')[:128]
+
+            opts['sample_formula'] = s.formula
+
+    if opts['verify_ok']:
+        opts['verify_messages'].append('')
         opts['verify_messages'].append('Data looks OK for upload')
+        if with_arrays:
+            if energy is not None:
+                energy = energy.tolist()
+            if i0 is not None:
+                i0 = i0.tolist()
+            if itrans is not None:
+                itrans = itrans.tolist()
+            if ifluor is not None:
+                ifluor = ifluor.tolist()
+            if irefer is not None:
+                irefer = irefer.tolist()
+            if mu is not None:
+                mu = mu.tolist()
+
+            opts['data'] = {'energy': energy, 'i0': i0, 'itrans': itrans,
+                            'ifluor': ifluor, 'irefer': irefer, 'mu': mu}
+
     return opts
 
 
@@ -1544,7 +1601,6 @@ def verify_upload():
             error = 'Could not read uploaded file (%s)' % (opts['fname'])
         return sendback('upload', error=error, person_id=opts['pid'])
 
-    print("-> Verify ", list(opts.keys()))
     return render_template('verify_uploadspectrum.html', **opts)
 
 
@@ -1557,7 +1613,6 @@ def submit_upload():
 
     if request.method != 'POST':
         return sendback('upload', error='upload must use POST')
-
 
     pid    = request.form['person_id']
     pemail = db.get_person(int(pid)).email
@@ -1575,13 +1630,20 @@ def submit_upload():
     else:
         spid = 1
 
-        opts = verify_uploaded_data(request.form)
-
+        opts = verify_uploaded_data(request.form, with_arrays=True)
         print("Really submit spectrum! ", list(opts.keys()))
 
-        # sid = db.add_xdifile(fullpath, person=pemail, create_sample=True)
-        # time.sleep(0.50)
-        # db.session.commit()
+        filename = upload2xdi(opts, app.config['UPLOAD_FOLDER'])
+
+        time.sleep(0.50)
+
+        print("wrote file ", filename)
+        print(' -> add xdifile ')
+
+        spid = db.add_xdifile(filename, person=pemail, create_sample=True)
+        db.session.commit()
+        time.sleep(0.25)
+
         # spectrum  = db.get_spectrum(sid)
         return redirect(url_for('spectrum', spid=spid, error=error))
 

@@ -9,6 +9,9 @@ from random import randrange
 from string import printable
 from sqlalchemy import text
 
+import numpy as np
+import scipy.constants as consts
+
 try:
     from werkzeug.utils import secure_filename
 except ImportError:
@@ -16,10 +19,10 @@ except ImportError:
 
 from xraydb import guess_edge
 
+from lmfit.printfuncs import gformat
+
 from .xaslib import fmttime
 
-import numpy as np
-import scipy.constants as consts
 
 PLANCK_HC = 1.e10 * consts.Planck * consts.c / consts.e
 def mono_deg2ev(angle, d_spacing):
@@ -260,8 +263,9 @@ def parse_spectrum(s, db):
             mononame = notes['mono']['name']
 
     notes.pop('column')
-    notes.pop('scan')
     notes.pop('element')
+    if 'scan' in notes:
+        notes.pop('scan')
 
     misc = []
     for key, val in notes.items():
@@ -383,3 +387,84 @@ def guess_metadata(dgroup):
             out['elem_sym'] = elem
             out['edge'] = edge
     return out
+
+
+def upload2xdi(opts, upload_folder):
+    """upload result of upload form to XDI file"""
+
+    filename = opts['filename'].replace('.', '_')
+    filename = secure_filename('xaslib_%s_%s.xdi' % (random_string(4), filename))
+
+    filename = path.abspath(pathjoin(upload_folder, filename))
+
+    buff = ['#XDI/1.0  XASDataLibrary/1.0']
+    arrays = opts['data']
+
+    dcolumns = [('energy', arrays['energy'])]
+    if arrays['i0'] is not None:
+        dcolumns.append(('i0', arrays['i0']))
+
+
+    if opts['mode'] == 'transmission':
+        if arrays['itrans'] is not None:
+            dcolumns.append(('itrans', arrays['itrans']))
+        elif arrays['mu'] is not None:
+            dcolumns.append(('mutrans', arrays['mu']))
+    else:
+        if arrays['ifluor'] is not None:
+            dcolumns.append(('ifluor', arrays['ifluor']))
+        elif arrays['mu'] is not None:
+            dcolumns.append(('mufluor', arrays['mu']))
+    if opts['has_reference'] and arrays.get('irefer', None) is not None:
+        dcolumns.append(('irefer', arrays['irefer']))
+
+
+    icol = 0
+    array_labels = []
+    for name, darray in dcolumns:
+        array_labels.append("  %s           " %name)
+        if name == 'energy':
+            name = 'energy eV'
+        icol += 1
+        buff.append('# Column.%d: %s' % (icol, name))
+
+    buff.append('# Mono.d_spacing: %.6f' % float(opts['d_spacing']))
+    buff.append('# Mono.name: %s' % opts['mono_name'])
+
+    for tag, attr in ( ('Beamline.name',      'beamline'),
+                       ('Element.symbol',     'elem_sym'),
+                       ('Element.edge',       'edge'),
+                       ('Data.upload_date',   'upload_date'),
+                       ('Data.submitted_by',  'person_name'),
+                       ('Sample.name',        'sample_name'),
+                       ('Sample.formula',     'sample_formula'),
+                       ('Sample.preparation', 'sample_prep'),
+                       ('Sample.notes',       'sample_notes'),
+                       ('Sample.description', 'description')):
+        attr = opts.get(attr, '')
+        if len(attr) > 0:
+            buff.append('# %s: %s' % (tag, attr))
+
+    if opts['has_reference'] and len(opts.get('ref_mode', '')) > 0:
+        buff.append('# Reference.mode: %s' % opts['ref_mode'])
+
+    buff.append('# ///')
+    comments = opts['comments'].split('\n')
+    for c in comments:
+        buff.append('# %s' % c)
+
+    if len(opts['header']) > 0:
+        buff.append('# # original header: ')
+        for hline in opts['header']:
+            buff.append('#     %s' % hline)
+    buff.append('#-----------------------')
+    buff.append('#  %s' % ('  '.join(array_labels)))
+    for i in range(opts['npts']):
+        row = []
+        for name, darray in dcolumns:
+            row.append(gformat(darray[i], 15))
+        buff.append('  '.join(row))
+    buff.append('')
+    with open(filename, 'w') as fh:
+        fh.write('\n'.join(buff))
+    return filename
