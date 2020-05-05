@@ -13,7 +13,7 @@
 # Mono.name: Si(111)
 # Mono.notes: unfocused, detuned 40%,counter clockwise at E=12000eV
 # Sample.formula: As2O5
-# Sample.name: As2O5 arsenic(V) oxide
+# Sample.name: As2O5 arsenic (V) oxide
 # Sample.prep: powder, mixed 1:60 with B(OH)3 by wt
 # Sample.reference: GaAs powder
 # Sample.temperature: room temperature
@@ -344,4 +344,3 @@
    12703.8250  484909.280000  738135.211988  814043.831736
    12709.5280  489525.340000  746161.621647  824183.309159
    12715.2500  490275.410000  748377.997387  827844.797706
-
