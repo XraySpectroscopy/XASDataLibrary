@@ -37,10 +37,11 @@ db = None
 app = Flask('xaslib', static_folder='static')
 app.config.from_object(__name__)
 
-ANY_EDGES = ANY_MODES = ANY_BEAMLINES = SAMPLES_OR_NEW = None
+ANY_EDGES = ANY_MODES = SAMPLES_OR_NEW = None
 INCLUDED_ELEMS = SPECTRA_COUNT = None
 ALL_ELEMS = EN_UNITS = None
-
+BEAMLINE_DATA = ANY_BEAMLINES = None
+SAMPLES_DATA = None
 
 EMAIL_MSG = "From: {mailfrom:s}\r\nTo: {mailto:s}\r\nSubject: {subject:s}\r\n{message:s}\n"
 
@@ -54,7 +55,8 @@ REFERENCE_MODES = ('no reference spectra',
 
 
 def session_init(session, force_refresh=False):
-    global db, app, ANY_EDGES, ANY_MODES, ANY_BEAMLINES, SAMPLES_OR_NEW
+    global db, app, ANY_EDGES, ANY_MODES,  SAMPLES_OR_NEW
+    global ANY_BEAMLINES, BEAMLINE_DATA, SAMPLES_DATA
     global INCLUDED_ELEMS, SPECTRA_COUNT, ALL_ELEMS, EN_UNITS
     if 'username' not in session:
         session['username'] = None
@@ -75,10 +77,39 @@ def session_init(session, force_refresh=False):
         SAMPLES_OR_NEW.extend( [(s.id, s.name) for s in db.fquery('sample')])
 
 
+
         INCLUDED_ELEMS = db.included_elements()
         SPECTRA_COUNT = len(db.get_spectra())
         ALL_ELEMS  = db.fquery('element')
         EN_UNITS = [e.units for e in db.fquery('energy_units')]
+
+        BEAMLINE_DATA = []
+        for bldat in db.fquery('beamline', orderby='name'):
+            blid = bldat.id
+            fac = db.fquery('facility', id=bldat.facility_id)[0]
+            loc = fac.country
+            if fac.city is not None and len(fac.city) > 0:
+                loc = "%s, %s" % (fac.city, fac.country)
+
+            spectra = spectra_for_beamline(db, blid)
+            BEAMLINE_DATA.append({'id': blid, 'name': bldat.name,
+                                  'nickname': bldat.nickname,
+                                  'facility': fac.name,
+                                  'facility_id': fac.id,
+                                  'location': loc,
+                                  'nspectra': len(spectra),
+                                  'spectra': spectra})
+
+        SAMPLES_DATA = []
+        for sdat in db.fquery('sample', orderby='name'):
+            sid = sdat.id
+            nspectra = len(db.fquery('spectrum', sample_id=sid))
+            formula = sdat.formula
+            if formula in (None, 'None'):
+                formula = 'unknown'
+            SAMPLES_DATA.append({'id': sid, 'name': sdat.name,
+                                'formula': formula,
+                                'nspectra': nspectra})
 
 
 def send_confirm_email(person, hash, style='new'):
@@ -1029,21 +1060,14 @@ def sample(sid=None):
 @app.route('/samples/<orderby>')
 @app.route('/samples/<orderby>/<reverse>')
 def samples(blid=None, orderby='name', reverse=0):
-    session_init(session)
-    kws = {'orderby': orderby}
-    samples = []
-    for sdat in db.fquery('sample', **kws):
-        sid = sdat.id
-        nspectra = len(db.fquery('spectrum', sample_id=sid))
-        formula = sdat.formula
-        if formula in (None, 'None'):
-            formula = 'unknown'
-        samples.append({'id': sid, 'name': sdat.name,
-                        'formula': formula,
-                        'nspectra': nspectra})
+    session_init(session, force_refresh=(SAMPLES_DATA is None))
 
-    if orderby in ('name', 'formula', 'nspectra'):
-        samples = sorted(samples, key=lambda k: k[orderby])
+    if orderby not in ('name', 'formula', 'nspectra'):
+        orderby = 'name'
+    samples = [s for s in SAMPLES_DATA]
+    samples = sorted(samples, key=lambda k: k[orderby])
+
+    for i in samples: print(i)
 
     reverse = int(reverse)
     if reverse != 0:
@@ -1130,28 +1154,13 @@ def submit_sample_edits():
 @app.route('/beamlines/<orderby>')
 @app.route('/beamlines/<orderby>/<reverse>')
 def beamlines(blid=None, orderby='name', reverse=0):
-    session_init(session)
-    kws = {'orderby': orderby}
-    beamlines = []
-    for bldat in db.fquery('beamline', **kws):
-        blid = bldat.id
-        fac = db.fquery('facility', id=bldat.facility_id)[0]
-        loc = fac.country
-        if fac.city is not None and len(fac.city) > 0:
-            loc = "%s, %s" % (fac.city, fac.country)
+    session_init(session, force_refresh=(BEAMLINE_DATA is None))
 
-        spectra = spectra_for_beamline(db, blid)
-        beamlines.append({'id': blid, 'name': bldat.name,
-                          'nickname': bldat.nickname,
-                          'facility': fac.name,
-                          'facility_id': fac.id,
-                          'location': loc,
-                          'nspectra': len(spectra),
-                          'spectra': spectra})
+    if orderby not in ('name', 'nickname', 'nspectra', 'facility'):
+        orderby = 'name'
 
-    if orderby in ('name', 'nickname', 'nspectra', 'facility'):
-        beamlines = sorted(beamlines, key=lambda k: k[orderby])
-
+    beamlines = [b for b in BEAMLINE_DATA]
+    beamlines = sorted(BEAMLINE_DATA, key=lambda k: k[orderby])
     reverse = int(reverse)
     if reverse != 0:
         beamlines.reverse()
