@@ -422,7 +422,7 @@ def upload2xdi(opts, upload_folder):
     icol = 0
     array_labels = []
     for name, darray in dcolumns:
-        array_labels.append("  %s           " %name)
+        array_labels.append((" %s         " %name)[:13])
         if name == 'energy':
             name = 'energy eV'
         icol += 1
