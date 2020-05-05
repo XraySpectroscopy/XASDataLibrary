@@ -1,24 +1,34 @@
 {% extends "layout.html" %}
 {% block body %}
 
-<div class=subtitle> Upload XAS Spectra to the X-ray Absorption Data Library: </div>
+<p><div class=subtitle> Upload XAS Spectra to the X-ray Absorption Data Library: </div>
 <div class=body>
 
-<form action="{{ url_for('edit_upload') }}"
-    method=post enctype=multipart/form-data>
-  <input type=hidden name=person_id value={{person_id}}>
+  <p>
+    {% if session.username is not none %}
 
-  Select a data file:   <input type=file name=filename>
-  <input type=submit   value="Edit and Verify">
-</form>
+    <form action="{{ url_for('edit_upload') }}"
+	  method=post enctype=multipart/form-data>
+      <input type=hidden name=person_id value={{person_id}}>
+
+      Select a data file:   <input type=file size=170 name=filename>  &nbsp;
+      <input type=submit   value="Edit and Verify Data for Upload">
+    </form>
+
+    {% else %}
+
+    You must be logged in to upload data.
+{% endif %}
 
 <p>
-<hr>
-Notes on Uploading Files: <br>
+
+  <hr>
+  Notes on Uploading Files:
+<p>
 
 
 <ul>
-  <li> Uploaded files must be an ASCII file no larger than 16Mb with a
+  <li> Uploaded files must be ASCII files no larger than 16Mb with a
     <b>Header Section</b> followed by a <b>Data Table Section</b>.
 
   <li> The <b>Header Section</b> contains strings that describe the
@@ -28,7 +38,7 @@ Notes on Uploading Files: <br>
 
     <li> The <b>Data Table Section</b> contains columns for indvidual
       arrays.  Columns should be separated or <i>delimited</i> by a
-      combination of spaces, tabs, and commas.  Each line of the file
+      combination of spaces or tabs. Each line of the file
       (ending with a Newline and optional Carriage Return character)
       corresponds to one row of  the Data Table,   representing a different
       energy point for the data.  Up to 16 columns will be accessible.
@@ -55,8 +65,8 @@ Some additional notes:
 
 <ol>
   <li>Ideally, the Energy array will be in one of the first few columns of
-    the Data Table and will be strictly increasing. The data will be sorted if
-    it is not.
+    the Data Table and will be strictly increasing. The data will be sorted
+    so that energy is strictly increasing if it is not.
 
     <li> Ideally, there will be a separate column of <b>I_0</b>, but this is
       not required.
