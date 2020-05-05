@@ -1,6 +1,6 @@
 <!doctype html>
 <title>X-ray Absorption Data Library</title>
-<link rel=stylesheet type=text/css href="{{ url_for('static',filename='style.css') }}">
+<link rel=stylesheet type=text/css href="{{ url_for('static', filename='xaslib_style.css') }}">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 <style>
 @import url(http://fonts.googleapis.com/css?family=Roboto:500,100,300,700,400);
@@ -36,11 +36,13 @@ src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-A
 
 <div class=tab>
   <ul class=tabmenu>
-    <li> <a href="{{url_for('elem')}}"> Browse By Element </a> </li>
-    <li> <a href="{{url_for('suites')}}"> Browse By Suite </a> </li>
-    <li> <a href="{{url_for('beamlines')}}"> Browse By Beamline </a> </li>
-    <li> <a href="{{url_for('samples')}}"> Browse By Sample </a> </li>
+    <li> Browse By: </li>
+    <li> <a href="{{url_for('elem')}}">  Element </a> </li>
+    <li> <a href="{{url_for('samples')}}">  Sample </a> </li>
+    <li> <a href="{{url_for('suites')}}">  Suite </a> </li>
+    <li> <a href="{{url_for('beamlines')}}">  Beamline </a> </li>
     {% if session.username != none %}
+    <li>  </li>
     <li> <a href="{{url_for('upload')}}"> Upload Data</a></li>
     {% endif %}
   </ul>
