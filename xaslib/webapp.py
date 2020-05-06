@@ -520,6 +520,7 @@ def index():
 
 @app.route('/spectrum/')
 @app.route('/spectrum/<int:spid>')
+@app.route('/spectrum/<int:spid>/')
 @app.route('/spectrum/<int:spid>/<plotstyle>')
 def spectrum(spid=None, plotstyle='xanes'):
     session_init(session)
@@ -586,7 +587,7 @@ def spectrum(spid=None, plotstyle='xanes'):
         opts['plotstyle'] = 'rawxafs'
         opts['plotstyle_label'] = 'Raw XAFS'
         e1 = max(e0-25, min(energy))
-        e2 = min(e0+125, max(energy))
+        e2 = min(e0+75, max(energy))
         ref_mu = None
         if murefer is not None:
             rgroup = preedge(energy, murefer)
