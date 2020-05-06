@@ -2,13 +2,17 @@
 from setuptools import setup
 import os
 
-version = '0.2'
+version = '0.3'
 with open(os.path.join('xaslib', '_version.py')) as fh:
     for line in fh.readlines():
         line = line[:-1].strip()
         if line.startswith('__version'):
             words = line.split('=') + [' ', ' ']
             version = words[1].strip().replace("'", '').replace('"', '')
+
+
+pkg_data = {'xaslib.template': ['template/*', 'templates/doc/*'],
+            'xaslib.static': ['static/*']}
 
 
 setup(name='xaslib',
@@ -20,5 +24,6 @@ setup(name='xaslib',
       description  = 'X-ray Absorption Spectra Data Library',
       install_requires=('sqlalchemy', 'numpy', 'scipy', 'xraydb'),
       package_dir = {'xaslib': 'xaslib'},
-      packages = ['xaslib','xaslib.web']
+      package_data = pkg_data,
+      packages = ['xaslib'],
 )
