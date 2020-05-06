@@ -60,27 +60,27 @@ def create_xaslib(dbname, server= 'sqlite', user='',
         engine = create_engine('sqlite:///{:s}'.format(dbname),
                                poolclass=SingletonThreadPool)
     else: # postgres
-        conn_str= 'postgresql://%s:%s@%s:%i/%s'
+        conn_str= 'postgresql://%s:%s@%s:%d/%s'
         if port is None:
             port = 5432
 
         dbname = dbname.lower()
         # first we check if dbname exists....
-        query = "select datname from pg_database"
-        pg_engine = create_engine(conn_str % (user, password,
-                                              host, port, 'postgres'))
-        conn = pg_engine.connect()
-        conn.execution_options(autocommit=True)
-        conn.execute("commit")
-        dbs = [i[0].lower() for i in conn.execute(query).fetchall()]
-        if  dbname not in dbs:
-            try:
+        try:
+            query = "select datname from pg_database"
+            pg_engine = create_engine(conn_str % (user, password,
+                                                  host, port, 'postgres'))
+            conn = pg_engine.connect()
+            conn.execution_options(autocommit=True)
+            conn.execute("commit")
+            dbs = [i[0].lower() for i in conn.execute(query).fetchall()]
+            if dbname not in dbs:
                 conn.execute("create database %s" % dbname)
                 conn.execute("commit")
-            except:
-                pass
-        conn.close()
-        time.sleep(0.5)
+            conn.close()
+            time.sleep(0.5)
+        except:
+            pass
 
         engine = create_engine(conn_str % (user, password, host, port, dbname))
 
