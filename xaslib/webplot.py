@@ -15,12 +15,51 @@ mpl_lfont = FontProperties()
 mpl_lfont.set_size(18)
 rcParams['xtick.labelsize'] =  rcParams['ytick.labelsize'] = 18
 
+import json
+import plotly
+
+PLOTLY_CONFIG = {'displaylogo': False,
+                 'modeBarButtonsToRemove': [ 'hoverClosestCartesian',
+                                             'hoverCompareCartesian',
+                                             'toggleSpikelines']}
+
+def xafs_plotly(x, y, title, ylabel='mutrans', refer=None, x_range=None):
+    data = [{'x': x.tolist(),
+             'y': y.tolist(),
+             'type': 'scatter',
+             'name': 'data',
+             'line': {'width': 3},
+             'hoverinfo': 'skip'}]
+    if refer is not None:
+        data.append({'x': x.tolist(),
+                     'y': refer.tolist(),
+                     'type': 'scatter',
+                     'name': 'reference',
+                     'line': {'width': 3},
+                     'hoverinfo': 'skip'})
+
+    layout = {'title': title,
+              'height': 350,
+              'width': 500,
+              'showlegend': len(data) > 1,
+              'xaxis': {'title': {'text': 'Energy (eV)'},
+                        'tickformat': '.0f'},
+              'yaxis': {'title': {'text': ylabel},
+                        'zeroline': False,
+                        'tickformat': '.2f'},
+              'modebar': {'orientation': 'h'},
+              }
+    if x_range is not None:
+        layout['xaxis']['range'] = x_range
+
+    return json.dumps({'data': data, 'layout': layout, 'config': PLOTLY_CONFIG})
+
 def make_xafs_plot(x, y, title, xlabel='Energy (eV)', ylabel='mu', x0=None,
                    ref_mu=None, ref_name=None):
 
     fig  = Figure(figsize=(8.5, 5.0), dpi=300)
     canvas = FigureCanvas(fig)
-    axes = fig.add_axes([0.16, 0.16, 0.75, 0.75]) #, axisbg='#FFFFFF')
+    axes = fig.add_axes([0.16, 0.16, 0.75, 0.75])
 
     axes.set_xlabel(xlabel, fontproperties=mpl_lfont)
     axes.set_ylabel(ylabel, fontproperties=mpl_lfont)
