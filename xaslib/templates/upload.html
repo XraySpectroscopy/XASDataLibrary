@@ -34,15 +34,18 @@
 
   <li> The <b>Header Section</b> contains strings that describe the
     meta-data for the data file.  Ideally, these will follow the
-    <a href='https://github.com/XraySpectroscopy/XAS-Data-Interchange/blob/master/specification/spec.md'>
+    <a  href='https://github.com/XraySpectroscopy/XAS-Data-Interchange/blob/master/specification/spec.md'>
       XAS Data Interchange Specification</a>.
+    See <a  href='https://github.com/XraySpectroscopy/XASDataLibrary/tree/master/data'>
+      Example Data Files</a> for this library.
 
-    <li> The <b>Data Table Section</b> contains columns for indvidual
-      arrays.  Columns should be separated or <i>delimited</i> by a
-      combination of spaces, tabs, or commas. Each line of the file
-      (ending with a Newline and optional Carriage Return character)
-      corresponds to one row of the Data Table,  representing a different
-      energy point for the data.  Up to 32 columns will be accessible.
+
+  <li> The <b>Data Table Section</b> contains columns for indvidual arrays.
+    Columns should be separated or <i>delimited</i> by a combination of
+    spaces, tabs, or commas. Each line of the file (ending with a Newline
+    and optional Carriage Return character) corresponds to one row of the
+    Data Table, representing a different energy point for the data.  Up to
+    32 columns will be accessible.
 </ul>
 
 Somewhere in the columns of the Data Table there <b>Must</b> be columns for
@@ -50,7 +53,8 @@ Somewhere in the columns of the Data Table there <b>Must</b> be columns for
 <ol>
   <li> <b>Energy</b> or <b>Monochromator Angle</b>, in units of  eV,  keV, or degrees.
 
-  <li> Arrays that can be used to build mu(Energy).  These could be columns
+  <li> Arrays that can be used to build <span class="math notranslate nohighlight">\(\mu(E)\)<span> or mu(Energy).
+	 These arrays will be columns in the Data Table that may represent
        of <b>I_0</b>, <b>I_transmission</b>, <b>I_fluorescence</b>, or
        <b>mu_transmission</b>,  <b>mu_fluorescence</b>.  Note that it is
        OK to have emission modes other than fluorescence -- they will be
@@ -114,21 +118,6 @@ fields.
 Finally, because uploading files uses finite computing resources, we
 reserve the right to restrict or remove any data for any reason without
 notice and to ban users who abuse the ability to upload data.
-
-
-<p> For example files, see example data files at
-
-<a href='https://github.com/XraySpectroscopy/XAS-Data-Interchange/tree/master/data'>
-Example XDI data</a> and
-
-<a href='https://github.com/XraySpectroscopy/XAS-Data-Interchange/tree/master/data'>
-Example XDI data</a> and
-<a href='https://github.com/XraySpectroscopy/XASDataLibrary/tree/master/data'>
-Initial X-ray Absorption Data</a>.
-
-<br> For a detailed description of XDI files, see <a
-href='https://github.com/XraySpectroscopy/XAS-Data-Interchange/blob/master/specification/spec.md'>
-XAS Data Interchange Specification</a>. <br>
 
 <hr>
 
