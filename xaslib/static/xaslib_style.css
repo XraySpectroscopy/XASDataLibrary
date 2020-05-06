@@ -1,14 +1,15 @@
 
-a, h1, h2       { color: #5060C0; text-decoration: none; }.
+
+a, h1, h2       { color: #56C; text-decoration: none; }.
 h1, h2          { font-family: 'Georgia', serif; margin: 0; }
 h1              { border-bottom: 1px solid #eee; }
 h2              { font-size: 1.2em; }
 
 .body  { font-family: sans-serif; margin:5px; padding:2px;
-	 background: #FFFFFF; font: 12px verdana, sans-serif;}
+	 background-color: #FFFFFqF; font: 12px verdana, sans-serif;}
 .body a, a.active {color: #4444AA; solid #880000 ; text-decoration: none; }
-.body a.active    {color: #CC0000;  background: #FAFAE0;}
-.body a:hover     {color: #CC0000;  background: #FAFAE0;}
+.body a.active    {color: #CC0000;  background-color: #FAFAE0;}
+.body a:hover     {color: #CC0000;  background-color: #FAFAE0;}
 
 .even {background-color: #F3F3F0;}
 .odd {background-color: #FFFFFF;}
@@ -18,21 +19,15 @@ h2              { font-size: 1.2em; }
 .entries li h2  { margin-left: -1em; }
 .add-entry      { font-size: 0.9em; border-bottom: 0px solid #ccc; }
 
-.warning  { background: #cee5F5; padding: 0.5em; border: 3px solid #aacbe2; }
-.error    { background: #f0d6d6; padding: 0.5em; border: 3px solid #702020; }
+.warning  { background-color: #cee5F5; padding: 0.5em; border: 3px solid #aacbe2; }
+.error    { background-color: #f0d6d6; padding: 0.5em; border: 3px solid #702020; }
 
-.topbar {font: bold 16px verdana, arial, sans-serif;
-	 padding: 5px;	 text-decoration: none;	 color: #FFFFFF;
-	 background: #2090B0;}
-
-.topbar a        {background: #2090A0; color: #FFFFFF; margin: 10px}
-.topbar a:hover  {background: #60B0E0; color: #FFEF60; margin: 10px}
 
 .subfont {font:bold 16px verdana, arial, sans-serif;color:#CC0000;}
 .subtitle {font:bold 16px verdana, arial, sans-serif;color:#CC0000;}
 
 .confirm {font-family: sans-serif; margin:5px; padding:2px;
-	  background: #FFFFFF; font:bold 14px verdana,sans-serif;}
+	  background-color: #FFFFFF; font:bold 14px verdana,sans-serif;}
 .confirm a, a.active {color: #444AAA;  font:bold 14px verdana,sans-serif;}
 
 pre {text-indent: 16px}
@@ -42,38 +37,47 @@ h3 {font:bold 16px verdana,arial,sans-serif;color:#A42424; font-weight:bold;font
 
 h2 {font:bold 18px verdana,arial,sans-serif;color:#044484;font-weight:bold;}
 
-.ptable {background:#FFFFFD;}
+.ptable {background-color:#FFFFFD;}
 
-.elem {font: bold 16px verdana; background:#FFFFFD; text-align:justify; padding: 2px;}
+.elem {font: bold 16px verdana; background-color:#FFFFFD; text-align:justify; padding: 2px;}
 .elem a, a.active {color: #4444AA; solid #880000 ; text-decoration: none; }
-.elem a.active {color: #CC0000;  background: #FFFFFD;}
-.elem a:hover  {color: #CC0000;  background: #FAFAE0;}
+.elem a.active {color: #CC0000;  background-color: #FFFFFD;}
+.elem a:hover  {color: #CC0000;  background-color: #FAFAE0;}
 
 .spectra {text-align:justify;}
 .spectra a, a.active {color: #4444AA; solid #880000 ; text-decoration: none; }
-.spectra a.active {color: #CC0000;  background: #FAFAE0;}
-.spectra a:hover {color: #CC0000;  background: #FAFAE0;}
+.spectra a.active {color: #CC0000;  background-color: #FAFAE0;}
+.spectra a:hover {color: #CC0000;  background-color: #FAFAE0;}
 
-.tabmenu { font: bold 12px verdana, arial, sans-serif;
-    margin: 0px;    padding: 3px;    padding-left: 12px;
-    border-left:   3px solid #777777;
-    border-right:  3px solid #777777;
-    border-top:    3px solid #777777;
-    border-bottom: 3px solid #777777;}
+.topbar {font: bold 16px verdana, arial, sans-serif;
+	 padding: 5px;
+	 text-decoration: none;
+	 color: #FFF; background-color: #3085C8;}
+.topbar a        {background-color: #3085C8;     color: #FFF; margin: 10px}
+.topbar a:hover  {background-color: #3085C8; color: #FEA; margin: 10px}
 
-.tabmenu ul {margin: 0px;  padding: 12px}
-.tabmenu li {display: inline;  margin: 0px; list-style-type: none;
-	     border-right: 3px solid #777777;
-	     padding: 3px 12px 3px 12px;}}
-.tabmenu a, a.active {color: #4444AA; padding: 3px 12px 3px 12px;}
-.tabmenu a.active    {color: #CC0000; background: #FCFCCC;}
-.tabmenu a:hover     {color: #CC0000; background: #FCFCCC;}
+.topmenu { font: bold 14px verdana, arial, sans-serif; margin: 0px;
+           padding: 0px 0px 16px 0px;   border: 3px solid #3085C8;
+           background-color: #F0F0F4;}
 
-.input[type=submit] {    border: 1px solid #f44c0e;    color: #fff;    background: tomato;    padding: 100px 20px;    border-radius: 3px; }
-.input[type=submit]:hover {    background: #f44c0e; }
+.topmenu ul {margin: 0px;  padding: 0px}
+.topmenu li {float: left;  display: inline;
+             margin: 0px;
+             list-style-type: none;
+             border-right: 3px solid #2090B0;
+             padding: 0px 10px 0px 10px;
+             color: #FEA;   background-color: #F6F6F9;}
 
+.topmenu a, a.active {color: #3085C8; }
+.topmenu a.active    {color: #3085C8; background-color: #FE9;}
+.topmenu a:hover     {color: #3085C8; background-color: #FE9;}
+.topmenu li:hover    {color: #3085C8; background-color: #FE9;}
 
-.formsubmit input[type=submit] {background: #FE8;
+.input[type=submit] {border: 1px solid #f44c0e;  color: #fff;
+		   background-color: tomato;    padding: 100px 20px;    border-radius: 3px; }
+.input[type=submit]:hover {  background-color: #f44c0e; }
+
+.formsubmit input[type=submit] {background-color: #FE8;
     color: red;
     border-style: outset;
     border-color: #FD0;
@@ -83,7 +87,7 @@ h2 {font:bold 18px verdana,arial,sans-serif;color:#044484;font-weight:bold;}
     text-shadow:none;
 }
 
-.formsubmit input[type=submit] {background: #FE8;
+.formsubmit input[type=submit] {background-color: #FE8;
     color: red;
     border-style: outset;
     border-color: #FD0;
@@ -94,20 +98,20 @@ h2 {font:bold 18px verdana,arial,sans-serif;color:#044484;font-weight:bold;}
 }
 
 
-#submitbutton {background: #FAFAFE0;
+#submitbutton {background-color: #FAFAFE0;
 	       color: blue;
 	       border-color: #D0D080;
 	       border-style: outset;
 	       border-radius: 4px;
 	      }
 
-#fileinput {background: #FEFEFE;
+#fileinput {background-color: #FEFEFE;
 	     color: blue;
 	     border-color: #FEFEFE;
 	     border-radius: 4px;
 	    }
 
-#fileinput.button {background: #FEFEFE;
+#fileinput.button {background-color: #FEFEFE;
 		   color: blue;
 		   border-color: #FEFEFE;
 		   border-radius: 4px;
