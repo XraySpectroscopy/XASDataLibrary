@@ -741,7 +741,7 @@ class XASDataLibrary(object):
             kws[attr] = val
 
         # simple pointers
-        for attr in ('person', 'sample', 'citation', 'reference_mode'):
+        for attr in ('person', 'sample', 'citation'):
             kws['%s_id' % attr] = dlocal.get(attr, '')
 
         # dates
@@ -769,9 +769,9 @@ class XASDataLibrary(object):
 
         kws['edge_id'] = self.get_edge(edge).id
         kws['mode_id'] = self.fquery('mode', name=mode)[0].id
+        kws['reference_mode_id'] = self.fquery('mode', name=reference_mode)[0].id
         kws['element_z'] = self.get_element(element).z
         kws['energy_units_id'] = self.fquery('energy_units', name=energy_units)[0].id
-
         return self.addrow('spectrum', name=name, commit=commit, **kws)
 
     def get_beamlines(self, facility=None, orderby='id'):
