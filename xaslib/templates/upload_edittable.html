@@ -209,7 +209,6 @@ Uploaded File: {{filename}} has {{narrays}} array columns with {{npts}} data poi
     }
   </script>
 
-
 <tr><td> Use Existing Sample?: </td><td><select  name='sample' id="sample"
       style="width: 300px;" onchange="on_Sample()">
       {% for s in samples %}
@@ -219,7 +218,7 @@ Uploaded File: {{filename}} has {{narrays}} array columns with {{npts}} data poi
 </td></tr>
 
 <tr><td> User Comment: </td><td>
-<textarea cols=50  rows=4 type=text name=comments>{{comments|safe}}</textarea></td></tr>
+<textarea cols=50  rows=3 type=text name=comments>{{comments|safe}}</textarea></td></tr>
 <tr><td colspan=2> <hr> </td></tr>
 <tr><td><input type=submit name=submit value="Verify Data"></td>
   <td>

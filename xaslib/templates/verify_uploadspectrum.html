@@ -4,18 +4,23 @@
 <div class=subtitle>Verify Upload: </div>
 
 <div class=body style="overflow: hidden;">
-<div style="width:60%; float: left;">
+<div style="width:55%; float: left;">
   <form action="/submit_upload" method=post>
     {% include "upload_edittable.html" %}
   </form>
 </div>
 
-<div style="width: 40%; float: right;">
-  <i>Plot of mu(E): </i> <p>
+<div style="width: 45%; float: right;">
+<div id="mu_plot">
+  {% if muplot != 'noplot' %}
+  <script  type="text/javascript">
+    var graph = {{muplot | safe}};
+    Plotly.plot('mu_plot',   graph.data,   graph.layout || {},  config=graph.config);
+  </script>
+{% endif %}
+</div>
 
-    {% if mufig != 'noplot' %}  <img width=375  src="data:image/png;base64,{{ mufig|safe }}"> {% endif %}
-
-  <p> <i>Verification and Warning Messages: </i> <p>
+<p> <i>Verification and Warning Messages: </i> <p>
 
     Edge energy = {{verify_edge_energy}}<p>
     Edge jump = {{verify_edge_step}}<p>
