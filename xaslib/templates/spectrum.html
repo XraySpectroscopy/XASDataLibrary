@@ -1,6 +1,7 @@
 {% extends "layout.html" %}
 {% block body %}
 
+<p>
 <div class=subtitle> Spectrum:  {{ spectrum_name }}
 
 
@@ -23,23 +24,20 @@
 
 <div class=body>
 
-<table> <tr>
-<td><img width=550 src="data:image/png;base64,{{ fullfig|safe }}"></td>
-<td><img width=550 src="data:image/png;base64,{{ xanesfig|safe }}"><br></td></tr></table>
 
-<table>
-<tr>
-<tr><td colspan=2> <hr> </td></tr>
+<div style="width:55%; float: left;">
 
-<td width=25%> Original Data File: </td>
+  <table>
+    <td>Original Data File: </td>
     <td> <a href="{{url_for('rawfile', spid=spectrum_id, fname=xdi_filename)}}">
-	     {{ spectrum_name }}.xdi </a>
-    </td>
-
-<tr><td> Short Description: </td> <td> {{ description  }} </td></tr>
-<tr><td width=25%> Ratings: </td>
-    <td> <a href="{{url_for('showspectrum_rating', spid=spectrum_id)}}"> {{ rating }} </a>
+	{{ spectrum_name }}.xdi </a>
     </td></tr>
+
+    <tr><td> Short Description: </td> <td> {{ description  }} </td></tr>
+    <tr><td width=25%> Ratings: </td>
+      <td> <a href="{{url_for('showspectrum_rating', spid=spectrum_id)}}"> {{ rating }} </a>
+      </td>
+    </tr>
 
 <tr><td> Suites:  </td>  <td>
   {% if nsuites == 0 %}
@@ -90,5 +88,19 @@
 
 
 </table>
+</div>
+
+<div style="width: 45%; float: right;">
+<table> <tr>
+
+    <div id="xasplot">
+      <script  type="text/javascript">
+	var graph = {{xasplot | safe}};
+	Plotly.plot('xasplot',   graph.data,   graph.layout || {},  config=graph.config);
+      </script>
+    </div>
+
+    <a href="{{url_for('spectrum')}}/{{spectrum_id}}/{{plotstyle}}">
+      Switch Plot to  {{plotstyle_label}} </a>
 </div>
 {% endblock %}

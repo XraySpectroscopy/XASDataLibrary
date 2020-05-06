@@ -30,7 +30,7 @@ from .webutils import (row2dict, multiline_text, parse_spectrum,
                        guess_metadata, pathjoin, secure_filename,
                        mono_deg2ev, upload2xdi   )
 
-from .webplot import make_xafs_plot
+from .webplot import make_xafs_plot, xafs_plotly
 
 
 db = None
@@ -341,7 +341,7 @@ def login():
             session['person_id'] = "%d" % person.id
             session['username'] = request.form['email']
     if session['username'] is not None:
-        return sendback()
+        return sendback('elem')
     else:
         return render_template('login.html', error=error)
 
@@ -520,7 +520,8 @@ def index():
 
 @app.route('/spectrum/')
 @app.route('/spectrum/<int:spid>')
-def spectrum(spid=None):
+@app.route('/spectrum/<int:spid>/<plotstyle>')
+def spectrum(spid=None, plotstyle='xanes'):
     session_init(session)
     s  = db.get_spectrum(spid)
     if s is None:
@@ -538,6 +539,7 @@ def spectrum(spid=None):
 
     try:
         e0 = edge_energies[int(s.element_z)][str(opts['edge'])]
+        opts['e0'] = '%f' % e0
     except:
         pass
 
@@ -572,30 +574,27 @@ def spectrum(spid=None):
         else:
             murefer = irefer/i0
     except:
-        pass
+        murefer = None
 
-    try:
-        e1 = max(np.where(energy<=e0 - 25)[0])
-    except:
-        e1 = 0
-    e2 = max(np.where(energy<=e0 + 75)[0]) + 1
-    xanes_en = energy[e1:e2]
+    if plotstyle.lower() == 'rawxafs':
+        opts['xasplot'] =  xafs_plotly(energy, mudata, s.name, ylabel='Raw XAFS')
+        opts['plotstyle'] = 'xanes'
+        opts['plotstyle_label'] = 'normalized XANES'
+        if murefer is not None:
+            opts['plotstyle_label'] = 'normalized XANES, with reference spectra'
+    else:
+        opts['plotstyle'] = 'rawxafs'
+        opts['plotstyle_label'] = 'Raw XAFS'
+        e1 = max(e0-25, min(energy))
+        e2 = min(e0+125, max(energy))
+        ref_mu = None
+        if murefer is not None:
+            rgroup = preedge(energy, murefer)
+            ref_mu = rgroup['norm']
 
-    xanes_mu = dgroup['norm'][e1:e2]
-    xanes_ref = None
-    if murefer is not None:
-        rgroup = preedge(energy, murefer)
-        xanes_ref = rgroup['norm'][e1:e2]
-
-    opts['e0'] = '%f' % e0
-    opts['fullfig'] =  make_xafs_plot(energy, mudata, s.name,
-                                      ylabel='Raw XAFS').decode('UTF-8')
-
-    opts['xanesfig'] = make_xafs_plot(xanes_en, xanes_mu, s.name,
-                                      xlabel='Energy (eV)',
+        opts['xasplot'] = xafs_plotly(energy, dgroup['norm'], s.name,
                                       ylabel='Normalized XANES',
-                                      ref_mu=xanes_ref,
-                                      ref_name='with reference').decode('UTF-8')
+                                      refer=ref_mu, x_range=[e1, e2])
 
     suites = []
     for r in db.fquery('spectrum_suite', spectrum_id=s.id):
@@ -1067,12 +1066,9 @@ def samples(blid=None, orderby='name', reverse=0):
     samples = [s for s in SAMPLES_DATA]
     samples = sorted(samples, key=lambda k: k[orderby])
 
-    for i in samples: print(i)
-
     reverse = int(reverse)
     if reverse != 0:
         samples.reverse()
-
     return render_template('samples.html', samples=samples,
                            reverse=(0 if reverse else 1))
 
@@ -1369,11 +1365,6 @@ def submit_citation_edits():
 @app.route('/upload/')
 def upload():
     session_init(session)
-    if session['username'] is None:
-        return needslogin(error='to submit a spectrum')
-    # clear upload data
-    session['upload_datagroup'] = None
-    session['upload_fullpath'] = None
     return render_template('upload.html',
                            person_id=session['person_id'])
 
@@ -1560,13 +1551,13 @@ def verify_uploaded_data(form, with_arrays=False):
         if murefer is not None:
             murefer = murefer[en_order]
 
-
     try:
-        opts['mufig'] =  make_xafs_plot(energy, mu, fname, ylabel=mode).decode('UTF-8')
+        opts['muplot'] =  xafs_plotly(energy, mu, fname, ylabel=mode)
     except:
-        opts['mufig'] =  'noplot'
+        opts['muplot'] =  'noplot'
         opts['verify_ok']  = 0
         opts['verify_errors'].append('could not plot data -- arrays must not be correct')
+
 
     if opts['beamline'] == ANY_BEAMLINES[0]:
         opts['verify_ok']  = 0
