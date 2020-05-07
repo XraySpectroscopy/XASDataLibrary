@@ -220,7 +220,7 @@ def create_account():
                               password=password,
                               affiliation=affiliation)
                 hash = db.person_unconfirm(email)
-                if LOCAL_ONLY:
+                if app.config['LOCAL_USE_ONLY']:
                     db.person_confirm(email, hash)
                 else:
                     ## send email here!!
