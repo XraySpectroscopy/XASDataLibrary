@@ -23,7 +23,9 @@ PLOTLY_CONFIG = {'displaylogo': False,
                                              'hoverCompareCartesian',
                                              'toggleSpikelines']}
 
-def xafs_plotly(x, y, title, ylabel='mutrans', refer=None, x_range=None):
+def xafs_plotly(x, y, title, ylabel='mutrans', refer=None,
+                x_range=None, y_range=None):
+
     data = [{'x': x.tolist(),
              'y': y.tolist(),
              'type': 'scatter',
@@ -51,6 +53,8 @@ def xafs_plotly(x, y, title, ylabel='mutrans', refer=None, x_range=None):
               }
     if x_range is not None:
         layout['xaxis']['range'] = x_range
+    if y_range is not None:
+        layout['yaxis']['range'] = y_range
 
     return json.dumps({'data': data, 'layout': layout, 'config': PLOTLY_CONFIG})
 
