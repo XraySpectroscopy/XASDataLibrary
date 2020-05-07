@@ -943,7 +943,7 @@ class XASDataLibrary(object):
         return query.execute().fetchall()
 
     def add_xdifile(self, fname, person=None, reuse_sample=True,
-                    commit=True, **kws):
+                    mode=None, commit=True, verbose=False, **kws):
         try:
             fh  = open(fname, 'r')
             filetext  = fh.read()
@@ -978,41 +978,26 @@ class XASDataLibrary(object):
         if hasattr(xfile, 'comments'):
             comments = xfile.comments.decode('utf-8')
 
-        if hasattr(xfile, 'i0'):
-            i0 = xfile.i0
+        i0  = getattr(xfile, 'i0', getattr(xfile, 'io', np.ones(len(energy))*1.0))
 
-        #
-        mode = 'transmission'
-        ifluor = itrans = irefer = None
-        if hasattr(xfile, 'itrans'):
-            itrans = xfile.itrans
-        elif hasattr(xfile, 'i1'):
-            itrans = xfile.i1
+        itrans = getattr(xfile, 'itrans', getattr(xfile, 'i1', None))
+        ifluor = getattr(xfile, 'ifluor', getattr(xfile, 'if', None))
+        irefer = getattr(xfile, 'irefer', getattr(xfile, 'i2', None))
 
-        if hasattr(xfile, 'ifluor'):
-            ifluor= xfile.ifluor
+        if hasattr(xfile, 'mutrans'):
+            itrans = i0 * np.exp(-xfile.mutrans)
+
+        elif hasattr(xfile, 'mufluor'):
+            ifluor = i0 * xfile.mufluor
+
+        if mode is None:
             mode = 'fluorescence'
-
-        elif hasattr(xfile, 'ifl'):
-            ifluor= xfile.ifl
-            mode = 'fluorescence'
-
-        # special case: mutrans given,
-        # itrans not available,
-        # and maybe i0 not available
-        if (hasattr(xfile, 'mutrans') and
-            not hasattr(xfile, 'itrans')):
-            if not hasattr(xfile, 'i0'):
-                i0 = np.ones(len(xfile.mutrans))*1.0
-                itrans = np.exp(-xfile.mutrans)
-            mode = 'transmission'
-
-        if (hasattr(xfile, 'mufluor') and
-            not hasattr(xfile, 'ifluor')):
-            if not hasattr(xfile, 'i0'):
-                i0 = np.ones(len(xfile.mufluor))*1.0
-                ifluor = xfile.mufluor
-            mode = 'fluorescence'
+            if itrans is not None:
+                mode = 'transmission'
+        if mode == 'transmission' and itrans is None:
+            raise ValueError("cannot find transmission data")
+        elif mode == 'fluoresence' and ifluor is None:
+            raise ValueError("cannot find fluorescence data")
 
         reference_used = False
         reference_mode = 'transmission'
@@ -1077,6 +1062,9 @@ class XASDataLibrary(object):
             reference_sample = 'none'
         beamline_name  = xfile.attrs['beamline']['name']
         notes = json_encode(xfile.attrs)
+        if verbose:
+            print("adding %s: %s %s mode='%s', %d points" %(fname, element, edge, mode, len(energy)))
+
         return self.add_spectrum(spectrum_name, description=description,
                                  d_spacing=d_spacing, collection_date=c_date,
                                  person=person_id, beamline=beamline_name,
