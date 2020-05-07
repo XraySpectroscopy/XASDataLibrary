@@ -340,7 +340,11 @@ class XASDataLibrary(object):
         self.set_mod_time()
         if commit:
             self.session.commit()
-        return out.lastrowid
+        if out.lastrowid == 0:
+            v = self.fquery(tablename, **kws)
+            return v[-1].id
+        else:
+            return out.lastrowid
 
     def fquery(self, tablename, **kws):
         """
@@ -852,8 +856,13 @@ class XASDataLibrary(object):
 
     def get_spectrum_mode(self, spectrum_id):
         """return name of mode for a spectrum"""
-        spect = self.fquery('spectrum', id=spectrum_id)[0]
-        return self.fquery('mode', id=spect.mode_id)[0].name
+        spect = None_or_one(self.fquery('spectrum', id=spectrum_id))
+        mode_id = 1
+        if spect is not None:
+            mode_id = spect.mode_id
+        else:
+            print("Get no spectrum for spectrum ", spectrum_id)
+        return self.fquery('mode', id=mode_id)[0].name
 
     def get_spectrum_beamline(self, spectrum_id):
         "return id, desc for beamline for aa spectrum"
@@ -1059,13 +1068,13 @@ class XASDataLibrary(object):
             if sample_id == 0:
                 sample_id = self.add_sample(sample_name, person_id,
                                             notes=sample_notes, **sample_kws)
-
+        self.session.commit()
+        time.sleep(0.025)
         if reference_used:
             if reference_sample is None:
                 reference_sample = 'unknown'
         else:
             reference_sample = 'none'
-
         beamline_name  = xfile.attrs['beamline']['name']
         notes = json_encode(xfile.attrs)
         return self.add_spectrum(spectrum_name, description=description,
