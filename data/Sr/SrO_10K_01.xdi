@@ -1,8 +1,8 @@
 # XDI/1.0 EXAFS Data Collector 1.1 AD.RGN
 # Column.1: energy eV
 # Column.2: mutrans
-# Column.2: murefer
-# Column.3: i0
+# Column.3: murefer
+# Column.4: i0
 # Beamline.name: SSRL 4-3
 # Detector.I0: N2 15cm
 # Detector.I1: N2+Ar 30cm
