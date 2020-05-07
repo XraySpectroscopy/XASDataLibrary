@@ -21,6 +21,7 @@ from .initialdata import edge_energies, elem_syms
 from larch.io import read_ascii
 from larch.xafs.pre_edge import preedge
 from larch.utils.jsonutils import encode4js, decode4js
+from larch.math import index_of
 # from .xafs_preedge import preedge
 
 from .webutils import (row2dict, multiline_text, parse_spectrum,
@@ -28,7 +29,7 @@ from .webutils import (row2dict, multiline_text, parse_spectrum,
                        spectra_for_citation, spectra_for_beamline,
                        get_beamline_list, get_rating, get_fullpath,
                        guess_metadata, pathjoin, secure_filename,
-                       mono_deg2ev, upload2xdi   )
+                       mono_deg2ev, upload2xdi)
 
 from .webplot import make_xafs_plot, xafs_plotly
 
@@ -586,8 +587,18 @@ def spectrum(spid=None, plotstyle='xanes'):
     else:
         opts['plotstyle'] = 'rawxafs'
         opts['plotstyle_label'] = 'Raw XAFS'
-        e1 = max(e0-25, min(energy))
-        e2 = min(e0+75, max(energy))
+
+        exanes_max = int(0.01*e0)
+        emin = max(e0-50, min(energy))
+        emax = min(e0+175, max(energy))
+
+        ie1 = index_of(energy, emin)
+        ie2 = index_of(energy, emax)
+        ymax = max(dgroup['norm'][ie1:ie2])
+        ymin = min(dgroup['norm'][ie1:ie2])
+        ymax += (ymax-ymin)*0.05
+        ymin -= (ymax-ymin)*0.05
+
         ref_mu = None
         if murefer is not None:
             rgroup = preedge(energy, murefer)
@@ -595,7 +606,8 @@ def spectrum(spid=None, plotstyle='xanes'):
 
         opts['xasplot'] = xafs_plotly(energy, dgroup['norm'], s.name,
                                       ylabel='Normalized XANES',
-                                      refer=ref_mu, x_range=[e1, e2])
+                                      refer=ref_mu, x_range=[emin, emax],
+                                      y_range=[ymin, ymax])
 
     suites = []
     for r in db.fquery('spectrum_suite', spectrum_id=s.id):
