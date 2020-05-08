@@ -23,11 +23,7 @@ from sqlalchemy import MetaData, create_engine, text
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import SingletonThreadPool
 
-try:
-    from xdifile import XDIFile
-except ImportError:
-    from larch.io import XDIFile
-
+from larch.io import XDIFile, read_ascii
 from larch.utils import debugtime
 
 from . import initialdata
@@ -942,8 +938,10 @@ class XASDataLibrary(object):
         query = apply_orderby(query, tab, orderby)
         return query.execute().fetchall()
 
-    def add_xdifile(self, fname, person=None, reuse_sample=True,
-                    mode=None, commit=True, verbose=False, **kws):
+    def add_xdifile(self, fname, spectrum_name=None, description=None,
+                    person=None, reuse_sample=True, mode=None, commit=True,
+                    verbose=False, **kws):
+
         try:
             fh  = open(fname, 'r')
             filetext  = fh.read()
@@ -953,14 +951,21 @@ class XASDataLibrary(object):
             fh.close()
 
         xfile = XDIFile(fname)
+        try:
+            afile = read_ascii(fname)
+        except:
+            afile = None
+
         path, fname = os.path.split(fname)
         now = fmttime()
 
-        spectrum_name = fname
+        if spectrum_name is None:
+            spectrum_name = fname
         if spectrum_name.endswith('.xdi'):
             spectrum_name = spectrum_name[:-4]
 
-        description  = spectrum_name
+        if description is None:
+            description  = spectrum_name
         stab = self.tables['spectrum']
 
         _s_names = [s.name for s in stab.select().execute()]
@@ -977,6 +982,23 @@ class XASDataLibrary(object):
         comments  = ''
         if hasattr(xfile, 'comments'):
             comments = xfile.comments.decode('utf-8')
+        # prefer to get comments from original header, if possible
+        header = getattr(afile, 'header', None)
+        if header is not None:
+            comment_lines = []
+            slashes_found = False
+            for hline in header:
+                hline = hline.strip()
+                if slashes_found:
+                    if hline.startswith('#'):
+                        hline = hline[1:].strip()
+                    if len(hline) > 0:
+                        comment_lines.append(hline)
+                slashes_found = hline.startswith('# //')
+                if hline.startswith('#---'):
+                    break
+            if len(comment_lines) > 0:
+                comments = '\n'.join(comment_lines)
 
         i0  = getattr(xfile, 'i0', getattr(xfile, 'io', np.ones(len(energy))*1.0))
 
