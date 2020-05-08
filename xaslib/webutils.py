@@ -245,12 +245,12 @@ def parse_spectrum(s, db):
         sample = db.fquery('sample', id=s.sample_id)[0]
         sample_id = s.sample_id
         sample_name = sample.name
-        sample_form = sample.formula
+        sample_formula = sample.formula
         sample_prep = sample.preparation
     except:
         sample_id  = 0
         sample_name = 'unknown'
-        sample_form = 'unknown'
+        sample_formula = 'unknown'
         sample_prep = 'unknown'
         if 'sample' in notes:
             sample_name = notes['sample']
@@ -308,7 +308,7 @@ def parse_spectrum(s, db):
             'temperature': s.temperature,
             'sample_id':   sample_id,
             'sample_name':  sample_name,
-            'sample_form':  sample_form,
+            'sample_formula':  sample_formula,
             'sample_prep':  sample_prep,
             'reference_sample': s.reference_sample,
             'person_email': person.email,
@@ -376,7 +376,11 @@ def guess_metadata(dgroup):
                 elif 'prep' in key:
                     out['sample_prep'] = val
                 elif 'form' in key:
-                    out['sample_form'] = val
+                    out['sample_formula'] = val
+                elif 'notes' in key:
+                    out['sample_notes'] = val
+                elif 'desc' in key:
+                    out['sample_notes'] = val
 
     if e0 is not None and out.get('elem_sym', None) is None:
         try:
@@ -392,9 +396,9 @@ def guess_metadata(dgroup):
 def upload2xdi(opts, upload_folder):
     """upload result of upload form to XDI file"""
 
-    filename = opts['filename'].replace('.', '_')
-    filename = secure_filename('xaslib_%s_%s.xdi' % (random_string(4), filename))
-
+    fname = opts['filename']
+    filename = fname.replace('.', '_')
+    filename = secure_filename('%s_%s.xdi' % (random_string(4), filename))
     filename = path.abspath(pathjoin(upload_folder, filename))
 
     buff = ['#XDI/1.0  XASDataLibrary/1.0']
@@ -439,8 +443,7 @@ def upload2xdi(opts, upload_folder):
                        ('Sample.name',        'sample_name'),
                        ('Sample.formula',     'sample_formula'),
                        ('Sample.preparation', 'sample_prep'),
-                       ('Sample.notes',       'sample_notes'),
-                       ('Sample.description', 'description')):
+                       ('Sample.notes',       'sample_notes')):
         attr = opts.get(attr, '')
         if len(attr) > 0:
             buff.append('# %s: %s' % (tag, attr))
@@ -452,11 +455,6 @@ def upload2xdi(opts, upload_folder):
     comments = opts['comments'].split('\n')
     for c in comments:
         buff.append('# %s' % c)
-
-    if len(opts['header']) > 0:
-        buff.append('# # original header: ')
-        for hline in opts['header']:
-            buff.append('#     %s' % hline)
     buff.append('#-----------------------')
     buff.append('#  %s' % ('  '.join(array_labels)))
     for i in range(opts['npts']):
@@ -467,4 +465,5 @@ def upload2xdi(opts, upload_folder):
     buff.append('')
     with open(filename, 'w') as fh:
         fh.write('\n'.join(buff))
+
     return filename
