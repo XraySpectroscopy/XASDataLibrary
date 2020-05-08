@@ -178,8 +178,7 @@ def needslogin(backto='show_error', error='', **kws):
 
 @app.route('/favicon.ico')
 def favicon():
-    return send_from_directory(pathjoin(app.root_path, 'static'),
-                               'ixas_logo.ico',
+    return send_from_directory(app.static_folder, 'ixas_logo.ico',
                                mimetype='image/vnd.microsoft.icon')
 
 @app.errorhandler(404)
@@ -401,9 +400,6 @@ def show_error(error=''):
 def elem(elem=None, orderby=None, reverse=0):
     session_init(session)
     dbspectra = []
-    sql_orderby = orderby
-    if orderby is None:
-        sql_orderby = 'element_z'
 
     if elem == 'filter':
         if 'All Spectra' in request.form.get('submit'):
@@ -418,8 +414,10 @@ def elem(elem=None, orderby=None, reverse=0):
             except:
                 pass
         else:
+            if orderby is None:
+                orderby = 'name'
             try:
-                dbspectra = db.get_spectra(element=elem, orderby=sql_orderby)
+                dbspectra = db.get_spectra(element=elem, orderby=orderby)
             except:
                 pass
 
@@ -434,8 +432,7 @@ def elem(elem=None, orderby=None, reverse=0):
         edge     = db.get_edge(s.edge_id).name
         elem_sym = db.get_element(s.element_z).symbol
         person   = db.get_person(s.person_id)
-        mode     = db.get_spectrum_mode(s.mode_id)
-
+        mode     = ANY_MODES[s.mode_id]
         rating   = get_rating(s)
         bl_id, bl_desc = db.get_spectrum_beamline(s.id)
 
