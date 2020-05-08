@@ -120,7 +120,7 @@ def send_confirm_email(person, hash, style='new'):
     base_url = app.config['BASE_URL']
     admin_email = app.config['ADMIN_EMAIL']
     message = """
-        Someone (hopefully you) asked to reset your account for the XAS Spectra Library.
+        Someone (hopefully you) asked to reset your account for the XAS Data Library.
 
         To change your passowrd, please follow this link:
                {base_url:s}/newpassword/{person_id:d}/{hash:s}
@@ -132,13 +132,12 @@ def send_confirm_email(person, hash, style='new'):
     if style == 'new':
         subject = "XAS Library Account Confirmation"
         message = """
-        An account at the XAS Spectra Library has been created for {name:s}, but not yet confirmed.
+        An account at the XAS Data Library has been created for {name:s}, but not yet confirmed.
 
         To confirm this account, please follow this link:
-               {base_url:s}/confirmpassword/{person_id:d}/{hash:s}
+               {base_url:s}/confirmaccount/{person_id:d}/{hash:s}
 
         Thank you.
-
 """.format(base_url=base_url, person_id=person.id, hash=hash, name=person.name)
 
     fullmsg = EMAIL_MSG.format(mailfrom=admin_email, mailto=person.email,
@@ -151,9 +150,9 @@ def send_confirm_email(person, hash, style='new'):
 def notify_account_creation(person):
     """send email to administrator about account creation"""
 
-    subject = "XAS Library Account created"
+    subject = "XAS Data Library Account created"
     message = """
-        An account on the XAS Spectra Library was created for user:
+        An account on the XAS Data Library was created for user:
           email= {email:s}
           name = {mame:s}
 """.format(email=person.email, name=person.name)
@@ -221,7 +220,7 @@ def create_account():
                               password=password,
                               affiliation=affiliation)
                 hash = db.person_unconfirm(email)
-                if app.config['LOCAL_USE_ONLY']:
+                if app.config.get('LOCAL_USE_ONLY', False):
                     db.person_confirm(email, hash)
                 else:
                     ## send email here!!
@@ -315,8 +314,7 @@ def confirmaccount(pid='-1', hash=''):
                 flash('''Congratulations, %s, your account is confirmed.
                 You can now log in!''' % person.name)
                 # notify
-                notify_account_creation(person)
-
+                # notify_account_creation(person)
                 return render_template('login.html')
     return render_template('confirmation_email_sent.html', error=error)
 
