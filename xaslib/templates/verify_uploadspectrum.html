@@ -11,6 +11,13 @@
 </div>
 
 <div style="width: 45%; float: right;">
+<p> <i>Verification and Warning Messages: </i> <p>
+  <p>  <font size=-1>{% for a in verify_messages  %} {{ a }} <p> {%endfor%}</font>
+  <p>  <font color='#AA2222'' size=-1>{% for a in verify_errors  %} {{ a }} <p> {%endfor%}</font>
+  <p>
+    Edge energy = {{verify_edge_energy}},   Edge jump =
+    {{verify_edge_step}},   Energy range = {{verify_edge_range}}
+
 <div id="mu_plot">
   {% if muplot != 'noplot' %}
   <script  type="text/javascript">
@@ -20,16 +27,6 @@
 {% endif %}
 </div>
 
-<p> <i>Verification and Warning Messages: </i> <p>
-
-    Edge energy = {{verify_edge_energy}}<p>
-    Edge jump = {{verify_edge_step}}<p>
-    Energy range = {{verify_edge_range}}<p>
-
-  <p>  <font size=-1>{% for a in verify_messages  %} {{ a }} <p> {%endfor%}</font>
-  <p>  <font color='#AA2222'' size=-1>{% for a in verify_errors  %} {{ a }} <p> {%endfor%}</font>
-
-    <hr>
   <p>
     <i>Header from data file </i> <p>
     <font size=-2>{% for a in header %} {{ a }} <br> {%endfor%}</font>
