@@ -1360,7 +1360,6 @@ def submit_citation_edits():
         else:
             db.update('citation', cid, use_id=True, name=name, **form)
 
-        print("Need to resolve Citation " , cid, spectrum_id)
         time.sleep(0.25)
         return redirect(url_for('citation', cid=cid, error=error))
     return redirect(url_for('citation', error=error))
@@ -1470,6 +1469,7 @@ def edit_upload():
                                        error='Could not read uploaded file (%s)' % (fname))
 
             opts = parse_datagroup(dgroup, fname, fullpath, pid)
+
             return render_template('edit_uploadspectrum.html', **opts)
 
     return render_template('upload.html',
@@ -1608,7 +1608,6 @@ def verify_uploaded_data(form, with_arrays=False):
             opts['sample_name'] = s.name
             opts['sample_prep'] = s.preparation
             opts['sample_notes'] = s.notes.replace('\n', ', ')[:128]
-
             opts['sample_formula'] = s.formula
 
     if opts['verify_ok']:
@@ -1651,7 +1650,6 @@ def verify_upload():
         if opts['verify_error'] == 'noread':
             error = 'Could not read uploaded file (%s)' % (opts['fname'])
         return sendback('upload', error=error, person_id=opts['pid'])
-
     return render_template('verify_uploadspectrum.html', **opts)
 
 
@@ -1680,12 +1678,13 @@ def submit_upload():
 
     else:
         spid = 1
-
         opts = verify_uploaded_data(request.form, with_arrays=True)
         filename = upload2xdi(opts, app.config['UPLOAD_FOLDER'])
-
         time.sleep(0.25)
-        spid = db.add_xdifile(filename, person=pemail, create_sample=True)
+        spid = db.add_xdifile(filename, person=pemail,
+                              spectrum_name=opts['filename'],
+                              description=opts['description'],
+                              create_sample=True)
         time.sleep(0.25)
         session_init(session, force_refresh=True)
 
