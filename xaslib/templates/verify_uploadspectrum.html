@@ -11,6 +11,7 @@
 </div>
 
 <div style="width: 45%; float: right;">
+  <script src="{{ url_for('static', filename='plotly_v1.54.1.js')}}"></script>
 <p> <i>Verification and Warning Messages: </i> <p>
   <p>  <font size=-1>{% for a in verify_messages  %} {{ a }} <p> {%endfor%}</font>
   <p>  <font color='#AA2222'' size=-1>{% for a in verify_errors  %} {{ a }} <p> {%endfor%}</font>

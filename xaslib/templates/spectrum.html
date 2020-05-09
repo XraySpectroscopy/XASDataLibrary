@@ -92,7 +92,7 @@
 
 <div style="width: 45%; float: right;">
 <table> <tr>
-
+    <script src="{{ url_for('static', filename='plotly_v1.54.1.js')}}"></script>
     <div id="xasplot">
       <script  type="text/javascript">
 	var graph = {{xasplot | safe}};
