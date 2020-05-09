@@ -3,29 +3,28 @@
   <head>
     <title>X-ray Absorption Data Library</title>
     <link rel=stylesheet type=text/css  href="{{ url_for('static', filename='xaslib_style.css') }}">
-    <!-- href="https://millenia.cars.aps.anl.gov/~newville/xaslib_style.css"> -->
 
     <link rel="stylesheet"
-	  href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     <style>
       @import url(http://fonts.googleapis.com/css?family=Roboto:500,100,300,700,400);
       div.stars {width: 175px;  display: inline-block;}
       input.star {display: none;}
       label.star {float: right;   padding: 5px;  font-size: 18px;  color: #646464;  transition: all .2s;}
       input.star:checked ~ label.star:before {  content: '\f005';  color: #E9B530;  transition: all .2s;}
-input.star-5:checked ~ label.star:before { color: #E9B530;   text-shadow: 0 0 1px #A39420;}
+      input.star-5:checked ~ label.star:before { color: #E9B530;   text-shadow: 0 0 1px #A39420;}
       label.star:hover {transform: scale(1.00);  text-shadow: 0 0 0px #E9B530;}
       label.star:before {content: '\f006';  font-family: FontAwesome;}
     </style>
 
-    <script async  src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"> </script>
-    <script  src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.6/d3.min.js"></script>
-    <script  src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
-    <script  src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
-
-    <script src="{{ url_for('static', filename='jquery.simple-dtpicker.js')}}"></script>
-    <link rel="stylesheet" href="{{ url_for('static', filename='jquery.simple-dtpicker.css')}}"/>
-    <script async src="{{ url_for('static', filename='plotly_v1.54.1.js')}}"></script>
+    <script async src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"> </script>
+    <script async src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.6/d3.min.js"></script>
+    <script async src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
+    <!--
+    <script async src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+    <script async src="{{ url_for('static',  filename='jquery.simple-dtpicker.js')}}"></script>
+    <script async src="https://cdn.plot.ly/plotly-latest.min.js"  charset="utf-8"></script>
+     -->
   </head>
   <body>
 

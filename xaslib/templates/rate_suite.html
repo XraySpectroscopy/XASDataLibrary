@@ -3,9 +3,19 @@
 
 <div class=subtitle> Suite: {{suite_name}} </div>
 <div class=body>
+<link rel="stylesheet"  href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<style>
+      @import url(http://fonts.googleapis.com/css?family=Roboto:500,100,300,700,400);
+      div.stars {width: 175px;  display: inline-block;}
+      input.star {display: none;}
+      label.star {float: right;   padding: 5px;  font-size: 18px;  color: #646464;  transition: all .2s;}
+      input.star:checked ~ label.star:before {  content: '\f005';  color: #E9B530;  transition: all .2s;}
+input.star-5:checked ~ label.star:before { color: #E9B530;   text-shadow: 0 0 1px #A39420;}
+      label.star:hover {transform: scale(1.00);  text-shadow: 0 0 0px #E9B530;}
+      label.star:before {content: '\f006';  font-family: FontAwesome;}
+</style>
 
 {% if session.username is not none %}
-
 
 <form action="{{ url_for('submit_suite_rating') }}" method=post>
     <input type=hidden name=person     value={{person_id}}>
@@ -32,19 +42,13 @@
     <label class="star star-1" for="star-1"></label>
     </div>
 
-</td>
-<td align='right'>
-    <div class='formsubmit'>
-      <input class='formsubmit.input.submit' type="submit" name="submit" value="Submit" />
-    </div>
-</td></tr>
+</td> <td align='left'> <input type="submit" name="submit" value="Submit" /> </td></tr>
 <tr><td>Review:</td><td></td></tr>
-<tr><td colspan=3><textarea cols=120 rows=20 type=text name=review>{{review|safe}}
+<tr><td colspan=3><textarea cols=85 rows=15 type=text name=review>{{review|safe}}
 </textarea></td></tr>
 </table>
 </form>
 </div>
-
 
 {% else %}
 You must be logged in to rate a suite.
