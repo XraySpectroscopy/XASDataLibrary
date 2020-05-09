@@ -83,7 +83,15 @@
     </td></tr>
 
     <tr><td> Reference Sample: </td><td>
-	<input size=50 type=text name=reference_sample value={{reference_sample}}>  </td></tr>
+	<input size=50 type=text name=reference_sample
+	       value={{reference_sample}}>
+    </td></tr>
+
+    <tr><td> Date Measured:   </td> <td>
+	<input type="text" name="collection_date" value="" value="{{collection_date }}">
+	<script type="text/javascript">	$(function(){ $('*[name=collection_date]').appendDtpicker(); });	</script>
+    </td></tr>
+
     <tr><td> User Comment: </td><td>
 	<textarea cols=45  rows=10 type=text name=comments>{{raw_comments}}</textarea></td></tr>
   <tr><td colspan=2> <hr> </td></tr>

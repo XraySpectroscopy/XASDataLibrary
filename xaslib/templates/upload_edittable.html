@@ -70,6 +70,12 @@ Uploaded File: {{filename}} has {{narrays}} array columns with {{npts}} data poi
 </select>
 </td></tr>
 
+<tr><td> Date Measured:   </td> <td>
+    <input type="text" name="collection_date" value="" value="{{collection_date }}">
+    <script type="text/javascript">	$(function(){ $('*[name=collection_date]').appendDtpicker(); });	</script>
+</td></tr>
+
+
   <script type="text/javascript">
     function on_DataMode() {
     var refmode = document.getElementById("mode");
