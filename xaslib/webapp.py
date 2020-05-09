@@ -16,7 +16,8 @@ from flask import (Flask, request, session, redirect, url_for,
                    abort, render_template, flash, Response,
                    send_from_directory)
 
-from .xaslib import connect_xaslib, fmttime, valid_score, unique_name, None_or_one
+from .xaslib import (connect_xaslib, isotime2datetime, fmttime, valid_score,
+                     unique_name, None_or_one)
 from .initialdata import edge_energies, elem_syms
 from larch.io import read_ascii
 from larch.xafs.pre_edge import preedge
@@ -645,6 +646,10 @@ def submit_spectrum_edits():
         spid  = int(request.form['spectrum'])
         edge_id = ANY_EDGES.index(request.form['edge'])
         mode_id = ANY_MODES.index(request.form['mode'])
+        try:
+            collection_time = isotime2datetime(request.form['collection_date'])
+        except:
+            collection_time = None
 
         db.update('spectrum', int(spid),
                   name=request.form['name'],
@@ -655,8 +660,8 @@ def submit_spectrum_edits():
                   edge_id=edge_id, mode_id=mode_id,
                   beamline_id= int(request.form['beamline']),
                   sample_id= int(request.form['sample']),
+                  collection_time = collection_time,
                   reference_sampled=request.form['reference_sample'],
-
                   energy_units_id=int(request.form['energy_units']))
 
         time.sleep(0.25)
@@ -675,7 +680,6 @@ def edit_spectrum(spid=None):
 
     opts = parse_spectrum(s, db)
     beamlines = get_beamline_list(db, with_any=False, orderby='name')
-
     return render_template('edit_spectrum.html',
                            error=error,
                            elems=db.fquery('element'),
@@ -1373,7 +1377,6 @@ def upload():
     return render_template('upload.html',
                            person_id=session['person_id'])
 
-
 def parse_datagroup(dgroup, fname, fullpath, pid, form=None):
     person = db.get_person(int(pid))
     filename = dgroup.filename
@@ -1629,9 +1632,7 @@ def verify_uploaded_data(form, with_arrays=False):
 
             opts['data'] = {'energy': energy, 'i0': i0, 'itrans': itrans,
                             'ifluor': ifluor, 'irefer': irefer, 'mu': mu}
-
     return opts
-
 
 
 @app.route('/verify_upload', methods=['GET', 'POST'])

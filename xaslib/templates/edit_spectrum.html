@@ -92,7 +92,7 @@
         <script src="{{ url_for('static', filename='jquery.simple-dtpicker.js')}}"></script>
         <link rel="stylesheet" href="{{ url_for('static', filename='jquery.simple-dtpicker.css')}}"/>
 
-	<input type="text" name="collection_date" value="" value="{{collection_date }}">
+	<input type="text" name="collection_date" value="{{collection_date|safe}}">
 	<script type="text/javascript">	$(function(){ $('*[name=collection_date]').appendDtpicker(); });	</script>
     </td></tr>
 

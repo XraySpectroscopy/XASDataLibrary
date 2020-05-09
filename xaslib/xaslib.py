@@ -97,6 +97,21 @@ def isotime2datetime(isotime):
 
     return datetime(syear, smon, sday, shour, smin, ssec, susec)
 
+def guess_datetime(tstring):
+    if 'T' in tstring and 'OCT' not in tstring:
+        tstring = isotime.replace('T', ' ')
+
+    for dfmt in ("%Y-%m-%d", "%Y-%b-%d", "%Y/%m/%d", "%Y/%b/%d",
+                 "%b %d, %Y", "%m/%d/%Y", "%d/%m/%Y"):
+        for tfmt in ("%H:%M:%S", "%H:%M"):
+            dtfmt = "%s %s" % (dfmt, tfmt)
+            try:
+                out = datetime.strptime(tstring, tfmt)
+            except ValueError:
+                out = None
+            if out is not None:
+                return out
+
 def fmttime(dtime=None):
     if dtime is None:
         dtime = datetime.now()

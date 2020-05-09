@@ -21,8 +21,7 @@ from xraydb import guess_edge
 
 from lmfit.printfuncs import gformat
 
-from .xaslib import fmttime
-
+from .xaslib import fmttime, isotime2datetime, guess_datetime
 
 PLANCK_HC = 1.e10 * consts.Planck * consts.c / consts.e
 def mono_deg2ev(angle, d_spacing):
@@ -381,6 +380,10 @@ def guess_metadata(dgroup):
                     out['sample_notes'] = val
                 elif 'desc' in key:
                     out['sample_notes'] = val
+            if 'scan' in key and 'start_time' in key:
+                dtime = guess_datetime(val)
+                if dtime is not None:
+                    out['collection_date'] = fmttime(dtime)
 
     if e0 is not None and out.get('elem_sym', None) is None:
         try:
