@@ -115,7 +115,7 @@ def session_init(session, force_refresh=False):
 
 def send_confirm_email(person, hashkey, style='new'):
     """send email with account confirmation/reset link"""
-    subject = "XAS Library Account Password Reset"
+    subject = "XAS Data Library Account Password Reset"
     base_url = app.config['BASE_URL']
     if base_url.endswith('/'):
         base_url = base_url[:-1]
@@ -131,7 +131,7 @@ def send_confirm_email(person, hashkey, style='new'):
 """.format(base_url=base_url, person_id=person.id, hashkey=hashkey)
 
     if style == 'new':
-        subject = "XAS Library Account Confirmation"
+        subject = "XAS Data Library Account Confirmation"
         message = """
         An account at the XAS Data Library has been created for {name:s}, but not yet confirmed.
 
