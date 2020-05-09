@@ -15,7 +15,7 @@
 # Facility.Name:  APS
 # Beamline.Name:  13-ID-E
 # Beamline.xray_source:  3.6cm undulator
-# Beamline.I0: He, 200 cm
+# Beamline.I0: He, 200 mm
 # Beamline.If: 4-element SDD (Vortex ME-4)
 # ScanParameters.ScanType: xafs
 # ScanParameters.E0: 2472.000
