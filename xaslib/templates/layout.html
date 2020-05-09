@@ -18,17 +18,14 @@ input.star-5:checked ~ label.star:before { color: #E9B530;   text-shadow: 0 0 1p
       label.star:before {content: '\f006';  font-family: FontAwesome;}
     </style>
 
-    <script async="async" type="text/javascript"
-	    src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML">
-    </script>
+    <script async  src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"> </script>
+    <script  src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.6/d3.min.js"></script>
+    <script  src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+    <script  src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
 
-    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.6/d3.min.js"></script>
-    <script async="async" type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
-    <script async="async" src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
-
-    <script async="async" src="{{ url_for('static', filename='jquery.simple-dtpicker.js')}}"></script>
+    <script src="{{ url_for('static', filename='jquery.simple-dtpicker.js')}}"></script>
     <link rel="stylesheet" href="{{ url_for('static', filename='jquery.simple-dtpicker.css')}}"/>
-    <script async="async" src="{{ url_for('static', filename='plotly_v1.54.1.js')}}"></script>
+    <script async src="{{ url_for('static', filename='plotly_v1.54.1.js')}}"></script>
   </head>
   <body>
 
