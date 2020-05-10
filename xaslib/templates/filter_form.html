@@ -1,0 +1,54 @@
+
+
+<table border=0>
+  <tr><td colspan=2>
+      Filter Spectra by Edge, Beamline, Measurement Mode, </td></tr>
+  <tr><td colspan=2>
+      Rating,  or Text in Name, Comment, or other Field:</td></tr>
+   <tr><td>Edge: </td>
+    <td><select  name='edge_filter' style="width: 200px;">
+	{% for ename in edges %}
+	<option value={{ename}} {% if ename==edge_filter %} selected=1 {% endif %} > {{ ename }}</option>
+	{% endfor %}
+      </select>
+  </td></tr>
+  <tr><td>Beamline: </td>
+    <td colspan=2><select  name='beamline' style="width: 200px;">
+	{% for bl in beamlines %}
+	<option value={{bl.id}}
+		{% if bl.id == beamline_id %} selected=1 {% endif %} >
+	  {{ bl.name }}</option>
+	{% endfor %}
+      </select>
+  </td></tr>
+
+    <tr><td>Measurement Mode: </td>
+    <td colspan=2><select  name='mode_filter' style="width: 200px;">
+	{% for mname in modes %}
+	<option value={{mname}} {% if mname==mode_filter %} selected=1 {% endif %} > {{ mname }}</option>
+	{% endfor %}
+      </select>
+  </td></tr>
+
+  <tr><td>Rating: </td>
+    <td colspan=2><select  name='rating' style="width: 200px;">
+	  <option value='0' {% if rating_min == '0' %} selected=1 {% endif %} >Any</option>
+	  <option value='1' {% if rating_min == '1' %} selected=1 {% endif %} >1 or higher</option>
+	  <option value='2' {% if rating_min == '2' %} selected=1 {% endif %} >2 or higher</option>
+	  <option value='3' {% if rating_min == '3' %} selected=1 {% endif %} >3 or higher</option>
+	  <option value='4' {% if rating_min == '4' %} selected=1 {% endif %} >4 or higher</option>
+	  <option value='5' {% if rating_min == '5' %} selected=1 {% endif %} >5</option>
+	</select>
+    </td></tr>
+
+  <tr><td>Required Text:</td>
+    <td colspan=2><input size=35 type=text name=searchphrase value={{ searchword }}></td></tr>
+  <tr><td>
+      <input class='submitbutton' type=submit name=submit value='Search All Spectra'>
+    </td>
+    <td>
+      {% if spectra|count != 0 %}
+      <input class='submitbutton' type=submit name=submit value='Filter Current Selections'>
+      {% endif %}
+  </td></tr>
+</table>

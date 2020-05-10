@@ -1,0 +1,99 @@
+{% extends "layout.html" %}
+{% block body %}
+
+<p> <div class=subtitle>Select Absorbing Element
+({{ spectra_count }} spectra, {{ included_elems|length }} elements): </div>
+</p>
+
+<div class=body>
+  <form action="{{ url_for('elem')}}" name="ptablefilter" method="post">
+     <input type=hidden name=elem value={{elem}}>
+     <table border=0 cellpadding=3>
+       <tr><td>	  {% include "ptable.html" %}	</td>
+	 <td>  {% include "filter_form.html" %} 	</td>
+       </tr>
+       <tr>
+	<td rowspan=10>
+          {% if spectra|count > 0 %}
+
+	  <hr>
+
+	  {% if spectra|count == 1 %}
+              {{ spectra|count }} spectrum for {{ elem }}
+	    {% else %}
+                 {{ spectra|count }} spectra for {{ elem }}
+   	   {% endif %}
+          {% if ntotal > spectra|count %}  (filtered from {{ ntotal }}) {% endif %}
+
+	    <table cellspacing=5 cellpadding=2>
+	      <tr>
+		<th> &nbsp; Name &nbsp;</th>
+		<th> &nbsp; Edge &nbsp;</th>
+		<th> &nbsp; Beamline &nbsp;</th>
+		<th> &nbsp; Rating &nbsp;</th>
+		<th> &nbsp; Selected &nbsp;</th>
+	      </tr>
+
+              {% for spec in spectra %}
+	      <tr class={{ loop.cycle('odd', 'even') }}>
+		<td> &nbsp; &nbsp; <a href="{{url_for('spectrum', spid= spec.id)}}"> {{ spec.name }}</a></td>
+		<td> &nbsp; {{ spec.edge }} </td>
+		<td> &nbsp; {{ spec.beamline_desc }} </td>
+		<td> &nbsp; {{ spec.rating }} </td>
+		<td> <input type="checkbox"  name="sel_{{spec.id}}"
+			    {% if spec.id in selected_spectra %} checked="checked" {% endif %}>  </td>
+	      </tr>
+	      {% endfor %}
+	    </table>
+	    {% endif %}
+	</td>
+	<td>
+          {% if spectra|count > 0 %}
+ 	  <hr>
+	  <table>
+	      <tr>
+		<td><a  onclick="javascript:checkAll('ptablefilter', true);"
+			href="javascript:void();">Select All</a>
+		</td>
+		<td>
+		  <a onclick="javascript:checkAll('ptablefilter', false);"
+		     href="javascript:void();">Select None</a>
+		</td>
+	      </tr>
+	      <tr> <td>
+		<input class='submitbutton' type=submit name=submit
+		       value='Plot Selected Spectra'> </td><td></td></tr>
+	      <tr>  <td colspan=2>
+		  <input class='submitbutton' type=submit name=submit
+			 value='Save Selected Spectra to Zip File'>
+		</td>
+	      </tr>
+	      <tr>  <td colspan=2>
+		  <input class='submitbutton' type=submit name=submit
+			 value='Save Selected Spectra to Athea Project File'>
+		</td>
+	      </tr>
+	    <tr>  <td>
+		<input class='submitbutton' type=submit name=submit
+		       value='Add Selected to Suite'></td><td>
+		LIST OF SUITES HERE
+	    </td></tr>
+	  </table>
+	    {% endif %}
+	  </div>
+
+</td></tr>
+</table>
+<script type="text/javascript">
+  function checkAll(form, toggle)  {
+      var checkboxes = new Array();
+      checkboxes = document[form].getElementsByTagName('input');
+      for (var i=0; i<checkboxes.length; i++)  {
+          if (checkboxes[i].type == 'checkbox')  {
+             checkboxes[i].checked = toggle;
+     }
+    }
+  }
+</script>
+
+{% endblock %}
