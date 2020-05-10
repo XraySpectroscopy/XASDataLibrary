@@ -1,8 +1,8 @@
 {% extends "layout.html" %}
 {% block body %}
 
-<div class=subtitle> Add a Facility</div>
-<div class=body>
+<p><div class=subtitle> Add a Facility</div>
+
 
 <p> A Facility is a place that has one or more Beamlines.
 
@@ -24,7 +24,7 @@
 	   <td><input size=60 type=text name=facility_city></td></tr>
       <tr><td>Country:</td>
 	   <td><input size=60 type=text name=facility_country></td></tr>
-      <tr><td><input type=submit value=submit></td><td></td></tr>
+      <tr><td><input class="abutton" type=submit value=submit></td><td></td></tr>
     </table>
 </form>
 {% else %}

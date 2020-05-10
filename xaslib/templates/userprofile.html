@@ -1,8 +1,7 @@
 {% extends "layout.html" %}
 {% block body %}
 
-<div class=subtitle> User Profile: for {{email}}</div>
-<div class=body>
+<p><div class=subtitle> User Profile: for {{email}}</div>
 
 {% if session.username is not none %}
 
@@ -14,7 +13,7 @@
 	  <td><input size=60 type=text name=name value='{{name|safe}}'></td></tr>
       <tr><td>Affiliation:</td>
 	<td><input size=60 type=text  name=affiliation value='{{affiliation|safe}}'></td></tr>
-      <tr><td><input type=submit name=button value='Update Account'></td>
+      <tr><td><input class="abutton" type=submit name=button value='Update Account'></td>
     </table>
 </form>
 {% else %}

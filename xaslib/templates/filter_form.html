@@ -37,18 +37,17 @@
 	  <option value='2' {% if rating_min == '2' %} selected=1 {% endif %} >2 or higher</option>
 	  <option value='3' {% if rating_min == '3' %} selected=1 {% endif %} >3 or higher</option>
 	  <option value='4' {% if rating_min == '4' %} selected=1 {% endif %} >4 or higher</option>
-	  <option value='5' {% if rating_min == '5' %} selected=1 {% endif %} >5</option>
 	</select>
     </td></tr>
 
   <tr><td>Required Text:</td>
     <td colspan=2><input size=35 type=text name=searchphrase value={{ searchword }}></td></tr>
   <tr><td>
-      <input class='submitbutton' type=submit name=submit value='Search All Spectra'>
+      <input class='abutton' type=submit name=submit value='Search All Spectra'>
     </td>
     <td>
       {% if spectra|count != 0 %}
-      <input class='submitbutton' type=submit name=submit value='Filter Current Selections'>
+      <input class='abutton' type=submit name=submit value='Filter Current Selections'>
       {% endif %}
   </td></tr>
 </table>

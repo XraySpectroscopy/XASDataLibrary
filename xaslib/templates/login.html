@@ -1,21 +1,19 @@
 {% extends "layout.html" %}
 {% block body %}
-<h4>Login: </h4>
-
+<p><div class=subtitle>Login to your account:</div>
+<p>
 
 <form action="{{ url_for('login') }}" method=post>
     <table>
-      <tr><td>Email:</td><td><input size=60 type=text name=email></td></tr>
-      <tr><td>Password:</td><td><input size=60 type=password name=password></td></tr>
-      <tr><td><input type=submit name=button value=login></td>
+      <tr><td>Email:</td><td><input size=80 type=text name=email></td></tr>
+      <tr><td>Password:</td><td><input size=80 type=password name=password></td></tr>
+      <tr><td><input class="abutton" type=submit name=button value=login></td>
     </table>
 </form>
 
 <p>
-  <a href="{{ url_for('create_account') }}">Create New Account</a>
-
-  &nbsp; &nbsp; &nbsp;
-
-  <a href="{{ url_for('password_reset_request') }}">Reset Password</a></p>
+<a class="abutton" href="{{ url_for('create_account') }}">Create New Account</a>
+&nbsp; &nbsp
+<a class="abutton" href="{{ url_for('password_reset_request') }}">Reset Password</a></p>
 
 {% endblock %}

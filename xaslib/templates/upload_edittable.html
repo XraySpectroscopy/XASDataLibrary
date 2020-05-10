@@ -228,8 +228,8 @@ Uploaded File: {{filename}} has {{narrays}} array columns with {{npts}} data poi
 <tr><td> User Comment: </td><td>
 <textarea cols=50  rows=3 type=text name=comments>{{comments|safe}}</textarea></td></tr>
 <tr><td colspan=2> <hr> </td></tr>
-<tr><td><input type=submit name=submit value="Verify Data"></td>
+<tr><td><input class="abutton" type=submit name=submit value="Verify Data"></td>
   <td>
-    {% if verify_ok %} <input type=submit name=submit value="Confirm and Upload">  {% endif %}
+    {% if verify_ok %} <input class="abutton" type=submit name=submit value="Confirm and Upload">  {% endif %}
 </td></tr>
 </table>

@@ -1,7 +1,7 @@
 {% extends "layout.html" %}
 {% block body %}
 
-<div class=subtitle>Edit Spectrum:  {{ spectrum_name }}</div>
+<p><div class=subtitle>Edit Spectrum:  {{ spectrum_name }}</div>
 
 <div class=body style="overflow: hidden;">
 <div style="width:60%; float: left;">
@@ -74,9 +74,9 @@
 	</select>
 	{% if session.username is not none %}
 	    &nbsp;   &nbsp;
-	    <a href="{{url_for('edit_sample', sid=sample_id)}}"> [edit this sample] </a>
+	    <a class="abutton" href="{{url_for('edit_sample', sid=sample_id)}}">edit this sample</a>
 	    &nbsp; &nbsp;
-	    <a href="{{url_for('new_sample', spid=spectrum_id)}}"> [create new sample] </a>
+	    <a class="abutton" href="{{url_for('new_sample', spid=spectrum_id)}}">create new sample</a>
 	    &nbsp; &nbsp;
         {% endif %}
 
@@ -99,7 +99,7 @@
     <tr><td> User Comment: </td><td>
 	<textarea cols=45  rows=10 type=text name=comments>{{raw_comments}}</textarea></td></tr>
   <tr><td colspan=2> <hr> </td></tr>
-     <tr><td><input type=submit value=submit></td><td></td></tr>
+     <tr><td><input class="abutton" type=submit value=submit></td><td></td></tr>
     </table>
 </form>
 </div>

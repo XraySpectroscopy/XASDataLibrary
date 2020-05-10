@@ -29,15 +29,15 @@
 
 	    <table cellspacing=5 cellpadding=2>
 	      <tr>
-		<th><a href="{{url_for('elem')}}{{elem}}/name/{{reverse}}">
+		<th style="width: 260px;"><a href="{{url_for('elem')}}{{elem}}/name/{{reverse}}">
 		    &nbsp; Name &nbsp;</a></th>
-		<th><a href="{{url_for('elem')}}{{elem}}/edge/{{reverse}}">
+		<th style="width: 50px;"><a href="{{url_for('elem')}}{{elem}}/edge/{{reverse}}">
 		    &nbsp; Edge &nbsp;</a></th>
-		<th><a href="{{url_for('elem')}}{{elem}}/beamline/{{reverse}}">
+		<th style="width: 140px;"><a href="{{url_for('elem')}}{{elem}}/beamline/{{reverse}}">
 		    &nbsp; Beamline &nbsp;</a></th>
-		<th><a href="{{url_for('elem')}}{{elem}}/rating_summary/{{reverse}}">
+		<th style="width: 80px;"><a href="{{url_for('elem')}}{{elem}}/rating_summary/{{reverse}}">
 		    &nbsp; Rating &nbsp;</a></th>
-		<th>  Selected </th>
+		<th>  Select </th>
 	      </tr>
 
               {% for spec in spectra %}
@@ -67,20 +67,20 @@
 		</td>
 	      </tr>
 	      <tr> <td>
-		<input class='submitbutton' type=submit name=submit
+		<input class='abutton' type=submit name=submit
 		       value='Plot Selected Spectra'> </td><td></td></tr>
 	      <tr>  <td colspan=2>
-		  <input class='submitbutton' type=submit name=submit
+		  <input class='abutton' type=submit name=submit
 			 value='Save Selected Spectra to Zip File'>
 		</td>
 	      </tr>
 	      <tr>  <td colspan=2>
-		  <input class='submitbutton' type=submit name=submit
+		  <input class='abutton' type=submit name=submit
 			 value='Save Selected Spectra to Athea Project File'>
 		</td>
 	      </tr>
 	    <tr>  <td>
-		<input class='submitbutton' type=submit name=submit
+		<input class='abutton' type=submit name=submit
 		       value='Add Selected to Suite'></td><td>
 		LIST OF SUITES HERE
 	    </td></tr>

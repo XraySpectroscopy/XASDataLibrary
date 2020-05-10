@@ -4,7 +4,7 @@
 
 {% if session.username is not none %}
   &nbsp;   &nbsp;
-  <a href="{{url_for('add_suite')}}"> [add a suite] </a>
+  <a class="abutton" class="abutton" href="{{url_for('add_suite')}}">add a suite</a>
 {% endif %}
 
 </div>
@@ -28,10 +28,10 @@
        <td align='left'>{{s.notes|safe}} </td>
        <td> &nbsp; &nbsp; <a href="{{url_for('showsuite_rating', stid=s.id)}}"> {{s.rating}} &nbsp;
 	{% if session.username is not none %}
-	   <a href="{{url_for('rate_suite', stid=s.id)}}"> [rate] </a>
+	   <a class="abutton" href="{{url_for('rate_suite', stid=s.id)}}">rate this suite</a>
            {% if s.suite_owner %}
-             &nbsp; <a href="{{url_for('edit_suite', stid=s.id)}}"> [edit] </a>
- 	     &nbsp; <a href="{{url_for('delete_suite', stid=s.id, ask=1)}}"> [delete] </a>
+             &nbsp; <a class="abutton" href="{{url_for('edit_suite', stid=s.id)}}">edit this suite</a>
+ 	     &nbsp; <a class="abutton" href="{{url_for('delete_suite', stid=s.id, ask=1)}}">delete this suite</a>
            {% endif %}
         {% endif %}
 	</td></tr>

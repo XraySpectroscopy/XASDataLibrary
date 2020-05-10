@@ -36,6 +36,7 @@ h3 {font:bold 16px verdana,arial,sans-serif;color:#A42424; font-weight:bold;font
 
 h2 {font:bold 18px verdana,arial,sans-serif;color:#044484;font-weight:bold;}
 
+
 .ptable {background-color:#FDFDFA;}
 
 .elem {font: bold 16px verdana; color: #333; background-color:#FDFDFA;
@@ -54,7 +55,7 @@ h2 {font:bold 18px verdana,arial,sans-serif;color:#044484;font-weight:bold;}
 	 color: #FFF;   background-color: #16C;}
 
 .topbar a        {background-color: #16C; color: #FEA; margin: 10px}
-.topbar a:hover  {background-color: #16C; color: #FFF; margin: 10px}
+.topbar a:hover  {background-color: #16C; color: #FFF; margin: 10px;}
 
 .topmenu { font: bold 14px verdana, arial, sans-serif; margin: 0px;
            padding: 0px 0px 16px 0px;   border: 3px solid #16C;
@@ -70,41 +71,39 @@ h2 {font:bold 18px verdana,arial,sans-serif;color:#044484;font-weight:bold;}
 
 .topmenu a, a.active {color: #16C; }
 .topmenu a.active    {color: #16C; background-color: #FE9;}
-.topmenu a:hover     {color: #16C; background-color: #FE9;}
-.topmenu li:hover    {color: #16C; background-color: #FE9;}
+.topmenu a:hover     {color: #16C; background-color: #FE9; transition: 0.5s ease-in; }
+.topmenu li:hover    {color: #16C; background-color: #FE9; transition: 1.0s ease-in; }
 
-.input[type=submit] {border: 1px solid #f44c0e;  color: #fff;
-		   background-color: tomato;    padding: 100px 20px;    border-radius: 3px; }
-.input[type=submit]:hover {  background-color: #f44c0e; }
-
-.formsubmit input[type=submit] {background-color: #FE8;
-    color: red;
-    border-style: outset;
-    border-color: #FD0;
-    height: 30px;
-    width: 100px;
-    font: bold 17px arial, sans-serif;
-    text-shadow:none;
+.abutton {
+    font: 12px verdana, sans-serif;
+    text-decoration: none;
+    color: #004;
+    background-color: #F3F3F0;
+    padding: 2px 5px 2px 5px;
+    border-left:   0.8px solid #777;
+    border-bottom: 0.8px solid #777;
+    border-top:    0.5px solid #BBB;
+    border-right:  0.5px solid #BBB;
+    border-radius: 2px;
 }
 
-.formsubmit input[type=submit] {background-color: #FE8;
-    color: red;
-    border-style: outset;
-    border-color: #FD0;
-    height: 30px;
-    width: 100px;
-    font: bold 17px arial, sans-serif;
-    text-shadow:none;
+.abutton:hover {background-color: #FEA; transition: 1s ease-in; }
+
+
+.fileinput {
+    size: 6000px;
+    font: 12px verdana, sans-serif;
+    content: 'Choose File';
+    display: inline-block;
+    background-color: #F3F3F0;
+    padding: 2px 5px 2px 5px;
+    border-left:   0.8px solid #777;
+    border-bottom: 0.8px solid #777;
+    border-top:    0.5px solid #BBB;
+    border-right:  0.5px solid #BBB;
+    border-radius: 2px;
 }
 
+.fileinput:hover {background: #FEA; transition: 1s ease-in;}
 
-#submitbutton {background-color: #FAFAFE0;
-	       color: blue; border-color: #D0D080;
-	       border-style: outset;
-	       border-radius: 4px;}
-
-#fileinput {background-color: #FEFEFE;
-	    color: blue; border-color: #FEFEFE; border-radius: 4px;}
-
-#fileinput.button {background-color: #FEFEFE;
-		   color: blue;  border-color: #FEFEFE; border-radius: 4px;}
+.fileinput:active {    background: #FEA; }

@@ -1,11 +1,11 @@
 {% extends "layout.html" %}
 {% block body %}
 
-<div class=subtitle> Citations
+<p><div class=subtitle> Citations
 
 {% if session.username is not none %}
   &nbsp;   &nbsp;
-  <a href="{{ url_for('add_citation') }}"> [add a citationy] </a>
+  <a class="abutton" href="{{ url_for('add_citation') }}">add a citation</a>
 {% endif %}
 </div>
 

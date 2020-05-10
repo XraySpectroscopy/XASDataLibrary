@@ -1,18 +1,15 @@
 {% extends "layout.html" %}
 {% block body %}
 
-<div class=subtitle> Really Delete Spectrum  {{ spectrum_name }}? </div>
-
-<div class=confirm>
-
+<p><div class=subtitle> Really Delete Spectrum  {{ spectrum_name }}? </div>
 
 {% if session.username is not none %}
 <p>
-   Click: <a href="{{url_for('delete_spectrum', spid=spectrum_id, ask=0)}}"> [Delete This Spectrum]</a>
-   to permanently delete the Spectrum '{{spectrum_name}}'. </p>
+Click <a class="abutton"
+href="{{url_for('delete_spectrum', spid=spectrum_id, ask=0)}}">Yes, Really Delete This Spectrum</a>
+to delete the Spectrum '{{spectrum_name}}'. </p>
 
 <p> Important Note: This cannot be undone!</p>
 
 {% endif %}
-</div>
 {% endblock %}

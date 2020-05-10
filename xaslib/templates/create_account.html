@@ -1,21 +1,26 @@
 {% extends "layout.html" %}
 {% block body %}
 
-<h4>Create Account: </h4>
+<p><div class=subtitle>Create an Account</div>
 
-Passwords must be at least 7 characters long.<br>
-User Names must be at least 4 characters long.
 
+Notes:
+<ul>
+  <li> User Names must be at least 5 characters long.
+  <li> Passwords must be at least 7 characters long.
+  <li> Your account will not become "active" until you follow the
+       link sent to the email address given.
+</ul>
 <p>
 
 <form action="{{ url_for('create_account') }}" method=post>
     <table>
-      <tr><td>Email:</td><td><input size=60 type=text name=email value=''></td></tr>
-      <tr><td>Full Name:</td><td><input size=60 type=text name=name value=''></td></tr>
-      <tr><td>Affiliation:</td><td><input size=60 type=text  name=affiliation value=''></td></tr>
-      <tr><td>Password:</td><td><input size=60 type=password name=password value=''></td></tr>
-      <tr><td>Repeat Password:</td><td><input size=60 type=password name=password2 value=''></td></tr>
-      <tr><td><input type=submit name=button value='Create Account'></td>
+      <tr><td>Email:</td><td><input size=80 type=text name=email value=''></td></tr>
+      <tr><td>Full Name:</td><td><input size=80 type=text name=name value=''></td></tr>
+      <tr><td>Affiliation:</td><td><input size=80 type=text  name=affiliation value=''></td></tr>
+      <tr><td>Password:</td><td><input size=80 type=password name=password value=''></td></tr>
+      <tr><td>Repeat Password:</td><td><input size=80 type=password name=password2 value=''></td></tr>
+      <tr><td><input class="abutton" type=submit name=button value='Create Account'></td>
     </table>
   </form>
 

@@ -2,21 +2,20 @@
 {% block body %}
 
 <p><div class=subtitle> Upload XAS Spectra to the X-ray Absorption Data Library: </div>
-<div class=body>
 
-  <p>
-    {% if session.username is not none %}
+<p>
+{% if session.username is not none %}
 
-    <form action="{{ url_for('edit_upload') }}"
-	  method=post enctype=multipart/form-data>
-      <input type=hidden name=person_id value={{person_id}}>
-      <table>
-	<tr><td>      Select a data file:</td><td>   <input type=file name=filename>  </td></tr>
-	<tr><td>      </td><td>   <input type=submit   value="Edit and Verify Data for Upload"> </td></tr>
-      </table>
-    </form>
+<form action="{{ url_for('edit_upload') }}"
+method=post enctype=multipart/form-data>
+<input type=hidden name=person_id value={{person_id}}>
 
-    {% else %}
+<input class="fileinput" type=file name=filename>  &nbsp;  &nbsp;
+<input class="abutton" type=submit   value="Edit and Verify Data for  Upload">
+
+</form>
+
+{% else %}
 
     You must be logged in to upload data.
 {% endif %}

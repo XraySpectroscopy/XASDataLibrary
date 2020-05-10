@@ -3,10 +3,11 @@
 
 <p><div class=subtitle> Beamlines:
 
-
 {% if session.username is not none %}
   &nbsp;   &nbsp;
-  <a href="{{ url_for('add_beamline') }}"> [add a beamline] </a>
+<a class="abutton" href="{{ url_for('add_beamline') }}">add a beamline</a>
+
+
 {% endif %}
 
 &nbsp;   &nbsp;

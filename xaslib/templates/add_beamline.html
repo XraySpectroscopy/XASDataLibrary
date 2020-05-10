@@ -1,11 +1,11 @@
 {% extends "layout.html" %}
 {% block body %}
 
-<div class=subtitle> Add a Beamline
+<p><div class=subtitle> Add a Beamline
 
 {% if session.username is not none %}
   &nbsp;   &nbsp;
-  <a href="{{ url_for('add_facility')}}"> [add a facility] </a>
+  <a class="abutton" href="{{ url_for('add_facility')}}">add a facility</a>
 {% endif %}
 
 </div>
@@ -31,7 +31,7 @@
 	    <option value={{fac.id}}> {{fac.name}}</option>
 	  {% endfor %}
 	      </select> </td></tr>
-      <tr><td><input type=submit value=submit></td><td></td></tr>
+      <tr><td><input class="abutton" type=submit value=submit></td><td></td></tr>
     </table>
 </form>
 {% else %}
