@@ -84,10 +84,14 @@ def session_init(session, db):
     if 'person_id' not in session:
         session['person_id'] = "-1"
 
-def get_rating(item):
+def get_rating(item, short=False):
     rating = getattr(item, 'rating_summary', None)
+    if short and rating is not None:
+        rating = rating.split()[0]
     if rating is None or len(rating) < 1:
         rating = 'No ratings'
+        if short:
+            rating = "unrated"
     return rating
 
 def get_beamline_list(db, orderby='id', with_any=False):
