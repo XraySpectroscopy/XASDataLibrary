@@ -20,18 +20,24 @@
 
 	  {% if spectra|count == 1 %}
               {{ spectra|count }} spectrum for {{ elem }}
-	    {% else %}
-                 {{ spectra|count }} spectra for {{ elem }}
-   	   {% endif %}
+	  {% else %}
+              {{ spectra|count }} spectra for {{ elem }}
+   	  {% endif %}
           {% if ntotal > spectra|count %}  (filtered from {{ ntotal }}) {% endif %}
+
+	  &nbsp;&nbsp; - &nbsp; Click on heading labels to toggle sorting:
 
 	    <table cellspacing=5 cellpadding=2>
 	      <tr>
-		<th> &nbsp; Name &nbsp;</th>
-		<th> &nbsp; Edge &nbsp;</th>
-		<th> &nbsp; Beamline &nbsp;</th>
-		<th> &nbsp; Rating &nbsp;</th>
-		<th> &nbsp; Selected &nbsp;</th>
+		<th><a href="{{url_for('elem')}}{{elem}}/name/{{reverse}}">
+		    &nbsp; Name &nbsp;</a></th>
+		<th><a href="{{url_for('elem')}}{{elem}}/edge/{{reverse}}">
+		    &nbsp; Edge &nbsp;</a></th>
+		<th><a href="{{url_for('elem')}}{{elem}}/beamline/{{reverse}}">
+		    &nbsp; Beamline &nbsp;</a></th>
+		<th><a href="{{url_for('elem')}}{{elem}}/rating_summary/{{reverse}}">
+		    &nbsp; Rating &nbsp;</a></th>
+		<th>  Selected </th>
 	      </tr>
 
               {% for spec in spectra %}

@@ -397,7 +397,9 @@ def show_error(error=''):
 @app.route('/elem/', methods=['GET', 'POST'])
 @app.route('/elem/<elem>',  methods=['GET', 'POST'])
 @app.route('/elem/<elem>/', methods=['GET', 'POST'])
-def elem(elem=None):
+@app.route('/elem/<elem>/<orderby>',  methods=['GET', 'POST'])
+@app.route('/elem/<elem>/<orderby>/<reverse>', methods=['GET', 'POST'])
+def elem(elem=None, orderby='name', reverse=0):
     session_init(session)
     dbspectra = []
 
@@ -414,7 +416,7 @@ def elem(elem=None):
                 pass
         else:
             try:
-                dbspectra = db.get_spectra(element=elem, orderby='name')
+                dbspectra = db.get_spectra(element=elem, orderby=orderby)
             except:
                 pass
 
@@ -490,10 +492,17 @@ def elem(elem=None):
                         'beamline_desc': bl_desc,
                         'beamline_id': bl_id })
 
+    reverse = int(reverse)
+    if reverse:
+        spectra.reverse()
+        reverse = 0
+    else:
+        reverse = 1
 
     return render_template('browse_elements.html',
                            ntotal=len(dbspectra),
                            nspectra=len(spectra),
+                           reverse=reverse,
                            elem=elem, spectra=spectra,
                            edge_filter=edge_filter, edges=ANY_EDGES,
                            mode_filter=mode_filter, modes=ANY_MODES,
