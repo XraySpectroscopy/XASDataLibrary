@@ -395,19 +395,17 @@ def show_error(error=''):
 
 
 @app.route('/elem/', methods=['GET', 'POST'])
-@app.route('/elem/<elem>', methods=['GET', 'POST'])
-@app.route('/elem/<elem>/<orderby>',  methods=['GET', 'POST'])
-@app.route('/elem/<elem>/<orderby>/<reverse>', methods=['GET', 'POST'])
-def elem(elem=None, orderby=None, reverse=0):
+@app.route('/elem/<elem>',  methods=['GET', 'POST'])
+@app.route('/elem/<elem>/', methods=['GET', 'POST'])
+def elem(elem=None):
     session_init(session)
     dbspectra = []
 
-    if elem == 'filter':
-        if 'All Spectra' in request.form.get('submit'):
-            elem = 'all'
-        else:
-            elem = request.form.get('elem')
-
+    button = request.form.get('submit', 'no button').lower()
+    if elem == 'filter' or 'all spectra' in button:
+        elem = 'all'
+    elif elem is None:
+        elem = request.form.get('elem')
     if elem is not None:
         if elem.lower() == 'all':
             try:
@@ -415,12 +413,25 @@ def elem(elem=None, orderby=None, reverse=0):
             except:
                 pass
         else:
-            if orderby is None:
-                orderby = 'name'
             try:
-                dbspectra = db.get_spectra(element=elem, orderby=orderby)
+                dbspectra = db.get_spectra(element=elem, orderby='name')
             except:
                 pass
+
+    selected = []
+    for key, val in request.form.items():
+        if key.startswith('sel_'):
+            selected.append(int(key[4:]))
+
+
+    if button.startswith('plot selected'):
+        print(' plot ', selected)
+    elif button.startswith('save selected'):
+        print(' save ', selected)
+        print(list(request.form.keys()))
+    elif button.startswith('add selected'):
+        print(' add to suite ' , selected)
+
 
     edge_filter = request.form.get('edge_filter', ANY_EDGES[0])
     mode_filter = request.form.get('mode_filter', ANY_MODES[0])
@@ -479,26 +490,28 @@ def elem(elem=None, orderby=None, reverse=0):
                         'beamline_desc': bl_desc,
                         'beamline_id': bl_id })
 
-    reverse = int(reverse)
-    if reverse:
-        spectra.reverse()
-        reverse = 0
-    else:
-        reverse = 1
 
-    return render_template('ptable.html',
+    return render_template('browse_elements.html',
                            ntotal=len(dbspectra),
                            nspectra=len(spectra),
                            elem=elem, spectra=spectra,
-                           reverse=reverse,
                            edge_filter=edge_filter, edges=ANY_EDGES,
                            mode_filter=mode_filter, modes=ANY_MODES,
                            beamlines=get_beamline_list(db, with_any=True, orderby='name'),
                            beamline_id=beamline_id,
                            searchword=searchword,
                            rating_min=rating_min,
+                           selected_spectra=[],
                            spectra_count=SPECTRA_COUNT,
                            included_elems=INCLUDED_ELEMS)
+
+
+@app.route('/on_selected_spectra', methods=['GET', 'POST'])
+def on_selected_spectra():
+    session_init(session)
+    dbspectra = []
+    return redirect(url_for('elem'))
+
 
 
 
