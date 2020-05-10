@@ -447,7 +447,7 @@ def elem(elem=None, orderby='name', reverse=0):
         elem_sym = db.get_element(s.element_z).symbol
         person   = db.get_person(s.person_id)
         mode     = ANY_MODES[s.mode_id]
-        rating   = get_rating(s)
+        rating   = get_rating(s, short=True)
         bl_id, bl_desc = db.get_spectrum_beamline(s.id)
 
         # filter edge, beamline, and modes:
@@ -459,9 +459,9 @@ def elem(elem=None, orderby='name', reverse=0):
         # filter rating
         if rating_min != '0':
             try:
-                rval = float(rating.split()[0])
+                rval = float(rating)
             except:
-                rval = 100.0
+                rval = 6.0
             if (rval-0.01) < int(rating_min):
                 continue
 
@@ -1025,7 +1025,7 @@ def delete_suite(stid, ask=1):
     else:
         db.del_suite(stid)
         time.sleep(1)
-        flash('Deleted suite %s' % s_name)
+        flash('Deleted suite %s' % suite_name)
     return redirect(url_for('suites', error=error))
 
 @app.route('/edit_suite/<int:stid>')
