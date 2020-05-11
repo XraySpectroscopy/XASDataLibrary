@@ -27,13 +27,13 @@ from larch.math import index_of
 
 from .webutils import (row2dict, multiline_text, parse_spectrum,
                        spectrum_ratings, spectra_for_suite,
-                       spectra_for_citation, spectra_for_beamline,
-                       get_beamline_list, get_rating, get_fullpath,
-                       guess_metadata, pathjoin, secure_filename,
-                       mono_deg2ev, upload2xdi)
+                       get_person_suites, add_spectra_to_suite,
+                       spectra_for_citation, save_zipfile,
+                       spectra_for_beamline, get_beamline_list, get_rating,
+                       get_fullpath, guess_metadata, pathjoin,
+                       secure_filename, mono_deg2ev, upload2xdi)
 
-from .webplot import make_xafs_plot, xafs_plotly
-
+from .webplot import make_xafs_plot, xafs_plotly, plot_multiple_spectra
 
 db = None
 app = Flask('xaslib', static_folder='static')
@@ -402,7 +402,7 @@ def show_error(error=''):
 def elem(elem=None, orderby='name', reverse=0):
     session_init(session)
     dbspectra = []
-
+    person_id = int(session['person_id'])
     button = request.form.get('submit', 'no button').lower()
     if elem == 'filter' or 'all spectra' in button:
         elem = 'all'
@@ -425,15 +425,23 @@ def elem(elem=None, orderby='name', reverse=0):
         if key.startswith('sel_'):
             selected.append(int(key[4:]))
 
+    if button.startswith('plot') and len(selected) > 0:
+        return render_template('show_plot.html', nspectra=len(selected),
+                               plotdata=plot_multiple_spectra(db, selected))
 
-    if button.startswith('plot selected'):
-        print(' plot ', selected)
-    elif button.startswith('save selected'):
-        print(' save ', selected)
-        print(list(request.form.keys()))
-    elif button.startswith('add selected'):
-        print(' add to suite ' , selected)
+    elif button.startswith('save') and len(selected) > 0:
+        fname = save_zipfile(db, selected, folder=app.config['DOWNLOAD_FOLDER'])
+        return send_from_directory(app.config['DOWNLOAD_FOLDER'], fname,
+                                   mimetype='application/zip',
+                                   as_attachment=True,
+                                   attachment_filename='xaslib.zip')
 
+    elif button.startswith('add') and len(selected) > 0:
+        target_suite = request.form.get('target_suite', None)
+        msg = add_spectra_to_suite(db, selected,
+                                   suite_id=int(target_suite),
+                                   person_id = person_id)
+        flash(msg)
 
     edge_filter = request.form.get('edge_filter', ANY_EDGES[0])
     mode_filter = request.form.get('mode_filter', ANY_MODES[0])
@@ -511,6 +519,7 @@ def elem(elem=None, orderby='name', reverse=0):
                            searchword=searchword,
                            rating_min=rating_min,
                            selected_spectra=[],
+                           owned_suites=get_person_suites(db, person_id),
                            spectra_count=SPECTRA_COUNT,
                            included_elems=INCLUDED_ELEMS)
 
@@ -520,8 +529,6 @@ def on_selected_spectra():
     session_init(session)
     dbspectra = []
     return redirect(url_for('elem'))
-
-
 
 
 @app.route('/all')
@@ -547,6 +554,7 @@ def spectrum(spid=None, plotstyle='xanes'):
 
     opts = parse_spectrum(s, db)
     opts['spectrum_owner'] = (session['person_id'] == "%d" % s.person_id)
+    opts['person_id'] = session['person_id']
     opts['rating'] = get_rating(s)
 
     eunits = opts['energy_units']
@@ -604,7 +612,6 @@ def spectrum(spid=None, plotstyle='xanes'):
         opts['plotstyle'] = 'rawxafs'
         opts['plotstyle_label'] = 'Raw XAFS'
 
-        exanes_max = int(0.01*e0)
         emin = max(e0-50, min(energy))
         emax = min(e0+175, max(energy))
 
@@ -631,6 +638,7 @@ def spectrum(spid=None, plotstyle='xanes'):
         suites.append({'id': r.suite_id, 'name': st.name})
     opts['nsuites'] = len(suites)
     opts['suites'] = suites
+    opts['owned_suites'] = get_person_suites(db, session['person_id'])
     return render_template('spectrum.html', **opts)
 
 @app.route('/showspectrum_rating/<int:spid>')
@@ -879,26 +887,24 @@ def showsuite_rating(stid=None):
                            ratings=ratings, suite_notes=st.notes,
                            suite_name=st.name)
 
-@app.route('/add_spectrum_to_suite/<int:spid>')
-def add_spectrum_to_suite(spid=None):
+@app.route('/add_spectrum_to_suite',  methods=['GET', 'POST'])
+def add_spectrum_to_suite():
     session_init(session)
     error=None
+    print(" Add spectrum to suite ", list(request.form.items()))
     if session['username'] is None:
         error='must be logged in to add spectrum to suite'
         return redirect(url_for('spectrum', spid=spid, error=error))
 
-    s  = db.get_spectrum(spid)
-    if s is None:
-        error = 'Could not find Spectrum #%d' % spid
-        return redirect(url_for('/', error=error))
+    ###
+    person_id = int(request.form.get('person_id', -1))
+    spectrum_id = int(request.form.get('spectrum', -1))
+    target_suite = int(request.form.get('target_suite', -1))
 
-    suites = []
-    for st in db.fquery('suite'):
-        suites.append({'id': st.id, 'name': st.name})
+    flash(add_spectra_to_suite(db, [spectrum_id],
+                               suite_id=target_suite,
+                               person_id=person_id))
 
-    return render_template('add_spectrum_to_suite.html', error=error,
-                           spectrum_id=spid, spectrum_name=s.name,
-                           person_id=session['person_id'], suites=suites)
 
 @app.route('/submit_spectrum_to_suite', methods=['GET', 'POST'])
 def submit_spectrum_to_suite():
@@ -918,7 +924,7 @@ def submit_spectrum_to_suite():
             found = found or (r.spectrum_id == spid)
         if not found:
             db.addrow('spectrum_suite', suite_id=stid, spectrum_id=spid)
-            time.sleep(0.25)
+            time.sleep(0.1)
         else:
             stname = db.fquery('suite', id=stid)[0].name
             spname = db.get_spectrum(spid).name
@@ -949,38 +955,41 @@ def about():
 def doc(page='index.html'):
     return render_template('doc/%s' % page)
 
+@app.route('/show_person')
+@app.route('/show_person/')
+@app.route('/show_person/<int:pid>')
+def show_person(pid=-1):
+    session_init(session)
+    return render_template('person.html', person=db.get_person(pid))
+
 @app.route('/suites')
 @app.route('/suites/')
 @app.route('/suites/<int:stid>')
 def suites(stid=None):
     session_init(session)
     suites = []
+    person = db.get_person(1)
     if stid is None:
         for st in db.fquery('suite'):
-            name, notes, person_id = st.name, st.notes, st.person_id
-            person_email = db.get_person(person_id).email
+            person = db.get_person(st.person_id)
             spectra = spectra_for_suite(db, st.id)
-
             is_owner = (int(session['person_id']) == int(st.person_id))
-            suites.append({'id': st.id, 'name': name, 'notes': notes,
-                           'person_email': person_email,
+            suites.append({'id': st.id, 'name': st.name, 'notes': st.notes,
                            'rating': get_rating(st),
                            'suite_owner': is_owner,
                            'nspectra': len(spectra), 'spectra': spectra})
 
     else:
         st = db.fquery('suite', id=stid)[0]
-        name, notes, person_id = st.name, st.notes, st.person_id
-        person_email = db.get_person(person_id).email
+        person = db.get_person(st.person_id)
         spectra = spectra_for_suite(db, stid)
-
         is_owner = (int(session['person_id']) == int(st.person_id))
-        suites.append({'id': stid, 'name': name, 'notes': notes,
-                       'person_email': person_email,
+        suites.append({'id': stid, 'name': st.name, 'notes': st.notes,
                        'rating': get_rating(st),
                        'suite_owner': is_owner,
                        'nspectra': len(spectra), 'spectra': spectra})
-    return render_template('suites.html', nsuites=len(suites), suites=suites)
+    return render_template('suites.html', nsuites=len(suites), suites=suites,
+                           person=person)
 
 @app.route('/add_suite')
 @app.route('/add_suite', methods=['GET', 'POST'])
