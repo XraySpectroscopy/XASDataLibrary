@@ -1,0 +1,15 @@
+{% extends "layout.html" %}
+{% block body %}
+
+<p><div class=subtitle> Person:</div>
+
+<div class=body>
+
+<table cellspacing=3 cellpadding=1>
+<tr><td>Email:</td><td> {{person.email}} </td></tr>
+<tr><td>Name:</td><td>  {{person.name}} </td></tr>
+<tr><td>Affiliation:</td><td>{{person.affiliation}}</td></tr>
+</table>
+
+</div>
+{% endblock %}

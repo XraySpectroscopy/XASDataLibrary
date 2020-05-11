@@ -1,0 +1,12 @@
+{% extends "layout.html" %}
+{% block body %}
+
+<script src="https://cdn.plot.ly/plotly-latest.min.js" charset="utf-8"></script>
+<div id="plot">
+      <script  type="text/javascript">
+	var graph = {{plotdata | safe}};
+	Plotly.plot('plot',   graph.data,   graph.layout || {},  config=graph.config);
+      </script>
+</div>
+
+{% endblock %}
