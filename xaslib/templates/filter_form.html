@@ -43,11 +43,11 @@
   <tr><td>Required Text:</td>
     <td colspan=2><input size=35 type=text name=searchphrase value={{ searchword }}></td></tr>
   <tr><td>
-      <input class='abutton' type=submit name=submit value='Search All Spectra'>
+      <input class='abutton' style="width: 120px;" type=submit name=submit value='Search All Spectra'>
     </td>
     <td>
       {% if spectra|count != 0 %}
-      <input class='abutton' type=submit name=submit value='Filter Current Selections'>
+      <input class='abutton'  style="width: 200px;" type=submit name=submit value='Filter Current Selections'>
       {% endif %}
   </td></tr>
 </table>

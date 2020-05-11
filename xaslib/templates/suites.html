@@ -4,7 +4,7 @@
 
 {% if session.username is not none %}
   &nbsp;   &nbsp;
-  <a class="abutton" class="abutton" href="{{url_for('add_suite')}}">add a suite</a>
+  <a class="abutton" class="abutton" href="{{url_for('add_suite')}}">Add a Suite</a>
 {% endif %}
 
 </div>
@@ -15,12 +15,12 @@
 {% if nsuites == 0 %}
       No suites defined.
 {% else %}
-    <table cellspacing=0 cellpadding=3 border=0>
+    <table cellspacing=0 cellpadding=3 border=0.25>
 <tr>
-  <th width="20%"> Name</th>
-  <th widht="10%"> # Spectra</th>
-  <th width="35%" align='left'> Description</th>
-  <th width="35%">  &nbsp; &nbsp; Ratings</th>
+  <th width="20%" align='left'> Name</th>
+  <th widht=" 8%" align='left'> # Spectra</th>
+  <th width="32%" align='left'> Description</th>
+  <th width="40%" align='left'> Ratings and Actions</th>
    {% for s in suites %}
        <tr class={{ loop.cycle('odd', 'even') }}>
        <td><a href="{{url_for('suites')}}/{{ s.id }}"> {{ s.name }}</a></td>
@@ -28,17 +28,21 @@
        <td align='left'>{{s.notes|safe}} </td>
        <td> &nbsp; &nbsp; <a href="{{url_for('showsuite_rating', stid=s.id)}}"> {{s.rating}} &nbsp;
 	{% if session.username is not none %}
-	   <a class="abutton" href="{{url_for('rate_suite', stid=s.id)}}">rate this suite</a>
+	   <a class="abutton" href="{{url_for('rate_suite', stid=s.id)}}">Rate</a>
            {% if s.suite_owner %}
-             &nbsp; <a class="abutton" href="{{url_for('edit_suite', stid=s.id)}}">edit this suite</a>
- 	     &nbsp; <a class="abutton" href="{{url_for('delete_suite', stid=s.id, ask=1)}}">delete this suite</a>
+             &nbsp; <a class="abutton" href="{{url_for('edit_suite', stid=s.id)}}">Edit</a>
+ 	     &nbsp; <a class="abutton" href="{{url_for('delete_suite', stid=s.id, ask=1)}}">Delete</a>
            {% endif %}
         {% endif %}
 	</td></tr>
    {% endfor %}
    </table>
-   {% if nsuites == 1 %}
-    Spectra:
+{% if nsuites == 1 %}
+
+<p>Suite created by <a href="{{url_for('show_person')}}/{{person.id}}">
+    {{person.email}}</a>
+
+<p> Spectra:
     <table>
       {% for suite in suites %}
 	  {% for spec in suite.spectra %}

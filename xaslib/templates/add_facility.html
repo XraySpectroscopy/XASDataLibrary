@@ -5,12 +5,8 @@
 
 
 <p> A Facility is a place that has one or more Beamlines.
+  <a class="abutton" href="{{ url_for('facilities') }}">   Show Existing Facilities </a>
 
-  Check for
-  existing facilities
-  <a href="{{ url_for('facilities') }}"> existing facilities </a>
-
-  to avoid duplication.<p>
 
 {% if session.username is not none %}
 
@@ -24,7 +20,7 @@
 	   <td><input size=60 type=text name=facility_city></td></tr>
       <tr><td>Country:</td>
 	   <td><input size=60 type=text name=facility_country></td></tr>
-      <tr><td><input class="abutton" type=submit value=submit></td><td></td></tr>
+      <tr><td><input class="abutton" type=submit value=Submit></td><td></td></tr>
     </table>
 </form>
 {% else %}

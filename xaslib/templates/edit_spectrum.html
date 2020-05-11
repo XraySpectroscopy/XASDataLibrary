@@ -74,9 +74,9 @@
 	</select>
 	{% if session.username is not none %}
 	    &nbsp;   &nbsp;
-	    <a class="abutton" href="{{url_for('edit_sample', sid=sample_id)}}">edit this sample</a>
+	    <a class="abutton" href="{{url_for('edit_sample', sid=sample_id)}}">Edit This Sample</a>
 	    &nbsp; &nbsp;
-	    <a class="abutton" href="{{url_for('new_sample', spid=spectrum_id)}}">create new sample</a>
+	    <a class="abutton" href="{{url_for('new_sample', spid=spectrum_id)}}">Create New Sample</a>
 	    &nbsp; &nbsp;
         {% endif %}
 

@@ -5,7 +5,7 @@
 
 {% if session.username is not none %}
   &nbsp;   &nbsp;
-  <a class="abutton" href="{{ url_for('add_facility')}}">add a facility</a>
+  <a class="abutton" href="{{ url_for('add_facility')}}">Add a Facility</a>
 {% endif %}
 
 </div>
@@ -31,7 +31,7 @@
 	    <option value={{fac.id}}> {{fac.name}}</option>
 	  {% endfor %}
 	      </select> </td></tr>
-      <tr><td><input class="abutton" type=submit value=submit></td><td></td></tr>
+      <tr><td><input class="abutton" type=submit value=Submit></td><td></td></tr>
     </table>
 </form>
 {% else %}

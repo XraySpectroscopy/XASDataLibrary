@@ -64,18 +64,18 @@
 		     href="javascript:void();">Select None</a></td>
 	    </tr><tr>
 	      <td><input class='abutton' type=submit name=submit
-			 style="width: 100px;"   value='Plot Spectra'> </td>
+			 style="width: 120px;"   value='Plot Spectra'> </td>
 	      <td>(up to 20 spectra plotted)</td>
 	    </tr><tr>
 	      <td><input class='abutton' type=submit name=submit
-			 style="width: 100px;" value='Save Zip File'></td>
+			 style="width: 120px;" value='Save Zip File'></td>
 	      <td>
 	      </td>
 	    </tr>
 	      {% if owned_suites|count > 0 %}
 	      <tr> <td>
 		  <input class='abutton' type=submit name=submit
-			 style="width: 100px;" value='Add to Suite'></td><td>
+			 style="width: 120px;" value='Add to Suite'></td><td>
 		  <select  name='target_suite' style="width: 200px;">
 		    {% for s in owned_suites %} <option value={{s[0]}}> {{s[1]}}</option>  {% endfor %}
 		  </select>
