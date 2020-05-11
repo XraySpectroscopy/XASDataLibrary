@@ -991,6 +991,39 @@ def suites(stid=None):
     return render_template('suites.html', nsuites=len(suites), suites=suites,
                            person=person)
 
+
+
+@app.route('/suite_action', methods=['GET', 'POST'])
+def suite_action():
+    session_init(session)
+    error=None
+    person_id = int(session['person_id'])
+    button = request.form.get('submit', 'no button').lower()
+    stid = int(request.form.get('suite'))
+    suite = db.fquery('suite', id=stid)[0]
+
+    selected = []
+    for key, val in request.form.items():
+        if key.startswith('sel_'):
+            selected.append(int(key[4:]))
+
+    if button.startswith('plot') and len(selected) > 0:
+        pdata = plot_multiple_spectra(db, selected,
+                                      title="Spectra from '%s'" % suite.name)
+        return render_template('show_plot.html', plotdata=pdata)
+
+
+    elif button.startswith('save') and len(selected) > 0:
+        fname = save_zipfile(db, selected, folder=app.config['DOWNLOAD_FOLDER'])
+        aname = secure_filename("%s.zip" % suite.name)
+        return send_from_directory(app.config['DOWNLOAD_FOLDER'], fname,
+                                   mimetype='application/zip',
+                                   as_attachment=True,
+                                   attachment_filename=aname)
+
+    return reidrect(url_for('suites', stid=stid))
+
+
 @app.route('/add_suite')
 @app.route('/add_suite', methods=['GET', 'POST'])
 def add_suite():
