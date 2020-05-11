@@ -27,6 +27,7 @@ email  = db.get_person('xaslib@xrayabsorption.org').email
 
 datadir = 'data'
 subdirs = sorted(os.listdir(datadir))
+# subdirs = ('Pb', 'Sr')
 
 n = 0
 for sdir in subdirs:
@@ -34,7 +35,6 @@ for sdir in subdirs:
     for f in sorted(glob.glob("%s/*.xdi"  % sdirname)):
         if 'nonxafs' in f or 'upload' in f:
             continue
-        db.add_xdifile(f, person=email)
-        print("added ", f)
+        db.add_xdifile(f, person=email, verbose=True)
         n += 1
 print("'%s' has %d spectra" % (dbname, n))
