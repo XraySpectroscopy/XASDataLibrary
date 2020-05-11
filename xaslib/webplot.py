@@ -62,7 +62,7 @@ def xafs_plotly(x, y, title, ylabel='mutrans', refer=None,
     return json.dumps({'data': data, 'layout': layout, 'config': PLOTLY_CONFIG})
 
 
-def plot_multiple_spectra(db, spectra_list, max_spectra=20):
+def plot_multiple_spectra(db, spectra_list, title=None, max_spectra=20):
     data = []
     xmin, xmax, ymin, ymax = [], [], [], []
     for spid in spectra_list:
@@ -112,7 +112,10 @@ def plot_multiple_spectra(db, spectra_list, max_spectra=20):
     ymax += (ymax-ymin)*0.05
     ymin -= (ymax-ymin)*0.05
 
-    layout = {'title': 'Plot of %d spectra' % (len(data)),
+    if title is None:
+        title = 'Plot of %d spectra' % (len(data))
+
+    layout = {'title': title,
               'height': 600,
               'width': 1000,
               'showlegend': len(data) > 1,
