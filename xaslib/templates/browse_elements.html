@@ -13,11 +13,9 @@
 	 <td>  {% include "filter_form.html" %} 	</td>
        </tr>
        <tr>
+	<td> <hr> </td><td><hr></td><tr>
 	<td rowspan=10>
           {% if spectra|count > 0 %}
-
-	  <hr>
-
 	  {% if spectra|count == 1 %}
               {{ spectra|count }} spectrum for {{ elem }}
 	  {% else %}
@@ -53,37 +51,36 @@
 	    </table>
 	    {% endif %}
 	</td>
+
 	<td>
           {% if spectra|count > 0 %}
- 	  <hr>
-	  <table>
-	      <tr>
-		<td><a  onclick="javascript:checkAll('ptablefilter', true);"
-			href="javascript:void();">Select All</a>
-		</td>
-		<td>
-		  <a onclick="javascript:checkAll('ptablefilter', false);"
-		     href="javascript:void();">Select None</a>
-		</td>
-	      </tr>
+	  Act on Selected Spectra:
+
+	  <table cellpadding=4 border=0>
+	    <tr>
+	      <td><a  onclick="javascript:checkAll('ptablefilter', true);"
+		      href="javascript:void();">Select All</a></td>
+	      <td><a onclick="javascript:checkAll('ptablefilter', false);"
+		     href="javascript:void();">Select None</a></td>
+	    </tr><tr>
+	      <td><input class='abutton' type=submit name=submit
+			 style="width: 100px;"   value='Plot Spectra'> </td>
+	      <td>(up to 20 spectra plotted)</td>
+	    </tr><tr>
+	      <td><input class='abutton' type=submit name=submit
+			 style="width: 100px;" value='Save Zip File'></td>
+	      <td>
+	      </td>
+	    </tr>
+	      {% if owned_suites|count > 0 %}
 	      <tr> <td>
-		<input class='abutton' type=submit name=submit
-		       value='Plot Selected Spectra'> </td><td></td></tr>
-	      <tr>  <td colspan=2>
 		  <input class='abutton' type=submit name=submit
-			 value='Save Selected Spectra to Zip File'>
-		</td>
-	      </tr>
-	      <tr>  <td colspan=2>
-		  <input class='abutton' type=submit name=submit
-			 value='Save Selected Spectra to Athea Project File'>
-		</td>
-	      </tr>
-	    <tr>  <td>
-		<input class='abutton' type=submit name=submit
-		       value='Add Selected to Suite'></td><td>
-		LIST OF SUITES HERE
-	    </td></tr>
+			 style="width: 100px;" value='Add to Suite'></td><td>
+		  <select  name='target_suite' style="width: 200px;">
+		    {% for s in owned_suites %} <option value={{s[0]}}> {{s[1]}}</option>  {% endfor %}
+		  </select>
+	      </td></tr>
+	      {% endif %}
 	  </table>
 	    {% endif %}
 	  </div>
