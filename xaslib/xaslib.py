@@ -855,7 +855,7 @@ class XASDataLibrary(object):
             sid = suite.id
         else:
             sid = suite
-        return db.fquery('suite_rating', suite_id=sid)
+        return self.fquery('suite_rating', suite_id=sid)
 
     def get_spectrum_ratings(self, spectrum):
         "get all ratings for a spectrum"
