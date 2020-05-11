@@ -18,10 +18,13 @@ rcParams['xtick.labelsize'] =  rcParams['ytick.labelsize'] = 18
 import json
 import plotly
 
+from larch.xafs.pre_edge import preedge
+
 PLOTLY_CONFIG = {'displaylogo': False,
                  'modeBarButtonsToRemove': [ 'hoverClosestCartesian',
                                              'hoverCompareCartesian',
                                              'toggleSpikelines']}
+
 
 def xafs_plotly(x, y, title, ylabel='mutrans', refer=None,
                 x_range=None, y_range=None):
@@ -57,6 +60,71 @@ def xafs_plotly(x, y, title, ylabel='mutrans', refer=None,
         layout['yaxis']['range'] = y_range
 
     return json.dumps({'data': data, 'layout': layout, 'config': PLOTLY_CONFIG})
+
+
+def plot_multiple_spectra(db, spectra_list, max_spectra=20):
+    data = []
+    xmin, xmax, ymin, ymax = [], [], [], []
+    for spid in spectra_list:
+        # now get real data for plotting
+        energy, mudata, dgroup = None, None, None
+        try:
+            s  = db.get_spectrum(spid)
+            mode = db.get_spectrum_mode(spid)
+            if mode.startswith('trans'):
+                energy = np.array(json.loads(s.energy))
+                i0     = np.array(json.loads(s.i0))
+                itrans = np.array(json.loads(s.itrans))
+                mudata = -np.log(itrans/i0)
+            else:
+                energy = np.array(json.loads(s.energy))
+                i0     = np.array(json.loads(s.i0))
+                ifluor = np.array(json.loads(s.ifluor))
+                mudata = ifluor/i0
+        except:
+            pass
+        if energy is not None and mudata is not None:
+            dgroup = preedge(energy, mudata)
+        if dgroup is not None:
+            data.append({'x': energy.tolist(),
+                         'y': dgroup['norm'].tolist(),
+                         'type': 'scatter',
+                         'name': s.name,
+                         'line': {'width': 3},
+                         'hoverinfo': 'skip'})
+            xmin.append(energy.min())
+            xmax.append(energy.max())
+            ymin.append(dgroup['norm'].min())
+            ymax.append(dgroup['norm'].max())
+            if len(data) >= max_spectra:
+                break
+
+
+    if len(data) < 0:
+        return
+
+    xmin = np.array(xmin).min()
+    xmax = np.array(xmax).max()
+    ymin = np.array(ymin).min()
+    ymax = np.array(ymax).max()
+    xmax += (xmax-xmin)*0.05
+    xmin -= (xmax-xmin)*0.05
+    ymax += (ymax-ymin)*0.05
+    ymin -= (ymax-ymin)*0.05
+
+    layout = {'title': 'Plot of %d spectra' % (len(data)),
+              'height': 600,
+              'width': 1000,
+              'showlegend': len(data) > 1,
+              'xaxis': {'title': {'text': 'Energy (eV)'},
+                        'tickformat': '.0f', 'range': [xmin, xmax]},
+              'yaxis': {'title': {'text': 'Normalized XAS'},
+                        'zeroline': False,
+                        'tickformat': '.2f', 'range': [ymin, ymax]},
+              'modebar': {'orientation': 'h'},
+              }
+    return json.dumps({'data': data, 'layout': layout, 'config': PLOTLY_CONFIG})
+
 
 def make_xafs_plot(x, y, title, xlabel='Energy (eV)', ylabel='mu', x0=None,
                    ref_mu=None, ref_name=None):
