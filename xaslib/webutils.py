@@ -2,6 +2,7 @@ from os import urandom, path
 
 import json
 import time
+from zipfile import ZipFile
 from base64 import b64encode
 from collections import namedtuple
 from datetime import datetime
@@ -71,6 +72,24 @@ def random_string(n):
        [a-z](n)
     """
     return ''.join([printable[randrange(10, 36)] for i in range(n)])
+
+
+def get_randomfile(extension='zip'):
+    fmt = 'xas%4.4d%2.2d%2.2d_%s.%s'
+
+    now = time.localtime()
+    return fmt % (now.tm_year, now.tm_mon, now.tm_mday,
+                  random_string(6), extension)
+
+def save_zipfile(db, slist, folder='.'):
+    fname = get_randomfile(extension='zip')
+    tfile = path.abspath(path.join(folder, fname))
+    zfile = ZipFile(tfile, mode='w')
+    for spid in slist:
+        spect =  db.fquery('spectrum', id=spid)[0]
+        zfile.writestr("%s.xdi" % spect.name, spect.filetext)
+    zfile.close()
+    return fname
 
 def multiline_text(s):
     if isinstance(s, bytes):
@@ -151,12 +170,44 @@ def suite_ratings_summary(db, sid):
         rating = ' %.1f (%d ratings)' % (sum/n, n)
     return rating
 
+def get_person_suites(db, pid):
+    """get suites owned by a person, for 'add to suite' lists"""
+    out = []
+    try:
+        for s in db.fquery('suite', person_id=int(pid)):
+            out.append((s.id, s.name))
+    except:
+        pass
+    return out
+
 def get_suite_spectra(db, sid):
     'spectra in suite'
     d = []
     for r in db.fquery('spectrum_suite', suite_id=sid):
         d.append(r.spectrum_id)
     return d
+
+def add_spectra_to_suite(db, spectrum_ids, suite_id=-1, person_id=-1):
+    print("Add Spectra ", db, spectrum_ids, suite_id, person_id)
+    # try:
+    suite = db.fquery('suite', id=suite_id)
+    print(suite)
+    if suite is None:
+        return "could not find suite %d" % suite_id
+    suite = suite[0]
+    if suite.person_id != person_id:
+        return "not owner of suite '%s'" % (suite.name)
+
+    current_spectrum_ids = []
+    for r in db.fquery('spectrum_suite', suite_id=suite_id):
+        current_spectrum_ids.append(r.spectrum_id)
+    nadded = 0
+    for spid in spectrum_ids:
+        if spid not in current_spectrum_ids:
+            db.addrow('spectrum_suite', suite_id=suite_id, spectrum_id=spid)
+            nadded += 1
+    return "added %d spectra to suite '%s'" % (nadded, suite.name)
+
 
 def get_spectrum_suites(db, sid):
     'suites that a spectrum is in'
