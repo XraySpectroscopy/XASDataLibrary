@@ -13,48 +13,101 @@
 <div class=body>
 <hr>
 {% if nsuites == 0 %}
-      No suites defined.
+No suites defined.
 {% else %}
-    <table cellspacing=0 cellpadding=3 border=0.25>
-<tr>
-  <th width="20%" align='left'> Name</th>
-  <th widht=" 8%" align='left'> # Spectra</th>
-  <th width="32%" align='left'> Description</th>
-  <th width="40%" align='left'> Ratings and Actions</th>
-   {% for s in suites %}
-       <tr class={{ loop.cycle('odd', 'even') }}>
-       <td><a href="{{url_for('suites')}}/{{ s.id }}"> {{ s.name }}</a></td>
-       <td> {{ s.nspectra }} </td>
-       <td align='left'>{{s.notes|safe}} </td>
-       <td> &nbsp; &nbsp; <a href="{{url_for('showsuite_rating', stid=s.id)}}"> {{s.rating}} &nbsp;
-	{% if session.username is not none %}
-	   <a class="abutton" href="{{url_for('rate_suite', stid=s.id)}}">Rate</a>
-           {% if s.suite_owner %}
-             &nbsp; <a class="abutton" href="{{url_for('edit_suite', stid=s.id)}}">Edit</a>
- 	     &nbsp; <a class="abutton" href="{{url_for('delete_suite', stid=s.id, ask=1)}}">Delete</a>
-           {% endif %}
-        {% endif %}
-	</td></tr>
-   {% endfor %}
-   </table>
+<table cellspacing=0 cellpadding=3 border=0.25>
+  <tr>
+    <th width="20%" align='left'> Name</th>
+    <th widht= "8%" align='left'> # Spectra</th>
+    <th width="32%" align='left'> Description</th>
+    <th width="15%" align='left'> Ratings</th>
+    <th width="25%" align='left'> Actions</th>
+    {% for s in suites %}
+  <tr class={{ loop.cycle('odd', 'even') }}>
+    <td><a href="{{url_for('suites')}}/{{ s.id }}"> {{ s.name }}</a></td>
+    <td> {{ s.nspectra }} </td>
+    <td align='left'>{{s.notes|safe}} </td>
+    <td> &nbsp; <a href="{{url_for('showsuite_rating',
+			 stid=s.id)}}"> {{s.rating}} </td>
+    <td>
+      {% if session.username is not none %}
+      <a class="abutton" href="{{url_for('rate_suite', stid=s.id)}}">Rate</a>
+      {% if s.suite_owner %}
+      &nbsp; <a class="abutton" href="{{url_for('edit_suite', stid=s.id)}}">Edit</a>
+      &nbsp; <a class="abutton" href="{{url_for('delete_suite', stid=s.id, ask=1)}}">Delete</a>
+      {% endif %}
+      {% endif %}
+  </td></tr>
+  {% endfor %}
+</table>
 {% if nsuites == 1 %}
 
-<p>Suite created by <a href="{{url_for('show_person')}}/{{person.id}}">
-    {{person.email}}</a>
+<p>
 
-<p> Spectra:
-    <table>
+  <form action="{{ url_for('suite_action')}}" name="suiteform" method="post">
+    <input type=hidden name=person value={{person.id}}>
+    <input type=hidden name=suite value={{suites[0].id}}>
+    <table border=0 cellpadding=3>
+      <tr><td>     <hr></td><td><hr></td></tr>
+      <tr><td>Suite created by <a href="{{url_for('show_person')}}/{{person.id}}">
+	    {{person.email}}</a>
+	</td><td> Act on Selected Spectra </td></tr>
+  <tr>
+    <td rowspan=10>
+      <table cellspacing=5 cellpadding=2>
+      <tr>
+	<th style="width: 300px;"> &nbsp; Name &nbsp;</th>
+	<th style="width: 80px;">   &nbsp; Edge &nbsp;</th>
+	<th>  Select </th>
+      </tr>
+
       {% for suite in suites %}
-	  {% for spec in suite.spectra %}
-	    <tr class={{ loop.cycle('odd', 'even') }}>
-	    <td> &nbsp; &nbsp; <a href="{{url_for('spectrum')}}{{ spec.spectrum_id }}"> {{ spec.name }}</a></td>
-	    <td> &nbsp; {{ spec.elem_sym }}  {{ spec.edge }} edge </td>
-	    </tr>
-	 {% endfor %}
-     {% endfor %}
+      {% for spec in suite.spectra %}
+      <tr class={{ loop.cycle('odd', 'even') }}>
+	<td> &nbsp; &nbsp; <a href="{{url_for('spectrum')}}{{ spec.spectrum_id }}"> {{ spec.name }}</a></td>
+	<td> &nbsp; {{ spec.elem_sym }}  {{ spec.edge }} edge </td>
+	<td> <input type="checkbox"  name="sel_{{spec.spectrum_id}}" checked="checked" </td>
+		    </tr>
+      {% endfor %}
+      {% endfor %}
     </table>
-   {% endif %}
-{% endif %}
+  </td>
+  <td>
+    <table cellpadding=4 border=0>
+      <tr>
+	<td><a  onclick="javascript:checkAll('suiteform', true);"
+		href="javascript:void();">Select All</a></td>
+	<td><a onclick="javascript:checkAll('suiteform', false);"
+	       href="javascript:void();">Select None</a></td>
+      </tr><tr>
+	<td><input class='abutton' type=submit name=submit
+		   style="width: 120px;"   value='Plot Spectra'> </td>
+	<td>(up to 20 spectra plotted)</td>
+      </tr><tr>
+	<td><input class='abutton' type=submit name=submit
+		   style="width: 120px;" value='Save Zip File'></td>
+	<td>
+	</td>
+      </tr>
+    </table>
+  </td></tr>
+  </form>
+</table>
+
+    {% endif %}
+    {% endif %}
+
+<script type="text/javascript">
+  function checkAll(form, toggle)  {
+      var checkboxes = new Array();
+      checkboxes = document[form].getElementsByTagName('input');
+      for (var i=0; i<checkboxes.length; i++)  {
+          if (checkboxes[i].type == 'checkbox')  {
+             checkboxes[i].checked = toggle;
+     }
+    }
+  }
+</script>
 
 </div>
 {% endblock %}
