@@ -3,25 +3,36 @@
 
 <p>
 <div class=subtitle> Spectrum:  {{ spectrum_name }}
+</div> <br>
+
+<form action="{{ url_for('add_spectrum_to_suite')}}" method="post">
+
+  {% if session.username is not none %}
+  <a class="abutton" href="{{url_for('rate_spectrum', spid=spectrum_id) }}">Rate Spectrum</a>
+  {% endif %}
+
+  {% if spectrum_owner %}
+  &nbsp;   &nbsp;
+  <a class="abutton" href="{{url_for('edit_spectrum',  spid=spectrum_id)}}">Edit Spectrum</a>
+  &nbsp;  &nbsp;
+  <a class="abutton" href="{{url_for('delete_spectrum',  spid=spectrum_id)}}">Delete Spectrum</a>
+  {% endif %}
+
+  {% if session.username is not none  and  owned_suites|count > 0 %}
+  &nbsp;  &nbsp;  &nbsp;  &nbsp;
+    <input type=hidden name=person value={{person_id}}>
+  <input type=hidden name=spectrum value={{spectrum_id}}>
+  <input class='abutton' type=submit name=submit  value='Add to Suite'>
+  &nbsp;  &nbsp;
+  <select  name='target_suite' style="width: 200px;">
+    {% for s in owned_suites %} <option value={{s[0]}}> {{s[1]}}</option>  {% endfor %}
+  </select>
+  {% endif %}
+</form>
 
 
-{% if session.username is not none %}
-&nbsp;
-<a class="abutton" href="{{url_for('rate_spectrum', spid=spectrum_id) }}">rate this spectrum</a>
-{% endif %}
-
-{% if spectrum_owner %}
-&nbsp;
-<a class="abutton" href="{{url_for('edit_spectrum',  spid=spectrum_id)}}">edit spectrum</a>
-&nbsp;
-<a class="abutton" href="{{url_for('delete_spectrum', spid=spectrum_id)}}">delete spectrum</a>
-{% endif %}
-
-{% if session.username is not none %}
-&nbsp;
-<a class="abutton" href="{{url_for('add_spectrum_to_suite', spid=spectrum_id)}}">add spectrum to a suite</a>
-{% endif %}
 <p>
+
 
 </div>
 
@@ -72,7 +83,7 @@
        <a href="{{url_for('citation')}}/{{citation_id}}"> {{ citation_name }}</a> &nbsp; &nbsp;
     {% else %}
        {% if spectrum_owner %}
-           <a class="abutton" href="{{url_for('add_citation')}}">add citation</a>
+           <a class="abutton" href="{{url_for('add_citation')}}">Add Citation</a>
        {% else %} {{ citation_name }} &nbsp; &nbsp;
        {% endif %}
 {% endif %} </td></tr>
