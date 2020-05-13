@@ -585,7 +585,6 @@ def spectrum(spid=None, plotstyle='xanes'):
             ifluor = np.array(json.loads(s.ifluor))
             mudata = ifluor/i0
     except:
-        error = 'Could not extract fluorescence data from spectrum'
         return render_template('spectrum.html', **opts)
 
     dgroup = preedge(energy, mudata)
@@ -594,11 +593,12 @@ def spectrum(spid=None, plotstyle='xanes'):
     try:
         irefer = np.array(json.loads(s.irefer))
         refmode = s.reference_mode_id
-        refmode = 1 if refmode is None else refmode
-        if refmode.startswith('trans'):
-            murefer = -np.log(irefer/itrans)
-        else:
-            murefer = irefer/i0
+        if refmode is not None:
+            refmode = REFERENCE_MODES[refmode]
+            if refmode.startswith('trans'):
+                murefer = -np.log(irefer/itrans)
+            else:
+                murefer = irefer/i0
     except:
         murefer = None
 
@@ -626,7 +626,6 @@ def spectrum(spid=None, plotstyle='xanes'):
         if murefer is not None:
             rgroup = preedge(energy, murefer)
             ref_mu = rgroup['norm']
-
         opts['xasplot'] = xafs_plotly(energy, dgroup['norm'], s.name,
                                       ylabel='Normalized XANES',
                                       refer=ref_mu, x_range=[emin, emax],
@@ -960,7 +959,14 @@ def doc(page='index.html'):
 @app.route('/show_person/<int:pid>')
 def show_person(pid=-1):
     session_init(session)
-    return render_template('person.html', person=db.get_person(pid))
+    person = db.get_person(pid)
+    suites = db.fquery('suite', person_id=pid)
+    spectra = db.fquery('spectrum', person_id=pid)
+    print(len(suites), len(spectra), pid)
+    return render_template('person.html', person=person, suites=suites,
+                           spectra=spectra)
+
+
 
 @app.route('/suites')
 @app.route('/suites/')
@@ -1625,7 +1631,7 @@ def verify_uploaded_data(form, with_arrays=False):
             murefer = murefer[en_order]
 
     try:
-        opts['muplot'] =  xafs_plotly(energy, mu, fname, ylabel=mode)
+        opts['muplot'] =  xafs_plotly(energy, mu, fname, ylabel=mode, refer=murefer)
     except:
         opts['muplot'] =  'noplot'
         opts['verify_ok']  = 0
