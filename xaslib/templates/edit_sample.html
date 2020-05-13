@@ -4,7 +4,7 @@
 <p><div class=subtitle>Edit Sample:  {{ name }}</div>
 
 
-<form action="{{ url_for('submit_sample_edits') }}" method=post>
+  <form action="{{ url_for('submit_sample_edits') }}" method=post enctype=multipart/form-data>
   <input type=hidden name=person_id value={{person_id}}>
   <input type=hidden name=sample_id value={{id}}>
   <table>
@@ -13,6 +13,13 @@
 	<input size=60 type=text name=name value='{{name|safe}}'></td></tr>
     <tr><td>Formula:</td><td>
 	<input size=60 type=text name=formula value='{{formula|safe}}'></td></tr>
+    <tr><td>CAS Number:</td><td>
+	<input size=60 type=text name=cas_number value='{{cas_number|safe}}'></td></tr>
+    <tr><td> Upload Image: </td><td>
+
+{% if has_image %} <img src="{{image_data}}" />  {% endif %}
+       <input  type=file name=image_filename>    </td></tr>
+    <tr><td></td><td></td></tr>
     <tr><td>Preparation: </td><td>
 	<textarea cols=55  rows=6 type=text name=preparation>{{preparation|safe}}</textarea></td></tr>
     <tr><td> Notes: </td><td>

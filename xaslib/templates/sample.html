@@ -16,7 +16,13 @@
 <tr><td width=12%> Name: </td> <td>  {{name}} </td></tr>
 <tr><td width=12%> Formula: </td> <td>  {{formula}} </td></tr>
 <tr><td width=12%> Preparation: </td> <td>  {{preparation}} </td></tr>
-<tr><td width=12%> Notes: </td> <td>  {{notes}} </td></tr>
+<tr><td width=12%> CAS Number:  </td> <td>  {{cas_number}} </td></tr>
+<tr><td width=12%> Notes:       </td> <td>  {{notes}} </td></tr>
+<tr><td width=12%> Image:       </td> <td>
+{% if has_image %} <img src="{{image_data}}"/> {% endif %}
+</td></tr>
+
+<tr><td width=12%> XRD Data:       </td> <td> - </td> </tr>
 </table>
 
 <hr>

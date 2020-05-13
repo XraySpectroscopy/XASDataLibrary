@@ -1115,7 +1115,7 @@ def submit_suite_edits():
             key = 'spec_%d' % spid
             if key not in request.form:
                 db.remove_spectrum_from_suite(stid, spid)
-        time.sleep(0.25)
+        time.sleep(0.1)
 
     return redirect(url_for('suites', stid=stid, error=error))
 
@@ -1128,8 +1128,9 @@ def sample(sid=None):
         return sendback(error='no sample #%d found' % sid)
 
     opts = row2dict(sdat)
+    has_image = opts.get('image_data', None) is not None
     opts['spectra'] = db.fquery('spectrum', sample_id=sid)
-    return render_template('sample.html', sid=sid, **opts)
+    return render_template('sample.html', sid=sid, has_image=has_image, **opts)
 
 
 @app.route('/samples')
@@ -1166,7 +1167,7 @@ def new_sample(spid=None):
     if spid is not None:
         db.update('spectrum', spid, use_id=True, sample_id=sid)
     session_init(session, force_refresh=True)
-    return redirect(url_for('edit_sample', sid=sid, error=error))
+    return redirect(url_for('edit_sample', sid=sid,  error=error))
 
 
 @app.route('/select_spectrum_sample/<int:spid>/<int:sid>')
@@ -1181,8 +1182,9 @@ def select_spectrum_sample(spid=None, sid=None):
     sdat = None_or_one(db.fquery('sample', id=sid))
     if sdat is not None:
         opts = row2dict(sdat)
-    return render_template('edit_sample.html', sid=sid,
-                           spid=spid, **opts)
+    opts['has_image'] = opts.get('image_data', None) is not None
+
+    return render_template('edit_sample.html', sid=sid, spid=spid, **opts)
 
 @app.route('/edit_sample/<int:sid>')
 def edit_sample(sid=None):
@@ -1198,6 +1200,8 @@ def edit_sample(sid=None):
         return redirect(url_for('/', error=error))
 
     opts = row2dict(sdat)
+    opts['has_image'] = opts.get('image_data', None) is not None
+
     opts['spectra'] = db.fquery('spectrum', sample_id=sid)
     return render_template('edit_sample.html', sid=sid, **opts)
 
@@ -1217,9 +1221,41 @@ def submit_sample_edits():
         notes = request.form['notes']
         prep = request.form['preparation']
         formula = request.form['formula']
+        cas_number = request.form['cas_number']
+        print(" Submit Sample Edits: ", sid, name, cas_number)
+        image_data = None
+        ###
+        print(" - Files: ", request.files)
+        img_file = request.files['image_filename']
+        if img_file:
+            fullpath = get_fullpath(img_file, app.config['UPLOAD_FOLDER'])
+            mimetype = img_file.mimetype
+            print("Image File ", fullpath, img_file, mimetype, dir(img_file))
+
+            try:
+                img_file.save(fullpath)
+            except IOError:
+                return render_template('sample.html',
+                                       person_id=session['person_id'],
+                                       error='Could not save uploaded file')
+
+            time.sleep(0.250)
+
+            try:
+                dat = open(fullpath, 'rb').read()
+            except:
+                return render_template('sample.html',
+                                       person_id=session['person_id'],
+                                       error='Could not read uploaded file')
+
+            image_data = "data:%s;base64,%s" % (mimetype,
+                                                base64.b64encode(dat).decode('utf-8'))
+            print("Have Image Data!" , image_data)
+        ###
         db.update('sample', int(sid), person=pid, name=name, notes=notes,
-                  formula=formula,  preparation=prep)
-        time.sleep(0.25)
+                  formula=formula,  preparation=prep, cas_number=cas_number,
+                  image_data=image_data)
+        time.sleep(0.1)
     session_init(session, force_refresh=True)
     return redirect(url_for('sample', sid=sid, error=error))
 
@@ -1509,7 +1545,6 @@ def parse_datagroup(dgroup, fname, fullpath, pid, form=None):
     opts.update(**guess_metadata(dgroup))
     if opts['has_reference']:
         opts['ref_choice'] = REFERENCE_MODES[1]
-
     return opts
 
 
