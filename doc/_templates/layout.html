@@ -1,0 +1,29 @@
+{% extends "!layout.html" %}
+
+
+{% block relbar1 %}
+
+<!-- <div class="related" role="navigation" aria-label="related navigation"> -->
+
+<link rel="stylesheet" href="_static/xaslib_doc.css" type="text/css" />
+
+<div class="topbar">
+<a href="{{pathto('index')}}">X-ray Absorption Data Library: documentation</a>
+
+<p>
+  <ul class="topmenu">
+  <li><a href="https://xaslib.xrayabsorption.org">XAS Data Library</a></li>
+  <li><a href="{{ pathto('license') }}">License</a></li>
+  <li><a href="{{ pathto('login') }}">Why Log in?</a></li>
+  <li><a href="{{ pathto('suites') }}">What is a Suite?</a></li>
+  <li><a href="{{ pathto('ratings') }}">Ratings and Reviews</a></li>
+  <li><a href="{{ pathto('upload') }}">Uploading Data</a></li>
+</ul>
+</div>
+</div>
+
+
+{% endblock %}
+
+
+{% block scripts %}  {{ super()}} {% endblock %}
