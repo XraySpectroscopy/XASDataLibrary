@@ -2,39 +2,40 @@
 Intended Usage, License, and Citations
 ----------------------------------------------
 
-The intended audience for this collection of XAS spectra is the XAS
-research community or anyone trying to understand the relation between XAS
-spectra and the chemical and physical state of a material or molecule.  For
-such researchers, comparing XAS spectra on different materials, samples,
-and chemical species is a recurring need.  It is sometimes challenging,
-time-consuming, or expensive to measure "good standards" for different
-sample conditions.
+The data in the X-ray Absorption Data Library have been licensed under the
+`Creative Commons Zero
+<https://creativecommons.org/share-your-work/public-domain/cc0/>`_ license
+and put in the Public Domain. This allows anyone to use these data for any
+purpose, without restrictions. All claims of exclusive copyright on these
+data has been relinquished in order to ensure that the broad community of
+scientists, educators, and students can use these data in their studies
+using X-ray absorption spectroscopy.
 
-The data in this library have been put into the Public Domain or licensed
-under the `Creative Commonz Zero
-<https://creativecommons.org/share-your-work/public-domain/cc0/>`_
-license. This allows you to use these data for any purpose, without
-restrictions.  Following standard academic practices, claiming that any of
-the data here is exclusively yours would not be reasonable.
+The people submitting data to this library agree to these terms to permit
+free and unrestricted access to this data.  While exclusive ownership has
+been relinquished, each spectrum here will have the name of at least one
+real person associated with it. This will typically be the person who
+uploaded the data, or someone involved in the collection of the data.  This
+attribution follows standard academic practices, and allows the people
+uploading spectra to be recognized by their peers for their contribution.
+It also allows people looking at spectra to see who uploaded the data.
 
-As a matter of practice, each spectrum here will have at least one name
-associated with it as the person who uploaded (and presumably was involved
-in the collection) the data.  Most of the data here will have been
-collected at government-operated national laboratories and/or with
-government-funded research grants that may have policies about data sharing
-and attribution. These policies are generally liberal in order to promote
-public access as made available here, at least after some time.  By
-uploading the data here, the submitter has agreed to grant free and
-unrestricted access to this data and to follow the guidelines of the
+Most of the data here will have been collected at government-operated
+national laboratories and/or with government-funded research grants that
+may have policies about data sharing and attribution. These policies are
+generally liberal and designed to promote public access of data, at least
+after some time.  By uploading the data here, the submitter has agreed that
+submitting the data with this license follows the guidelines of the
 institutions and funding agents.
 
 If some of the XAS data here becomes an important part of your work, you
-may want to contact or reference the author or their institution.  Some
-spectra will have a literature citation associated with them.  You are not
-obligated to cite such work in order to use the data, but you may consider
-doing so.
+may want to contact the author or their institution, or refer to there
+work.  Some spectra will have a literature citation associated with them.
+You are not obliged to cite such work in order to use the data, but we
+encourage you to do so if those data become an important part of your work.
 
-If you wish to cite the collection as a whole, simply use the URL
-https://data.xrayabsorption.org and reference the work as belonging to the
-`International X-ray Absorption Society <https://xrayabsorption.org>`_.  We
-will explore generating a DOI for this collection.
+At this point, if you wish to cite the collection as a whole, simply use
+the URL https://xaslib.xrayabsorption.org and reference the work as
+belonging to the `International X-ray Absorption Society
+<https://xrayabsorption.org>`_.  We will explore generating a DOI for the
+collection as a whole.
