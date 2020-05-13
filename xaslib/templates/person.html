@@ -3,6 +3,10 @@
 
 <p><div class=subtitle> Person:</div>
 
+Owner of
+{%if spectrum|count == 1 %} 1 spectrum{% else %} {{ spectra|count }} spectra{% endif %}, and
+{%if suites|count == 1 %} 1 suite{% else %} {{ suites|count }} suites{% endif %}.
+
 <div class=body>
 
 <table cellspacing=3 cellpadding=1>
@@ -12,9 +16,6 @@
 </table>
 
 
-This person is the owner of
-{%if spectrum|count == 1 %} 1 spectrum{% else %} {{ spectra|count }} spectra{% endif %}, and
-{%if suites|count == 1 %} 1 suite{% else %} {{ suites|count }} suites{% endif %}.
 
 </div>
 {% endblock %}
