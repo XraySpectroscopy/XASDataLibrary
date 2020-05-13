@@ -21,5 +21,9 @@ for definitions.
 
    license
    website
+   login
+   suites
+   ratings
+   upload
    xdi
    database
