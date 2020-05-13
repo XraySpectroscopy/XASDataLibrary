@@ -4,7 +4,7 @@ Intended Usage, License, and Citations
 
 
 The data in the X-ray Absorption Data Library have been licensed under the `Creative Commons Zero
-<https://creativecommons.org/share-your-work/public-domain/cc0/>` license and put in the Public
+<https://creativecommons.org/share-your-work/public-domain/cc0/>`_ license and put in the Public
 Domain. This allows anyone to use these data for any purpose, without restrictions. All claims of
 exclusive copyright on these data have been relinquished in order to ensure that the broad
 community of scientists, educators, and students can use these data in their studies using X-ray
@@ -30,6 +30,24 @@ associated with them.  You are not obliged to cite such work in order to use the
 encourage you to do so if those data become an important part of your work.
 
 At this point, if you wish to cite the collection as a whole, simply use the URL
-https://xaslib.xrayabsorption.org and reference the work as belonging to the `International X-ray
-Absorption Society <https://xrayabsorption.org>` . We will explore generating a DOI for the
+https://xaslib.xrayabsorption.org and reference the work as belonging to the
+`International X-ray Absorption Society <https://xrayabsorption.org>`_.  We will explore generating a DOI for the
 collection as a whole.
+
+
+on Data and Sample Quality
+--------------------------------
+
+The XAS data here are intended to be of good quality and collected using well-characterized samples
+that are of general interest.  The spectra are intended to be able to act as standards for more
+complex analysis and to give experimentalists a set of benchmarks for data quality and instrument
+calibration.  As with any experimental method, there may be imperfections or inadvertent errors in
+any of the individual spectra here.  While we intend these to be "good spectra", there are no
+guarantees are made about the quality of the data or the origin or quality of the samples used.
+Use these data with caution.  Also see the information on Ratings and Reviews, which allows anyone
+interested to add ratings and comments on a particular spectrum or suite of spectra.
+
+To better explain and curate the data, information is included about the beamlines and facilities
+(typically government-funded laboratories) where the data were collected, and at least one person
+involved with the measurement.  These should not be viewed as an endorsement of the data by the
+facility or as a notice of copyright to restrict who can use the data.
