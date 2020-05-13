@@ -34,12 +34,17 @@
 	<a href="{{url_for('elem')}}"> X-ray Absorption Data Library </a>
       </td>
       <td width=65% align=right>
+	<font size=-1>
+
         {% if session.username == none %}
 	<a href="{{ url_for('login') }}">Log In</a>
 	<a href="{{ url_for('create_account') }}">Create Account</a>
-	{% else %}
+        {% else %}
+        Hello, <a href="{{ url_for('show_person', pid=session.person_id)}}">{{session.username}}</a>
+
 	<a href="{{ url_for('logout') }}">Log Out</a>
 	{% endif %}
+	</font>
       </td>
     </tr>
   </table>
