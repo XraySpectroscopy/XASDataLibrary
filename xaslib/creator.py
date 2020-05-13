@@ -137,6 +137,10 @@ def create_xaslib(dbname, server= 'sqlite', user='',
                         cols=[StrCol('formula'),
                               StrCol('material_source'),
                               StrCol('preparation'),
+                              StrCol('cas_number'),
+                              StrCol('image_data'),
+                              StrCol('xrd_data'),
+                              StrCol('extra_data'),
                               PointerCol('person'),
                               PointerCol('crystal_structure')
                               ])
