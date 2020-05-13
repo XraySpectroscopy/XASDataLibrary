@@ -124,7 +124,7 @@ def send_confirm_email(person, hashkey, style='new'):
     message = """
         Someone (hopefully you) asked to reset your account for the XAS Data Library.
 
-        To change your passowrd, please follow this link:
+        To enter a new password, please follow this link:
                {base_url:s}/newpassword/{person_id:d}/{hashkey:s}
 
         Thank you.
@@ -136,7 +136,7 @@ def send_confirm_email(person, hashkey, style='new'):
         message = """
         An account at the XAS Data Library has been created for {name:s}, but not yet confirmed.
 
-        To confirm this account, please follow this link:
+        To use this account, you will have to confirm it by following this link:
                {base_url:s}/confirmaccount/{person_id:d}/{hashkey:s}
 
         Thank you.
@@ -250,7 +250,6 @@ def password_reset_request():
             send_confirm_email(person, hashkey, style='reset')
             return render_template('password_reset_response.html',
                                    email=email, error=error)
-
     return render_template('password_reset_request.html', error=error)
 
 
