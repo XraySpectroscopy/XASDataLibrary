@@ -1,7 +1,11 @@
 
 
-Next Generation XAFS Data Library
-=======================================
+Database Desgin:  Next Generation XAFS Data Library
+============================================================
+
+Important note: this section is currently far out-of-date and needs
+attention.
+
 
 This page is a Work-in-Progress Proposal for how to build a *Next
 Generation XAFS Data Library* The main idea is to facilitate the exchange

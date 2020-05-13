@@ -21,7 +21,5 @@ for definitions.
 
    license
    website
-   quality
-   overview
    xdi
-   about
+   database
