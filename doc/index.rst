@@ -11,7 +11,8 @@ recorded in electron-Volts (:math:`eV`) while the values for absorption are
 left "un-normalized" and not necessarily scaled to any particular units.
 Most of the data will have been measured in Transmission mode though some
 may have been measured in Fluorescence or other Emission modes See
-`https://xafs.xrayabsorption.org/acronyms.html#terms-for-measurement-modes`_
+`Measurement Modes
+<https://xafs.xrayabsorption.org/acronyms.html#terms-for-measurement-modes>`_
 for definitions.
 
 .. toctree::
@@ -20,7 +21,7 @@ for definitions.
 
    license
    website
-   about
    quality
-   xdi
    overview
+   xdi
+   about
