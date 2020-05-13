@@ -11,5 +11,10 @@
 <tr><td>Affiliation:</td><td>{{person.affiliation}}</td></tr>
 </table>
 
+
+This person is the owner of
+{%if spectrum|count == 1 %} 1 spectrum{% else %} {{ spectra|count }} spectra{% endif %}, and
+{%if suites|count == 1 %} 1 suite{% else %} {{ suites|count }} suites{% endif %}.
+
 </div>
 {% endblock %}
