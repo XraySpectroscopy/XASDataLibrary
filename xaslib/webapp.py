@@ -56,6 +56,13 @@ REFERENCE_MODES = ('no reference spectra',
                    'flouresence,  downstream of i1')
 
 
+def make_permalink(selected, func='plot_spectra'):
+    base_url = app.config['BASE_URL']
+    if base_url.endswith('/'):
+        base_url = base_url[:-1]
+    sel = '&'.join(['%d' % i for i in selected])
+    return "%s/%s?%s" % (base_url, func, sel)
+
 def session_init(session, force_refresh=False):
     global db, app, ANY_EDGES, ANY_MODES,  SAMPLES_OR_NEW
     global ANY_BEAMLINES, BEAMLINE_DATA, SAMPLES_DATA
@@ -426,6 +433,7 @@ def elem(elem=None, orderby='name', reverse=0):
 
     if button.startswith('plot') and len(selected) > 0:
         return render_template('show_plot.html', nspectra=len(selected),
+                               permalink=make_permalink(selected),
                                plotdata=plot_multiple_spectra(db, selected))
 
     elif button.startswith('save') and len(selected) > 0:
@@ -1015,7 +1023,8 @@ def suite_action():
     if button.startswith('plot') and len(selected) > 0:
         pdata = plot_multiple_spectra(db, selected,
                                       title="Spectra from '%s'" % suite.name)
-        return render_template('show_plot.html', plotdata=pdata)
+        return render_template('show_plot.html', nspectra=len(selected),
+                               permalink=make_permalink(selected), plotdata=pdata)
 
 
     elif button.startswith('save') and len(selected) > 0:
@@ -1027,6 +1036,20 @@ def suite_action():
                                    attachment_filename=aname)
 
     return reidrect(url_for('suites', stid=stid))
+
+@app.route('/plot_spectra', methods=['GET', 'POST'])
+def plot_spectra():
+    session_init(session)
+    selected = []
+
+    if request.method == 'GET':
+        for k, v in request.args.items():
+            selected.append(int(k))
+
+    if len(selected) > 0:
+        return render_template('show_plot.html', nspectra=len(selected),
+                               permalink=make_permalink(selected),
+                               plotdata=plot_multiple_spectra(db, selected))
 
 
 @app.route('/add_suite')
