@@ -16,7 +16,7 @@ PORT = 7112
 cnf = app.config
 cnf['LOCAL_USE_ONLY'] = False
 cnf['ADMIN_EMAIL'] = 'xaslib@xrayabsorption.org'
-cnf['BASE_URL'] = 'https://data.xrayabsorption.org'
+cnf['BASE_URL'] = 'http://127.0.0.1:%d' % PORT
 cnf['DBNAME']  =  'xaslib.db'
 cnf['DBCONN']  = dict(user='xasdb', password='secret',
                       host='localhost', server='sqlite3')
