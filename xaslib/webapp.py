@@ -1058,7 +1058,6 @@ def suite_action():
 @app.route('/plots/<int:s1>/<int:s2>/<int:s3>/<int:s4>/<int:s5>/<int:s6>/<int:s7>/<int:s8>/<int:s9>/<int:s10>/<int:s11>/<int:s12>/<int:s13>/<int:s14>/<int:s15>/<int:s16>/<int:s17>/<int:s18>')
 @app.route('/plots/<int:s1>/<int:s2>/<int:s3>/<int:s4>/<int:s5>/<int:s6>/<int:s7>/<int:s8>/<int:s9>/<int:s10>/<int:s11>/<int:s12>/<int:s13>/<int:s14>/<int:s15>/<int:s16>/<int:s17>/<int:s18>/<int:s19>')
 @app.route('/plots/<int:s1>/<int:s2>/<int:s3>/<int:s4>/<int:s5>/<int:s6>/<int:s7>/<int:s8>/<int:s9>/<int:s10>/<int:s11>/<int:s12>/<int:s13>/<int:s14>/<int:s15>/<int:s16>/<int:s17>/<int:s18>/<int:s19>/<int:s20>')
-
 def plots(s1=0, s2=0, s3=0, s4=0, s5=0, s6=0, s7=0, s8=0, s9=0, s10=0, s11=0,
           s12=0, s13=0, s14=0, s15=0, s16=0, s17=0, s18=0, s19=0, s20=0):
     session_init(session)
