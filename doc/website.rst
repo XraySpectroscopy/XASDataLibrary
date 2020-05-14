@@ -90,16 +90,37 @@ spectra.
 
 
 
-
 .. _Spectra:
+
 
 The XAS Spectrum
 -----------------------------------------
 
 
-The data in xaslib contains several kinds of information related to XAS
-Spectrum, such as Sample, Beamline, Collection Date, and Person.  A
-complete list and explanation of these terms is given below.
+The data in xaslib contains several kinds of information.  The most
+important of these is the *XAS Spectrum*.  This contains an XAS spectrum
+:math:`\mu(E)`, which is to say arrays of numbers for *Energy* and
+*Absorbance*, and a set of *meta-data* that goes along with each spectrum
+to help describe it the important details needed to use these data.  The
+full details of what metadata is stored and how will be given in
+:ref:`database`, and the emphasis here will be on using the web library.
+
+Clicking on any of the spectra listed in the Spectrum Table, such as shown in
+Fig :ref:`web_fig2` will bring up a page with lots of the information for
+that spectrum, like this:
+
+
+.. _web_fig5:
+
+.. figure::  _images/web_spectrum.png
+    :target: _images/web_spectrum.png
+    :width: 85%
+    :align: center
+
+    Example page for a single spectrum.
+
+
+
 
 
 
@@ -122,46 +143,14 @@ Beamlines and Facilities
 Information about Samples
 -----------------------------------------
 
-.. _Citations:
 
-Literature Citations
------------------------------------------
 
 .. _People:
 
 People
 -----------------------------------------
 
+.. _Citations:
 
-.. _Suites:
-
-Suites: Tagging Related Spectra
+Literature Citations
 -----------------------------------------
-
-A suite is a collection of similar spectra. From an organizational point of
-view, suites are simply tags that can be applied to spectra.  Each suite
-can contain multiple spectra in the sense that each tag can be applied to
-multiple spectra.
-
-In addition, each spectra can be assigned to many suites.  With this simple
-mechanism of tags, one can build complex sets of spectra, and be able to
-assemble suites of something like *V oxides prepared by Person X and
-measured at beamline Y*.
-
-.. _Ratings:
-
-Rating Spectra and Suites
------------------------------
-
-Any individual spectra or suites of spectra can be rated and reviewed by
-any person who has logged in.  Scores can range from 0 to 5 (similar to
-many on-line shopping sites), and comments or reviews on the spectrum or
-suite can be made.
-
-
-.. _Uploading:
-
-Uploading Data
---------------------
-
-To upload data, you must be logged in, and the data to load must be a   valid XDI file.

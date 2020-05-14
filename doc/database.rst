@@ -1,6 +1,6 @@
+.. _database:
 
-
-Database Desgin:  Next Generation XAFS Data Library
+Database Design for the XAS Data Library
 ============================================================
 
 Important note: this section is currently far out-of-date and needs
