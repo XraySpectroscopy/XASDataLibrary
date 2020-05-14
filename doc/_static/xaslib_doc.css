@@ -1,11 +1,7 @@
 
-a, h1, h2  {color: #16C; text-decoration: none; }.
-h1, h2     {font-family: 'Georgia', serif; margin: 0; }
-h1         {border-bottom: 1px solid #eee; }
-h2         {font-size: 1.2em; }
+.body a  {color: #16C; background-color: #FFE; text-decoration: none; }
+.body a:hover  {color: #C61; background-color: #F4F4C4; text-decoration: none; }
 
-.body  { font-family: sans-serif; margin:5px; padding:2px;
-	 background-color: #FFF; font: 12px verdana, sans-serif;}
 
 .topbar {font: bold 16px verdana, arial, sans-serif;
 	 padding: 5px;text-decoration: none;
@@ -15,7 +11,7 @@ h2         {font-size: 1.2em; }
 .topbar a:hover  {background-color: #16C; color: #FFF; margin: 10px;}
 
 .topmenu { font: bold 14px verdana, arial, sans-serif; margin: 0px;
-           padding: 0px 0px 16px 0px;   border: 3px solid #16C;
+           padding: 0px 0px 14px 0px;   border: 1px solid #16C;
            background-color: #16C;}
 
 .topmenu ul {margin: 0px;  padding: 0px}
@@ -23,11 +19,11 @@ h2         {font-size: 1.2em; }
              margin: 0px;
              list-style-type: none;
              border-right: 3px solid #FE9;
-             padding: 0px 10px 0px 10px;
+             padding: 0px 6px 0px 6px;
              color: #FEA; background-color: #16C;}
 
 
-.topmenu a, a.active {color: #FE9; }
+.topmenu a, a.active {color: #FE9; background-color: #16C;}
 .topmenu a.active    {color: #FE9; background-color: #16C;}
-.topmenu a:hover     {color: #FE9; background-color: #579; transition: 0.5s ease-in; }
-.topmenu li:hover    {color: #FE9; background-color: #579; transition: 1.01s ease-in; }
+.topmenu a:hover     {color: #FAF4C4; background-color: #468; transition: 0.5s ease-in; }
+.topmenu li:hover    {color: #FAF4C4; background-color: #468; transition: 0.6s ease-in; }

@@ -10,7 +10,7 @@
 <div class="topbar">
 <a href="{{pathto('index')}}">X-ray Absorption Data Library: documentation</a>
 
-<p>
+<p><p>
   <ul class="topmenu">
   <li><a href="https://xaslib.xrayabsorption.org">XASLIB</a></li>
   <li><a href="{{ pathto('website') }}">Using XASLIB</a></li>
@@ -24,6 +24,37 @@
 </div>
 
 
+{% endblock %}
+
+{%- block sidebar2 %}
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+          {%- block sidebarlogo %}
+          {%- if logo %}
+            <p class="logo"><a href="{{ pathto(master_doc)|e }}">
+              <img class="logo" src="{{ pathto('_static/' + logo, 1)|e }}" alt="Logo"/>
+            </a></p>
+          {%- endif %}
+          {%- endblock %}
+            {#- old style sidebars: using blocks -- should be deprecated #}
+            {%- block sidebarsearch %}
+            {%- include "searchbox.html" %}
+            {%- endblock %}
+
+            {%- block sidebartoc %}
+            {%- include "localtoc.html" %}
+            {%- endblock %}
+            {%- block sidebarrel %}
+            {%- include "relations.html" %}
+            {%- endblock %}
+            {%- block sidebarsourcelink %}
+            {%- include "sourcelink.html" %}
+            {%- endblock %}
+            {%- if customsidebar %}
+            {%- include customsidebar %}
+            {%- endif %}
+        </div>
+      </div>
 {% endblock %}
 
 
