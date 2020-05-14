@@ -56,12 +56,12 @@ REFERENCE_MODES = ('no reference spectra',
                    'flouresence,  downstream of i1')
 
 
-def make_permalink(selected, func='plot_spectra'):
+def make_permalink(selected, func='plots'):
     base_url = app.config['BASE_URL']
     if base_url.endswith('/'):
         base_url = base_url[:-1]
-    sel = '&'.join(['%d' % i for i in selected])
-    return "%s/%s?%s" % (base_url, func, sel)
+    sel = '/'.join(['%d' % i for i in selected])
+    return "%s/%s/%s" % (base_url, func, sel)
 
 def session_init(session, force_refresh=False):
     global db, app, ANY_EDGES, ANY_MODES,  SAMPLES_OR_NEW
@@ -1037,15 +1037,37 @@ def suite_action():
 
     return reidrect(url_for('suites', stid=stid))
 
-@app.route('/plot_spectra', methods=['GET', 'POST'])
-def plot_spectra():
+
+@app.route('/plots/<int:s1>')
+@app.route('/plots/<int:s1>/<int:s2>')
+@app.route('/plots/<int:s1>/<int:s2>/<int:s3>')
+@app.route('/plots/<int:s1>/<int:s2>/<int:s3>/<int:s4>')
+@app.route('/plots/<int:s1>/<int:s2>/<int:s3>/<int:s4>/<int:s5>')
+@app.route('/plots/<int:s1>/<int:s2>/<int:s3>/<int:s4>/<int:s5>/<int:s6>')
+@app.route('/plots/<int:s1>/<int:s2>/<int:s3>/<int:s4>/<int:s5>/<int:s6>/<int:s7>')
+@app.route('/plots/<int:s1>/<int:s2>/<int:s3>/<int:s4>/<int:s5>/<int:s6>/<int:s7>/<int:s8>')
+@app.route('/plots/<int:s1>/<int:s2>/<int:s3>/<int:s4>/<int:s5>/<int:s6>/<int:s7>/<int:s8>/<int:s9>')
+@app.route('/plots/<int:s1>/<int:s2>/<int:s3>/<int:s4>/<int:s5>/<int:s6>/<int:s7>/<int:s8>/<int:s9>/<int:s10>')
+@app.route('/plots/<int:s1>/<int:s2>/<int:s3>/<int:s4>/<int:s5>/<int:s6>/<int:s7>/<int:s8>/<int:s9>/<int:s10>/<int:s11>')
+@app.route('/plots/<int:s1>/<int:s2>/<int:s3>/<int:s4>/<int:s5>/<int:s6>/<int:s7>/<int:s8>/<int:s9>/<int:s10>/<int:s11>/<int:s12>')
+@app.route('/plots/<int:s1>/<int:s2>/<int:s3>/<int:s4>/<int:s5>/<int:s6>/<int:s7>/<int:s8>/<int:s9>/<int:s10>/<int:s11>/<int:s12>/<int:s13>')
+@app.route('/plots/<int:s1>/<int:s2>/<int:s3>/<int:s4>/<int:s5>/<int:s6>/<int:s7>/<int:s8>/<int:s9>/<int:s10>/<int:s11>/<int:s12>/<int:s13>/<int:s14>')
+@app.route('/plots/<int:s1>/<int:s2>/<int:s3>/<int:s4>/<int:s5>/<int:s6>/<int:s7>/<int:s8>/<int:s9>/<int:s10>/<int:s11>/<int:s12>/<int:s13>/<int:s14>/<int:s15>')
+@app.route('/plots/<int:s1>/<int:s2>/<int:s3>/<int:s4>/<int:s5>/<int:s6>/<int:s7>/<int:s8>/<int:s9>/<int:s10>/<int:s11>/<int:s12>/<int:s13>/<int:s14>/<int:s15>/<int:s16>')
+@app.route('/plots/<int:s1>/<int:s2>/<int:s3>/<int:s4>/<int:s5>/<int:s6>/<int:s7>/<int:s8>/<int:s9>/<int:s10>/<int:s11>/<int:s12>/<int:s13>/<int:s14>/<int:s15>/<int:s16>/<int:s17>')
+@app.route('/plots/<int:s1>/<int:s2>/<int:s3>/<int:s4>/<int:s5>/<int:s6>/<int:s7>/<int:s8>/<int:s9>/<int:s10>/<int:s11>/<int:s12>/<int:s13>/<int:s14>/<int:s15>/<int:s16>/<int:s17>/<int:s18>')
+@app.route('/plots/<int:s1>/<int:s2>/<int:s3>/<int:s4>/<int:s5>/<int:s6>/<int:s7>/<int:s8>/<int:s9>/<int:s10>/<int:s11>/<int:s12>/<int:s13>/<int:s14>/<int:s15>/<int:s16>/<int:s17>/<int:s18>/<int:s19>')
+@app.route('/plots/<int:s1>/<int:s2>/<int:s3>/<int:s4>/<int:s5>/<int:s6>/<int:s7>/<int:s8>/<int:s9>/<int:s10>/<int:s11>/<int:s12>/<int:s13>/<int:s14>/<int:s15>/<int:s16>/<int:s17>/<int:s18>/<int:s19>/<int:s20>')
+
+def plots(s1=0, s2=0, s3=0, s4=0, s5=0, s6=0, s7=0, s8=0, s9=0, s10=0, s11=0,
+          s12=0, s13=0, s14=0, s15=0, s16=0, s17=0, s18=0, s19=0, s20=0):
     session_init(session)
     selected = []
-
-    if request.method == 'GET':
-        for k, v in request.args.items():
-            selected.append(int(k))
-
+    for s in (s1, s2, s3, s4, s5, s6, s7, s8, s9, s10, s11, s12, s13, s14,
+              s15, s16, s17, s18, s19, s20):
+        if s == 0:
+            break
+        selected.append(s)
     if len(selected) > 0:
         return render_template('show_plot.html', nspectra=len(selected),
                                permalink=make_permalink(selected),
