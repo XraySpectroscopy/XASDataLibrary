@@ -82,7 +82,7 @@
 <tr><td> Date Measured:   </td> <td>  {{collection_date}}     </td></tr>
 <tr><td> Date Uploaded:   </td> <td>  {{upload_date}}    </td></tr>
 <tr><td></td></tr>
-<tr><td>  Owner:    </td> <td>   <a href="{{url_for('show_person',pid=person_id)}}">     {{ person_name }} </a> ({{ person_email }})  </td></tr>
+<tr><td>  Owner:    </td> <td>   <a href="{{url_for('show_person', pid=person_id)}}">     {{ person_name }} </a> ({{ person_email }})  </td></tr>
 <tr><td> Citation:        </td> <td>
     {% if  citation_id != '-1' %}
        <a href="{{url_for('citation')}}/{{citation_id}}"> {{ citation_name }}</a> &nbsp; &nbsp;

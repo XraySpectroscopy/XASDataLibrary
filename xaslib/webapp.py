@@ -561,7 +561,7 @@ def spectrum(spid=None, plotstyle='xanes'):
 
     opts = parse_spectrum(s, db)
     opts['spectrum_owner'] = (session['person_id'] == "%d" % s.person_id)
-    opts['person_id'] = session['person_id']
+    opts['person_id'] = s.person_id
     opts['rating'] = get_rating(s)
 
     eunits = opts['energy_units']
