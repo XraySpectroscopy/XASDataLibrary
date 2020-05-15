@@ -51,11 +51,13 @@ h2 {font:bold 18px verdana,arial,sans-serif;color:#044484;font-weight:bold;}
 .spectra a:hover {color: #C61;  background-color: #FDFDFA;}
 
 .topbar {font: bold 16px verdana, arial, sans-serif;
-	 padding: 5px;text-decoration: none;
+	 padding: 2px 4px 4px 4px;text-decoration: none;
 	 color: #FFF;   background-color: #16C;}
 
-.topbar a        {background-color: #16C; color: #FEA; margin: 10px}
-.topbar a:hover  {background-color: #16C; color: #FFF; margin: 10px;}
+.topbar a        {background-color: #16C; color: #FEA; margin: 5px 5px 5px 5px;}
+.topbar a:hover  {background-color: #27D; color: #FAF0C0;
+		  transition: 0.5s ease-in;
+		  margin: 5px 5px 5px 5px;}
 
 .topmenu { font: bold 14px verdana, arial, sans-serif; margin: 0px;
            padding: 0px 0px 16px 0px;   border: 3px solid #16C;
