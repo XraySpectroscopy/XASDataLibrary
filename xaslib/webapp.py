@@ -911,7 +911,7 @@ def add_spectrum_to_suite():
         suite_id = int(request.form.get('target_suite', -1))
         flash(add_spectra_to_suite(db, [spid], suite_id=suite_id,
                                    person_id=person_id))
-        return redirect(url_for('spectrum', spid=spid, error=error))
+    return redirect(url_for('spectrum', spid=spid, error=error))
 
 
 @app.route('/submit_spectrum_to_suite', methods=['GET', 'POST'])
@@ -999,10 +999,13 @@ def suites(stid=None):
         person = db.get_person(st.person_id)
         spectra = spectra_for_suite(db, stid)
         is_owner = (int(session['person_id']) == int(st.person_id))
+
         suites.append({'id': stid, 'name': st.name, 'notes': st.notes,
                        'rating': get_rating(st),
                        'suite_owner': is_owner,
                        'nspectra': len(spectra), 'spectra': spectra})
+        print('spectra for suite ', stid, spectra)
+
     return render_template('suites.html', nsuites=len(suites), suites=suites,
                            person=person)
 
@@ -1158,8 +1161,7 @@ def submit_suite_edits():
 
         for spec in spectra_for_suite(db, stid):
             spid = int(spec['spectrum_id'])
-            key = 'spec_%d' % spid
-            if key not in request.form:
+            if ('remove_%d' % spid) in request.form:
                 db.remove_spectrum_from_suite(stid, spid)
         time.sleep(0.1)
 

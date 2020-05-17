@@ -6,6 +6,7 @@
 <form action="{{ url_for('submit_suite_edits') }}" method=post>
   <input type=hidden name=person value={{person_id}}>
   <input type=hidden name=suite  value={{id}}>
+
   <table>
     <tr><td colspan=2> <hr> </td></tr>
     <tr><td>Name:</td><td>
@@ -13,13 +14,28 @@
     <tr><td> Comments: </td><td>
 	<textarea cols=55  rows=10 type=text name=comments>{{notes|safe}}</textarea></td></tr>
 
-    <tr><td> Spectra: </td><td>
-      {% for s in spectra %}
-	<input type="checkbox"  name="spec_{{s.spectrum_id}}" checked="checked"> {{s.name}} <br>
-      {% endfor %} </td></tr>
-
-  <tr><td colspan=2> <hr> </td></tr>
-     <tr><td><input class="abutton" type=submit value=submit></td><td></td></tr>
+    <tr><td colspan=2> <hr> </td></tr>
+    <tr><td> Spectra in this suite: </td><td></tr>
+    <tr><td colspan=2>
+	<table cellpadding=2>
+	      <tr>
+		<th style="width: 275x;"> &nbsp; Name &nbsp;</th>
+		<th style="width: 75x;"> &nbsp; Element &nbsp;</th>
+		<th style="width: 75px;"> &nbsp; Edge &nbsp;</th>
+		<th> Remove from Suite? </th>
+	      </tr>
+	      {% for spec in spectra %}
+	      <tr class={{ loop.cycle('odd', 'even') }}>
+		<td> <a href="{{url_for('spectrum', spid= spec.spectrum_id)}}"> {{ spec.name }}</a></td>
+		<td> {{ spec.elem_sym}}</td>
+		<td> {{ spec.edge}}</td>
+		<td> <input type="checkbox"  name="remove_{{spec.spectrum_id}}">   </td>
+	      </tr>
+	      {% endfor %}
+	    </table>
+    </td></tr>
+    <tr><td colspan=2> <hr> </td></tr>
+    <tr><td><input class="abutton" type=submit value=submit></td><td></td></tr>
     </table>
 </form>
 </div>
