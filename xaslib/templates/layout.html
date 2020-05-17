@@ -35,9 +35,10 @@
         {% if session.username == none %}
 	<a href="{{ url_for('login') }}">Log In</a>
 	<a href="{{ url_for('create_account') }}">Create Account</a>
-        {% else %}
-        Hello, <a href="{{ url_for('show_person', pid=session.person_id)}}">{{session.username}}</a>
-
+	{% else %}
+            {% if session.person_id != none %}
+            Hello, <a href="{{ url_for('show_person', pid=session.person_id)}}">{{session.username}}</a>
+            {% endif %}
 	<a href="{{ url_for('logout') }}">Log Out</a>
 	{% endif %}
 	</font>

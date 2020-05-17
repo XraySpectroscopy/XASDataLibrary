@@ -191,6 +191,7 @@ def favicon():
 
 @app.errorhandler(404)
 def page_not_found(error):
+    session_init(session)
     return render_template('notfound.html')
 
 @app.route('/clear')
@@ -396,8 +397,6 @@ def user():
 def show_error(error=''):
     session_init(session)
     return render_template('layout.html', error=error)
-
-
 
 
 @app.route('/elem/', methods=['GET', 'POST'])
@@ -906,7 +905,7 @@ def add_spectrum_to_suite():
     person_id = int(request.form.get('person_id', -1))
     spectrum_id = int(request.form.get('spectrum', -1))
     target_suite = int(request.form.get('target_suite', -1))
-
+    print(" Add spect to suite person, suite, spectrum = ", person_id, target_suite, spectrum_id)
     flash(add_spectra_to_suite(db, [spectrum_id],
                                suite_id=target_suite,
                                person_id=person_id))

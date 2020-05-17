@@ -493,15 +493,16 @@ def upload2xdi(opts, upload_folder):
     buff.append('# Mono.d_spacing: %.6f' % float(opts['d_spacing']))
     buff.append('# Mono.name: %s' % opts['mono_name'])
 
-    for tag, attr in ( ('Beamline.name',      'beamline'),
-                       ('Element.symbol',     'elem_sym'),
-                       ('Element.edge',       'edge'),
-                       ('Data.upload_date',   'upload_date'),
-                       ('Data.submitted_by',  'person_name'),
-                       ('Sample.name',        'sample_name'),
-                       ('Sample.formula',     'sample_formula'),
-                       ('Sample.preparation', 'sample_prep'),
-                       ('Sample.notes',       'sample_notes')):
+    for tag, attr in (('Beamline.name',      'beamline'),
+                      ('Element.symbol',     'elem_sym'),
+                      ('Element.edge',       'edge'),
+                      ('Scan.start_time',    'collection_date'),
+                      ('Data.upload_date',   'upload_date'),
+                      ('Data.submitted_by',  'person_name'),
+                      ('Sample.name',        'sample_name'),
+                      ('Sample.formula',     'sample_formula'),
+                      ('Sample.preparation', 'sample_prep'),
+                      ('Sample.notes',       'sample_notes')):
         attr = opts.get(attr, '')
         if len(attr) > 0:
             buff.append('# %s: %s' % (tag, attr))
