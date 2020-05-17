@@ -683,9 +683,9 @@ def submit_spectrum_edits():
         edge_id = ANY_EDGES.index(request.form['edge'])
         mode_id = ANY_MODES.index(request.form['mode'])
         try:
-            collection_time = isotime2datetime(request.form['collection_date'])
+            collection_date = isotime2datetime(request.form['collection_date'])
         except:
-            collection_time = None
+            collection_date = None
 
         db.update('spectrum', int(spid),
                   name=request.form['name'],
@@ -696,7 +696,7 @@ def submit_spectrum_edits():
                   edge_id=edge_id, mode_id=mode_id,
                   beamline_id= int(request.form['beamline']),
                   sample_id= int(request.form['sample']),
-                  collection_time = collection_time,
+                  collection_date=collection_date,
                   reference_sampled=request.form['reference_sample'],
                   energy_units_id=int(request.form['energy_units']))
 
