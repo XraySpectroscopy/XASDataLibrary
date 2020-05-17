@@ -902,7 +902,7 @@ def add_spectrum_to_suite():
         return redirect(url_for('spectrum', spid=spid, error=error))
 
     ###
-    person_id = int(request.form.get('person_id', -1))
+    person_id = int(request.form.get('person', session.person_id))
     spectrum_id = int(request.form.get('spectrum', -1))
     target_suite = int(request.form.get('target_suite', -1))
     print(" Add spect to suite person, suite, spectrum = ", person_id, target_suite, spectrum_id)
