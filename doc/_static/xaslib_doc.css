@@ -1,29 +1,34 @@
 
-.body a  {color: #16C; background-color: #FFE; text-decoration: none; }
-.body a:hover  {color: #C61; background-color: #F4F4C4; text-decoration: none; }
+a         {color: #16C; background-color: #FFF; text-decoration: none; }
+a.active  {color: #16C; background-color: #FFF; text-decoration: none; }
+ a:hover  {color: #C61; background-color: #F4E4C4; text-decoration: none; }
 
 
 .topbar {font: bold 16px verdana, arial, sans-serif;
-	 padding: 5px;text-decoration: none;
+	 padding: 20px 5px 5px 20px;
+	 text-decoration: none;
 	 color: #FFF;   background-color: #16C;}
 
-.topbar a        {background-color: #16C; color: #FEA; margin: 10px ; text-decoration: none; }
-.topbar a:hover  {background-color: #16C; color: #FFF; margin: 10px;}
+.topbar a {background-color: #16C; color: #FEA; margin: 10px ; text-decoration: none;}
 
-.topmenu { font: bold 14px verdana, arial, sans-serif; margin: 0px;
-           padding: 0px 0px 14px 0px;   border: 1px solid #16C;
+.topbar a:hover  {background-color: #16C; color: #FAE4C4; margin: 10px;}
+.topmenu { font: bold 14px verdana, arial, sans-serif; margin: 1px;
+           padding: 0px 0px 14px 0px;
+	   border: 1px solid #16C;
            background-color: #16C;}
 
 .topmenu ul {margin: 0px;  padding: 0px}
 .topmenu li {float: left;  display: inline;
              margin: 0px;
              list-style-type: none;
-             border-right: 3px solid #FE9;
-             padding: 0px 6px 0px 6px;
+	     border-bottom: 2px solid #FE9;
+	     border-top:   2px solid #FE9;
+	     border-right: 2px solid #FE9;
+             padding: 0px 6px 0px 0px;
              color: #FEA; background-color: #16C;}
 
 
 .topmenu a, a.active {color: #FE9; background-color: #16C;}
 .topmenu a.active    {color: #FE9; background-color: #16C;}
-.topmenu a:hover     {color: #FAF4C4; background-color: #468; transition: 0.5s ease-in; }
-.topmenu li:hover    {color: #FAF4C4; background-color: #468; transition: 0.6s ease-in; }
+.topmenu a:hover     {color: #FAE4C4; background-color: #369; transition: 0.25s ease-in; }
+.topmenu li:hover    {color: #FAE4C4; background-color: #369; transition: 0.75s ease-in; }

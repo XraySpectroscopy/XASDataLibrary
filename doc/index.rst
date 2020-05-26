@@ -25,6 +25,7 @@ for definitions.
    license
    website
    login
+   samples
    suites
    ratings
    upload

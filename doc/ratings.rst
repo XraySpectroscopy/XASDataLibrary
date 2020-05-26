@@ -1,4 +1,6 @@
 
+.. _Ratings:
+
 Rating Spectra and Suites of Spectra
 ----------------------------------------------
 
