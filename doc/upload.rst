@@ -9,3 +9,96 @@ that could go into this library, and are able and willing to apply the
 <https://creativecommons.org/share-your-work/public-domain/cc0/>`_ license
 to this data as discussed in :ref:`license`, then please do upload that
 data.
+
+
+
+Note on Uploading data files:
+
+ * Uploaded files must be ASCII files no larger than 16Mb with a
+    **Header Section** followed by a **Data Table Section**.
+
+ * The **Header Section** contains strings that describe the
+    meta-data for the data file.  Ideally, these will follow the
+    `https://github.com/XraySpectroscopy/XAS-Data-Interchange/blob/master/specification/spec.md`      XAS Data Interchange Specification</a>.
+    See <a  href='https://github.com/XraySpectroscopy/XASDataLibrary/tree/master/data'>
+      Example Data Files</a> for this library.
+
+
+ * The **Data Table Section** contains columns for indvidual arrays.
+    Columns should be separated or *delimited* by a combination of
+    spaces, tabs, or commas. Each line of the file (ending with a Newline
+    and optional Carriage Return character) corresponds to one row of the
+    Data Table, representing a different energy point for the data.  Up to
+    32 columns will be accessible.
+
+
+Somewhere in the columns of the Data Table there <b>Must</b> be columns for
+
+<ol>
+  <li> <b>Energy</b> or <b>Monochromator Angle</b>, in units of  eV,  keV, or degrees.
+
+  <li> Arrays that can be used to build <span class="math notranslate nohighlight">\(\mu(E)\)<span> or mu(Energy).
+	 These arrays will be columns in the Data Table that may represent
+       of <b>I_0</b>, <b>I_transmission</b>, <b>I_fluorescence</b>, or
+       <b>mu_transmission</b>,  <b>mu_fluorescence</b>.  Note that it is
+       OK to have emission modes other than fluorescence -- they will be
+       treated in the same way as fluorescence data.
+
+</ol>
+
+Names for the columns will be automatically deduced from the data file.
+These names these may not be perfectly aligned with what you expect the
+column labels to be. Still, when uploading data, you will be expected to be
+able to deduce which columns are appropriate and what the column name.
+During the Verification process, you will be shown plots of the resulting
+<i>mu</i> vs <i>Energy</i>.
+
+<p>
+
+You will be expected to fill in values for some meta-data including:
+
+<ul>
+  <li> Sample Name
+  <li> Absorbing Element and Edge
+  <li> Monochromator d-spacing or nominal reflecting cut
+  <li> Energy units
+  <li> Beamline
+  <li> Measurement Mode
+</ul>
+
+Some of this meta-data may be guessed from the file headers. In additions,
+some validity and error checking will be done on these values. Ultimately,
+the quality of the data relies on you verifying the correctness of these
+fields.
+
+
+<p>
+  Some additional notes:
+
+<ul>
+  <li> The data will be sorted so that Energy is strictly increasing.
+    A warning will be given if any of the steps in energy value is less
+    than 0.001 eV, as this may cause problems for some processing software.
+
+    <li> Ideally, there will be a separate column of <b>I_0</b>, but this is
+      not required.
+
+    <li> You can include data for a reference channel, either
+      <b>I_reference</b>, or <b>mu_referencee</b>.  Note that the reference
+      channel can either be in one of three modes:
+      <ol>
+	<li> Transmission, with reference sample downstream of
+	  <b>I_transmission</b>, so that
+	  <b>mu_reference =  -log(I_reference/I_transmission)</b>
+	<li> Fluorescence, with reference upstream of sample, so that
+	  <b>mu_reference =  (I_reference/I_0)</b>
+	<li> Fluorescence, with reference downstream of sample, so that
+	  <b>mu_reference =  (I_reference/I_transmission)</b>
+      </ol>
+
+</ul>
+
+
+Finally, because uploading files uses finite computing resources, we
+reserve the right to restrict or remove any data for any reason without
+notice and to ban users who abuse the ability to upload data.
