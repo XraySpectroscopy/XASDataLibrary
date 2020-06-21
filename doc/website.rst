@@ -20,9 +20,10 @@ element:
 
 
 Clicking on any of the element symbols will show a list of spectra for that
-element.  The form on the right hand side allows further refinement of the
-displayed spectra, based on which *Edge*, *Beamline*, *Measurement Mode*,
-*Rating*, or *Text* found in the information for the spectra.
+element.  The form to the right of the periodic table allows further
+refinement of the displayed spectra, based on which *Edge*, *Beamline*,
+*Measurement Mode*, *Rating*, or *Text* found in the information for the
+spectra.
 
 As an example element with a relatively small number of spectra, clicking
 on **V** will show a table with 5 spectra for vanadium:
@@ -63,7 +64,8 @@ This plot is interactive in a few ways:
     of the plot.
 
     2. clicking and dragging will zoom in on a portion of the plot.  You
-    can double-click to zoom out, or use the toolbar.
+    can double-click or use the toolbar to zoom out to view the full
+    spectral range. 
 
     3. clicking on the entries in the legend (for example the label with
     the blue line and **V2O3**) will toggle whether that spectra is shown
@@ -97,11 +99,12 @@ The XAS Spectrum
 
 The data in xaslib contains several kinds of information, but the most
 important of these is the *XAS Spectrum*.  This contains an XAS spectrum
-:math:`\mu(E)`, which is to say arrays of numbers for *Energy* and
+:math:`\mu(E)`, which is kept as arrays of numbers for *Energy* and
 *Absorbance*, and a set of *meta-data* that goes along with each spectrum
-to help describe it the important details needed to use these data.  The
-full details of what metadata is stored and how will be given in
-:ref:`database`, and the emphasis here will be on using the web library.
+to help describe the important details needed to use these data.  The full
+details of what metadata is stored and how will be given in
+:ref:`database`, and the emphasis in this section will be on using the web
+library.
 
 Clicking on any of the spectra listed in the Spectrum Table, such as shown
 in the Figure for :ref:`web_fig2`, will bring up a page with information
@@ -122,10 +125,10 @@ element, edge, sample name, beamline, monochromator used, person owning the
 spectrum, and so on.  Many of these fields will be links that lead to, for
 example, the raw data file, the beamline, and more details on the sample.
 On the right side is a plot of the spectrum.  This will be interactive as
-described for the plots.  You can switch between plotting the full range of
-the raw XAS spectrum or a simple attempt at producing normalized XANES.
-If a reference sample has been used in the measurement, its spectrum will
-also be displayed.
+described for the plots shown above.  You can switch between plotting the
+full range of the raw XAS spectrum or a simple attempt at producing
+normalized XANES.  If a reference sample has been used in the measurement,
+its spectrum will also be displayed.
 
 .. _WebSuites:
 

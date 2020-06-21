@@ -12,9 +12,10 @@ html_short_title = 'xaslib.xrayabsorption.org'
 
 pygments_style = 'sphinx'
 html_theme = 'classic'
+html_theme = 'pyramid'
 
-extensions = ['sphinx.ext.todo',
-              'sphinx.ext.mathjax']
+
+extensions = ['sphinx.ext.mathjax']
 
 templates_path = ['_templates']
 source_suffix = '.rst'
@@ -32,17 +33,17 @@ html_favicon = '_static/ixas_logo.ico'
 # html_sidebars = {'index': ['globaltoc.html','searchbox.html']}
 
 language = None
-html_theme_options = {
-    "rightsidebar": "false",
-    "relbarbgcolor": "#16C",
-    "relbartextcolor": "#FEA",
-    "sidebarbgcolor": "#F2F2F2",
-    "sidebarbtncolor": "#16C",
-    "sidebartextcolor": "#16C",
-    "sidebarlinkcolor": "#16C",
-    "footerbgcolor": "#EEE",
-    "footertextcolor": "#000",
-}
+# html_theme_options = {
+#     "rightsidebar": "false",
+#     "relbarbgcolor": "#16C",
+#     "relbartextcolor": "#FEA",
+#     "sidebarbgcolor": "#F2F2F2",
+#     "sidebarbtncolor": "#16C",
+#     "sidebartextcolor": "#16C",
+#     "sidebarlinkcolor": "#16C",
+#     "footerbgcolor": "#EEE",
+#     "footertextcolor": "#000",
+# }
 
 """
 footerbgcolor (CSS color): Background color for the footer line.

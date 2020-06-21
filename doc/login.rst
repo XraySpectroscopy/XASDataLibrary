@@ -1,8 +1,15 @@
 
+Accounts
+==================
+
+Logging in to the XAS Data Library (**xaslib**) permits users to add content to
+the library.
+
+
 Why Log in to the XAS Data Library?
 ----------------------------------------------
 
-While the data on the XAS Data Library (xaslib) are free to use, with no
+While the data on the XAS Data Library (xaslib) are free to use without
 restrictions, anonymous users are not permitted to add any content or
 comments on the data in the library.  Logging in to xaslib allows you to do
 the following:

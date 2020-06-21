@@ -1,26 +1,35 @@
 .. _license:
 
-Intended Usage, License, and Citations
-----------------------------------------------
+Overview and Intended Use
+=================================
+
+Anyone may use the data the X-ray Absorption Data Library (**xaslib**) for
+any purpose and without restrictions. All claims of exclusive copyright on
+these data have been relinquished in order to ensure that the broad
+community of scientists, educators, and students can use these data in
+their studies using X-ray absorption spectroscopy.
 
 
-The data in the X-ray Absorption Data Library have been licensed under the
+License
+-------------
+
+All of the data in the X-ray Absorption Data Library are licensed under the
 `Creative Commons Zero
-<https://creativecommons.org/share-your-work/public-domain/cc0/>`_ license and
-put in the Public Domain. This allows anyone to use these data for any purpose,
-without restrictions. All claims of exclusive copyright on these data have been
-relinquished in order to ensure that the broad community of scientists,
-educators, and students can use these data in their studies using X-ray
-absorption spectroscopy.
+<https://creativecommons.org/share-your-work/public-domain/cc0/>`_ license
+and put in the Public Domain.
 
-The people submitting data to this library agree to these terms to permit free
-and unrestricted access to this data.  While exclusive ownership has been
-relinquished, each spectrum here will have the name of at least one real person
-associated with it. This will typically be the person who uploaded the data, or
-someone involved in the collection of the data.  This attribution follows
-standard academic practices and allows the people who upload spectra to be
-recognized by their peers for their contribution.  It also allows people to
-look at spectra to see who uploaded the data.
+
+Citations
+---------------------
+
+The people submitting data to this library agree to these terms to permit
+free and unrestricted access to this data. While exclusive ownership has
+been relinquished, each spectrum here will have the name of at least one
+real person associated with it. This will typically be the person who
+uploaded the data, or someone involved in the collection of the data.  This
+attribution follows standard academic practices and allows the people who
+upload spectra to be recognized by their peers for their contribution.  It
+also allows people to look at spectra to see who uploaded the data.
 
 Most of the data here will have been collected at government-operated national
 laboratories and/or with government-funded research grants that may have
