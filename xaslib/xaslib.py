@@ -293,7 +293,6 @@ class XASDataLibrary(object):
         self.dbname = dbname
         if server.startswith('sqlit'):
             self.engine = create_engine('sqlite:///%s' % self.dbname,
-                                        # poolclass=SingletonThreadPool,
                                         connect_args={'check_same_thread': False})
         else:
             conn_str= 'postgresql://%s:%s@%s:%d/%s'
