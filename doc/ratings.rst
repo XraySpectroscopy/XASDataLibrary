@@ -2,7 +2,7 @@
 .. _Ratings:
 
 Rating Spectra and Suites of Spectra
-----------------------------------------------
+==============================================
 
 While the data in X-ray Absorption Data Library are meant to be of high
 quality, we cannot actually guarantee the quality of any of the spectra

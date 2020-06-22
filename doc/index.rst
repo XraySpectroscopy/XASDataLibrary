@@ -29,6 +29,7 @@ This collection of data is brought to you by the
    license
    website
    login
+   spectra
    samples
    suites
    ratings

@@ -2,7 +2,8 @@
 .. _Suites:
 
 Suites of Spectra
-----------------------------------------------
+===========================
+
 
 A **suite** in the X-ray Absorption Data Library is a simple and flexible
 way to organize multiple spectra.  In essence, a suite is just the name of

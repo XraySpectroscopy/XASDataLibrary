@@ -2,8 +2,10 @@
 Accounts
 ==================
 
-Logging in to the XAS Data Library (**xaslib**) permits users to add content to
-the library.
+Logging in to the XAS Data Library (**xaslib**) permits users to add
+content to the library.  This includes the ability to give ratings and
+reviews to any spectrum or suite of spectra, upload spectra, create suites
+of spectra, and edit suites or spectra that you have created.
 
 
 Why Log in to the XAS Data Library?
