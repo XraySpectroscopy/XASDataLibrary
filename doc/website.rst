@@ -2,7 +2,7 @@
 Using the X-ray Absorption Data Library
 =========================================================
 
-The X-ray Absorption Data Library (**xaslib**) website
+The X-ray Absorption Data Library (XASLIB) website
 `<https://xaslib.xrayabsorption.org>`_ presensts tools to browse and view a
 collection of X-ray Absorption Spectroscopy (XAS) data held by `The
 International X-ray Absorption Society <https://xrayabsorption.org>`_.  The
@@ -65,7 +65,7 @@ This plot is interactive in a few ways:
 
     2. clicking and dragging will zoom in on a portion of the plot.  You
     can double-click or use the toolbar to zoom out to view the full
-    spectral range. 
+    spectral range.
 
     3. clicking on the entries in the legend (for example the label with
     the blue line and **V2O3**) will toggle whether that spectra is shown
@@ -97,8 +97,8 @@ spectra.
 The XAS Spectrum
 -----------------------------------------
 
-The data in xaslib contains several kinds of information, but the most
-important of these is the *XAS Spectrum*.  This contains an XAS spectrum
+The data in XASLIB contains several kinds of information, but the most
+important of these is the :ref:`Spectra`.  This contains an XAS spectrum
 :math:`\mu(E)`, which is kept as arrays of numbers for *Energy* and
 *Absorbance*, and a set of *meta-data* that goes along with each spectrum
 to help describe the important details needed to use these data.  The full
@@ -149,13 +149,13 @@ file.  A list of suites will look like this:
     :align: center
 
     Example page for list of suites
-    
+
 
 People who are logged in will be able to create new suites, edit suites
 (alter the description, add and remove spectra) that they have created, and
 rate existing suites.
 
-     
+
 .. _WebSamples:
 
 Information about Samples
@@ -201,7 +201,7 @@ Beamlines and Facilities
 
 Each spectrum will have a Beamline associated with it, indicating where the spectrum
 was collected.  There is a comprehensive - but no doubt incomplete - list
-of beamlines around the world, and the facilities they belong too. 
+of beamlines around the world, and the facilities they belong too.
 
 
 .. _web_fig9:
@@ -228,4 +228,4 @@ Literature Citations
 
 Each spectrum can have a literature citation associated with it.   For
 people logged in and editing a spectrum, a citation can be added or
-edited. 
+edited.

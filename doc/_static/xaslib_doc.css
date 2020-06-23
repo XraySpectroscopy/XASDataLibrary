@@ -32,3 +32,21 @@ a.active  {color: #16C; background-color: #FFF; text-decoration: none; }
 .topmenu a.active    {color: #FE9; background-color: #16C;}
 .topmenu a:hover     {color: #FAE4C4; background-color: #369; transition: 0.25s ease-in; }
 .topmenu li:hover    {color: #FAE4C4; background-color: #369; transition: 0.75s ease-in; }
+
+.red { color: red; }
+.blue { color: #16C;  }
+.maroon { color: maroon; }
+.magenta { color: magenta; }
+.fuchsia { color: fuchsia; }
+.pink { color: pink; }
+.orange { color: orange; }
+.yellow { color: yellow; }
+.lime { color: lime; }
+.green { color: green; }
+.olive { color: olive; }
+.teal { color: teal; }
+.cyan { color: cyan; }
+.aqua { color: aqua; }
+.blue { color: blue; }
+.navy { color: navy; }
+.purple { color: purple; }

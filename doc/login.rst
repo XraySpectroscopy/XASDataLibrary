@@ -2,7 +2,7 @@
 Accounts
 ==================
 
-Logging in to the XAS Data Library (**xaslib**) permits users to add
+Logging in to the XAS Data Library (XASLIB) permits users to add
 content to the library.  This includes the ability to give ratings and
 reviews to any spectrum or suite of spectra, upload spectra, create suites
 of spectra, and edit suites or spectra that you have created.
@@ -11,9 +11,9 @@ of spectra, and edit suites or spectra that you have created.
 Why Log in to the XAS Data Library?
 ----------------------------------------------
 
-While the data on the XAS Data Library (xaslib) are free to use without
+While the data on the XAS Data Library (XASLIB) are free to use without
 restrictions, anonymous users are not permitted to add any content or
-comments on the data in the library.  Logging in to xaslib allows you to do
+comments on the data in the library.  Logging in to XASLIB allows you to do
 the following:
 
 
@@ -27,7 +27,7 @@ the following:
 Creating an Account and Logging in
 ----------------------------------------------
 
-Creating an account on xaslib is easy.  Follow the *Create Account* link at
+Creating an account on XASLIB is easy.  Follow the *Create Account* link at
 the upper right of the page, and enter your email address, name,
 affiliation, and password.
 
@@ -61,7 +61,7 @@ ban users that violate these norms.
 A note on passwords
 ----------------------------------------------
 
-The password used for accounts on xaslib should follow the normal rules for
+The password used for accounts on XASLIB should follow the normal rules for
 good passwords.  We require only that they are at least 7 characters long,
 but you should not use common words or passwords used for other accounts.
 

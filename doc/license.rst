@@ -3,7 +3,7 @@
 Overview and Intended Use
 =================================
 
-Anyone may use the data the X-ray Absorption Data Library (**xaslib**) for
+Anyone may use the data the X-ray Absorption Data Library (XASLIB) for
 any purpose and without restrictions. All claims of exclusive copyright on
 these data have been relinquished in order to ensure that the broad
 community of scientists, educators, and students can use these data in
