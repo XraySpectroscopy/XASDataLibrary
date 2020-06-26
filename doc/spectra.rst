@@ -81,7 +81,6 @@ fluorescence or emission mode.
    ==============================   ===============================================================
 
 
-
 Spectra Attributes
 ==================
 
@@ -99,7 +98,9 @@ A complete list of Spectrum attributes is:
    Attribute                     Description
    =======================  ===========================================================
     **name**                 name of spectrum (possibly original file name)
-    description              short description of spectrum
+    **description**          short description of spectrum
+    **energy**               array for Energy data, in units given by `energy_units`.
+    **d_spacing** [1]_       monochromator *d* spacing in Angstroms.
     :blue:`element`          atomic symbol of absorbing element
     :blue:`edge`             name for absorption edge. (`K`, `L3`, etc)
     :blue:`mode`             name of :ref:`measurement mode <mode_table>`.
@@ -109,32 +110,52 @@ A complete list of Spectrum attributes is:
     :blue:`beamline`         beamline used for spectrum (link to Beamline table)
     :blue:`citation`         literature citation (link to Citation table)
     :blue:`person`           person uploading/owning the spectrum(link to Person table)
-    **energy**               array for Energy (in eV)
-    **d_spacing**            monochromator *d* spacing in Angstroms.
-    i0                       array for I0 (incident) intensity
-    :red:`itrans`            array for transmission intensity
-    :red:`ifluor`            array for fluorescence / emission intensity
+    i0 [2]_                  array for I0 (incident) intensity.
+    :red:`itrans` [2]_       array for transmission intensity
+    :red:`ifluor` [2]_       array for fluorescence / emission intensity
     irefer                   array for refereence intensity
     energy_stderr            array for standard error of energy
     i0_stderr                array for standard error of i0
     itrans_stderr            array for standard error of itrans
     ifluor_stderr            array for standard error of ifluor
     irefer_stderr            array for standard error of irefer
-    energy_notes             additional notes on energy array
     energy_resolution        description of energy resolution
+    energy_notes             additional notes on energy array
     i0_notes                 additional notes on i0 array
     itrans_notes             additional notes on itrans array
     ifluor_notes             additional notes on ifluor array
     irefer_notes             additional notes on irefer array
-    submission_date          date and time the spectrum was submitted (ISO datestring)
-    collection_date          date and time the spectrum was collected (ISO datestring)
-    reference_sample         name of reference sample (simple string)
+    submission_date [3]_     date and time the spectrum was submitted (datestring)
+    collection_date [3]_     date and time the spectrum was collected (datestring)
+    reference_sample [4]_    name of reference sample (simple string)
     temperature              description of sample temperature for measurement
-    extra_data               JSON-encoded data from other method (described in notes)
-    notes                    notes for spectrum
+    extra_data               extra data from other method(s) (described in notes)
     rating_summary           summary string for ratings (internal use)
     filetext                 text of XDI file for spectrum
    =======================  ===========================================================
 
+Notes
 
- Note that if `i0`
+.. [1] The monochromator *d* spacing is necessary if *energy_units* is
+       `degrees` but is also important to help reproduce and shift spectra
+       collected at different times or beamlines.If you do not know the
+       exact value used, using the nominal value for the monochromator
+       crystal used is acceptable.  If the spectra were measured with an
+       energy-dispersive or exotic method that did not use a crystal
+       monochromator, please give a value of 1.0 and a detailed explanation
+       of the energy calibration in the Notes section.
+
+.. [2] it is expected that `i0` will be provided for most data. If it is
+       not available, then `itrans` must hold :math:`\mu(E)` in
+       transmission or `ifluor` must :math:`\mu(E)` in fluorescence or
+       other emission mode.
+ 
+.. [3] dates for submission and collection date should be formatted as
+       ISO861 datestring: `YYYY-MM-DDTHH:MM:SS`, though the `T` can be
+       replaces with a blank. For example, '2020-06-21 17:51:22'.
+
+.. [4] note that the reference sample is expected to be an obvious and
+       reproducible sample, so simply giving its name (eg, "Ni foil")
+       should suffice.
+       
+       
