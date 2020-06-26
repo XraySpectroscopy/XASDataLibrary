@@ -220,10 +220,10 @@ modes = [["transmission", "transmission intensity through sample"],
          ]
 
 reference_modes = [['none', 'no reference spectra'],
-                   ['murefer',   'mu_refer'],
-                   ['transmission', 'transmission, downstream of itrans (mu_refer=-log(irefer/itrans))'],
-                   ['fluorescence, i0', 'flouresence, upstream of sample (mu_refer=irefer/i0)'],
-                   ['flouresence, itrans',  'fluorescence downstream of itrans (mu_refer=irefer/itrans)'],
+                   ['murefer',   'murefer'],
+                   ['transmission', 'transmission, downstream of itrans (murefer=-log(irefer/itrans))'],
+                   ['fluorescence, i0', 'flouresence, upstream of sample (murefer=irefer/i0)'],
+                   ['flouresence, itrans',  'fluorescence downstream of itrans (murefer=irefer/itrans)'],
                    ]
 
 

@@ -147,7 +147,6 @@ Uploaded File: {{filename}} has {{narrays}} array columns with {{npts}} data poi
     var dis = false;
     if (refmode.selectedIndex == 0) { dis = true;}
         document.getElementById("ir_arrayname").disabled =dis;
-        document.getElementById("is_murefer").disabled = dis;
         document.getElementById("reference_sample").disabled = dis;
     }
   </script>
@@ -167,9 +166,6 @@ Uploaded File: {{filename}} has {{narrays}} array columns with {{npts}} data poi
     <option value="{{a}}" {% if a == ir_arrayname %} selected=1 {% endif %} >{{ a }}</option>
     {% endfor %}
   </select>
-  &nbsp; <input type="checkbox"  id="is_murefer" name="is_murefer"
-		{% if is_murefer %} checked {% endif %}
-		{% if ref_mode == ref_modes[0] %}  disabled {% endif %} >  mu_refer (no I_ref)? </input>
 </td></tr>
 
 <tr><td> Reference Sample: </td><td>

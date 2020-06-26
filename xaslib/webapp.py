@@ -1279,7 +1279,7 @@ def submit_sample_edits():
             except IOError:
                 return render_template('sample.html',
                                        person_id=session['person_id'],
-                                       error='Could not save uploaded file')
+                                       error='Could not save image file')
 
             time.sleep(0.250)
 
@@ -1606,9 +1606,12 @@ def edit_upload():
             try:
                 file.save(fullpath)
             except IOError:
+                print("edit_upload failed ", session, fname, file.filename,
+                      app.config['UPLOAD_FOLDER']
+                     )
                 return render_template('upload.html',
                                        person_id=session['person_id'],
-                                       error='Could not save uploaded file (%s)' % (file))
+                                       error='Could not save uploaded file (%s)' % (file.filename))
 
             time.sleep(0.50)
             try:
@@ -1679,18 +1682,20 @@ def verify_uploaded_data(form, with_arrays=False):
     else:
         print("Could not get mu array")
 
-    if form['ref_mode'] != REFERENCE_MODES[0]: ## 'no reference'
-        irefer = getattr(dgroup, form['ir_arrayname'], None)
-        if irefer is not None:
-            refmode = form['ref_mode'].lower()
-            if 'is_murefer' not in form:
-                murefer = irefer
-            elif refmode.startswith('trans'):
-                murefer = -np.log(irefer/itrans)
-            elif refmode.startswith('fluor') and 'itrans' in refmode:
-                murefer = irefer/itrans
-            else:
-                murefer = irefer/i0
+    ir_arrayname = form.get('ir_arrayname', None)
+    refmode = form.get('ref_mode', 'none').lower()
+    if ir_arrayname is not None and refmode is not 'none':
+        irefer = getattr(dgroup, ir_arrayname, None)
+        if refer is None:
+            murefer = None
+        elif refmode.startswith('mu'):
+            murefer = irefer
+        elif refmode.startswith('trans'):
+            murefer = -np.log(irefer/itrans)
+        elif refmode.startswith('fluor') and 'itrans' in refmode:
+            murefer = irefer/itrans
+        elif refmode.startswith('fluor') and 'i0' in refmode:
+            murefer = irefer/i0
 
     # ensure data is ordered by increasing energy:
     en_order = np.argsort(energy)

@@ -98,8 +98,9 @@ def isotime2datetime(isotime):
     return datetime(syear, smon, sday, shour, smin, ssec, susec)
 
 def guess_datetime(tstring):
+    print("Guess Datetime ", tstring)
     if 'T' in tstring and 'OCT' not in tstring:
-        tstring = isotime.replace('T', ' ')
+        tstring = tstring.replace('T', ' ')
 
     for dfmt in ("%Y-%m-%d", "%Y-%b-%d", "%Y/%m/%d", "%Y/%b/%d",
                  "%b %d, %Y", "%m/%d/%Y", "%d/%m/%Y"):
