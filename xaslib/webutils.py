@@ -288,6 +288,7 @@ def parse_spectrum(s, db):
     elem   = db.get_element(s.element_z)
     person = db.get_person(s.person_id)
     mode   = db.get_spectrum_mode(s.id)
+    refmode = db.get_spectrum_refmode(s.id)
     eunits = db.fquery('energy_units', id=s.energy_units_id)[0].units
     d_spacing = '%f'% s.d_spacing
     notes =  json.loads(s.notes)
@@ -349,6 +350,7 @@ def parse_spectrum(s, db):
             'energy_units': eunits,
             'energy_resolution': eresolution,
             'mode': mode,
+            'refmode': refmode,
             'raw_comments': s.comments,
             'comments': multiline_text(s.comments),
             'header': header,

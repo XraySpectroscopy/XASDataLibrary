@@ -43,18 +43,11 @@ ANY_EDGES = ANY_MODES = SAMPLES_OR_NEW = None
 INCLUDED_ELEMS = SPECTRA_COUNT = None
 ALL_ELEMS = EN_UNITS = None
 BEAMLINE_DATA = ANY_BEAMLINES = None
-SAMPLES_DATA = None
+REFERENC_MODES = SAMPLES_DATA = None
 
 EMAIL_MSG = "From: {mailfrom:s}\r\nTo: {mailto:s}\r\nSubject: {subject:s}\r\n{message:s}\n"
 
 GENERIC_MONOS = ('None', 'generic Si(111)', 'generic Si(220)', 'generic Si(311)')
-
-
-REFERENCE_MODES = ('no reference spectra',
-                   'transmission, downstream of i1',
-                   'flouresence,  upstream of sample',
-                   'flouresence,  downstream of i1')
-
 
 def make_permalink(selected, func='plots'):
     base_url = app.config['BASE_URL']
@@ -65,7 +58,7 @@ def make_permalink(selected, func='plots'):
 
 def session_init(session, force_refresh=False):
     global db, app, ANY_EDGES, ANY_MODES,  SAMPLES_OR_NEW
-    global ANY_BEAMLINES, BEAMLINE_DATA, SAMPLES_DATA
+    global ANY_BEAMLINES, BEAMLINE_DATA, SAMPLES_DATA, REFERENCE_MODES
     global INCLUDED_ELEMS, SPECTRA_COUNT, ALL_ELEMS, EN_UNITS
     if 'username' not in session:
         session['username'] = None
@@ -85,13 +78,11 @@ def session_init(session, force_refresh=False):
         SAMPLES_OR_NEW  = [(0, '<Create New Sample>')]
         SAMPLES_OR_NEW.extend( [(s.id, s.name) for s in db.fquery('sample')])
 
-
-
         INCLUDED_ELEMS = db.included_elements()
         SPECTRA_COUNT = len(db.get_spectra())
         ALL_ELEMS  = db.fquery('element')
         EN_UNITS = [e.units for e in db.fquery('energy_units')]
-
+        REFERENCE_MODES = [r.notes for r in db.fquery('reference_mode')]
         BEAMLINE_DATA = []
         for bldat in db.fquery('beamline', orderby='name'):
             blid = bldat.id
@@ -594,17 +585,20 @@ def spectrum(spid=None, plotstyle='xanes'):
         return render_template('spectrum.html', **opts)
 
     dgroup = preedge(energy, mudata)
-
     # get reference if possible
     try:
         irefer = np.array(json.loads(s.irefer))
-        refmode = s.reference_mode_id
-        if refmode is not None:
-            refmode = REFERENCE_MODES[refmode]
-            if refmode.startswith('trans'):
-                murefer = -np.log(irefer/itrans)
-            else:
-                murefer = irefer/i0
+        refmode = opts.get('refmode', 'none')
+        if refmode.startswith('none'):
+            murefer = None
+        elif refmode.startswith('mu'):
+            murefer = irefer
+        elif refmode.startswith('trans'):
+            murefer = -np.log(irefer/itrans)
+        elif refmode.startswith('fluor') and 'itrans' in rmode:
+            murefer = irefer/itrans
+        else:
+            murefer = irefer/i0
     except:
         murefer = None
 
@@ -1688,14 +1682,15 @@ def verify_uploaded_data(form, with_arrays=False):
     if form['ref_mode'] != REFERENCE_MODES[0]: ## 'no reference'
         irefer = getattr(dgroup, form['ir_arrayname'], None)
         if irefer is not None:
+            refmode = form['ref_mode'].lower()
             if 'is_murefer' not in form:
                 murefer = irefer
-            elif form['ref_mode'] != REFERENCE_MODES[1]: ## 'trans'
-                murefer = -log(irefer/itrans)
-            elif form['ref_mode'] != REFERENCE_MODES[2]: ## 'fluor, i0'
-                murefer = irefer/i0
-            elif form['ref_mode'] != REFERENCE_MODES[3]: ## 'fluor, i1'
+            elif refmode.startswith('trans'):
+                murefer = -np.log(irefer/itrans)
+            elif refmode.startswith('fluor') and 'itrans' in refmode:
                 murefer = irefer/itrans
+            else:
+                murefer = irefer/i0
 
     # ensure data is ordered by increasing energy:
     en_order = np.argsort(energy)
