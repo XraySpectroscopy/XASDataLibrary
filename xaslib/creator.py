@@ -93,6 +93,7 @@ def create_xaslib(dbname, server= 'sqlite', user='',
 
     ligand  = NamedTable('ligand', metadata)
     mode    = NamedTable('mode', metadata)
+    refmode = NamedTable('reference_mode', metadata)
 
     facility = NamedTable('facility', metadata,
                           cols=[StrCol('fullname'),
@@ -179,7 +180,7 @@ def create_xaslib(dbname, server= 'sqlite', user='',
                                 PointerCol('sample'),
                                 PointerCol('beamline'),
                                 PointerCol('citation'),
-                                PointerCol('reference_mode', 'mode')])
+                                PointerCol('reference_mode')])
 
     suite = NamedTable('suite', metadata,
                        cols=[PointerCol('person'),
@@ -231,6 +232,9 @@ def create_xaslib(dbname, server= 'sqlite', user='',
 
     for name, notes in initialdata.modes:
         mode.insert().execute(name=name, notes=notes)
+
+    for name, notes in initialdata.reference_modes:
+        refmode.insert().execute(name=name, notes=notes)
 
     for name, country, city, fullname, lab in initialdata.facilities:
         facility.insert().execute(name=name, country=country, city=city,

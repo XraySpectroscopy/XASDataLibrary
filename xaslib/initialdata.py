@@ -219,6 +219,14 @@ modes = [["transmission", "transmission intensity through sample"],
          ["electron emission", "emitted electrons from sample"],
          ]
 
+reference_modes = [['none', 'no reference spectra'],
+                   ['murefer',   'mu_refer'],
+                   ['transmission', 'transmission, downstream of itrans (mu_refer=-log(irefer/itrans))'],
+                   ['fluorescence, i0', 'flouresence, upstream of sample (mu_refer=irefer/i0)'],
+                   ['flouresence, itrans',  'fluorescence downstream of itrans (mu_refer=irefer/itrans)'],
+                   ]
+
+
 facilities = [
     ['SSRL',     'US',       'Palo Alto',          'Stanford Synchrotron Radiation Laboratory', 'SLAC'],
     ['NSLS',     'US',       'Upton',              'National Synchrotron Light Source', 'BNL'],

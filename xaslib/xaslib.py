@@ -431,7 +431,6 @@ class XASDataLibrary(object):
         """return list of measurement modes"""
         return self.fquery('mode')
 
-
     def get_edge(self, val, key='name'):
         """return edge by name  or id"""
         if isinstance(val, int):
@@ -769,7 +768,7 @@ class XASDataLibrary(object):
                 except ValueError:
                     val = None
             if val is None:
-                val = datetime(1,1,1)
+                val = datetime(1, 1, 1)
             kws[attr] = val
 
         # more complicated foreign keys, pointers to other tables
@@ -783,7 +782,9 @@ class XASDataLibrary(object):
 
         kws['edge_id'] = self.get_edge(edge).id
         kws['mode_id'] = self.fquery('mode', name=mode)[0].id
-        kws['reference_mode_id'] = self.fquery('mode', name=reference_mode)[0].id
+        if irefer is None:
+            reference_mode = 'none'
+        kws['reference_mode_id'] = self.fquery('reference_mode', name=reference_mode)[0].id
         kws['element_z'] = self.get_element(element).z
         kws['energy_units_id'] = self.fquery('energy_units', name=energy_units)[0].id
         return self.addrow('spectrum', name=name, commit=commit, **kws)
@@ -870,9 +871,15 @@ class XASDataLibrary(object):
         mode_id = 1
         if spect is not None:
             mode_id = spect.mode_id
-        else:
-            print("Get no spectrum for spectrum ", spectrum_id)
         return self.fquery('mode', id=mode_id)[0].name
+
+    def get_spectrum_refmode(self, spectrum_id):
+        """return name of refernce mode for a spectrum"""
+        spect = None_or_one(self.fquery('spectrum', id=spectrum_id))
+        mode_id = 1
+        if spect is not None:
+            mode_id = spect.reference_mode_id
+        return self.fquery('reference_mode', id=mode_id)[0].name
 
     def get_spectrum_beamline(self, spectrum_id):
         "return id, desc for beamline for aa spectrum"
@@ -1022,8 +1029,7 @@ class XASDataLibrary(object):
 
         if hasattr(xfile, 'mutrans'):
             itrans = i0 * np.exp(-xfile.mutrans)
-
-        elif hasattr(xfile, 'mufluor'):
+        if hasattr(xfile, 'mufluor'):
             ifluor = i0 * xfile.mufluor
 
         if mode is None:
@@ -1035,14 +1041,7 @@ class XASDataLibrary(object):
         elif mode == 'fluoresence' and ifluor is None:
             raise ValueError("cannot find fluorescence data")
 
-        reference_used = False
-        reference_mode = 'transmission'
-        if hasattr(xfile, 'irefer'):
-            reference_used = True
-            irefer= xfile.irefer
-        elif hasattr(xfile, 'i2'):
-            reference_used = True
-            irefer= xfile.i2
+        reference_mode = 'none' if irefer is None else 'transmission'
 
         en_units = 'eV'
         for index, value in xfile.attrs['column'].items():
@@ -1091,7 +1090,7 @@ class XASDataLibrary(object):
                                             notes=sample_notes, **sample_kws)
         self.session.commit()
         time.sleep(0.025)
-        if reference_used:
+        if reference_mode is not 'none':
             if reference_sample is None:
                 reference_sample = 'unknown'
         else:
@@ -1106,7 +1105,7 @@ class XASDataLibrary(object):
                                  person=person_id, beamline=beamline_name,
                                  edge=edge, element=element, mode=mode,
                                  energy=energy, energy_units=en_units,
-                                 i0=i0,itrans=itrans, ifluor=ifluor,
+                                 i0=i0, itrans=itrans, ifluor=ifluor,
                                  irefer=irefer, sample=sample_id,
                                  comments=comments, notes=notes,
                                  filetext=filetext,
