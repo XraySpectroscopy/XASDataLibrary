@@ -379,13 +379,14 @@ def parse_spectrum(s, db):
 def guess_metadata(dgroup):
     """guess some metadata from data group headers and array labels"""
 
-    alabels = ['None'] + dgroup.array_labels
-
     out = {'en_arrayname':'None',
            'i0_arrayname':'None',
            'it_arrayname':'None',
            'if_arrayname':'None',
            'ir_arrayname':'None'}
+
+    alabels = ['None'] + dgroup.array_labels
+    alabels.reverse()
 
     e0 = None
     for lab in alabels:
@@ -410,7 +411,7 @@ def guess_metadata(dgroup):
         if line[0] in '#*%;!':
             line = line[1:].strip()
         line = line.replace('||', ':').replace('=', ':').replace('#', ':')
-        words = line.split(':')
+        words = line.split(':', 1)
         if len(words) > 1:
             key = words[0].strip().lower()
             val = words[1].strip()
