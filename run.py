@@ -20,14 +20,13 @@ cnf['BASE_URL'] = 'http://127.0.0.1:%d' % PORT
 cnf['DBNAME']  =  'xaslib.db'
 cnf['DBCONN']  = dict(user='xasdb', password='secret',
                       host='localhost', server='sqlite3')
-cnf['UPLOAD_FOLDER'] = '/tmp/xaslib_uploads'
-cnf['DOWNLOAD_FOLDER'] = '/tmp/xaslib_public'
+cnf['UPLOAD_FOLDER'] = '/tmp/'
+cnf['DOWNLOAD_FOLDER'] = '/tmp/'
 cnf['MAX_CONTENT_LENGTH'] = 33554432
 
 app.jinja_env.cache = {}
 app.debug  = True
 app.secret_key = SECRET_KEY
-
 
 # app.config['PROFILE'] = True
 # app.wsgi_app = ProfilerMiddleware(app.wsgi_app, restrictions = [30])
