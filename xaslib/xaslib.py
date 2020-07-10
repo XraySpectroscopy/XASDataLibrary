@@ -98,7 +98,6 @@ def isotime2datetime(isotime):
     return datetime(syear, smon, sday, shour, smin, ssec, susec)
 
 def guess_datetime(tstring):
-    print("Guess Datetime ", tstring)
     if 'T' in tstring and 'OCT' not in tstring:
         tstring = tstring.replace('T', ' ')
 
@@ -107,11 +106,12 @@ def guess_datetime(tstring):
         for tfmt in ("%H:%M:%S", "%H:%M"):
             dtfmt = "%s %s" % (dfmt, tfmt)
             try:
-                out = datetime.strptime(tstring, tfmt)
+                out = datetime.strptime(tstring, dtfmt)
             except ValueError:
                 out = None
             if out is not None:
                 return out
+            
 
 def fmttime(dtime=None):
     if dtime is None:
@@ -551,7 +551,6 @@ class XASDataLibrary(object):
         try:
             algor, niter, salt, hash_stored = row.password.split('$')
         except:
-            print("Fetch stored hash failed" )
             algor, niter, salt, hash_stored = PW_ALGOR, PW_NITER, '_nul_', '%bad%'
         hash_test = b64encode(pbkdf2_hmac(algor, password.encode('utf-8'),
                                           salt.encode('utf-8'),

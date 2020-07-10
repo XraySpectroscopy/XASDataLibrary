@@ -968,7 +968,7 @@ def show_person(pid=-1):
     person = db.get_person(pid)
     suites = db.fquery('suite', person_id=pid)
     spectra = db.fquery('spectrum', person_id=pid)
-    print(len(suites), len(spectra), pid)
+    # print(len(suites), len(spectra), pid)
     return render_template('person.html', person=person, suites=suites,
                            spectra=spectra)
 
@@ -1001,7 +1001,7 @@ def suites(stid=None):
                        'rating': get_rating(st),
                        'suite_owner': is_owner,
                        'nspectra': len(spectra), 'spectra': spectra})
-        print('spectra for suite ', stid, spectra)
+        # print('spectra for suite ', stid, spectra)
 
     return render_template('suites.html', nsuites=len(suites), suites=suites,
                            person=person)
@@ -1267,16 +1267,12 @@ def submit_sample_edits():
         prep = request.form['preparation']
         formula = request.form['formula']
         cas_number = request.form['cas_number']
-        print(" Submit Sample Edits: ", sid, name, cas_number)
         image_data = None
         ###
-        print(" - Files: ", request.files)
         img_file = request.files['image_filename']
         if img_file:
             fullpath = get_fullpath(img_file, app.config['UPLOAD_FOLDER'])
             mimetype = img_file.mimetype
-            print("Image File ", fullpath, img_file, mimetype, dir(img_file))
-
             try:
                 img_file.save(fullpath)
             except IOError:
@@ -1295,7 +1291,6 @@ def submit_sample_edits():
 
             image_data = "data:%s;base64,%s" % (mimetype,
                                                 base64.b64encode(dat).decode('utf-8'))
-            print("Have Image Data!" , image_data)
         ###
         db.update('sample', int(sid), person=pid, name=name, notes=notes,
                   formula=formula,  preparation=prep, cas_number=cas_number,
@@ -1498,7 +1493,6 @@ def submit_citation_edits():
         return redirect(url_for('suites', error=error))
 
     if request.method == 'POST':
-        print("Citation Edits ", request.form)
         form = {k: v for k, v in request.form.items()}
         person_id   = form.pop('person_id')
         citation_id = form.pop('citation_id')
@@ -1559,6 +1553,7 @@ def parse_datagroup(dgroup, fname, fullpath, pid, form=None):
                 ref_modes=REFERENCE_MODES,
                 ref_mode=REFERENCE_MODES[0])
 
+    print(" Array labels ", array_labels)
     opts.update(dict(person_id=pid,
                      filename=fname,
                      fullpath=fullpath,
@@ -1571,6 +1566,7 @@ def parse_datagroup(dgroup, fname, fullpath, pid, form=None):
                      person_email=person.email,
                      person_name=person.name,
                      upload_date=fmttime(),
+                     collection_date=fmttime(),
                      en_arrayname=array_labels[1],
                      i0_arrayname=array_labels[2],
                      it_arrayname=array_labels[3],
@@ -1610,8 +1606,7 @@ def edit_upload():
                 file.save(fullpath)
             except IOError:
                 print("edit_upload failed ", session, fname, file.filename,
-                      app.config['UPLOAD_FOLDER']
-                     )
+                      app.config['UPLOAD_FOLDER'])
                 return render_template('upload.html',
                                        person_id=session['person_id'],
                                        error='Could not save uploaded file (%s)' % (file.filename))
@@ -1624,7 +1619,6 @@ def edit_upload():
                                        error='Could not read uploaded file (%s)' % (fname))
 
             opts = parse_datagroup(dgroup, fname, fullpath, pid)
-
             return render_template('edit_uploadspectrum.html', **opts)
 
     return render_template('upload.html',
@@ -1669,7 +1663,9 @@ def verify_uploaded_data(form, with_arrays=False):
 
 
     i0 = getattr(dgroup, form['i0_arrayname'], None)
-    itrans = ifluor = irefer = mu = murefer = None
+    itrans = getattr(dgroup, form['it_arrayname'], None)
+    ifluor = irefer = mu = murefer = None
+    
     if mode.startswith('trans'):
         itrans = getattr(dgroup, form['it_arrayname'], None)
         if 'is_mutrans' in form:
@@ -1678,7 +1674,7 @@ def verify_uploaded_data(form, with_arrays=False):
             mu = -np.log(itrans/i0)
     elif 'if_arrayname' in form:
         ifluor = getattr(dgroup, form['if_arrayname'], None)
-        if 'is_mufluor' not in form:
+        if 'is_mufluor' in form:
             mu = ifluor
         elif ifluor is not None and i0 is not None:
             mu = ifluor/i0
@@ -1689,7 +1685,7 @@ def verify_uploaded_data(form, with_arrays=False):
     refmode = form.get('ref_mode', 'none').lower()
     if ir_arrayname is not None and refmode is not 'none':
         irefer = getattr(dgroup, ir_arrayname, None)
-        if refer is None:
+        if irefer is None:
             murefer = None
         elif refmode.startswith('mu'):
             murefer = irefer
@@ -1821,7 +1817,6 @@ def submit_upload():
 
     pid    = request.form['person_id']
     pemail = db.get_person(int(pid)).email
-
     if request.form.get('submit', '').lower().startswith('verify'):
         opts = verify_uploaded_data(request.form)
         if opts['verify_read'] != 'OK':

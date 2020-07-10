@@ -1,5 +1,4 @@
 
-
 <input type=hidden name=person_id value={{person_id}}>
 <input type=hidden name=fullpath value="{{fullpath|safe}}">
 
@@ -71,10 +70,13 @@ Uploaded File: {{filename}} has {{narrays}} array columns with {{npts}} data poi
 </td></tr>
 
 <tr><td> Date Measured:   </td> <td>
+      <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>    
       <script src="https://docs.xrayabsorption.org/js/jquery.simple-dtpicker.js"></script>
       <link rel="stylesheet" href="https://docs.xrayabsorption.org/js/jquery.simple-dtpicker.css"/>
       <input type="text" name="collection_date"  value="{{collection_date|safe}}">
-      <script type="text/javascript">	$(function(){ $('*[name=collection_date]').appendDtpicker(); });	</script>
+      <script type="text/javascript">
+	$(function(){ $('*[name=collection_date]').appendDtpicker(); });
+      </script>
 </td></tr>
 
 
@@ -83,14 +85,12 @@ Uploaded File: {{filename}} has {{narrays}} array columns with {{npts}} data poi
     var refmode = document.getElementById("mode");
     var dis = false;
     if (refmode.selectedIndex == 0) {
-       document.getElementById("it_arrayname").disabled = false;
-       document.getElementById("is_mutrans").disabled = false;
-       document.getElementById("if_arrayname").disabled = true;
-       document.getElementById("is_mufluor").disabled = true;
-    } else {
-       document.getElementById("it_arrayname").disabled = true;
-       document.getElementById("is_mutrans").disabled = true;
        document.getElementById("if_arrayname").disabled = false;
+       document.getElementById("is_mutrans").disabled = false;
+       document.getElementById("is_mufluor").disabled = false;
+    } else {
+       document.getElementById("if_arrayname").disabled = false;
+       document.getElementById("is_mutrans").disabled = false;
        document.getElementById("is_mufluor").disabled = false;
     }
     }
@@ -120,8 +120,7 @@ Uploaded File: {{filename}} has {{narrays}} array columns with {{npts}} data poi
 </td></tr>
 
 <td>Transmission Column: </td><td>
-  <select name='it_arrayname' id="it_arrayname" style="width: 250px;"
-	  {% if mode != 'transmission' %}  disabled {% endif %} >
+  <select name='it_arrayname' id="it_arrayname" style="width: 250px;">
 {% for a in array_labels %}
     <option value={{a}} {% if a == it_arrayname %} selected=1 {% endif %} >{{ a }}</option>
 {% endfor %}
@@ -131,14 +130,13 @@ Uploaded File: {{filename}} has {{narrays}} array columns with {{npts}} data poi
 </td></tr>
 
 <td> Fluorescence Column: </td><td>
-  <select name='if_arrayname' ' id="if_arrayname"  style="width: 250px;"
-	  {% if mode == 'transmission' %}  disabled {% endif %} >
+  <select name='if_arrayname' ' id="if_arrayname"  style="width: 250px;">
 {% for a in array_labels %}
     <option value={{a}} {% if a == if_arrayname %} selected=1 {% endif %} >{{ a }}</option>
 {% endfor %}
 </select>
   &nbsp; <input type="checkbox"  id="is_mufluor" name="is_mufluor"
-		{% if is_mufluor %} checked {% endif %}  {% if mode == 'transmission' %}  disabled {% endif %}>  mu_fluor (not I_fluor)? </input>
+		{% if is_mufluor %} checked {% endif %}>  mu_fluor (not I_fluor)? </input>
 </td></tr>
 
   <script type="text/javascript">
