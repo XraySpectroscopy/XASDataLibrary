@@ -47,7 +47,10 @@ REFERENC_MODES = SAMPLES_DATA = None
 
 EMAIL_MSG = "From: {mailfrom:s}\r\nTo: {mailto:s}\r\nSubject: {subject:s}\r\n{message:s}\n"
 
-GENERIC_MONOS = ('None', 'generic Si(111)', 'generic Si(220)', 'generic Si(311)')
+GEN_MONOS = {"None":"-1",
+             "generic Si(111)":"3.1355893",
+             "generic Si(220)":"1.9201484",
+             "generic Si(311)":"1.6375081"}
 
 def make_permalink(selected, func='plots'):
     base_url = app.config['BASE_URL']
@@ -1552,7 +1555,7 @@ def parse_datagroup(dgroup, fname, fullpath, pid, form=None):
                 beamlines=ANY_BEAMLINES,
                 samples=SAMPLES_OR_NEW,
                 modes=ANY_MODES[1:],
-                gen_monos=GENERIC_MONOS,
+                gen_monos=GEN_MONOS,
                 ref_modes=REFERENCE_MODES,
                 ref_mode=REFERENCE_MODES[0])
 

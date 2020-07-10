@@ -41,9 +41,9 @@ Uploaded File: {{filename}} has {{narrays}} array columns with {{npts}} data poi
 <tr>
   <script type="text/javascript">
     function set_dspacing() {
-    var dvals = ['-1',  '3.1355893',  '1.9201484',  '1.6375081'];
-    var mono = document.getElementById("mono_name");
-    document.getElementById("d_spacing").value = dvals[mono.selectedIndex];
+    var mono_name = document.getElementById("mono_name").selectedOptions[0].label;
+    var dspace_val = {{gen_monos|tojson }};
+    document.getElementById("d_spacing").value = dspace_val[mono_name];
     }
   </script>
 
