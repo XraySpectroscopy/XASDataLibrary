@@ -434,7 +434,7 @@ def elem(elem=None, orderby='name', reverse=0):
         return send_from_directory(app.config['DOWNLOAD_FOLDER'], fname,
                                    mimetype='application/zip',
                                    as_attachment=True,
-                                   attachment_filename='xaslib.zip')
+                                   download_name='xaslib.zip')
 
     elif button.startswith('add') and len(selected) > 0:
         target_suite = request.form.get('target_suite', None)
@@ -1035,7 +1035,7 @@ def suite_action():
         return send_from_directory(app.config['DOWNLOAD_FOLDER'], fname,
                                    mimetype='application/zip',
                                    as_attachment=True,
-                                   attachment_filename=aname)
+                                   download_name=aname)
 
     return reidrect(url_for('suites', stid=stid))
 
@@ -1665,7 +1665,7 @@ def verify_uploaded_data(form, with_arrays=False):
     i0 = getattr(dgroup, form['i0_arrayname'], None)
     itrans = getattr(dgroup, form['it_arrayname'], None)
     ifluor = irefer = mu = murefer = None
-    
+
     if mode.startswith('trans'):
         itrans = getattr(dgroup, form['it_arrayname'], None)
         if 'is_mutrans' in form:
