@@ -288,7 +288,10 @@ def parse_spectrum(s, db):
     elem   = db.get_element(s.element_z)
     person = db.get_person(s.person_id)
     mode   = db.get_spectrum_mode(s.id)
-    refmode = db.get_spectrum_refmode(s.id)
+    try:
+        refmode = db.get_spectrum_refmode(s.id)
+    except:
+        refmode = 'none'
     eunits = db.fquery('energy_units', id=s.energy_units_id)[0].units
     d_spacing = '%f'% s.d_spacing
     notes =  json.loads(s.notes)
@@ -402,7 +405,7 @@ def guess_metadata(dgroup):
         if 'iref' in llab or 'i2' in llab or 'mur' in llab:
             out['ir_arrayname'] = lab
 
-    out['has_reference'] = out['ir_arrayname'] is not 'None'
+    out['has_reference'] = out['ir_arrayname'] != 'None'
 
     for line in dgroup.header:
         line  = line.strip()

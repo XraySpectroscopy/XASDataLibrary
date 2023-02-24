@@ -111,7 +111,7 @@ def guess_datetime(tstring):
                 out = None
             if out is not None:
                 return out
-            
+
 
 def fmttime(dtime=None):
     if dtime is None:
@@ -784,7 +784,10 @@ class XASDataLibrary(object):
         kws['mode_id'] = self.fquery('mode', name=mode)[0].id
         if irefer is None:
             reference_mode = 'none'
-        kws['reference_mode_id'] = self.fquery('reference_mode', name=reference_mode)[0].id
+        try:
+            kws['reference_mode_id'] = self.fquery('reference_mode', name=reference_mode)[0].id
+        except:
+            kws['reference_mode_id'] = 0
         kws['element_z'] = self.get_element(element).z
         kws['energy_units_id'] = self.fquery('energy_units', name=energy_units)[0].id
         return self.addrow('spectrum', name=name, commit=commit, **kws)
@@ -879,7 +882,10 @@ class XASDataLibrary(object):
         mode_id = 1
         if spect is not None:
             mode_id = spect.reference_mode_id
-        return self.fquery('reference_mode', id=mode_id)[0].name
+        try:
+            return self.fquery('reference_mode', id=mode_id)[0].name
+        except:
+            return 'none'
 
     def get_spectrum_beamline(self, spectrum_id):
         "return id, desc for beamline for aa spectrum"
@@ -1090,7 +1096,7 @@ class XASDataLibrary(object):
                                             notes=sample_notes, **sample_kws)
         self.session.commit()
         time.sleep(0.025)
-        if reference_mode is not 'none':
+        if reference_mode != 'none':
             if reference_sample is None:
                 reference_sample = 'unknown'
         else:

@@ -1311,7 +1311,10 @@ def beamlines(blid=None, orderby='name', reverse=0):
         orderby = 'name'
 
     beamlines = [b for b in BEAMLINE_DATA]
-    beamlines = sorted(BEAMLINE_DATA, key=lambda k: k[orderby])
+    try:
+        beamlines = sorted(BEAMLINE_DATA, key=lambda k: k[orderby])
+    except:
+        pass
     reverse = int(reverse)
     if reverse != 0:
         beamlines.reverse()
@@ -1683,7 +1686,7 @@ def verify_uploaded_data(form, with_arrays=False):
 
     ir_arrayname = form.get('ir_arrayname', None)
     refmode = form.get('ref_mode', 'none').lower()
-    if ir_arrayname is not None and refmode is not 'none':
+    if ir_arrayname is not None and refmode != 'none':
         irefer = getattr(dgroup, ir_arrayname, None)
         if irefer is None:
             murefer = None
