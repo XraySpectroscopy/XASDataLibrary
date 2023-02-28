@@ -2,7 +2,7 @@
 from setuptools import setup
 import os
 
-version = '0.3'
+version = '0.3.0'
 with open(os.path.join('xaslib', '_version.py')) as fh:
     for line in fh.readlines():
         line = line[:-1].strip()
@@ -13,7 +13,6 @@ with open(os.path.join('xaslib', '_version.py')) as fh:
 
 pkg_data = {'xaslib.template': ['template/*', 'templates/doc/*'],
             'xaslib.static': ['static/*']}
-
 
 setup(name='xaslib',
       version = version,
