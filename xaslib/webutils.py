@@ -22,7 +22,7 @@ from xraydb import guess_edge
 
 from lmfit.printfuncs import gformat
 
-from .xaslib import fmttime, isotime2datetime, guess_datetime
+from .xaslib import isotime, guess_datetime
 
 PLANCK_HC = 1.e10 * consts.Planck * consts.c / consts.e
 def mono_deg2ev(angle, d_spacing):
@@ -86,7 +86,7 @@ def save_zipfile(db, slist, folder='.'):
     tfile = path.abspath(path.join(folder, fname))
     zfile = ZipFile(tfile, mode='w')
     for spid in slist:
-        spect =  db.fquery('spectrum', id=spid)[0]
+        spect =  db.lookup('spectrum', id=spid)[0]
         zfile.writestr("%s.xdi" % spect.name, spect.filetext)
     zfile.close()
     return fname
@@ -113,14 +113,14 @@ def get_rating(item, short=False):
             rating = "unrated"
     return rating
 
-def get_beamline_list(db, orderby='id', with_any=False):
+def get_beamline_list(db, order_by='id', with_any=False):
     l = []
     if with_any:
         l.append({'id': '0', 'name': 'Any', 'notes': '',
                   'xray_source':'', 'fac_name': '', 'fac_loc': ''})
 
-    for r in db.get_beamlines(orderby=orderby):
-        fac  = db.fquery('facility', id=r.facility_id)[0]
+    for r in db.get_beamlines(order_by=order_by):
+        fac  = db.lookup('facility', id=r.facility_id)[0]
         loc = fac.country
         if fac.city is not None and len(fac.city) > 0:
             loc = "%s, %s" % (fac.city, fac.country)
@@ -134,7 +134,7 @@ def get_beamline_list(db, orderby='id', with_any=False):
 
 def get_sample_list(db):
     l = []
-    for r in db.fquery('sample'):
+    for r in db.get_rows('sample'):
         l.append({'id': '%d' % r.id, 'name': r.name,
                   'formula': r.formula, 'notes': r.notes,
                   'preparation': r.preparation,
@@ -145,14 +145,14 @@ def get_sample_list(db):
 def spectrum_ratings(db, sid):
     """list of score, comments, time, person) for spectrum ratings"""
     d = []
-    for r in db.fquery('spectrum_rating', spectrum_id=sid):
+    for r in db.lookup('spectrum_rating', spectrum_id=sid):
         d.append((r.score, r.comments, r.datetime, r.person_id))
     return d
 
 def spectrum_ratings_summary(db, sid):
     """summary of spectrum ratings"""
     sum, n, rating = 0.0, 0, 'No ratings'
-    for r in db.fquery('spectrum_rating', spectrum_id=sid):
+    for r in db.lookup('spectrum_rating', spectrum_id=sid):
         sum += 1.0*r.score
         n  += 1
     if n > 0:
@@ -163,7 +163,7 @@ def spectrum_ratings_summary(db, sid):
 def suite_ratings_summary(db, sid):
     """summary of suite ratings"""
     sum, n, rating = 0.0, 0, 'No ratings'
-    for r in db.fquery('suite_rating', suite_id=sid):
+    for r in db.lookup('suite_rating', suite_id=sid):
         sum += 1.0*r.score
         n  += 1
     if n > 0:
@@ -174,7 +174,7 @@ def get_person_suites(db, pid):
     """get suites owned by a person, for 'add to suite' lists"""
     out = []
     try:
-        for s in db.fquery('suite', person_id=int(pid)):
+        for s in db.lookup('suite', person_id=int(pid)):
             out.append((s.id, s.name))
     except:
         pass
@@ -183,14 +183,14 @@ def get_person_suites(db, pid):
 def get_suite_spectra(db, sid):
     'spectra in suite'
     d = []
-    for r in db.fquery('spectrum_suite', suite_id=sid):
+    for r in db.lookup('spectrum_suite', suite_id=sid):
         d.append(r.spectrum_id)
     return d
 
 def add_spectra_to_suite(db, spectrum_ids, suite_id=-1, person_id=-1):
     print("Add Spectra ", db, spectrum_ids, suite_id, person_id)
     # try:
-    suite = db.fquery('suite', id=suite_id)
+    suite = db.lookup('suite', id=suite_id)
     print(suite)
     if suite is None:
         return "could not find suite %d" % suite_id
@@ -199,7 +199,7 @@ def add_spectra_to_suite(db, spectrum_ids, suite_id=-1, person_id=-1):
         return "not owner of suite '%s'" % (suite.name)
 
     current_spectrum_ids = []
-    for r in db.fquery('spectrum_suite', suite_id=suite_id):
+    for r in db.lookup('spectrum_suite', suite_id=suite_id):
         current_spectrum_ids.append(r.spectrum_id)
     nadded = 0
     for spid in spectrum_ids:
@@ -212,7 +212,7 @@ def add_spectra_to_suite(db, spectrum_ids, suite_id=-1, person_id=-1):
 def get_spectrum_suites(db, sid):
     'suites that a spectrum is in'
     d = []
-    for r in db.fquery('spectrum_suite', spectrum_id=sid):
+    for r in db.lookup('spectrum_suite', spectrum_id=sid):
         d.append(r.suite_id)
     return d
 
@@ -222,8 +222,8 @@ def beamline_for_spectrum(db, s, notes=None):
 
     if s.beamline_id is not None:
         blid = s.beamline_id
-        bl   = db.fquery('beamline', id=blid)[0]
-        fac  = db.fquery('facility', id=bl.facility_id)[0]
+        bl   = db.lookup('beamline', id=blid)[0]
+        fac  = db.lookup('facility', id=bl.facility_id)[0]
         desc = bl.name
     if (blid is None or blid < 0) and (notes is not None):
         blid = -1
@@ -239,7 +239,7 @@ def citation_for_spectrum(db, s, notes=None):
     desc = 'unknown'
     if s.citation_id is not None:
         cid  = s.citation_id
-        cit  = db.fquery('citation', id=cid)[0]
+        cit  = db.lookup('citation', id=cid)[0]
         desc = cit.name
     if (cid is None or cid < 0) and (notes is not None):
         cid = -1
@@ -274,7 +274,7 @@ def spectra_for_citation(db, cid):
 def spectra_for_suite(db, stid):
     spectra = []
     if stid is not None:
-        for r in db.fquery('spectrum_suite', suite_id=int(stid)):
+        for r in db.lookup('spectrum_suite', suite_id=int(stid)):
             spec = db.get_spectrum(r.spectrum_id)
             elem = db.get_element(spec.element_z)
             edge = db.get_edge(spec.edge_id)
@@ -292,7 +292,7 @@ def parse_spectrum(s, db):
         refmode = db.get_spectrum_refmode(s.id)
     except:
         refmode = 'none'
-    eunits = db.fquery('energy_units', id=s.energy_units_id)[0].units
+    eunits = db.lookup('energy_units', id=s.energy_units_id)[0].units
     d_spacing = '%f'% s.d_spacing
     notes =  json.loads(s.notes)
 
@@ -300,7 +300,7 @@ def parse_spectrum(s, db):
     citation_id, citation_name = citation_for_spectrum(db, s, notes)
 
     try:
-        sample = db.fquery('sample', id=s.sample_id)[0]
+        sample = db.lookup('sample', id=s.sample_id)[0]
         sample_id = s.sample_id
         sample_name = sample.name
         sample_formula = sample.formula
@@ -372,8 +372,8 @@ def parse_spectrum(s, db):
             'reference_sample': s.reference_sample,
             'person_email': person.email,
             'person_name': person.name,
-            'upload_date': fmttime(s.submission_date),
-            'collection_date': fmttime(s.collection_date),
+            'upload_date': isotime(s.submission_date),
+            'collection_date': isotime(s.collection_date),
             'xdi_filename': "%s.xdi" % (s.name.strip()),
             'fullfig': None,
             'xanesfig': None}
@@ -444,7 +444,7 @@ def guess_metadata(dgroup):
             if 'scan' in key and 'start_time' in key:
                 dtime = guess_datetime(val)
                 if dtime is not None:
-                    out['collection_date'] = fmttime(dtime)
+                    out['collection_date'] = isotime(dtime)
 
     if e0 is not None and out.get('elem_sym', None) is None:
         try:

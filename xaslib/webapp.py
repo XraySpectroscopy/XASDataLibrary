@@ -16,8 +16,8 @@ from flask import (Flask, request, session, redirect, url_for,
                    abort, render_template, flash, Response,
                    send_from_directory)
 
-from .xaslib import (connect_xaslib, isotime2datetime, fmttime, valid_score,
-                     unique_name, None_or_one)
+from .xaslib import (connect_xaslib, isotime2datetime, isotime, valid_score,
+                     unique_name)
 from .initialdata import edge_energies, elem_syms
 from larch.io import read_ascii
 from larch.xafs.pre_edge import preedge
@@ -29,7 +29,7 @@ from .webutils import (row2dict, multiline_text, parse_spectrum,
                        spectrum_ratings, spectra_for_suite,
                        get_person_suites, add_spectra_to_suite,
                        spectra_for_citation, save_zipfile,
-                       spectra_for_beamline, get_beamline_list, get_rating,
+                       spectra_for_beamline, get_rating,
                        get_fullpath, guess_metadata, pathjoin,
                        secure_filename, mono_deg2ev, upload2xdi)
 
@@ -75,21 +75,23 @@ def session_init(session, force_refresh=False):
     if force_refresh:
         ANY_EDGES  = ['Any'] + [e.name for e in db.get_edges()]
         ANY_MODES  = ['Any'] + [e.name for e in db.get_modes()]
-        ANY_BEAMLINES = ['<Select Beamline>']
-        ANY_BEAMLINES.extend([b['name'] for b in get_beamline_list(db, with_any=False,
-                                                                   orderby='name')])
         SAMPLES_OR_NEW  = [(0, '<Create New Sample>')]
-        SAMPLES_OR_NEW.extend( [(s.id, s.name) for s in db.fquery('sample')])
+        SAMPLES_OR_NEW.extend( [(s.id, s.name) for s in db.lookup('sample')])
 
         INCLUDED_ELEMS = db.included_elements()
         SPECTRA_COUNT = len(db.get_spectra())
-        ALL_ELEMS  = db.fquery('element')
-        EN_UNITS = [e.units for e in db.fquery('energy_units')]
-        REFERENCE_MODES = [r.notes for r in db.fquery('reference_mode')]
+        ALL_ELEMS  = db.lookup('element')
+        EN_UNITS = [e.units for e in db.lookup('energy_units')]
+        REFERENCE_MODES = [r.notes for r in db.lookup('reference_mode')]
+
+        bl_data = db.get_beamlines(order_by='name')
+        ANY_BEAMLINES = ['<Select Beamline>', 'Any']
+        ANY_BEAMLINES.extend([b.name for b in bl_data])
+        print("ANY BL ", len(ANY_BEAMLINES), ANY_BEAMLINES[:35])
         BEAMLINE_DATA = []
-        for bldat in db.fquery('beamline', orderby='name'):
+        for bldat in bl_data:
             blid = bldat.id
-            fac = db.fquery('facility', id=bldat.facility_id)[0]
+            fac = db.lookup('facility', id=bldat.facility_id)[0]
             loc = fac.country
             if fac.city is not None and len(fac.city) > 0:
                 loc = "%s, %s" % (fac.city, fac.country)
@@ -103,10 +105,11 @@ def session_init(session, force_refresh=False):
                                   'nspectra': len(spectra),
                                   'spectra': spectra})
 
+
         SAMPLES_DATA = []
-        for sdat in db.fquery('sample', orderby='name'):
+        for sdat in db.lookup('sample', order_by='name'):
             sid = sdat.id
-            nspectra = len(db.fquery('spectrum', sample_id=sid))
+            nspectra = len(db.lookup('spectrum', sample_id=sid))
             formula = sdat.formula
             if formula in (None, 'None'):
                 formula = 'unknown'
@@ -396,9 +399,9 @@ def show_error(error=''):
 @app.route('/elem/', methods=['GET', 'POST'])
 @app.route('/elem/<elem>',  methods=['GET', 'POST'])
 @app.route('/elem/<elem>/', methods=['GET', 'POST'])
-@app.route('/elem/<elem>/<orderby>',  methods=['GET', 'POST'])
-@app.route('/elem/<elem>/<orderby>/<reverse>', methods=['GET', 'POST'])
-def elem(elem=None, orderby='name', reverse=0):
+@app.route('/elem/<elem>/<order_by>',  methods=['GET', 'POST'])
+@app.route('/elem/<elem>/<order_by>/<reverse>', methods=['GET', 'POST'])
+def elem(elem=None, order_by='element_z', reverse=0):
     session_init(session)
     dbspectra = []
     person_id = int(session['person_id'])
@@ -408,16 +411,12 @@ def elem(elem=None, orderby='name', reverse=0):
     elif elem is None:
         elem = request.form.get('elem')
     if elem is not None:
-        if elem.lower() == 'all':
-            try:
-                dbspectra = db.get_spectra(orderby='element_z')
-            except:
-                pass
-        else:
-            try:
-                dbspectra = db.get_spectra(element=elem, orderby=orderby)
-            except:
-                pass
+        kws = {'order_by': order_by}
+        if elem.lower() != 'all':
+            kws['element'] = elem
+
+        dbspectra = db.get_spectra(**kws)
+
 
     selected = []
     for key, val in request.form.items():
@@ -514,7 +513,7 @@ def elem(elem=None, orderby='name', reverse=0):
                            elem=elem, spectra=spectra,
                            edge_filter=edge_filter, edges=ANY_EDGES,
                            mode_filter=mode_filter, modes=ANY_MODES,
-                           beamlines=get_beamline_list(db, with_any=True, orderby='name'),
+                           beamlines=db.get_beamline_list(with_any=True),
                            beamline_id=beamline_id,
                            searchword=searchword,
                            rating_min=rating_min,
@@ -635,8 +634,8 @@ def spectrum(spid=None, plotstyle='xanes'):
                                       y_range=[ymin, ymax])
 
     suites = []
-    for r in db.fquery('spectrum_suite', spectrum_id=s.id):
-        st = db.fquery('suite', id=r.suite_id)[0]
+    for r in db.lookup('spectrum_suite', spectrum_id=s.id):
+        st = db.lookup('suite', id=r.suite_id)[0]
         suites.append({'id': r.suite_id, 'name': st.name})
     opts['nsuites'] = len(suites)
     opts['suites'] = suites
@@ -656,7 +655,7 @@ def showspectrum_rating(spid=None):
         person = db.get_person(row.person_id)
         ratings.append({'score': row.score,
                         'review': multiline_text(row.comments),
-                        'date': fmttime(row.datetime),
+                        'date': isotime(row.datetime),
                         'person_email': person.email,
                         'person_name': person.name,
                         'person_affil': person.affiliation})
@@ -711,13 +710,12 @@ def edit_spectrum(spid=None):
         return redirect(url_for('/', error='Could not find Spectrum #%d' % spid))
 
     opts = parse_spectrum(s, db)
-    beamlines = get_beamline_list(db, with_any=False, orderby='name')
     return render_template('edit_spectrum.html',
                            error=error,
-                           elems=db.fquery('element'),
-                           eunits=db.fquery('energy_units'),
+                           elems=db.lookup('element'),
+                           eunits=db.lookup('energy_units'),
                            edges=ANY_EDGES[1:],
-                           beamlines=beamlines,
+                           beamlines=db.get_beamline_list(),
                            samples=SAMPLES_OR_NEW,
                            modes=ANY_MODES[1:], **opts)
 
@@ -730,7 +728,7 @@ def delete_spectrum(spid, ask=1):
     if session['username'] is None:
         return needslogin(error='to delete a spectrum')
 
-    spect_name = db.fquery('spectrum', id=spid)[0].name
+    spect_name = db.lookup('spectrum', id=spid)[0].name
     if ask != 0:
         return render_template('confirm_delete_spectrum.html',
                                spectrum_id=spid,
@@ -849,7 +847,7 @@ def rate_suite(stid=None):
         error='must be logged in to rate suite'
         return redirect(url_for('suites', stid=stid, error=error))
 
-    st = None_or_one(db.fquery('suite', id=stid))
+    st = db.lookup('suite', id=stid, none_if_empty=True)
     if st is None:
         return redirect(url_for('suites', stid=stid, error='suite not found?'))
 
@@ -870,7 +868,7 @@ def rate_suite(stid=None):
 def showsuite_rating(stid=None):
     session_init(session)
 
-    st = None_or_one(db.fquery('suite'))
+    st = db.lookup('suite', none_if_empty=True)
     if st is None:
         error = 'Could not find Suite #%d' % stid
         return redirect(url_for('suites', error=error))
@@ -880,7 +878,7 @@ def showsuite_rating(stid=None):
         person = db.get_person(row.person_id)
         ratings.append({'score': row.score,
                         'review': multiline_text(row.comments),
-                        'date': fmttime(row.datetime),
+                        'date': isotime(row.datetime),
                         'person_email': person.email,
                         'person_name': person.name,
                         'person_affil': person.affiliation})
@@ -925,13 +923,13 @@ def submit_spectrum_to_suite():
         pid   = request.form['person']
 
         found = False
-        for r in db.fquery('spectrum_suite', suite_id=stid):
+        for r in db.lookup('spectrum_suite', suite_id=stid):
             found = found or (r.spectrum_id == spid)
         if not found:
             db.addrow('spectrum_suite', suite_id=stid, spectrum_id=spid)
             time.sleep(0.1)
         else:
-            stname = db.fquery('suite', id=stid)[0].name
+            stname = db.lookup('suite', id=stid)[0].name
             spname = db.get_spectrum(spid).name
             error = "Spectrum '%s' is already in Suite '%s'" % (spname, stname)
 
@@ -966,8 +964,8 @@ def doc(page='index.html'):
 def show_person(pid=-1):
     session_init(session)
     person = db.get_person(pid)
-    suites = db.fquery('suite', person_id=pid)
-    spectra = db.fquery('spectrum', person_id=pid)
+    suites = db.lookup('suite', person_id=pid)
+    spectra = db.lookup('spectrum', person_id=pid)
     # print(len(suites), len(spectra), pid)
     return render_template('person.html', person=person, suites=suites,
                            spectra=spectra)
@@ -982,7 +980,7 @@ def suites(stid=None):
     suites = []
     person = db.get_person(1)
     if stid is None:
-        for st in db.fquery('suite'):
+        for st in db.lookup('suite'):
             person = db.get_person(st.person_id)
             spectra = spectra_for_suite(db, st.id)
             is_owner = (int(session['person_id']) == int(st.person_id))
@@ -992,7 +990,7 @@ def suites(stid=None):
                            'nspectra': len(spectra), 'spectra': spectra})
 
     else:
-        st = db.fquery('suite', id=stid)[0]
+        st = db.lookup('suite', id=stid)[0]
         person = db.get_person(st.person_id)
         spectra = spectra_for_suite(db, stid)
         is_owner = (int(session['person_id']) == int(st.person_id))
@@ -1015,7 +1013,7 @@ def suite_action():
     person_id = int(session['person_id'])
     button = request.form.get('submit', 'no button').lower()
     stid = int(request.form.get('suite'))
-    suite = db.fquery('suite', id=stid)[0]
+    suite = db.lookup('suite', id=stid)[0]
 
     selected = []
     for key, val in request.form.items():
@@ -1088,7 +1086,7 @@ def add_suite():
         suite_name = request.form['suite_name']
         person_id = request.form['person']
         notes = request.form['notes']
-        _sname = [s.name for s in db.fquery('suite')]
+        _sname = [s.name for s in db.lookup('suite')]
         try:
             suite_name = unique_name(suite_name, _sname,  msg='suite')
         except:
@@ -1110,7 +1108,7 @@ def delete_suite(stid, ask=1):
         error='must be logged in to delete a suite'
         return redirect(url_for('suites', error=error))
 
-    suite_name = db.fquery('suite', id=stid)[0].name
+    suite_name = db.lookup('suite', id=stid)[0].name
     if ask != 0:
         return render_template('confirm_delete_suite.html', stid=stid,
                                suite_name=suite_name)
@@ -1129,7 +1127,7 @@ def edit_suite(stid=None):
         error='must be logged in to edit suite'
         return redirect(url_for('suites', error=error))
 
-    st = db.fquery('suite', id=stid)[0]
+    st = db.lookup('suite', id=stid)[0]
     name, notes, person_id = st.name, st.notes, st.person_id
     person_email = db.get_person(person_id).email
     spectra = spectra_for_suite(db, stid)
@@ -1168,28 +1166,28 @@ def submit_suite_edits():
 @app.route('/sample/<int:sid>')
 def sample(sid=None):
     session_init(session)
-    sdat = None_or_one(db.fquery('sample', id=sid))
+    sdat = db.lookup('sample', id=sid, none_if_empty=True)
     if sdat is None:
         return sendback(error='no sample #%d found' % sid)
 
     opts = row2dict(sdat)
     has_image = opts.get('image_data', None) is not None
-    opts['spectra'] = db.fquery('spectrum', sample_id=sid)
+    opts['spectra'] = db.lookup('spectrum', sample_id=sid)
     return render_template('sample.html', sid=sid, has_image=has_image, **opts)
 
 
 @app.route('/samples')
 @app.route('/samples/')
 @app.route('/samples/<int:sid>')
-@app.route('/samples/<orderby>')
-@app.route('/samples/<orderby>/<reverse>')
-def samples(blid=None, orderby='name', reverse=0):
+@app.route('/samples/<order_by>')
+@app.route('/samples/<order_by>/<reverse>')
+def samples(blid=None, order_by='name', reverse=0):
     session_init(session, force_refresh=(SAMPLES_DATA is None))
 
-    if orderby not in ('name', 'formula', 'nspectra'):
-        orderby = 'name'
+    if order_by not in ('name', 'formula', 'nspectra'):
+        order_by = 'name'
     samples = [s for s in SAMPLES_DATA]
-    samples = sorted(samples, key=lambda k: k[orderby])
+    samples = sorted(samples, key=lambda k: k[order_by])
 
     reverse = int(reverse)
     if reverse != 0:
@@ -1223,8 +1221,8 @@ def select_spectrum_sample(spid=None, sid=None):
         error='must be logged in to edit sample'
         return redirect(url_for('spectrum', spid=spid, error=error))
 
-    opts = {'spectra': db.fquery('spectrum', sample_id=sid)}
-    sdat = None_or_one(db.fquery('sample', id=sid))
+    opts = {'spectra': db.lookup('spectrum', sample_id=sid)}
+    sdat = db.lookup('sample', id=sid, none_if_empty=True)
     if sdat is not None:
         opts = row2dict(sdat)
     opts['has_image'] = opts.get('image_data', None) is not None
@@ -1239,7 +1237,7 @@ def edit_sample(sid=None):
         error='must be logged in to edit sample'
         return redirect(url_for('/', error=error))
 
-    sdat = None_or_one(db.fquery('sample', id=sid))
+    sdat = db.lookup('sample', id=sid, none_if_empty=True)
     if sdat is None:
         error='Cannot find sample to edit'
         return redirect(url_for('/', error=error))
@@ -1247,7 +1245,7 @@ def edit_sample(sid=None):
     opts = row2dict(sdat)
     opts['has_image'] = opts.get('image_data', None) is not None
 
-    opts['spectra'] = db.fquery('spectrum', sample_id=sid)
+    opts['spectra'] = db.lookup('spectrum', sample_id=sid)
     return render_template('edit_sample.html', sid=sid, **opts)
 
 @app.route('/submit_sample_edits', methods=['GET', 'POST'])
@@ -1302,17 +1300,17 @@ def submit_sample_edits():
 @app.route('/beamlines')
 @app.route('/beamlines/')
 @app.route('/beamlines/<int:blid>')
-@app.route('/beamlines/<orderby>')
-@app.route('/beamlines/<orderby>/<reverse>')
-def beamlines(blid=None, orderby='name', reverse=0):
+@app.route('/beamlines/<order_by>')
+@app.route('/beamlines/<order_by>/<reverse>')
+def beamlines(blid=None, order_by='name', reverse=0):
     session_init(session, force_refresh=(BEAMLINE_DATA is None))
 
-    if orderby not in ('name', 'nickname', 'nspectra', 'facility'):
-        orderby = 'name'
+    if order_by not in ('name', 'nickname', 'nspectra', 'facility'):
+        order_by = 'name'
 
     beamlines = [b for b in BEAMLINE_DATA]
     try:
-        beamlines = sorted(BEAMLINE_DATA, key=lambda k: k[orderby])
+        beamlines = sorted(BEAMLINE_DATA, key=lambda k: k[order_by])
     except:
         pass
     reverse = int(reverse)
@@ -1320,7 +1318,7 @@ def beamlines(blid=None, orderby='name', reverse=0):
         beamlines.reverse()
     return render_template('beamlines.html',
                            nbeamlines=len(beamlines),
-                           beamlines=beamlines,
+                           beamlines=db.get_beamline_list(),
                            reverse=(0 if reverse else 1))
 
 @app.route('/beamline/')
@@ -1329,11 +1327,11 @@ def beamline(blid=None):
     session_init(session)
     if blid is None:
         return sendback('beamlines')
-    bldat = None_or_one(db.fquery('beamline', id=blid))
+    bldat = db.lookup('beamline', id=blid, none_if_empty=True)
     if bldat is None:
         return sendback('beamlines', error='Beamline #%d not found' % blid)
 
-    fac = db.fquery('facility', id=bldat.facility_id)[0]
+    fac = db.lookup('facility', id=bldat.facility_id)[0]
     loc = fac.country
     if fac.city is not None and len(fac.city) > 0:
         loc = "%s, %s" % (fac.city, fac.country)
@@ -1367,7 +1365,7 @@ def add_beamline():
         fac_id = int(request.form['fac_id'])
         source = request.form['xray_source']
 
-        _blnames = [s.name for s in db.fquery('beamline')]
+        _blnames = [s.name for s in db.lookup('beamline')]
         try:
             bl_name = unique_name(bl_name, _blnames,
                                   msg='beamline', maxcount=5)
@@ -1381,7 +1379,7 @@ def add_beamline():
         return redirect(url_for('beamline', blid=bl.id, error=error))
     else:
         return render_template('add_beamline.html', error=error,
-                               facilities=db.get_facilities(orderby='country'))
+                               facilities=db.get_facilities(order_by='country'))
 
 
 @app.route('/add_facility')
@@ -1395,7 +1393,7 @@ def add_facility():
 
     if request.method == 'POST':
         fac_name = request.form['facility_name']
-        _facnames = [s.name for s in db.fquery('facility')]
+        _facnames = [s.name for s in db.lookup('facility')]
         try:
             fac_name = unique_name(fac_name, _facnames,  msg='facility', maxcount=5)
         except:
@@ -1406,14 +1404,14 @@ def add_facility():
         return redirect(url_for('facilities', error=error))
     else:
         return render_template('add_facility.html', error=error,
-                               facilities=db.get_facilities(orderby='country'))
+                               facilities=db.get_facilities(order_by='country'))
 
 @app.route('/facilities')
 @app.route('/facilities/')
 def facilities():
     session_init(session)
     return render_template('facilities.html', error=None,
-                           facilities=db.get_facilities(orderby='country'))
+                           facilities=db.get_facilities(order_by='country'))
 
 @app.route('/edit_facility/<int:fid>')
 def edit_facility(fid=None):
@@ -1459,7 +1457,7 @@ def citation(cid=None):
         kws['id'] = cid
 
     citations = []
-    for cit in db.fquery('citation', **kws):
+    for cit in db.lookup('citation', **kws):
         person_id = cit.person_id
         person_email = db.get_person(person_id).email
         spectra = spectra_for_citation(db, cid)
@@ -1544,19 +1542,18 @@ def parse_datagroup(dgroup, fname, fullpath, pid, form=None):
     labels = {'en':array_labels[1], 'i0':array_labels[2],
               'i1':array_labels[3], 'if':'None', 'ir':'None'}
 
-    desc = '{} uploaded  {}'.format(fname, fmttime())
+    desc = '{} uploaded  {}'.format(fname, isotime())
 
     opts = dict(elems=ALL_ELEMS,
                 eunits=EN_UNITS,
                 edges=ANY_EDGES[1:],
-                beamlines=ANY_BEAMLINES,
+                beamlines=BEAMLINES,
                 samples=SAMPLES_OR_NEW,
                 modes=ANY_MODES[1:],
                 gen_monos=GEN_MONOS,
                 ref_modes=REFERENCE_MODES,
                 ref_mode=REFERENCE_MODES[0])
 
-    print(" Array labels ", array_labels)
     opts.update(dict(person_id=pid,
                      filename=fname,
                      fullpath=fullpath,
@@ -1564,12 +1561,12 @@ def parse_datagroup(dgroup, fname, fullpath, pid, form=None):
                      description=desc,
                      mode='transmission',
                      e_resolution='nominal',
-                     beamline=ANY_BEAMLINES[0],
+                     beamline=BEAMLINES[0],
                      reference_sample='',
                      person_email=person.email,
                      person_name=person.name,
-                     upload_date=fmttime(),
-                     collection_date=fmttime(),
+                     upload_date=isotime(),
+                     collection_date=isotime(),
                      en_arrayname=array_labels[1],
                      i0_arrayname=array_labels[2],
                      it_arrayname=array_labels[3],
@@ -1760,7 +1757,7 @@ def verify_uploaded_data(form, with_arrays=False):
 
     opts['sample'] = int(opts['sample'])
     if opts['sample'] > 0:
-        s = None_or_one(db.fquery('sample', id=opts['sample']))
+        s = db.lookup('sample', id=opts['sample'], none_if_empty=True)
         if s is not None:
             opts['sample_name'] = s.name
             opts['sample_prep'] = s.preparation
