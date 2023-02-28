@@ -19,7 +19,7 @@ from datetime import datetime
 from base64 import b64encode
 from hashlib import pbkdf2_hmac
 
-from sqlalchemy import MetaData, create_engine, text
+from sqlalchemy import MetaData, create_engine, text, and_
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import SingletonThreadPool
 
@@ -27,9 +27,9 @@ from larch.io import XDIFile, read_ascii
 from larch.utils import debugtime
 
 from . import initialdata
+from .simpledb import (SimpleDB, isSimpleDB, isotime,
+                       hash_password, test_password)
 
-PW_ALGOR = 'sha512'
-PW_NITER = 200000
 
 def isXASDataLibrary(dbname):
     """test if a file is a valid XAS Data Library file:
@@ -38,25 +38,9 @@ def isXASDataLibrary(dbname):
        the 'element' table must have more than 90 rows and the
        'info' table must have an entries named 'version' and 'create_date'
     """
+    return isSimpeleDB(dbname, required_tables=('info', 'spectra',
+                                                'elements', 'energy_units'))
 
-    try:
-        engine  = create_engine('sqlite:///%s' % dbname)
-        metadata =  MetaData(engine)
-        metadata.reflect()
-    except:
-        return False
-
-    if ('info' in metadata.tables and
-        'spectra' in metadata.tables and
-        'element' in metadata.tables and
-        'energy_units' in metadata.tables):
-
-        elements = metadata.tables['element'].select().execute().fetchall()
-        if len(elements) > 90:
-            info = metadata.tables['info'].select().execute().fetchall()
-            keys = [row.key for row in info]
-            return ('version' in keys and 'create_date' in keys)
-    return False
 
 def json_encode(val):
     "simple wrapper around json.dumps"
@@ -82,19 +66,18 @@ def unique_name(name, namelist, maxcount=100, msg='spectrum'):
         count += 1
         if count > maxcount:
             msg = "a %s named '%s' already exists"  % (msg, name)
-            raise XASLibException(msg)
+            raise ValueError(msg)
         name = "%s (%d)" % (basename, count)
     return name
 
-def isotime2datetime(isotime):
-    sdate, stime = isotime.replace('T', ' ').split(' ')
+def isotime2datetime(intime):
+    sdate, stime = intime.replace('T', ' ').split(' ')
     syear, smon, sday = [int(x) for x in sdate.split('-')]
     sfrac = '0'
     if '.' in stime:
         stime, sfrac = stime.split('.')
     shour, smin, ssec  = [int(x) for x in stime.split(':')]
     susec = int(1e6*float('.%s' % sfrac))
-
     return datetime(syear, smon, sday, shour, smin, ssec, susec)
 
 def guess_datetime(tstring):
@@ -112,274 +95,22 @@ def guess_datetime(tstring):
             if out is not None:
                 return out
 
-
-def fmttime(dtime=None):
-    if dtime is None:
-        dtime = datetime.now()
-    return dtime.strftime('%Y-%m-%d %H:%M:%S')
-
-
-def None_or_one(val, msg='Expected 1 or None result'):
-    """expect result (as from query.all() to return
-    either None or exactly one result"""
-    if len(val) == 1:
-        return val[0]
-    elif len(val) == 0:
-        return None
-    else:
-        raise XASLibException(msg)
-
-def apply_orderby(q, tab, orderby=None):
-    """apply an order_by to a query to sort results"""
-    if orderby is not None:
-        key = getattr(tab.c, orderby, None)
-        if key is None:
-            key = getattr(tab.c, "%s_id" % orderby, None)
-        if key is not None:
-            q = q.order_by(key)
-    return q
-
-def slow_string_compare(a, b):
-    """
-    does a slow-as-possible compare of 2 strings, a and b
-    returns whether the two strings are equal
-    this is meant to confuse and slow down attempts to guess / crack
-    passwords that time how long a string comparison takes to fail.
-    """
-    isgood = 0
-    if len(a) != len(b):
-        isgood = 1
-    time.sleep(5.e-5*(len(a)*(1+5*random.random())))
-    for x, y in zip(a, b):
-        isgood |= ord(x) ^ ord(y)
-    return isgood == 0
-
-
-class XASLibException(Exception):
-    """XAS Library Exception: General Errors"""
-    def __init__(self, msg):
-        Exception.__init__(self)
-        self.msg = msg
-    def __str__(self):
-        return self.msg
-
-
-class _BaseTable(object):
-    "generic class to encapsulate SQLAlchemy table"
-    def __repr__(self):
-        name = self.__class__.__name__
-        fields = ['%s' % getattr(self, 'name', 'UNNAMED')]
-        return "<%s(%s)>" % (name, ', '.join(fields))
-
-
-class Info(_BaseTable):
-    "general information table (versions, etc)"
-    def __repr__(self):
-        name = self.__class__.__name__
-        fields = ['%s=%s' % (getattr(self, 'key', '?'),
-                               getattr(self, 'value', '?'))]
-        return "<%s(%s)>" % (name, ', '.join(fields))
-
-class Mode(_BaseTable):
-    "collection mode table"
-    pass
-
-class Facility(_BaseTable):
-    "facility table"
-    pass
-
-class Beamline(_BaseTable):
-    "beamline table"
-    pass
-
-class EnergyUnits(_BaseTable):
-    "Energy Units table"
-    def __repr__(self):
-        name = self.__class__.__name__
-        fields = ['%s' % getattr(self, 'units', '')]
-        return "<%s(%s)>" % (name, ', '.join(fields))
-
-class Edge(_BaseTable):
-    "edge table"
-    def __repr__(self):
-        name = self.__class__.__name__
-        fields = ['%s' % getattr(self, 'name', 'X')]
-        # '%s' % getattr(self, 'level', '')]
-        return "<%s(%s)>" % (name, ', '.join(fields))
-
-class Element(_BaseTable):
-    "element table"
-    def __repr__(self):
-        name = self.__class__.__name__
-        fields = ['%s' % getattr(self, 'symbol', 'NU'),
-                  'Z=%d' % getattr(self, 'z', 0),
-                  '%s' % getattr(self, 'name', 'UNNAMED'),
-                  ]
-        return "<%s(%s)>" % (name, ', '.join(fields))
-
-
-class Ligand(_BaseTable):
-    "ligand table"
-    pass
-
-class Crystal_Structure(_BaseTable):
-     "crystal structure table"
-     pass
-
-class Citation(_BaseTable):
-    "literature citation table"
-    pass
-
-class Person(_BaseTable):
-    "person table"
-    def __repr__(self):
-        name = self.__class__.__name__
-        fields = [getattr(self, 'name', ''),
-                  getattr(self, 'email', 'NO EMAIL')]
-        return "<%s(%s)>" % (name, ', '.join(fields))
-
-class Spectrum_Ligand(_BaseTable):
-    "spectrum ligand"
-    ligand, spectrum = None, None
-
-class Spectrum_Rating(_BaseTable):
-    "spectra rating"
-    def __repr__(self):
-        name = self.__class__.__name__
-        fields = ['%.1f' % getattr(self, 'score', 0)]
-        if getattr(self, 'spectra', None) is not None:
-            fields.append('Spectrum %d' % getattr(self, 'spectra', 0))
-
-        return "<%s(%s)>" % (name, ', '.join(fields))
-
-
-class Suite_Rating(_BaseTable):
-    "suite rating table"
-    def __repr__(self):
-        name = self.__class__.__name__
-        fields = ['%d' % (int(getattr(self, 'score', 0)))]
-        if getattr(self, 'suite', None) is not None:
-            fields.append('Suite %d' % getattr(self, 'suite', 0))
-
-        return "<%s(%s)>" % (name, ', '.join(fields))
-
-class Suite(_BaseTable):
-    "suite table"
-    pass
-
-class Sample(_BaseTable):
-    "sample table"
-    pass
-
-class Spectrum(_BaseTable):
-    "spectra table"
-    pass
-
-class XASDataLibrary(object):
+class XASDataLibrary(SimpleDB):
     """full interface to XAS Spectral Library"""
-    def __init__(self, dbname=None, server= 'sqlite', user='',
-                 password='',  host='', port=5432, logfile=None):
-        self.engine = None
+
+    def __init__(self, dbname=None, server= 'sqlite', user='', password='',
+                 host='', port=5432, dialect=None, logfile=None):
+
+        SimpleDB.__init__(self, dbname=dbname, server=server, user=user,
+                          password=password, host=host, port=port, dialect=dialect,
+                          logfile=logfile)
+
         self.session = None
-        self.metadata = None
-        self.logfile = logfile
-        if dbname is not None:
-            self.connect(dbname, server=server, user=user,
-                         password=password, port=port, host=host)
-
-    def connect(self, dbname, server='sqlite', user='',
-                password='', port=5432, host=''):
-        "connect to an existing database"
-
-        self.dbname = dbname
-        if server.startswith('sqlit'):
-            self.engine = create_engine('sqlite:///%s' % self.dbname,
-                                        connect_args={'check_same_thread': False})
-        else:
-            conn_str= 'postgresql://%s:%s@%s:%d/%s'
-            self.engine = create_engine(conn_str % (user, password, host,
-                                                    port, dbname))
-
-        self.session = sessionmaker(bind=self.engine)()
-        self.metadata =  MetaData(self.engine)
-        try:
-            self.metadata.reflect()
-        except:
-            raise XASLibException('%s is not a valid database' % dbname)
-
-        tables = self.tables = self.metadata.tables
-
-        self.update_mod_time =  None
-        if self.logfile is None and server.startswith('sqlit'):
-            lfile = self.dbname
-            if lfile.endswith('.xdl'):
-                lfile = self.logfile[:-4]
-            self.logfile = "%s.log" % lfile
-            logging.basicConfig()
-            logger = logging.getLogger('sqlalchemy.engine')
-            logger.addHandler(logging.FileHandler(self.logfile))
-
-
-
-    def close(self):
-        "close session"
-        self.session.commit()
-        self.session.flush()
-        self.session.close()
-
-    def set_info(self, key, value):
-        """set key / value in the info table"""
-        table = self.tables['info']
-        vals  = self.fquery('info', key=key)
-        if len(vals) < 1:
-            # none found -- insert
-            table.insert().execute(key=key, value=value)
-        else:
-            table.update(whereclause=text("key='%s'" % key)).execute(value=value)
-
-    def set_mod_time(self):
-        """set modify_date in info table"""
-        if self.update_mod_time is None:
-            self.update_mod_time = self.tables['info'].update(
-                whereclause=text("key='modify_date'"))
-        self.update_mod_time.execute(value=fmttime())
-
-    def addrow(self, tablename, commit=True, **kws):
-        """add generic row"""
-        table = self.tables[tablename]
-        out = table.insert().execute(**kws)
-        self.set_mod_time()
-        if commit:
-            self.session.commit()
-        if out.lastrowid == 0:
-            v = self.fquery(tablename, **kws)
-            return v[-1].id
-        else:
-            return out.lastrowid
-
-    def fquery(self, tablename, **kws):
-        """
-        return filtered query of table with any equality filter on columns
-
-        examples:
-
-        >>> db.fquery('element', z=30)
-        >>> db.fquery('spectrum', person_id=3)
-
-        will return all rows from table
-
-        """
-        table = self.tables[tablename]
-        query = self.session.query(table)
-        for key, val in kws.items():
-            if key in table.c and val is not None:
-                query = query.filter(getattr(table.c, key)==val)
-        return query.all()
 
     def included_elements(self, retval='symbol'):
         """return a list of elements with one or more spectra"""
         zvals = []
-        for s in self.fquery('spectrum'):
+        for s in self.get_rows('spectrum'):
             ez = s.element_z
             if ez not in zvals:
                 zvals.append(ez)
@@ -394,25 +125,14 @@ class XASDataLibrary(object):
                 out.append(val)
         return out
 
-
-    def get_facility(self,  **kws):
+    def get_facility(self,  facility):
         """return facility or list of facilities"""
+        return self.get_rows('facility', where={'name': facility},
+                             limit_one=True, none_if_empty=True)
 
-        out = self.fquery('facility', **kws)
-        if len(out) > 1:
-            return out
-        return None_or_one(out)
-
-    def get_facilities(self, orderby='id'):
+    def get_facilities(self, order_by='id'):
         """return facility or list of facilities"""
-
-        tab = self.tables['facility']
-        query = apply_orderby(tab.select(), tab, orderby)
-        return query.execute().fetchall()
-
-        out = self.fquery('facility')
-
-        return None_or_one(out)
+        return self.get_rows('facility', order_by=order_by, none_if_empty=True)
 
     def get_element(self, val):
         """return element z, name, symbol from one of z, name, symbol"""
@@ -422,297 +142,221 @@ class XASDataLibrary(object):
         elif len(val) > 2:
             key = 'name'
         kws = {key: val}
-        return None_or_one(self.fquery('element', **kws))
+        return self.get_rows('element', where=kws, limit_one=True, none_if_empty=True)
 
     def get_elements(self):
         """return list of elements z, name, symbol"""
-        return self.fquery('element')
+        return self.get_rows('element')
 
     def get_modes(self):
         """return list of measurement modes"""
-        return self.fquery('mode')
+        return self.get_rows('mode')
 
     def get_edge(self, val, key='name'):
         """return edge by name  or id"""
         if isinstance(val, int):
             key = 'id'
-        kws = {key: val}
-        return None_or_one(self.fquery('edge', **kws))
+        return self.get_rows('edge', where={key: val}, limit_one=True, none_if_empty=True)
 
     def get_edges(self):
         """return list of edges"""
-        return self.fquery('edge')
+        return self.get_rows('edge')
 
     def get_beamline(self, val, key='name'):
         """return beamline by name  or id"""
         if isinstance(val, int):
             key = 'id'
         kws = {key: val}
-        return None_or_one(self.fquery('beamline', **kws))
+        return self.get_rows('beamline', where={key: val}, limit_one=True, none_if_empty=True)
 
     def add_energy_units(self, units, notes=None, **kws):
         """add Energy Units: units required
         notes  optional
         returns EnergyUnits instance"""
-        return self.addrow('energy_units', units=units, notes=notes, **kws)
+        return self.add_row('energy_units', units=units, notes=notes, **kws)
 
     def get_sample(self, sid):
         """return sample by id"""
-        return None_or_one(self.fquery('sample', id=sid))
+        return self.get_rows('sample', where={'id': sid}, limit_one=True, none_if_empty=True)
 
     def add_mode(self, name, notes='', **kws):
-        """add collection mode: name required
-        returns Mode instance"""
-        return self.addrow('mode', name=name, notes=notes, **kws)
+        """add collection mode: name required"""
+        return self.add_row('mode', name=name, notes=notes, **kws)
 
-    def add_crystal_structure(self, name, notes='',
-                               format=None, data=None, **kws):
-         """add data format: name required
-         returns Format instance"""
-         kws['notes'] = notes
-         kws['format'] = format
-         kws['data'] = data
-         return self.addrow(Crystal_Structure, ('name',), (name,), **kws)
+    def add_crystal_structure(self, name, notes='', data=None, **kws):
+         """add data format: name required"""
+         kws.updata(dict(name=name, notes=notes,  data=data))
+         return self.add_row('crystal_structure', **kws)
 
     def add_edge(self, name, level):
-        """add edge: name and level required
-        returns Edge instance"""
-        return self.addrow('edge', name=name, level=level)
+        """add edge: name and level required"""
+        return self.add_row('edge', name=name, level=level)
 
     def add_facility(self, name, notes='', **kws):
         """add facilty by name, return Facility instance"""
-        return self.addrow('facility', name=name, notes=notes, **kws)
+        kws.updata(dict(name=name, notes=notes))
+        return self.add_row('facility', **kws)
 
-    def add_beamline(self, name, facility_id=None,
-                     xray_source=None,  notes='', **kws):
-        """add beamline by name, with facility:
-               facility= Facility instance or id
-               returns Beamline instance"""
-        return self.addrow('beamline', name=name, xray_source=xray_source,
-                           notes=notes, facility_id=facility_id, **kws)
+    def add_beamline(self, name, facility_id=None, notes='', **kws):
+        """add beamline by name, with facility id"""
+        kws.updata(dict(name=name, notes=notes, facility_id=facility_id))
+        return self.add_row('beamline', **kws)
 
     def add_citation(self, name, **kws):
-        """add literature citation: name required
-        returns Citation instance"""
-        return self.addrow('citation', name=name, **kws)
+        """add literature citation: name required"""
+        return self.add_row('citation', name=name, **kws)
 
     def add_info(self, key, value):
-        """add Info key value pair -- returns Info instance"""
-        return self.addrow('info', key=key, value=value)
+        """add Info key value pair"""
+        return self.add_row('info', key=key, value=value)
 
     def add_ligand(self, name, **kws):
-        """add ligand: name required
-        returns Ligand instance"""
-        return self.addrow('ligand', name=name, **kws)
+        """add ligand: name required"""
+        return self.add_row('ligand', name=name, **kws)
 
-    def add_person(self, name, email,
-                   affiliation='', password=None, con='false', **kws):
-        """add person: arguments are
-        name, email with affiliation and password optional
-        returns Person instance"""
-        person_id = self.addrow('person', email=email, name=name,
-                             affiliation=affiliation,
-                             confirmed=con, **kws)
+    def add_person(self, name, email, affiliation='', password=None,
+                   confirmed='false', **kws):
+        """add person: arguments are  name, email with optional affiliation and password"""
 
+        kws.update(dict(affiliation=affiliation))
+        self.add_row('person', email=email, name=name, **kws)
         if password is not None:
-            self.set_person_password(email, password)
-        return person_id
+            self.set_person_password(email, password, confirmed=confirmed)
 
     def get_person(self, val, key='email'):
         """get person by email"""
         if isinstance(val, int):
             key = 'id'
-        kws = {key: val}
-
-        return None_or_one(self.fquery('person', **kws),
-                           "expected 1 or None person")
+        return self.get_rows('person', where={key: val}, limit_one=True, none_if_empty=True)
 
     def get_persons(self, **kws):
         """return list of people"""
-        return self.fquery('person')
+        return self.get_rows('person', where=kws)
 
-    def set_person_password(self, email, password, auto_confirm=False):
+    def set_person_password(self, email, password, confirmed=None, auto_confirm=False):
         """ set secure password for person"""
-        salt   = b64encode(os.urandom(24))
-        result = b64encode(pbkdf2_hmac(PW_ALGOR, password.encode('utf-8'),
-                                       salt, PW_NITER))
-        hash = '$'.join((PW_ALGOR, '%8.8d'%PW_NITER, salt.decode('utf-8'),
-                         result.decode('utf-8')))
-        table = self.tables['person']
-        ewhere = text("email='%s'" % email)
-        confirmed = 'true' if auto_confirm else 'false'
-        table.update(whereclause=ewhere).execute(password=hash,
-                                                 confirmed=confirmed)
+        hash = hash_password(password)
+        if confirmed is None:
+            confirmed = 'true' if auto_confirm else 'false'
+        else:
+            confirmed = 'true' if confirmed else 'false'
+
+        self.update('person', where={'email': email}, password=hash,
+                    confirmed=confirmed)
 
     def test_person_password(self, email, password):
         """test password for person, returns True if valid"""
-        table = self.tables['person']
-        row  = table.select(table.c.email==email).execute().fetchone()
-        try:
-            algor, niter, salt, hash_stored = row.password.split('$')
-        except:
-            algor, niter, salt, hash_stored = PW_ALGOR, PW_NITER, '_nul_', '%bad%'
-        hash_test = b64encode(pbkdf2_hmac(algor, password.encode('utf-8'),
-                                          salt.encode('utf-8'),
-                                          int(niter))).decode('utf-8')
-        return slow_string_compare(hash_test, hash_stored)
+        row = self._get_person_by_email(email)
+        return test_password(password, row.hash, minimum_runtime=0.05)
 
     def test_person_confirmed(self, email):
         """test if account for a person is confirmed"""
-
-        table = self.tables['person']
-        row  = table.select(table.c.email==email).execute().fetchone()
+        row = self.get_person(email)
         return row.confirmed.lower() == 'true'
 
     def person_unconfirm(self, email):
         """ sets a person to 'unconfirmed' status, pending confirmation,
         returns hash, which must be used to confirm person"""
         hash = b64encode(os.urandom(24)).decode('utf-8').replace('/', '_')
-        table = self.tables['person']
-        table.update(whereclause=text("email='%s'" % email)).execute(confirmed=hash)
+        self.update('person', where={'email': email}, confirmed=hash)
         return hash
 
     def person_test_confirmhash(self, email, hash):
         """test if a person's confirmation hash is correct"""
-        tab = self.tables['person']
-        row = tab.select(tab.c.email==email).execute().fetchone()
-        return slow_string_compare(hash, row.confirmed)
+        return (self.get_person(email).confirmed == hash)
 
     def person_confirm(self, email, hash):
         """try to confirm a person,
         test the supplied hash for confirmation,
         setting 'confirmed' to 'true' if correct.
         """
-        tab = self.tables['person']
-        row = tab.select(tab.c.email==email).execute().fetchone()
-        is_confirmed = False
-        if hash == row.confirmed:
-            tab.update(whereclause=text("email='%s'" % email)).execute(confirmed='true')
-            is_confirmed = True
-        return is_confirmed
+        confirmed = (hash == self.get_person(email).confirmed)
+        if confirmed:
+            self.update('person', where={'email': email}, confirmed='true')
+        return confirmed
 
     def add_sample(self, name, person_id, **kws):
         "add sample: name required returns sample id"
-        return self.addrow('sample', name=name, person_id=person_id, **kws)
+        return self.add_row('sample', name=name, person_id=person_id, **kws)
 
     def add_suite(self, name, notes='', person_id=None, **kws):
         """add suite: name required
         returns Suite instance"""
-        return self.addrow('suite', name=name, notes=notes,
+        return self.add_row('suite', name=name, notes=notes,
                             person_id=person_id, **kws)
 
     def del_suite(self, suite_id):
-        table = self.tables['suite']
-        table.delete().where(table.c.id==suite_id).execute()
-        table = self.tables['spectrum_suite']
-        table.delete().where(table.c.suite_id==suite_id).execute()
-        table = self.tables['suite_rating']
-        table.delete().where(table.c.id==suite_id).execute()
-        self.set_mod_time()
-        self.session.commit()
+        self.delete_rows('suite', {'id': suite_id})
+        self.delete_rows('suite_rating', {'id': suite_id})
+        self.delete_rows('spectrum_suite', {'suite_id': suite_id})
+
 
     def remove_spectrum_from_suite(self, suite_id, spectrum_id):
-        tab = self.tables['spectrum_suite']
-        rows = tab.select().where(tab.c.suite_id==suite_id
-                                  ).where(tab.c.spectrum_id==spectrum_id
-                                          ).execute().fetchall()
-        for row in rows:
-            tab.delete().where(tab.c.id==row.id).execute()
-        self.set_mod_time()
-        self.session.commit()
+        self.delete_rows('spectrum_suite', {'suite_id': suite_id,
+                                            'spectrum_id': spectrum_id})
 
     def del_spectrum(self, sid):
-        table = self.tables['spectrum']
-        table.delete().where(table.c.id==sid).execute()
-        table = self.tables['spectrum_suite']
-        table.delete().where(table.c.spectrum_id==sid).execute()
-        table = self.tables['spectrum_rating']
-        table.delete().where(table.c.id==sid).execute()
+        self.delete_rows('spectrum', {'id:', sid})
+        self.delete_rows('spectrum_rating', {'id:', sid})
+        self.delete_rows('spectrum_suite', {'spectrum_id:', sid})
 
-        self.set_mod_time()
-        self.session.commit()
 
     def set_suite_rating(self, person_id, suite_id, score, comments=None):
-        """add a rating score to a suite:"""
-        kws = {'score': valid_score(score),
-               'person_id': person_id, 'suite_id': suite_id,
-               'datetime': datetime.now(), 'comments': ''}
-        if comments is not None:
-            kws['comments'] = comments
+        """add a rating score to a suite, also update summary rating"""
+        if comments is None:
+            comments = ''
 
-        tab = self.tables['suite_rating']
-        rowid = None
-        for row in tab.select(tab.c.suite_id==suite_id).execute().fetchall():
-            if row.person_id == person_id:
-                rowid = row.id
+        vals = {'score': valid_score(score),
+               'datetime': datetime.now(),
+               'comments':comments}
+        where={'suite_id': suite_id, 'person_id': person_id},
 
-        if rowid is None:
-            tab.insert().execute(**kws)
+        row = self.get_rows('suite_rating', where=where, none_if_empty=True)
+        if rows is None:
+            vals.update(where)
+            self.add_row('suite_rating', **vals)
         else:
-            tab.update(whereclause=text("id='%d'" % rowid)).execute(**kws)
-        self.session.commit()
+            self.update('suite_rating', where=where, **vals)
 
-        sum = 0
-        rows = tab.select(tab.c.suite_id==suite_id).execute().fetchall()
-        for row in rows:
-            sum += 1.0*row.score
+        # recompute average rating for suite
+        sum = 0.0
+        for row in self.get_rows('suite_rating', where={'suite_id': suite_id}):
+            sum += 1.0*float(row.score)
 
         rating = 'No ratings'
         if len(rows) > 0:
             rating = '%.1f (%d ratings)' % (sum/len(rows), len(rows))
-
-        stab = self.tables['suite']
-        stab.update(whereclause=text("id='%d'" % suite_id)).execute(rating_summary=rating)
+        self.update('suite', where=where, rating_summary=rating)
 
 
     def set_spectrum_rating(self, person_id, spectrum_id, score, comments=None):
         """add a score to a spectrum: person_id, spectrum_id, score, comment
         score is an integer value 0 to 5"""
-        kws = {'score': valid_score(score),
-               'person_id': person_id, 'spectrum_id': spectrum_id,
-               'datetime': datetime.now(), 'comments': ''}
         if comments is not None:
-            kws['comments'] = comments
+            comments = ''
+        valss = {'score': valid_score(score),
+                 'datetime': datetime.now(),
+                 'comments': comments}
+        where = {'spectrum_id': spectrum_id, 'person_id': person_id}
 
 
-        tab = self.tables['spectrum_rating']
-        rowid = None
-        for row in tab.select(tab.c.spectrum_id==spectrum_id).execute().fetchall():
-            if row.person_id == person_id:
-                rowid = row.id
-
-        if rowid is None:
-            tab.insert().execute(**kws)
+        row = self.get_rows('spectrum_rating', where=where, none_if_empty=True)
+        if rows is None:
+            vals.update(where)
+            self.add_row('spectrum_rating', **vals)
         else:
-            tab.update(whereclause=text("id='%d'" % rowid)).execute(**kws)
+            self.update('spectrum_rating', where=where, **vals)
 
-        self.session.commit()
-
-        sum = 0
-        rows = tab.select(tab.c.spectrum_id==spectrum_id).execute().fetchall()
-        for row in rows:
-            sum += 1.0*row.score
+        # recompute average rating for spectrum
+        sum = 0.0
+        for row in self.get_rows('suite_rating', where={'spectrum_id': spectrum_id}):
+            sum += 1.0*float(row.score)
 
         rating = 'No ratings'
         if len(rows) > 0:
             rating = '%.1f (%d ratings)' % (sum/len(rows), len(rows))
+        self.update('spectrum', where=where, rating_summary=rating)
 
-        stab = self.tables['spectrum']
-        stab.update(whereclause=text("id='%d'" % spectrum_id)).execute(rating_summary=rating)
-
-
-    def update(self, tablename, where, use_id=True, **kws):
-        """update a row (by id) in a table (by name) using keyword args
-        db.update('spectrum', 5, **kws)
-
-        """
-        table = self.tables[tablename]
-        if use_id:
-            where = "id='%d'" % where
-
-        table.update(whereclause=text(where)).execute(**kws)
-        self.set_mod_time()
-        self.session.commit()
 
     def add_spectrum(self, name, description=None, notes='', d_spacing=-1,
                      energy_units=None, edge='K', element=None,
@@ -724,22 +368,21 @@ class XASDataLibrary(object):
                      irefer_stderr=None, energy_notes='', i0_notes='',
                      itrans_notes='', ifluor_notes='', irefer_notes='',
                      submission_date=None, collection_date=None, person=None,
-                     sample=None, beamline=None, citation=None,
-                     commit=True, **kws):
+                     sample=None, beamline=None, citation=None, **kws):
 
         """add spectrum: name required
         returns Spectrum instance"""
-        stab = self.tables['spectrum']
-        spectrum_names = [s.name for s in stab.select().execute()]
+        spectrum_names = [s.name for s in self.get_rows('spectrum')]
 
         if name in spectrum_names:
-            raise XASLibException("A spectrum named '%s' already exists" % name)
+            raise ValueError(f"a spectrum named '{name}' already exists")
 
         if description is None:
             description = name
         dlocal = locals()
+
         # simple values
-        for attr in ('description', 'notes', 'd_spacing', 'reference_sample',
+        for attr in ('name', 'description', 'notes', 'd_spacing', 'reference_sample',
                      'temperature', 'energy_notes', 'i0_notes',
                      'itrans_notes', 'ifluor_notes', 'irefer_notes'):
             kws[attr] = dlocal.get(attr, '')
@@ -781,52 +424,75 @@ class XASDataLibrary(object):
             print("Add Spectrum : No beamline found = ",name,  beamline)
 
         kws['edge_id'] = self.get_edge(edge).id
-        kws['mode_id'] = self.fquery('mode', name=mode)[0].id
+        kws['mode_id'] = self.lookup('mode', name=mode)[0].id
         if irefer is None:
             reference_mode = 'none'
         try:
-            kws['reference_mode_id'] = self.fquery('reference_mode', name=reference_mode)[0].id
+            kws['reference_mode_id'] = self.lookup('reference_mode', name=reference_mode)[0].id
         except:
             kws['reference_mode_id'] = 0
         kws['element_z'] = self.get_element(element).z
-        kws['energy_units_id'] = self.fquery('energy_units', name=energy_units)[0].id
-        return self.addrow('spectrum', name=name, commit=commit, **kws)
+        kws['energy_units_id'] = self.lookup('energy_units', name=energy_units)[0].id
+        return self.add_row('spectrum',   **kws)
 
-    def get_beamlines(self, facility=None, orderby='id'):
+    def get_beamlines(self, facility=None, order_by='id'):
         """get all beamlines for a facility
         Parameters
         --------
-        facility  id, name, or Facility instance for facility
+        facility  id or name of facility, or None for all facilities
 
         Returns
         -------
         list of matching beamlines
 
         """
-        tab = self.tables['beamline']
-        fac_id = None
-        if isinstance(facility, Facility):
-            fac_id = facility.id
-        elif isinstance(facility, int):
-            fac_id = facility
-        elif isinstance(facility, str):
-            ftab = self.tables['facility']
-            row  = ftab.select(ftab.c.name==facility).execute().fetchone()
-            fac_id = row.id
+        where = {}
+        if facility is not None:
+            fwhere  = {}
+            if isinstance(facility, int):
+                fwhere = {'id': facility}
+            elif isinstance(facility, str):
+                fwhere = {'name': facility}
 
-        if fac_id is not None:
-            query = tab.select(tab.c.facility_id==fac_id)
-        else:
-            query = tab.select()
+            fac_id = None
+            row = self.get_rows('facility', where=fwhere, limit_one=True, none_if_empty=True)
+            print(" FAC ", fwhere)
+            if row is not None:
+                where = {'facility_id': row.id}
 
-        query = apply_orderby(query, tab, orderby)
-        return query.execute().fetchall()
+
+        return self.get_rows('beamline', where=where, order_by=order_by)
+
+    def get_beamline_list(self, order_by='name', with_any=False):
+        """ get list or beamline dicts with facility info included"""
+        out = []
+        if with_any:
+            out.append({'id': '0', 'name': 'Any', 'notes': '',
+                        'xray_source':'', 'fac_name': '', 'fac_loc': ''})
+
+        facs = {}
+        for row in self.lookup('facility'):
+            facs[row.id] = row
+        for row in self.get_beamlines(order_by=order_by):
+            fac  = facs[row.facility_id]
+            loc = fac.country
+            if fac.city is not None and len(fac.city) > 0:
+                loc = "%s, %s" % (fac.city, fac.country)
+            out.append({'id': '%d' % row.id,
+                        'name': row.name,
+                        'notes': row.notes,
+                        'xray_source': row.xray_source,
+                        'fac_name': fac.name,
+                        'fac_loc': loc})
+        return out
+
 
     def guess_beamline(self, name, facility=None):
         """return best guess of beamline by name"""
-        bline = None_or_one(self.fquery('beamline', name=name))
+        bline = self.get_rows('beamline', where={'name':name}, none_if_empty=True, limit_one=True)
         if bline is not None:
             return bline
+
         candidates = self.get_beamlines(facility=facility)
         lname = name.lower()
         for b in candidates:
@@ -839,60 +505,62 @@ class XASDataLibrary(object):
             if lname in b.name.lower() or lname in b.nickname.lower():
                 return b
 
-        # this is  comment
+        def clean_name(s):
+            s = s.lower()
+            for c in '-_ & ': s = s.replace(c, '')
+            return s
 
-        lname = lname.lower().replace('-', '').replace('_', '').replace(' ', '').replace('&', '')
+        lname = clean_name(lname)
 
         for b in candidates:
-            bnx = b.name.lower().replace('-', '').replace('_', '').replace(' ', '')
-            bn2 = b.nickname.lower().replace('-', '').replace('_', '').replace(' ', '')
-            if lname in b.name.lower() or lname in b.nickname.lower():
+            name = clean_name(b.name)
+            nickname = clean_name(b.nickname)
+            if lname in name or lname in nickname:
                 return b
-
         return None
-
 
     def get_suite_ratings(self, suite):
         "get all ratings for a suite"
-        if hasattr(suite, 'id') and hasattr(spectrum, 'ratings_summary'):
-            sid = suite.id
-        else:
-            sid = suite
-        return self.fquery('suite_rating', suite_id=sid)
+        if hasattr(suite, 'id') and hasattr(suite, 'rating_summary'):
+            suite_id = suite_id.id
+        elif isinstance(suite, int):
+            suite_id = suite
+        return self.lookup('suite_rating', suite_id=suite_id)
 
     def get_spectrum_ratings(self, spectrum):
         "get all ratings for a spectrum"
         if hasattr(spectrum, 'id') and hasattr(spectrum, 'itrans'):
             sid = spectrum.id
-        else:
+        elif isinstance(spectrum, int):
+
             sid = spectrum
-        return self.fquery('spectrum_rating', spectrum_id=sid)
+        return self.lookup('spectrum_rating', spectrum_id=sid)
+
+    def get_spectrum(self, spectrum_id):
+        return self.get_rows('spectrum', where={'id':spectrum_id},
+                             limit_one=True, none_if_empty=True)
+
 
     def get_spectrum_mode(self, spectrum_id):
         """return name of mode for a spectrum"""
-        spect = None_or_one(self.fquery('spectrum', id=spectrum_id))
-        mode_id = 1
+        spect = self.get_spectrum(spectrum_id)
         if spect is not None:
             mode_id = spect.mode_id
-        return self.fquery('mode', id=mode_id)[0].name
+            return self.lookup('mode', id=mode_id)[0].name
 
     def get_spectrum_refmode(self, spectrum_id):
         """return name of refernce mode for a spectrum"""
-        spect = None_or_one(self.fquery('spectrum', id=spectrum_id))
-        mode_id = 1
+        spect = self.get_spectrum(spectrum_id)
         if spect is not None:
             mode_id = spect.reference_mode_id
-        try:
-            return self.fquery('reference_mode', id=mode_id)[0].name
-        except:
-            return 'none'
+            return self.lookup('reference_mode', id=mode_id)[0].name
 
     def get_spectrum_beamline(self, spectrum_id):
         "return id, desc for beamline for aa spectrum"
         blid, desc  = -1, 'unknown'
-        spect = None_or_one(self.fquery('spectrum', id=spectrum_id))
+        spect = self.get_spectrum(spectrum_id)
         if spect is not None:
-            bl = self.fquery('beamline', id=spect.beamline_id)[0]
+            bl = self.lookup('beamline', id=spect.beamline_id)[0]
             if bl is not None:
                 blid = bl.id
                 desc = bl.name
@@ -902,14 +570,13 @@ class XASDataLibrary(object):
                 desc = "may be '%s'" % (desc, tname)
         return '%d' % blid, desc
 
-    def get_spectrum(self, id):
-        """ get spectrum by id"""
-        tab = self.tables['spectrum']
-        return tab.select().where(tab.c.id == id).execute().fetchone()
+
+    # done through here, I think
 
     def get_spectra(self, edge=None, element=None, beamline=None,
-                    person=None, mode=None, sample=None, facility=None,
-                    suite=None, citation=None, ligand=None, orderby='id'):
+                    person=None, mode=None, facility=None,
+                    # sample=None, suite=None, citation=None, ligand=None,
+                    order_by='id'):
         """get all spectra matching some set of criteria
 
         Parameters
@@ -920,50 +587,46 @@ class XASDataLibrary(object):
         beamline   by name
         facility
         mode
-        sample
-        citation
-        ligand
-        suite
+        # sample
+        # citation
+        # ligand
+        # suite
         """
-        edge_id, element_z, person_id, beamline_id = None, None, None, None
-
-        tab = self.tables['spectrum']
-        query = tab.select()
+        where = {}
+        def getval(row, key='id', default=None):
+            if row is None:
+                return default
+            return getattr(row, key, default)
 
         # edge
-        if isinstance(edge, Edge):
-            edge_id = edge.id
-        elif edge is not None:
-            edge_id = self.get_edge(edge).id
-        if edge_id is not None:
-            query = query.where(tab.c.edge_id==edge_id)
+        if edge is not None:
+            where['edge_id'] = getval(self.get_edge(edge))
 
         # element
-        if isinstance(element, Element):
-            element_z = element.z
-        elif element is not None:
-            element_z = self.get_element(element).z
-        if element_z is not None:
-            query = query.where(tab.c.element_z==element_z)
+        if element is not None:
+            where['element_z'] = getval(self.get_element(element), key='z')
 
         # beamline
-        if isinstance(beamline, Beamline):
-            beamline_id = beamline.id
-        elif beamline is not None:
-            beamline_id = self.get_beamline(name=beamline).id
-        if beamline_id is not None:
-            query = query.where(tab.c.beamline_id==beamline_id)
+        if beamline is not None:
+            where['beamline_id'] = getval(self.get_beamline(name=beamline))
 
         # person
-        if isinstance(person, Person):
-            person_id = person.id
-        elif person is not None:
-            person_id = self.get_person(person).id
-        if person_id is not None:
-            query = query.where(tab.c.person_id==person_id)
+        if person is not None:
+            where['person_id'] = getval(self.get_person(person))
 
-        query = apply_orderby(query, tab, orderby)
-        return query.execute().fetchall()
+        # mode
+        if mode is not None:
+            where['mode_id'] = getval(self.get_mode(mode))
+
+        results = self.get_rows('spectrum', where=where, order_by=order_by)
+
+        # facility filter is post-query
+        if facility is not None:
+            bl_ids = [bl.id for bl in self.get_beamlines(facility=facility)]
+            results = [row for row in results if row.beamline_id in bl_ids]
+
+        return results
+
 
     def add_xdifile(self, fname, spectrum_name=None, description=None,
                     person=None, reuse_sample=True, mode=None, commit=True,
@@ -984,7 +647,7 @@ class XASDataLibrary(object):
             afile = None
 
         path, fname = os.path.split(fname)
-        now = fmttime()
+        now = isotime()
 
         if spectrum_name is None:
             spectrum_name = fname
@@ -993,10 +656,10 @@ class XASDataLibrary(object):
 
         if description is None:
             description  = spectrum_name
-        stab = self.tables['spectrum']
 
-        _s_names = [s.name for s in stab.select().execute()]
-        spectrum_name = unique_name(spectrum_name, _s_names)
+
+        all_spect_names = [s.name for s in self.get_rows('spectrum')]
+        spectrum_name = unique_name(spectrum_name, all_spect_names)
 
         try:
             c_date = xfile.attrs['scan']['start_time']
@@ -1057,9 +720,7 @@ class XASDataLibrary(object):
                     value.lower().startswith('angle') ):
                     en_units = words[1]
 
-        if isinstance(person, Person):
-            person_id = person.id
-        else:
+        if person is not None:
             person_id = self.get_person(person).id
 
         beamline = None
@@ -1088,7 +749,7 @@ class XASDataLibrary(object):
             if len(sample_attrs) > 0:
                 sample_notes = '%s\n%s' % (sample_notes, json_encode(sample_attrs))
             if reuse_sample:
-                srow = self.fquery('sample', name=sample_name, person_id=person_id)
+                srow = self.lookup('sample', name=sample_name, person_id=person_id)
                 if len(srow) > 0:
                     sample_id = srow[0].id
             if sample_id == 0:
@@ -1104,7 +765,7 @@ class XASDataLibrary(object):
         beamline_name  = xfile.attrs['beamline']['name']
         notes = json_encode(xfile.attrs)
         if verbose:
-            print("adding %s: %s %s mode='%s', %d points" %(fname, element, edge, mode, len(energy)))
+            print(f"adding {fname}: {element} {edge}, '{mode}' {len(energy):d} points")
 
         return self.add_spectrum(spectrum_name, description=description,
                                  d_spacing=d_spacing, collection_date=c_date,
