@@ -456,7 +456,6 @@ class XASDataLibrary(SimpleDB):
 
             fac_id = None
             row = self.get_rows('facility', where=fwhere, limit_one=True, none_if_empty=True)
-            print(" FAC ", fwhere)
             if row is not None:
                 where = {'facility_id': row.id}
 
@@ -474,6 +473,8 @@ class XASDataLibrary(SimpleDB):
         for row in self.lookup('facility'):
             facs[row.id] = row
         for row in self.get_beamlines(order_by=order_by):
+            if row.facility_id is None or row.facility_id not in facs:
+                continue
             fac  = facs[row.facility_id]
             loc = fac.country
             if fac.city is not None and len(fac.city) > 0:
