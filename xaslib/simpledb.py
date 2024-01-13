@@ -126,23 +126,24 @@ class SimpleDB(object):
         "connect to an existing database"
 
         self.dbname = dbname
+        connect_args = {}
 
-        server = 'sqlite'
-        connect_str = f'/{dbname}'
-        connect_args = {'check_same_thread': False}
-
+        if host is None:
+            host='localhost'
         if server.startswith('post') or server.startswith('pg'):
             server ='postgresql'
             if port is None:
                 port = 5432
             connect_str= f'{user}:{password}@{host}:{port:d}/{dbname}'
-            connect_args = None
         elif server.startswith('my'):
             server = 'mysql'
             if port is None:
                 port = 3306
             connect_str= f'{user}:{password}@{host}:{port:d}/{dbname}'
-
+        else:
+            server = 'sqlite'
+            connect_str = f'/{dbname}'
+            connect_args = {'check_same_thread': False}
         if dialect is None:
             connect_str = f'{server}://{connect_str}'
         else:
@@ -284,7 +285,7 @@ class SimpleDB(object):
         else:
             result = result.fetchall()
 
-        if len(result) == 0 and none_if_empty:
+        if result is not None and len(result) == 0 and none_if_empty:
             result = None
         return result
 
