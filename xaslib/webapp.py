@@ -87,24 +87,25 @@ def session_init(session, force_refresh=False):
         bl_data = db.get_beamlines(order_by='name')
         ANY_BEAMLINES = ['<Select Beamline>', 'Any']
         ANY_BEAMLINES.extend([b.name for b in bl_data])
-        print("ANY BL ", len(ANY_BEAMLINES), ANY_BEAMLINES[:35])
+
         BEAMLINE_DATA = []
         for bldat in bl_data:
             blid = bldat.id
-            fac = db.lookup('facility', id=bldat.facility_id)[0]
-            loc = fac.country
-            if fac.city is not None and len(fac.city) > 0:
-                loc = "%s, %s" % (fac.city, fac.country)
+            fac = db.lookup('facility', id=bldat.facility_id)
+            if bldat.facility_id is not None and len(fac) > 0:
+                fac = fac[0]
+                loc = fac.country
+                if fac.city is not None and len(fac.city) > 0:
+                    loc = "%s, %s" % (fac.city, fac.country)
 
-            spectra = spectra_for_beamline(db, blid)
-            BEAMLINE_DATA.append({'id': blid, 'name': bldat.name,
-                                  'nickname': bldat.nickname,
-                                  'facility': fac.name,
-                                  'facility_id': fac.id,
-                                  'location': loc,
-                                  'nspectra': len(spectra),
-                                  'spectra': spectra})
-
+                spectra = spectra_for_beamline(db, blid)
+                BEAMLINE_DATA.append({'id': blid, 'name': bldat.name,
+                                      'nickname': bldat.nickname,
+                                      'facility': fac.name,
+                                      'facility_id': fac.id,
+                                      'location': loc,
+                                      'nspectra': len(spectra),
+                                      'spectra': spectra})
 
         SAMPLES_DATA = []
         for sdat in db.lookup('sample', order_by='name'):
