@@ -297,7 +297,9 @@ class SimpleDB(object):
            self.get_rows(tablename, limit_one=False, none_if_empty=False, **kws)
 
         """
-        return self.get_rows(tablename, limit_one=False, none_if_empty=False, **kws)
+        kwargs = {'limit_one': False, 'none_if_empty': False}
+        kwargs.update(kws)
+        return self.get_rows(tablename, **kwargs)
 
     def update(self, tablename, where=None, **kws):
         """update a row (with where in a table
